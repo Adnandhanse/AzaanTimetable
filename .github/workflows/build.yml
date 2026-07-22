@@ -31,11 +31,6 @@ jobs:
         run: |
           sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
 
-      - name: Bump Android compileSdk to 35
-        run: |
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' android/app/build.gradle
-          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/' android/app/build.gradle
-
       - name: Install dependencies
         run: flutter pub get
 
