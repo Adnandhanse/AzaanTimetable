@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "810033212499",
+    "project_id": "prayer-time-a527e",
+    "storage_bucket": "prayer-time-a527e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810033212499:android:a2b843ca8406e1c8296aa6",
+        "android_client_info": {
+          "package_name": "com.masjidalarm.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo_qRL7VNGK-XrAyuGvD4hdIiOvKDHKDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
