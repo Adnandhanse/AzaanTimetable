@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
 import '../data/mock_masjids.dart';
-import 'upload_verification_screen.dart';
+import 'admin_dashboard_screen.dart';
 
 class RegisterMasjidScreen extends StatefulWidget {
   const RegisterMasjidScreen({super.key});
@@ -50,9 +50,15 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
     mockMasjids.add(newMasjid);
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Registered. Status: Pending Verification — the platform team will review your registration number shortly.'),
+      ),
+    );
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => UploadVerificationScreen(masjid: newMasjid),
+        builder: (_) => AdminDashboardScreen(managedMasjids: [newMasjid]),
       ),
     );
   }
@@ -71,7 +77,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             _field(_masjidName, 'Masjid Name', Icons.mosque),
-            _field(_registrationNo, 'Mosque Registration No. (if any)', Icons.badge, required: false),
+            _field(_registrationNo, 'Mosque Registration No.', Icons.badge),
             _field(_city, 'City', Icons.location_city),
             _field(_address, 'Address', Icons.home),
             _field(_mapLink, 'Google Map Location (link)', Icons.map),
@@ -81,14 +87,34 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             _field(_adminName, 'Admin Name (Imam/Trustee)', Icons.person),
             _field(_mobile, 'Mobile Number', Icons.phone, keyboardType: TextInputType.phone),
             _field(_email, 'Email', Icons.email, keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            Card(
+              color: const Color(0xFFF0FDF4),
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Color(0xFF14532D)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'No document upload needed. Your registration number is what '
+                        'the platform team checks to verify your masjid.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
                 onPressed: _submit,
                 child: const Text(
-                  'Continue to Verification',
+                  'Register Masjid',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
