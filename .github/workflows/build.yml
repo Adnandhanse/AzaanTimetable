@@ -27,9 +27,15 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
-      - name: Bump Kotlin version
+      - name: Show settings.gradle before fix (debug)
+        run: cat android/settings.gradle
+
+      - name: Bump Kotlin version (robust)
         run: |
-          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+          sed -i -E "s/(id [\"']org\.jetbrains\.kotlin\.android[\"'] version )[\"'][^\"']*[\"']/\1\"1.9.24\"/" android/settings.gradle
+
+      - name: Show settings.gradle after fix (debug)
+        run: cat android/settings.gradle
 
       - name: Install dependencies
         run: flutter pub get
