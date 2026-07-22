@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'otp_screen.dart';
+import 'admin_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,6 +76,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       'Send OTP',
                       style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.admin_panel_settings, size: 18),
+                    label: const Text('Masjid Admin? Login here'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
                     ),
                   ),
                 ),
