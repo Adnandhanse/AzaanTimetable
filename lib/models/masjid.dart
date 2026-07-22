@@ -27,6 +27,7 @@ class Masjid {
   PrayerTimes prayerTimes;
 
   // Admin-only fields (set during registration)
+  String registrationNo;
   String adminName;
   String adminMobile;
   String adminEmail;
@@ -48,6 +49,7 @@ class Masjid {
     required this.longitude,
     required this.verificationStatus,
     required this.prayerTimes,
+    this.registrationNo = '',
     this.adminName = '',
     this.adminMobile = '',
     this.adminEmail = '',

@@ -27,6 +27,9 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
+      - name: Bump Android compileSdk to 35
+        run: sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' android/app/build.gradle.kts || true
+
       - name: Install dependencies
         run: flutter pub get
 
