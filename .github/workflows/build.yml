@@ -59,6 +59,12 @@ jobs:
           echo "--- settings.gradle now contains ---"
           cat android/settings.gradle
 
+      - name: Bump Gradle wrapper version
+        run: |
+          sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.4-all.zip#' android/gradle/wrapper/gradle-wrapper.properties
+          echo "--- gradle-wrapper.properties now ---"
+          cat android/gradle/wrapper/gradle-wrapper.properties
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -78,3 +84,4 @@ jobs:
         with:
           name: masjid-alarm-app-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+  
