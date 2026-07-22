@@ -27,18 +27,48 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
-      - name: Show settings.gradle before fix (debug)
-        run: cat android/settings.gradle
-
-      - name: Bump Kotlin version (robust)
+      - name: Overwrite settings.gradle with fixed Kotlin version
         run: |
-          sed -i -E "s/(id [\"']org\.jetbrains\.kotlin\.android[\"'] version )[\"'][^\"']*[\"']/\1\"1.9.24\"/" android/settings.gradle
+          cat > android/settings.gradle << 'GRADLE_EOF'
+          pluginManagement {
+              def flutterSdkPath = {
+                  def properties = new Properties()
+                  file("local.properties").withInputStream { properties.load(it) }
+                  def flutterSdkPath = properties.getProperty("flutter.sdk")
+                  assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+                  return flutterSdkPath
+              }()
 
-      - name: Show settings.gradle after fix (debug)
-        run: cat android/settings.gradle
+              includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          plugins {
+              id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+              id "com.android.application" version "8.1.0" apply false
+              id "org.jetbrains.kotlin.android" version "1.9.24" apply false
+          }
+
+          include ":app"
+          GRADLE_EOF
+          echo "--- settings.gradle now contains ---"
+          cat android/settings.gradle
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Patch all plugin compileSdk to 34 (avoid corrupted SDK 35 jar on CI)
+        run: |
+          find "$HOME/.pub-cache" -name "build.gradle" -exec sed -i \
+            -e 's/compileSdk[[:space:]]*=\?[[:space:]]*35/compileSdk 34/g' \
+            -e 's/compileSdkVersion[[:space:]]*35/compileSdkVersion 34/g' {} +
+          find "$HOME/.pub-cache" -name "build.gradle.kts" -exec sed -i \
+            -e 's/compileSdk[[:space:]]*=\?[[:space:]]*35/compileSdk = 34/g' {} +
 
       - name: Build APK (release)
         run: flutter build apk --release
