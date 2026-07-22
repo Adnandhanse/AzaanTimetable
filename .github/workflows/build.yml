@@ -70,6 +70,13 @@ jobs:
           echo "--- app/build.gradle plugins block now ---"
           head -n 10 android/app/build.gradle
 
+      - name: Bump minSdkVersion to 23 for Firebase Auth
+        run: |
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' android/app/build.gradle
+          echo "--- app/build.gradle after minSdk bump ---"
+          grep -A2 -B2 "minSdk" android/app/build.gradle
+
       - name: Place google-services.json
         run: |
           if [ -f "firebase_config/google-services.json" ]; then
