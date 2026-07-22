@@ -13,6 +13,7 @@ class RegisterMasjidScreen extends StatefulWidget {
 class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _formKey = GlobalKey<FormState>();
   final _masjidName = TextEditingController();
+  final _registrationNo = TextEditingController();
   final _city = TextEditingController();
   final _address = TextEditingController();
   final _mapLink = TextEditingController();
@@ -33,6 +34,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       latitude: 0.0,
       longitude: 0.0,
       verificationStatus: 'Pending Verification',
+      registrationNo: _registrationNo.text,
       adminName: _adminName.text,
       adminMobile: _mobile.text,
       adminEmail: _email.text,
@@ -69,6 +71,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             _field(_masjidName, 'Masjid Name', Icons.mosque),
+            _field(_registrationNo, 'Mosque Registration No. (if any)', Icons.badge, required: false),
             _field(_city, 'City', Icons.location_city),
             _field(_address, 'Address', Icons.home),
             _field(_mapLink, 'Google Map Location (link)', Icons.map),
@@ -96,7 +99,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon, {TextInputType? keyboardType}) {
+  Widget _field(TextEditingController c, String label, IconData icon,
+      {TextInputType? keyboardType, bool required = true}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
@@ -107,7 +111,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
           prefixIcon: Icon(icon),
           border: const OutlineInputBorder(),
         ),
-        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
       ),
     );
   }
