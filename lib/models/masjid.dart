@@ -1,12 +1,12 @@
 class PrayerTimes {
-  final String fajr;
-  final String dhuhr;
-  final String asr;
-  final String maghrib;
-  final String isha;
-  final String juma;
+  String fajr;
+  String dhuhr;
+  String asr;
+  String maghrib;
+  String isha;
+  String juma;
 
-  const PrayerTimes({
+  PrayerTimes({
     required this.fajr,
     required this.dhuhr,
     required this.asr,
@@ -18,15 +18,28 @@ class PrayerTimes {
 
 class Masjid {
   final String id;
-  final String name;
-  final String city;
-  final String address;
-  final double latitude;
-  final double longitude;
-  final String verificationStatus; // "Pending", "Verified"
-  final PrayerTimes prayerTimes;
+  String name;
+  String city;
+  String address;
+  double latitude;
+  double longitude;
+  String verificationStatus; // "Pending", "Verified"
+  PrayerTimes prayerTimes;
 
-  const Masjid({
+  // Admin-only fields (set during registration)
+  String adminName;
+  String adminMobile;
+  String adminEmail;
+
+  // Verification document (Phase 3: local path only; needs cloud storage to persist)
+  String? verificationDocName;
+
+  // Custom Azan audio (Phase 3: local path only; needs Firebase Storage
+  // so it actually plays on followers' phones instead of just the admin's)
+  String? customAzanAudioName;
+  String? customAzanAudioPath;
+
+  Masjid({
     required this.id,
     required this.name,
     required this.city,
@@ -35,5 +48,11 @@ class Masjid {
     required this.longitude,
     required this.verificationStatus,
     required this.prayerTimes,
+    this.adminName = '',
+    this.adminMobile = '',
+    this.adminEmail = '',
+    this.verificationDocName,
+    this.customAzanAudioName,
+    this.customAzanAudioPath,
   });
 }
