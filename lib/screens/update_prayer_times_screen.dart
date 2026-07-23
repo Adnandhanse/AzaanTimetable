@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/masjid.dart';
+import '../services/masjid_repository.dart';
 
 class UpdatePrayerTimesScreen extends StatefulWidget {
   final Masjid masjid;
@@ -21,6 +24,11 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
 
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
+  bool _isSaving = false;
+  bool _isUploadingAudio = false;
+
+  late String? _audioName;
+  late String? _audioUrl;
 
   @override
   void initState() {
@@ -32,6 +40,8 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     _maghrib = TextEditingController(text: t.maghrib);
     _isha = TextEditingController(text: t.isha);
     _juma = TextEditingController(text: t.juma);
+    _audioName = widget.masjid.customAzanAudioName;
+    _audioUrl = widget.masjid.customAzanAudioUrl;
   }
 
   @override
@@ -42,51 +52,66 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
 
   bool get _isVerified => widget.masjid.verificationStatus == 'Verified';
 
-  void _saveTimes() {
-    final t = widget.masjid.prayerTimes;
-    t.fajr = _fajr.text;
-    t.dhuhr = _dhuhr.text;
-    t.asr = _asr.text;
-    t.maghrib = _maghrib.text;
-    t.isha = _isha.text;
-    t.juma = _juma.text;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Prayer times updated.')),
+  Future<void> _saveTimes() async {
+    setState(() => _isSaving = true);
+    final times = PrayerTimes(
+      fajr: _fajr.text,
+      dhuhr: _dhuhr.text,
+      asr: _asr.text,
+      maghrib: _maghrib.text,
+      isha: _isha.text,
+      juma: _juma.text,
     );
+    try {
+      await MasjidRepository.updatePrayerTimes(widget.masjid.id, times);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Prayer times updated for everyone following this masjid.')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   Future<void> _pickAzanAudio() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-    );
-    if (result != null && result.files.isNotEmpty) {
+    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    if (result == null || result.files.isEmpty || result.files.first.path == null) return;
+
+    final file = File(result.files.first.path!);
+    final fileName = result.files.first.name;
+
+    setState(() => _isUploadingAudio = true);
+    try {
+      final ref = FirebaseStorage.instance.ref('azan_audio/${widget.masjid.id}/$fileName');
+      await ref.putFile(file);
+      final url = await ref.getDownloadURL();
+
+      await MasjidRepository.updateAzanAudio(widget.masjid.id, fileName, url);
+
+      if (!mounted) return;
       setState(() {
-        widget.masjid.customAzanAudioName = result.files.first.name;
-        widget.masjid.customAzanAudioPath = result.files.first.path;
+        _audioName = fileName;
+        _audioUrl = url;
       });
-      // Phase 3 note: this file lives only on the admin's own phone right
-      // now. To actually reach the phones of everyone following this
-      // masjid, it needs to be uploaded to cloud storage (e.g. Firebase
-      // Storage) and referenced by a URL in Firestore — that's Phase 2 work.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Audio selected. Note: this stays on this device until '
-            'cloud storage is connected (Phase 2).',
-          ),
-        ),
+        const SnackBar(content: Text('Azan audio uploaded - now live for everyone following this masjid.')),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+    } finally {
+      if (mounted) setState(() => _isUploadingAudio = false);
     }
   }
 
   Future<void> _togglePlayback() async {
-    final path = widget.masjid.customAzanAudioPath;
-    if (path == null) return;
+    if (_audioUrl == null) return;
     if (_isPlaying) {
       await _player.stop();
       setState(() => _isPlaying = false);
     } else {
-      await _player.play(DeviceFileSource(path));
+      await _player.play(UrlSource(_audioUrl!));
       setState(() => _isPlaying = true);
       _player.onPlayerComplete.listen((_) {
         if (mounted) setState(() => _isPlaying = false);
@@ -116,9 +141,8 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'This masjid is still Pending Verification. '
-                        'Changes are saved for testing but will not go '
-                        'live to followers until verified.',
+                        'This masjid is still Pending Verification. Changes are saved '
+                        'but followers will only see this masjid once it is verified.',
                       ),
                     ),
                   ],
@@ -140,23 +164,25 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
             height: 48,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
-              onPressed: _saveTimes,
-              child: const Text('Save Prayer Times', style: TextStyle(color: Colors.white)),
+              onPressed: _isSaving ? null : _saveTimes,
+              child: _isSaving
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('Save Prayer Times', style: TextStyle(color: Colors.white)),
             ),
           ),
           const Divider(height: 40),
           const Text('Custom Azan Audio', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           const Text(
-            'Upload your own Azan recording to play for followers instead of the default sound.',
+            'Upload your own Azan recording - it will play for everyone following this masjid.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 12),
-          if (widget.masjid.customAzanAudioName != null)
+          if (_audioName != null)
             Card(
               child: ListTile(
                 leading: const Icon(Icons.audiotrack, color: Color(0xFF14532D)),
-                title: Text(widget.masjid.customAzanAudioName!),
+                title: Text(_audioName!),
                 trailing: IconButton(
                   icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF14532D), size: 32),
                   onPressed: _togglePlayback,
@@ -165,9 +191,11 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
             ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
-            icon: const Icon(Icons.mic),
-            label: Text(widget.masjid.customAzanAudioName == null ? 'Upload Azan Recording' : 'Replace Recording'),
-            onPressed: _pickAzanAudio,
+            icon: _isUploadingAudio
+                ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.mic),
+            label: Text(_isUploadingAudio ? 'Uploading...' : (_audioName == null ? 'Upload Azan Recording' : 'Replace Recording')),
+            onPressed: _isUploadingAudio ? null : _pickAzanAudio,
           ),
         ],
       ),
@@ -179,11 +207,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: TextField(
         controller: c,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          suffixIcon: const Icon(Icons.access_time),
-        ),
+        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), suffixIcon: const Icon(Icons.access_time)),
       ),
     );
   }

@@ -14,6 +14,24 @@ class PrayerTimes {
     required this.isha,
     required this.juma,
   });
+
+  Map<String, dynamic> toMap() => {
+        'fajr': fajr,
+        'dhuhr': dhuhr,
+        'asr': asr,
+        'maghrib': maghrib,
+        'isha': isha,
+        'juma': juma,
+      };
+
+  factory PrayerTimes.fromMap(Map<String, dynamic> map) => PrayerTimes(
+        fajr: map['fajr'] ?? '--:--',
+        dhuhr: map['dhuhr'] ?? '--:--',
+        asr: map['asr'] ?? '--:--',
+        maghrib: map['maghrib'] ?? '--:--',
+        isha: map['isha'] ?? '--:--',
+        juma: map['juma'] ?? '--:--',
+      );
 }
 
 class Masjid {
@@ -23,7 +41,7 @@ class Masjid {
   String address;
   double latitude;
   double longitude;
-  String verificationStatus; // "Pending", "Verified"
+  String verificationStatus; // "Pending Verification", "Verified", "Rejected"
   PrayerTimes prayerTimes;
 
   // Admin-only fields (set during registration)
@@ -32,13 +50,13 @@ class Masjid {
   String adminMobile;
   String adminEmail;
 
-  // Verification document (Phase 3: local path only; needs cloud storage to persist)
+  // Verification document (not currently used - registration number based instead)
   String? verificationDocName;
 
-  // Custom Azan audio (Phase 3: local path only; needs Firebase Storage
-  // so it actually plays on followers' phones instead of just the admin's)
+  // Custom Azan audio - stores the Firebase Storage download URL once uploaded,
+  // so it plays for everyone following this masjid, not just the admin's phone.
   String? customAzanAudioName;
-  String? customAzanAudioPath;
+  String? customAzanAudioUrl;
 
   Masjid({
     required this.id,
@@ -55,6 +73,41 @@ class Masjid {
     this.adminEmail = '',
     this.verificationDocName,
     this.customAzanAudioName,
-    this.customAzanAudioPath,
+    this.customAzanAudioUrl,
   });
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'city': city,
+        'address': address,
+        'latitude': latitude,
+        'longitude': longitude,
+        'verificationStatus': verificationStatus,
+        'prayerTimes': prayerTimes.toMap(),
+        'registrationNo': registrationNo,
+        'adminName': adminName,
+        'adminMobile': adminMobile,
+        'adminEmail': adminEmail,
+        'verificationDocName': verificationDocName,
+        'customAzanAudioName': customAzanAudioName,
+        'customAzanAudioUrl': customAzanAudioUrl,
+      };
+
+  factory Masjid.fromMap(String id, Map<String, dynamic> map) => Masjid(
+        id: id,
+        name: map['name'] ?? '',
+        city: map['city'] ?? '',
+        address: map['address'] ?? '',
+        latitude: (map['latitude'] ?? 0.0).toDouble(),
+        longitude: (map['longitude'] ?? 0.0).toDouble(),
+        verificationStatus: map['verificationStatus'] ?? 'Pending Verification',
+        prayerTimes: PrayerTimes.fromMap(map['prayerTimes'] ?? {}),
+        registrationNo: map['registrationNo'] ?? '',
+        adminName: map['adminName'] ?? '',
+        adminMobile: map['adminMobile'] ?? '',
+        adminEmail: map['adminEmail'] ?? '',
+        verificationDocName: map['verificationDocName'],
+        customAzanAudioName: map['customAzanAudioName'],
+        customAzanAudioUrl: map['customAzanAudioUrl'],
+      );
 }

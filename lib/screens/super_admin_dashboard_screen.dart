@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
-import '../data/mock_masjids.dart';
+import '../services/masjid_repository.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({super.key});
@@ -18,21 +18,16 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
     _tabController = TabController(length: 2, vsync: this);
   }
 
-  List<Masjid> get _pending =>
-      mockMasjids.where((m) => m.verificationStatus != 'Verified' && m.verificationStatus != 'Rejected').toList();
-
-  void _approve(Masjid m) {
-    setState(() => m.verificationStatus = 'Verified');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${m.name} approved and is now live.')),
-    );
+  Future<void> _approve(Masjid m) async {
+    await MasjidRepository.updateVerificationStatus(m.id, 'Verified');
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${m.name} approved and is now live.')));
   }
 
-  void _reject(Masjid m) {
-    setState(() => m.verificationStatus = 'Rejected');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${m.name} rejected.')),
-    );
+  Future<void> _reject(Masjid m) async {
+    await MasjidRepository.updateVerificationStatus(m.id, 'Rejected');
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${m.name} rejected.')));
   }
 
   @override
@@ -46,17 +41,26 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
           controller: _tabController,
           indicatorColor: const Color(0xFFD4AF37),
           labelColor: Colors.white,
-          tabs: [
-            Tab(text: 'Pending (${_pending.length})'),
-            const Tab(text: 'All Masjids'),
-          ],
+          tabs: const [Tab(text: 'Pending'), Tab(text: 'All Masjids')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildList(_pending, showActions: true),
-          _buildList(mockMasjids, showActions: false),
+          StreamBuilder<List<Masjid>>(
+            stream: MasjidRepository.streamPending(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              return _buildList(snapshot.data!, showActions: true);
+            },
+          ),
+          StreamBuilder<List<Masjid>>(
+            stream: MasjidRepository.streamAll(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              return _buildList(snapshot.data!, showActions: false);
+            },
+          ),
         ],
       ),
     );
@@ -93,15 +97,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                   children: [
                     const Icon(Icons.mosque, color: Color(0xFF14532D)),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(m.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    ),
+                    Expanded(child: Text(m.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                      decoration: BoxDecoration(color: statusColor.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
                       child: Text(m.verificationStatus, style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.w600)),
                     ),
                   ],
@@ -110,17 +109,8 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                 Text('${m.address}, ${m.city}', style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 4),
                 Text('Admin: ${m.adminName} • ${m.adminMobile}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                if (m.verificationDocName != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.attach_file, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(m.verificationDocName!, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                      ],
-                    ),
-                  ),
+                if (m.registrationNo.isNotEmpty)
+                  Text('Reg. No: ${m.registrationNo}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 if (showActions) ...[
                   const SizedBox(height: 12),
                   Row(

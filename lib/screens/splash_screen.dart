@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import '../services/auth_service.dart';
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,10 +21,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(seconds: 6),
     )..repeat();
 
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 3), () async {
+      // No OTP for regular users - sign in anonymously (free, instant) so
+      // we can still remember which masjid they follow. OTP is reserved
+      // only for masjid admins registering a masjid, to keep SMS costs down.
+      await AuthService.signInAnonymouslyIfNeeded();
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     });
   }
@@ -50,7 +55,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Animated Tawaf illustration
             AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
@@ -60,7 +64,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Kaaba (stylized cube)
                       Container(
                         width: 70,
                         height: 70,
@@ -77,20 +80,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           ],
                         ),
                         child: Center(
-                          child: Container(
-                            width: 40,
-                            height: 6,
-                            color: const Color(0xFFD4AF37),
-                          ),
+                          child: Container(width: 40, height: 6, color: const Color(0xFFD4AF37)),
                         ),
                       ),
-                      // Pilgrims circling (Tawaf)
                       ...List.generate(8, (i) {
                         final baseAngle = (2 * pi / 8) * i;
                         final angle = baseAngle + (_controller.value * 2 * pi);
                         const radius = 110.0;
                         final dx = radius * cos(angle);
-                        final dy = radius * sin(angle) * 0.55; // ellipse for perspective
+                        final dy = radius * sin(angle) * 0.55;
                         return Transform.translate(
                           offset: Offset(dx, dy),
                           child: _Pilgrim(scale: 0.7 + 0.3 * ((dy + 60) / 120)),
@@ -101,35 +99,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 );
               },
             ),
-            // Title, positioned below the illustration
             const Positioned(
               bottom: 90,
               child: Column(
                 children: [
                   Text(
                     'Masjid Namaz Alarm',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                   ),
                   SizedBox(height: 6),
-                  Text(
-                    'Never miss a prayer time',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
+                  Text('Never miss a prayer time', style: TextStyle(color: Colors.white70, fontSize: 14)),
                 ],
               ),
             ),
             const Positioned(
               bottom: 40,
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(color: Colors.white54, strokeWidth: 2),
-              ),
+              child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(color: Colors.white54, strokeWidth: 2)),
             ),
           ],
         ),
@@ -138,8 +123,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 }
 
-/// Simple stylized figure in white ihram-like robe, drawn with basic
-/// shapes only (no external image/video assets).
 class _Pilgrim extends StatelessWidget {
   final double scale;
   const _Pilgrim({required this.scale});
@@ -153,25 +136,9 @@ class _Pilgrim extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Head
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5E9D3),
-                shape: BoxShape.circle,
-              ),
-            ),
+            Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFF5E9D3), shape: BoxShape.circle)),
             const SizedBox(height: 1),
-            // Robe (simple triangle-ish shape via container + clip)
-            ClipPath(
-              clipper: _RobeClipper(),
-              child: Container(
-                width: 16,
-                height: 20,
-                color: Colors.white,
-              ),
-            ),
+            ClipPath(clipper: _RobeClipper(), child: Container(width: 16, height: 20, color: Colors.white)),
           ],
         ),
       ),

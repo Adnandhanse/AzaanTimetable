@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
-import '../data/mock_masjids.dart';
+import '../services/masjid_repository.dart';
+import '../services/auth_service.dart';
 import 'admin_dashboard_screen.dart';
+import 'otp_screen.dart';
 
 class RegisterMasjidScreen extends StatefulWidget {
   const RegisterMasjidScreen({super.key});
@@ -20,17 +22,46 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _adminName = TextEditingController();
   final _mobile = TextEditingController();
   final _email = TextEditingController();
+  bool _isSendingOtp = false;
 
-  void _submit() {
+  // OTP is required here specifically - proving the admin's phone is real
+  // - but nowhere else in the app, to keep SMS costs down.
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSendingOtp = true);
 
+    await AuthService.sendOtp(
+      phoneNumber: '+91${_mobile.text}',
+      onCodeSent: (verificationId) {
+        if (!mounted) return;
+        setState(() => _isSendingOtp = false);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => OtpScreen(
+              phoneNumber: _mobile.text,
+              verificationId: verificationId,
+              onVerified: _saveMasjidAfterVerification,
+            ),
+          ),
+        );
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() => _isSendingOtp = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not send OTP: $error')),
+        );
+      },
+    );
+  }
+
+  Future<void> _saveMasjidAfterVerification() async {
     final newMasjid = Masjid(
-      id: 'm${mockMasjids.length + 1}',
+      id: '',
       name: _masjidName.text,
       city: _city.text,
       address: _address.text,
-      // Phase 3: latitude/longitude should come from Google Maps picker.
-      // Using placeholder coordinates until Google Maps API is wired in.
+      // Phase 4: latitude/longitude should come from a Google Maps picker.
       latitude: 0.0,
       longitude: 0.0,
       verificationStatus: 'Pending Verification',
@@ -38,28 +69,19 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       adminName: _adminName.text,
       adminMobile: _mobile.text,
       adminEmail: _email.text,
-      prayerTimes: PrayerTimes(
-        fajr: '--:--',
-        dhuhr: '--:--',
-        asr: '--:--',
-        maghrib: '--:--',
-        isha: '--:--',
-        juma: '--:--',
-      ),
+      prayerTimes: PrayerTimes(fajr: '--:--', dhuhr: '--:--', asr: '--:--', maghrib: '--:--', isha: '--:--', juma: '--:--'),
     );
 
-    mockMasjids.add(newMasjid);
+    await MasjidRepository.register(newMasjid);
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registered. Status: Pending Verification — the platform team will review your registration number shortly.'),
-      ),
+      const SnackBar(content: Text('Registered. Status: Pending Verification.')),
     );
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => AdminDashboardScreen(managedMasjids: [newMasjid]),
-      ),
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => AdminDashboardScreen(adminMobile: _mobile.text)),
+      (route) => false,
     );
   }
 
@@ -98,8 +120,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'No document upload needed. Your registration number is what '
-                        'the platform team checks to verify your masjid.',
+                        "We'll send an OTP to the mobile number above to confirm it's yours "
+                        'before your masjid is registered.',
                         style: TextStyle(fontSize: 13),
                       ),
                     ),
@@ -112,11 +134,10 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
-                onPressed: _submit,
-                child: const Text(
-                  'Register Masjid',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
+                onPressed: _isSendingOtp ? null : _submit,
+                child: _isSendingOtp
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Verify Mobile & Register', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
             ),
           ],
@@ -125,19 +146,14 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon,
-      {TextInputType? keyboardType, bool required = true}) {
+  Widget _field(TextEditingController c, String label, IconData icon, {TextInputType? keyboardType}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: c,
         keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: const OutlineInputBorder(),
-        ),
-        validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
+        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon), border: const OutlineInputBorder()),
+        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
       ),
     );
   }

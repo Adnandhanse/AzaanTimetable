@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
-import '../data/mock_masjids.dart';
+import '../services/masjid_repository.dart';
+import '../services/user_repository.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
@@ -13,8 +14,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Phase 2: load the user's saved selected masjid from Firestore.
-  Masjid? selectedMasjid = mockMasjids.first;
+  String? _selectedMasjidId;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedMasjid();
+  }
+
+  Future<void> _loadSelectedMasjid() async {
+    final id = await UserRepository.getSelectedMasjidId();
+    if (!mounted) return;
+    setState(() {
+      _selectedMasjidId = id;
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +48,21 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: selectedMasjid == null
-          ? _buildNoMasjidSelected()
-          : _buildSelectedMasjidView(selectedMasjid!),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _selectedMasjidId == null
+              ? _buildNoMasjidSelected()
+              : StreamBuilder<Masjid?>(
+                  stream: MasjidRepository.streamById(_selectedMasjidId!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final masjid = snapshot.data;
+                    if (masjid == null) return _buildNoMasjidSelected();
+                    return _buildSelectedMasjidView(masjid);
+                  },
+                ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF14532D),
         icon: const Icon(Icons.search, color: Colors.white),
@@ -44,7 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
           );
           if (result != null) {
-            setState(() => selectedMasjid = result);
+            await UserRepository.setSelectedMasjid(result.id);
+            setState(() => _selectedMasjidId = result.id);
           }
         },
       ),
@@ -83,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Today\'s Prayer Times', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text("Today's Prayer Times", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(
             child: Padding(
