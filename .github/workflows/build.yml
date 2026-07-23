@@ -69,13 +69,59 @@ jobs:
         run: |
           sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.4-all.zip#' android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Add Google Services plugin and bump minSdk for Firebase Auth
+      - name: Overwrite app/build.gradle with Google Services + minSdk + stable signing
         run: |
-          echo "--- app/build.gradle BEFORE ---"
-          cat android/app/build.gradle
-          sed -i '/id "kotlin-android"/a\    id "com.google.gms.google-services"' android/app/build.gradle
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
-          echo "--- app/build.gradle AFTER ---"
+          cat > android/app/build.gradle << 'APPGRADLE_EOF'
+          plugins {
+              id "com.android.application"
+              id "kotlin-android"
+              id "dev.flutter.flutter-gradle-plugin"
+              id "com.google.gms.google-services"
+          }
+
+          android {
+              namespace = "com.example.masjid_alarm_app"
+              compileSdk = flutter.compileSdkVersion
+              ndkVersion = flutter.ndkVersion
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_1_8
+                  targetCompatibility = JavaVersion.VERSION_1_8
+              }
+
+              kotlinOptions {
+                  jvmTarget = JavaVersion.VERSION_1_8
+              }
+
+              defaultConfig {
+                  applicationId = "com.example.masjid_alarm_app"
+                  minSdk = 23
+                  targetSdk = flutter.targetSdkVersion
+                  versionCode = flutter.versionCode
+                  versionName = flutter.versionName
+              }
+
+              signingConfigs {
+                  release {
+                      storeFile file("../../android_keystore/release.keystore")
+                      storePassword "masjidalarm123"
+                      keyAlias "masjidalarm"
+                      keyPassword "masjidalarm123"
+                  }
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.release
+                  }
+              }
+          }
+
+          flutter {
+              source = "../.."
+          }
+          APPGRADLE_EOF
+          echo "--- app/build.gradle now contains ---"
           cat android/app/build.gradle
 
       - name: Place google-services.json
