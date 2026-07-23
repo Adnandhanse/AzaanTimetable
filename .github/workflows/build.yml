@@ -27,13 +27,6 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
-      - name: Force correct applicationId to match Firebase registration
-        run: |
-          sed -i 's/applicationId = "[^"]*"/applicationId = "com.masjidalarm.app"/' android/app/build.gradle
-          sed -i 's/namespace = "[^"]*"/namespace = "com.masjidalarm.app"/' android/app/build.gradle
-          echo "--- confirming applicationId and namespace ---"
-          grep -E "applicationId|namespace" android/app/build.gradle
-
       - name: Overwrite settings.gradle with fixed Kotlin + Google Services plugin
         run: |
           cat > android/settings.gradle << 'GRADLE_EOF'
@@ -71,18 +64,69 @@ jobs:
         run: |
           sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.4-all.zip#' android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Add Google Services plugin to app module
+      - name: Overwrite app/build.gradle with correct config (package ID, minSdk, Google Services)
         run: |
-          sed -i '/id "org.jetbrains.kotlin.android"/a\    id "com.google.gms.google-services"' android/app/build.gradle
-          echo "--- app/build.gradle plugins block now ---"
-          head -n 10 android/app/build.gradle
+          cat > android/app/build.gradle << 'APPGRADLE_EOF'
+          plugins {
+              id "com.android.application"
+              id "org.jetbrains.kotlin.android"
+              id "dev.flutter.flutter-gradle-plugin"
+              id "com.google.gms.google-services"
+          }
 
-      - name: Bump minSdkVersion to 23 for Firebase Auth
-        run: |
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' android/app/build.gradle
-          echo "--- app/build.gradle after minSdk bump ---"
-          grep -A2 -B2 "minSdk" android/app/build.gradle
+          def localProperties = new Properties()
+          def localPropertiesFile = rootProject.file("local.properties")
+          if (localPropertiesFile.exists()) {
+              localPropertiesFile.withReader("UTF-8") { reader ->
+                  localProperties.load(reader)
+              }
+          }
+
+          def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+          if (flutterVersionCode == null) {
+              flutterVersionCode = "1"
+          }
+
+          def flutterVersionName = localProperties.getProperty("flutter.versionName")
+          if (flutterVersionName == null) {
+              flutterVersionName = "1.0"
+          }
+
+          android {
+              namespace = "com.masjidalarm.app"
+              compileSdk = flutter.compileSdkVersion
+              ndkVersion = flutter.ndkVersion
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_1_8
+                  targetCompatibility = JavaVersion.VERSION_1_8
+              }
+
+              kotlinOptions {
+                  jvmTarget = JavaVersion.VERSION_1_8
+              }
+
+              defaultConfig {
+                  applicationId = "com.masjidalarm.app"
+                  minSdk = 23
+                  targetSdk = flutter.targetSdkVersion
+                  versionCode = flutterVersionCode.toInteger()
+                  versionName = flutterVersionName
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.debug
+                  }
+              }
+          }
+
+          flutter {
+              source = "../.."
+          }
+          APPGRADLE_EOF
+          echo "--- app/build.gradle now contains ---"
+          cat android/app/build.gradle
 
       - name: Place google-services.json
         run: |
