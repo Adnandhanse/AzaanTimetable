@@ -27,6 +27,13 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
+      - name: Force correct applicationId to match Firebase registration
+        run: |
+          sed -i 's/applicationId = "[^"]*"/applicationId = "com.masjidalarm.app"/' android/app/build.gradle
+          sed -i 's/namespace = "[^"]*"/namespace = "com.masjidalarm.app"/' android/app/build.gradle
+          echo "--- confirming applicationId and namespace ---"
+          grep -E "applicationId|namespace" android/app/build.gradle
+
       - name: Overwrite settings.gradle with fixed Kotlin + Google Services plugin
         run: |
           cat > android/settings.gradle << 'GRADLE_EOF'
