@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
+import '../services/auth_service.dart';
+import 'super_admin_login_screen.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({super.key});
@@ -37,6 +39,20 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
         title: const Text('Platform Admin'),
         backgroundColor: const Color(0xFF0B1F14),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await AuthService.signOutAdmin();
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const SuperAdminLoginScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: const Color(0xFFD4AF37),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'super_admin_dashboard_screen.dart';
+import '../services/auth_service.dart';
 
 class SuperAdminLoginScreen extends StatefulWidget {
   const SuperAdminLoginScreen({super.key});
@@ -9,25 +10,44 @@ class SuperAdminLoginScreen extends StatefulWidget {
 }
 
 class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
-  final TextEditingController _username = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   String? _error;
 
-  // Phase 3: hardcoded credentials for testing only.
-  // Phase 2 (Firebase) will replace this with a real, securely stored
-  // platform-admin account (Firebase Auth + a custom claim/role check).
-  static const String _mockUsername = 'admin';
-  static const String _mockPassword = 'admin123';
+  @override
+  void initState() {
+    super.initState();
+    // If already signed in as the real admin account (not an anonymous
+    // regular-user session), skip straight to the dashboard.
+    if (AuthService.isAdminLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SuperAdminDashboardScreen()),
+        );
+      });
+    }
+  }
 
-  void _login() {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_username.text == _mockUsername && _password.text == _mockPassword) {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      await AuthService.signInAdmin(_email.text.trim(), _password.text);
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const SuperAdminDashboardScreen()),
       );
-    } else {
-      setState(() => _error = 'Invalid username or password');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _error = 'Invalid email or password';
+      });
     }
   }
 
@@ -45,18 +65,15 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
               children: [
                 const Icon(Icons.shield, size: 56, color: Color(0xFFD4AF37)),
                 const SizedBox(height: 12),
-                const Text(
-                  'Platform Admin',
-                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                ),
+                const Text('Platform Admin', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 TextFormField(
-                  controller: _username,
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Email',
                     labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: OutlineInputBorder(),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
@@ -83,8 +100,10 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                   height: 48,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37)),
-                    onPressed: _login,
-                    child: const Text('Login', style: TextStyle(color: Colors.black, fontSize: 16)),
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Login', style: TextStyle(color: Colors.black, fontSize: 16)),
                   ),
                 ),
               ],

@@ -9,7 +9,22 @@ class AuthService {
   /// Firebase Auth persists this automatically across app restarts.
   static User? get currentUser => _auth.currentUser;
 
-  static bool get isLoggedIn => currentUser != null;
+  /// True only for a real (non-anonymous) signed-in account - i.e. the
+  /// platform admin, who signs in with email/password rather than the
+  /// anonymous sessions regular users get automatically.
+  static bool get isAdminLoggedIn => currentUser != null && !currentUser!.isAnonymous;
+
+  static Future<void> signInAdmin(String email, String password) async {
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  /// Signs the admin out, then immediately restores an anonymous session
+  /// so the rest of the app (which expects someone to always be signed
+  /// in, even if just anonymously) keeps working normally.
+  static Future<void> signOutAdmin() async {
+    await _auth.signOut();
+    await signInAnonymouslyIfNeeded();
+  }
 
   /// Signs the user in anonymously - free, instant, no SMS cost. Used for
   /// regular app users so we can still remember their followed masjid
