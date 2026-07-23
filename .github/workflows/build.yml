@@ -27,6 +27,11 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
+      - name: Show actual default applicationId
+        run: |
+          echo "--- default app/build.gradle applicationId ---"
+          grep -A1 "applicationId" android/app/build.gradle || grep -A1 "applicationId" android/app/build.gradle.kts
+
       - name: Overwrite settings.gradle with fixed Kotlin + Google Services plugin
         run: |
           cat > android/settings.gradle << 'GRADLE_EOF'
