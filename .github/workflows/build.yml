@@ -73,7 +73,7 @@ jobs:
         run: |
           echo "--- app/build.gradle BEFORE ---"
           cat android/app/build.gradle
-          sed -i '/id "org.jetbrains.kotlin.android"/a\    id "com.google.gms.google-services"' android/app/build.gradle
+          sed -i '/id "kotlin-android"/a\    id "com.google.gms.google-services"' android/app/build.gradle
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle
           echo "--- app/build.gradle AFTER ---"
           cat android/app/build.gradle
