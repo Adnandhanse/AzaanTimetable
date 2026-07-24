@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:android_intent_plus/android_intent.dart';
 import '../models/masjid.dart';
 
 /// Schedules local notifications that fire daily at each prayer time for
@@ -54,7 +55,17 @@ class NotificationService {
   }
 
   static Future<void> openExactAlarmSettings() async {
-    await openAppSettings();
+    try {
+      const intent = AndroidIntent(
+        action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
+        data: 'package:com.example.masjid_alarm_app',
+      );
+      await intent.launch();
+    } catch (_) {
+      // Fallback for phones/Android versions that don't support this
+      // specific screen - opens the app's general settings page instead.
+      await openAppSettings();
+    }
   }
 
   static DateTime? _parseTimeToday(String timeStr) {
