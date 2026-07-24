@@ -47,6 +47,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 20),
       );
 
       // Reverse-geocode the coordinates into a readable address - uses the
@@ -82,8 +83,14 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isFetchingLocation = false);
+      String message = e.toString();
+      if (message.contains('TimeoutException') || message.toLowerCase().contains('timeout')) {
+        message = 'Could not get a GPS lock in time. Please go outdoors or near a window and try again.';
+      } else if (message.startsWith('Exception: ')) {
+        message = message.substring('Exception: '.length);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(message)),
       );
     }
   }

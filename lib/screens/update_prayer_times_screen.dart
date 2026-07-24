@@ -15,12 +15,12 @@ class UpdatePrayerTimesScreen extends StatefulWidget {
 }
 
 class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
-  late TextEditingController _fajr;
-  late TextEditingController _dhuhr;
-  late TextEditingController _asr;
-  late TextEditingController _maghrib;
-  late TextEditingController _isha;
-  late TextEditingController _juma;
+  late String _fajr;
+  late String _dhuhr;
+  late String _asr;
+  late String _maghrib;
+  late String _isha;
+  late String _juma;
 
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
@@ -34,12 +34,12 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
   void initState() {
     super.initState();
     final t = widget.masjid.prayerTimes;
-    _fajr = TextEditingController(text: t.fajr);
-    _dhuhr = TextEditingController(text: t.dhuhr);
-    _asr = TextEditingController(text: t.asr);
-    _maghrib = TextEditingController(text: t.maghrib);
-    _isha = TextEditingController(text: t.isha);
-    _juma = TextEditingController(text: t.juma);
+    _fajr = t.fajr;
+    _dhuhr = t.dhuhr;
+    _asr = t.asr;
+    _maghrib = t.maghrib;
+    _isha = t.isha;
+    _juma = t.juma;
     _audioName = widget.masjid.customAzanAudioName;
     _audioUrl = widget.masjid.customAzanAudioUrl;
   }
@@ -52,20 +52,57 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
 
   bool get _isVerified => widget.masjid.verificationStatus == 'Verified';
 
+  /// Formats a picked TimeOfDay into a clean "5:15 AM" style string,
+  /// so it's always unambiguous and never has garbled/free-typed text.
+  String _formatTime(TimeOfDay t) {
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final minute = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
+
+  /// Tries to parse an existing "5:15 AM" style string back into a
+  /// TimeOfDay, so the picker opens showing the current value.
+  TimeOfDay? _parseExisting(String value) {
+    try {
+      if (value.trim() == '--:--' || value.trim().isEmpty) return null;
+      final parts = value.trim().split(' ');
+      final hm = parts[0].split(':');
+      int hour = int.parse(hm[0]);
+      final minute = int.parse(hm[1]);
+      final isPM = parts.length > 1 && parts[1].toUpperCase() == 'PM';
+      if (isPM && hour != 12) hour += 12;
+      if (!isPM && hour == 12) hour = 0;
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _pickTime(String currentValue, void Function(String) onPicked) async {
+    final initial = _parseExisting(currentValue) ?? TimeOfDay.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyOf(alwaysUse24HourFormat: false),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => onPicked(_formatTime(picked)));
+    }
+  }
+
   Future<void> _saveTimes() async {
     setState(() => _isSaving = true);
-    final times = PrayerTimes(
-      fajr: _fajr.text,
-      dhuhr: _dhuhr.text,
-      asr: _asr.text,
-      maghrib: _maghrib.text,
-      isha: _isha.text,
-      juma: _juma.text,
-    );
+    final times = PrayerTimes(fajr: _fajr, dhuhr: _dhuhr, asr: _asr, maghrib: _maghrib, isha: _isha, juma: _juma);
     try {
       await MasjidRepository.updatePrayerTimes(widget.masjid.id, times);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Prayer times updated for everyone following this masjid.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Prayer times updated for everyone following this masjid.')),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
@@ -86,7 +123,6 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
       final ref = FirebaseStorage.instance.ref('azan_audio/${widget.masjid.id}/$fileName');
       await ref.putFile(file);
       final url = await ref.getDownloadURL();
-
       await MasjidRepository.updateAzanAudio(widget.masjid.id, fileName, url);
 
       if (!mounted) return;
@@ -151,14 +187,15 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
             ),
           const SizedBox(height: 16),
           const Text('Prayer Times', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Tap any prayer to set its time', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 8),
-          _timeField(_fajr, 'Fajr'),
-          _timeField(_dhuhr, 'Dhuhr'),
-          _timeField(_asr, 'Asr'),
-          _timeField(_maghrib, 'Maghrib'),
-          _timeField(_isha, 'Isha'),
-          _timeField(_juma, 'Juma (Friday)'),
-          const SizedBox(height: 8),
+          _timeTile('Fajr', _fajr, (v) => _fajr = v),
+          _timeTile('Dhuhr', _dhuhr, (v) => _dhuhr = v),
+          _timeTile('Asr', _asr, (v) => _asr = v),
+          _timeTile('Maghrib', _maghrib, (v) => _maghrib = v),
+          _timeTile('Isha', _isha, (v) => _isha = v),
+          _timeTile('Juma (Friday)', _juma, (v) => _juma = v),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             height: 48,
@@ -202,12 +239,27 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     );
   }
 
-  Widget _timeField(TextEditingController c, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: c,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), suffixIcon: const Icon(Icons.access_time)),
+  Widget _timeTile(String label, String value, void Function(String) onPicked) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value.trim() == '--:--' || value.trim().isEmpty ? 'Not set' : value,
+              style: TextStyle(
+                fontSize: 16,
+                color: value.trim() == '--:--' || value.trim().isEmpty ? Colors.grey : const Color(0xFF14532D),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.access_time, color: Color(0xFF14532D)),
+          ],
+        ),
+        onTap: () => _pickTime(value, onPicked),
       ),
     );
   }

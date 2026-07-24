@@ -33,7 +33,10 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Please turn on Location/GPS on your phone.');
       }
-      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 20),
+      );
       if (!mounted) return;
       setState(() {
         _userPosition = position;
