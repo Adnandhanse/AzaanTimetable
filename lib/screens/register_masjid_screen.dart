@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:latlong2/latlong.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/auth_service.dart';
 import 'admin_dashboard_screen.dart';
 import 'otp_screen.dart';
+import 'map_picker_screen.dart';
 
 class RegisterMasjidScreen extends StatefulWidget {
   const RegisterMasjidScreen({super.key});
@@ -51,15 +53,35 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
         timeLimit: const Duration(seconds: 20),
       );
 
-      // Reverse-geocode the coordinates into a readable address - uses the
-      // phone's built-in geocoding, no Google Maps billing needed.
-      // GPS + reverse geocoding is only ever a starting point (it can be
-      // off by a sector/block, especially indoors) - the admin should
-      // still check and correct it below, same as Ola/Zomato-style apps.
+      if (!mounted) return;
+
+      // Let the admin visually confirm/fine-tune the pin on a map -
+      // this is where the real accuracy comes from (like Ola/Zomato),
+      // not the automatic GPS reading alone.
+      final confirmed = await Navigator.of(context).push<LatLng>(
+        MaterialPageRoute(
+          builder: (_) => MapPickerScreen(
+            initialLatitude: position.latitude,
+            initialLongitude: position.longitude,
+          ),
+        ),
+      );
+      if (confirmed == null) {
+        // User backed out of the map screen without confirming.
+        setState(() => _isFetchingLocation = false);
+        return;
+      }
+      final finalLat = confirmed.latitude;
+      final finalLng = confirmed.longitude;
+
+      // Reverse-geocode the CONFIRMED coordinates into a readable address -
+      // uses the phone's built-in geocoding, no Google Maps billing needed.
+      // This is still just a starting point for the address text - the
+      // admin should check and correct it below.
       String readableAddress = '';
       String cityName = '';
       try {
-        final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        final placemarks = await placemarkFromCoordinates(finalLat, finalLng);
         if (placemarks.isNotEmpty) {
           final p = placemarks.first;
           readableAddress = [
@@ -78,8 +100,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
       if (!mounted) return;
       setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
+        _latitude = finalLat;
+        _longitude = finalLng;
         if (readableAddress.isNotEmpty) _address.text = readableAddress;
         if (cityName.isNotEmpty) _city.text = cityName;
         _isFetchingLocation = false;

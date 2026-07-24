@@ -19,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedMasjidId;
   bool _loading = true;
   String? _lastScheduledSignature;
+  bool _exactAlarmWarningDismissed = false;
+  bool? _hasExactAlarmPermission;
 
   @override
   void initState() {
@@ -53,7 +55,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final signature = '${masjid.id}|${t.fajr}|${t.dhuhr}|${t.asr}|${t.maghrib}|${t.isha}|${t.juma}';
     if (signature == _lastScheduledSignature) return;
     _lastScheduledSignature = signature;
-    NotificationService.scheduleForMasjid(masjid);
+    _scheduleAndCheckPermission(masjid);
+  }
+
+  Future<void> _scheduleAndCheckPermission(Masjid masjid) async {
+    try {
+      await NotificationService.scheduleForMasjid(masjid);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not schedule prayer alarms: $e')),
+        );
+      }
+    }
+    final granted = await NotificationService.hasExactAlarmPermission();
+    if (mounted) setState(() => _hasExactAlarmPermission = granted);
   }
 
   @override
@@ -72,22 +88,59 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _selectedMasjidId == null
-              ? _buildNoMasjidSelected()
-              : StreamBuilder<Masjid?>(
-                  stream: MasjidRepository.streamById(_selectedMasjidId!),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+      body: Column(
+        children: [
+          if (_hasExactAlarmPermission == false && !_exactAlarmWarningDismissed)
+            Material(
+              color: const Color(0xFFFFF3CD),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Prayer alarms are OFF. Enable "Alarms & Reminders" for this app in phone settings so notifications fire on time.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await NotificationService.openExactAlarmSettings();
+                        final granted = await NotificationService.hasExactAlarmPermission();
+                        if (mounted) setState(() => _hasExactAlarmPermission = granted);
+                      },
+                      child: const Text('Fix'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () => setState(() => _exactAlarmWarningDismissed = true),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _selectedMasjidId == null
+                    ? _buildNoMasjidSelected()
+                    : StreamBuilder<Masjid?>(
+                        stream: MasjidRepository.streamById(_selectedMasjidId!),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
                     final masjid = snapshot.data;
                     if (masjid == null) return _buildNoMasjidSelected();
                     _maybeScheduleNotifications(masjid);
                     return _buildSelectedMasjidView(masjid);
-                  },
-                ),
+                          },
+                        ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF14532D),
         icon: const Icon(Icons.search, color: Colors.white),

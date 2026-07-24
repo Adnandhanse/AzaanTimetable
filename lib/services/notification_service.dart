@@ -44,6 +44,19 @@ class NotificationService {
     _initialized = true;
   }
 
+  /// Android 12+ requires the user to explicitly enable "Alarms &
+  /// Reminders" in system settings - a normal permission dialog can't
+  /// grant this. If it's off, prayer alarms will silently fail to fire
+  /// on time (or not fire at all), so the app should check this and
+  /// prompt the user to fix it in Settings.
+  static Future<bool> hasExactAlarmPermission() async {
+    return await Permission.scheduleExactAlarm.isGranted;
+  }
+
+  static Future<void> openExactAlarmSettings() async {
+    await openAppSettings();
+  }
+
   static DateTime? _parseTimeToday(String timeStr) {
     if (timeStr.trim() == '--:--' || timeStr.trim().isEmpty) return null;
     try {
