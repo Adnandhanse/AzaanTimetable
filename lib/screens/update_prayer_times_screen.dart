@@ -85,7 +85,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
       context: context,
       initialTime: initial,
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyOf(alwaysUse24HourFormat: false),
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
         child: child!,
       ),
     );
