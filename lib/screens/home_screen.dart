@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
@@ -32,6 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedMasjidId = id;
       _loading = false;
     });
+  }
+
+  Future<void> _openDirections(Masjid masjid) async {
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${masjid.latitude},${masjid.longitude}',
+    );
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open maps app.')),
+        );
+      }
+    }
   }
 
   void _maybeScheduleNotifications(Masjid masjid) {
@@ -122,6 +136,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   : const Icon(Icons.hourglass_top, color: Colors.orange),
             ),
           ),
+          if (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+            Padding(
+              padding: const EdgeInsets.only(left: 8, top: 4),
+              child: InkWell(
+                onTap: () => _openDirections(masjid),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Get Directions',
+                      style: TextStyle(color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
           const Text("Today's Prayer Times", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),

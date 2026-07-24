@@ -18,6 +18,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _formKey = GlobalKey<FormState>();
   final _masjidName = TextEditingController();
   final _registrationNo = TextEditingController();
+  final _landmark = TextEditingController();
   final _city = TextEditingController();
   final _address = TextEditingController();
   final _adminName = TextEditingController();
@@ -52,15 +53,22 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
       // Reverse-geocode the coordinates into a readable address - uses the
       // phone's built-in geocoding, no Google Maps billing needed.
+      // GPS + reverse geocoding is only ever a starting point (it can be
+      // off by a sector/block, especially indoors) - the admin should
+      // still check and correct it below, same as Ola/Zomato-style apps.
       String readableAddress = '';
       String cityName = '';
       try {
         final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
         if (placemarks.isNotEmpty) {
           final p = placemarks.first;
-          readableAddress = [p.street, p.subLocality, p.locality]
-              .where((s) => s != null && s.isNotEmpty)
-              .join(', ');
+          readableAddress = [
+            if (p.subThoroughfare != null && p.subThoroughfare!.isNotEmpty) p.subThoroughfare,
+            p.thoroughfare,
+            p.subLocality,
+            p.locality,
+            if (p.postalCode != null && p.postalCode!.isNotEmpty) p.postalCode,
+          ].where((s) => s != null && s.isNotEmpty).join(', ');
           cityName = p.locality ?? p.subAdministrativeArea ?? '';
         }
       } catch (_) {
@@ -78,7 +86,10 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location captured. Please check the address below.')),
+        const SnackBar(
+          content: Text('Location captured. GPS can be off by a block - please check and correct the address below.'),
+          duration: Duration(seconds: 4),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -133,11 +144,15 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   }
 
   Future<void> _saveMasjidAfterVerification() async {
+    final combinedAddress = _landmark.text.trim().isEmpty
+        ? _address.text
+        : '${_landmark.text.trim()}, ${_address.text}';
+
     final newMasjid = Masjid(
       id: '',
       name: _masjidName.text,
       city: _city.text,
-      address: _address.text,
+      address: combinedAddress,
       latitude: _latitude!,
       longitude: _longitude!,
       verificationStatus: 'Pending Verification',
@@ -190,6 +205,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             ),
             const SizedBox(height: 12),
             _field(_city, 'City', Icons.location_city),
+            _field(_landmark, 'Building Name / Landmark (helps accuracy)', Icons.apartment, required: false),
             _field(_address, 'Address', Icons.home),
             const Divider(height: 32),
             const Text('Admin Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -234,14 +250,14 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon, {TextInputType? keyboardType}) {
+  Widget _field(TextEditingController c, String label, IconData icon, {TextInputType? keyboardType, bool required = true}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: c,
         keyboardType: keyboardType,
         decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon), border: const OutlineInputBorder()),
-        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+        validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
       ),
     );
   }

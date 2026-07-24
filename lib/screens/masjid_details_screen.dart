@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/masjid.dart';
 
 class MasjidDetailsScreen extends StatelessWidget {
   final Masjid masjid;
   const MasjidDetailsScreen({super.key, required this.masjid});
+
+  Future<void> _openDirections(BuildContext context) async {
+    if (masjid.latitude == 0.0 && masjid.longitude == 0.0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This masjid has no location set yet.')),
+      );
+      return;
+    }
+    final url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${masjid.latitude},${masjid.longitude}',
+    );
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open maps app.')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +39,31 @@ class MasjidDetailsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.location_on, color: Colors.grey),
                 const SizedBox(width: 8),
                 Expanded(child: Text(masjid.address)),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
+            InkWell(
+              onTap: () => _openDirections(context),
+              child: const Padding(
+                padding: EdgeInsets.only(left: 28),
+                child: Row(
+                  children: [
+                    Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Get Directions',
+                      style: TextStyle(color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Icon(
