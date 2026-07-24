@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
+import 'screens/azan_ringing_screen.dart';
+import 'services/notification_service.dart';
+
+/// Lets code outside the widget tree (the notification tap callback) push
+/// a new screen - used to open the Azan ringing screen when an alarm fires.
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +16,19 @@ void main() async {
   } catch (e) {
     initError = e.toString();
   }
+
+  await NotificationService.init(
+    onTapPayload: (payload) {
+      if (payload == null) return;
+      final (prayer, masjidName, audioUrl) = NotificationService.parsePayload(payload);
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => AzanRingingScreen(prayerName: prayer, masjidName: masjidName, audioUrl: audioUrl),
+        ),
+      );
+    },
+  );
+
   runApp(initError == null ? const MasjidAlarmApp() : _FirebaseErrorApp(error: initError));
 }
 
@@ -58,6 +77,7 @@ class MasjidAlarmApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Masjid Namaz Alarm',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
