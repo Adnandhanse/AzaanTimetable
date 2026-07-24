@@ -25,7 +25,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       // No OTP for regular users - sign in anonymously (free, instant) so
       // we can still remember which masjid they follow. OTP is reserved
       // only for masjid admins registering a masjid, to keep SMS costs down.
-      await AuthService.signInAnonymouslyIfNeeded();
+      try {
+        await AuthService.signInAnonymouslyIfNeeded().timeout(const Duration(seconds: 10));
+      } catch (_) {
+        // If anonymous sign-in fails (e.g. not enabled in Firebase yet),
+        // still let the user into the app rather than hanging forever -
+        // masjid-following just won't persist until this is fixed.
+      }
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),

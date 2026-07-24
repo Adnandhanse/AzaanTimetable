@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/auth_service.dart';
@@ -18,16 +20,84 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _registrationNo = TextEditingController();
   final _city = TextEditingController();
   final _address = TextEditingController();
-  final _mapLink = TextEditingController();
   final _adminName = TextEditingController();
   final _mobile = TextEditingController();
   final _email = TextEditingController();
-  bool _isSendingOtp = false;
 
-  // OTP is required here specifically - proving the admin's phone is real
-  // - but nowhere else in the app, to keep SMS costs down.
+  bool _isSendingOtp = false;
+  bool _isFetchingLocation = false;
+  double? _latitude;
+  double? _longitude;
+
+  Future<void> _useCurrentLocation() async {
+    setState(() => _isFetchingLocation = true);
+    try {
+      // Check/request location permission.
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        throw Exception('Location permission denied. Please allow it in phone settings.');
+      }
+
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        throw Exception('Please turn on Location/GPS on your phone.');
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Reverse-geocode the coordinates into a readable address - uses the
+      // phone's built-in geocoding, no Google Maps billing needed.
+      String readableAddress = '';
+      String cityName = '';
+      try {
+        final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        if (placemarks.isNotEmpty) {
+          final p = placemarks.first;
+          readableAddress = [p.street, p.subLocality, p.locality]
+              .where((s) => s != null && s.isNotEmpty)
+              .join(', ');
+          cityName = p.locality ?? p.subAdministrativeArea ?? '';
+        }
+      } catch (_) {
+        // Geocoding can fail (e.g. no internet) - coordinates are still
+        // saved even if we can't auto-fill the readable address.
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        if (readableAddress.isNotEmpty) _address.text = readableAddress;
+        if (cityName.isNotEmpty) _city.text = cityName;
+        _isFetchingLocation = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location captured. Please check the address below.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isFetchingLocation = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_latitude == null || _longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please tap "Use Current Location" first, so followers can find this masjid.')),
+      );
+      return;
+    }
+
     setState(() => _isSendingOtp = true);
 
     await AuthService.sendOtp(
@@ -61,9 +131,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       name: _masjidName.text,
       city: _city.text,
       address: _address.text,
-      // Phase 4: latitude/longitude should come from a Google Maps picker.
-      latitude: 0.0,
-      longitude: 0.0,
+      latitude: _latitude!,
+      longitude: _longitude!,
       verificationStatus: 'Pending Verification',
       registrationNo: _registrationNo.text,
       adminName: _adminName.text,
@@ -100,9 +169,21 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
           children: [
             _field(_masjidName, 'Masjid Name', Icons.mosque),
             _field(_registrationNo, 'Mosque Registration No.', Icons.badge),
+            const SizedBox(height: 4),
+            OutlinedButton.icon(
+              icon: _isFetchingLocation
+                  ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.my_location),
+              label: Text(_isFetchingLocation
+                  ? 'Getting location...'
+                  : _latitude == null
+                      ? 'Use Current Location'
+                      : 'Location captured ✓ (tap to refresh)'),
+              onPressed: _isFetchingLocation ? null : _useCurrentLocation,
+            ),
+            const SizedBox(height: 12),
             _field(_city, 'City', Icons.location_city),
             _field(_address, 'Address', Icons.home),
-            _field(_mapLink, 'Google Map Location (link)', Icons.map),
             const Divider(height: 32),
             const Text('Admin Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),

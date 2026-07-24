@@ -156,6 +156,16 @@ jobs:
           find "$HOME/.pub-cache" -name "build.gradle.kts" -exec sed -i \
             -e 's/compileSdk[[:space:]]*=\?[[:space:]]*35/compileSdk = 34/g' {} +
 
+      - name: Fix plugins with broken 'flutter.xxxSdkVersion' references
+        run: |
+          find "$HOME/.pub-cache" -name "build.gradle" -exec sed -i \
+            -e 's/compileSdkVersion flutter\.compileSdkVersion/compileSdkVersion 34/g' \
+            -e 's/compileSdk flutter\.compileSdkVersion/compileSdk 34/g' \
+            -e 's/minSdkVersion flutter\.minSdkVersion/minSdkVersion 23/g' \
+            -e 's/minSdk flutter\.minSdkVersion/minSdk 23/g' \
+            -e 's/targetSdkVersion flutter\.targetSdkVersion/targetSdkVersion 34/g' \
+            -e 's/targetSdk flutter\.targetSdkVersion/targetSdk 34/g' {} +
+
       - name: Build APK (release)
         run: flutter build apk --release
 

@@ -9,7 +9,20 @@ class MasjidRepository {
   static final CollectionReference _collection =
       FirebaseFirestore.instance.collection('masjids');
 
-  /// Live stream of every masjid - used for search/browse screens.
+  /// Live stream of only Verified masjids - this is what regular users
+  /// should see when searching/browsing. Pending and Rejected masjids
+  /// stay hidden from the public until (re)approved.
+  static Stream<List<Masjid>> streamVerified() {
+    return _collection
+        .where('verificationStatus', isEqualTo: 'Verified')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+            .toList());
+  }
+
+  /// Live stream of every masjid regardless of status - used only by the
+  /// Platform Admin's "All Masjids" tab, which needs to see everything.
   static Stream<List<Masjid>> streamAll() {
     return _collection.snapshots().map((snapshot) => snapshot.docs
         .map((doc) => Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>))

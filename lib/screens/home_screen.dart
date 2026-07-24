@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
+import '../services/notification_service.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? _selectedMasjidId;
   bool _loading = true;
+  String? _lastScheduledSignature;
 
   @override
   void initState() {
@@ -30,6 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedMasjidId = id;
       _loading = false;
     });
+  }
+
+  void _maybeScheduleNotifications(Masjid masjid) {
+    final t = masjid.prayerTimes;
+    final signature = '${masjid.id}|${t.fajr}|${t.dhuhr}|${t.asr}|${t.maghrib}|${t.isha}|${t.juma}';
+    if (signature == _lastScheduledSignature) return;
+    _lastScheduledSignature = signature;
+    NotificationService.scheduleForMasjid(masjid);
   }
 
   @override
@@ -60,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                     final masjid = snapshot.data;
                     if (masjid == null) return _buildNoMasjidSelected();
+                    _maybeScheduleNotifications(masjid);
                     return _buildSelectedMasjidView(masjid);
                   },
                 ),
