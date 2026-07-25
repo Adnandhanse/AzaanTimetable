@@ -186,4 +186,14 @@ class NotificationService {
       await _plugin.cancel(id);
     }
   }
+
+  /// Diagnostic helper: lists whatever is currently scheduled at the OS
+  /// level, so we can tell "never scheduled" (a code bug) apart from
+  /// "scheduled correctly but the phone is killing it" (an OEM battery
+  /// restriction) - the two look identical from the user's side (nothing
+  /// happens), but need completely different fixes.
+  static Future<List<String>> getPendingAlarms() async {
+    final pending = await _plugin.pendingNotificationRequests();
+    return pending.map((p) => '${p.title} (id: ${p.id})').toList();
+  }
 }

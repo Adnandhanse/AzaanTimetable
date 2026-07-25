@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin_login_screen.dart';
+import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -33,6 +34,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.bug_report, color: Colors.grey),
+            title: const Text('Check Scheduled Alarms'),
+            subtitle: const Text('Debug: see what alarms are currently set'),
+            onTap: () async {
+              final pending = await NotificationService.getPendingAlarms();
+              if (!context.mounted) return;
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Scheduled Alarms'),
+                  content: SingleChildScrollView(
+                    child: Text(pending.isEmpty ? 'Nothing is currently scheduled.' : pending.join('\n')),
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close')),
+                  ],
+                ),
+              );
+            },
           ),
           const Divider(),
           ListTile(
