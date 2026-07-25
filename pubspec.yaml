@@ -34,5 +34,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # assets:
-  #   - assets/
+  assets:
+    - assets/quran/quran_en.json
+    - assets/quran/quran_ur.json

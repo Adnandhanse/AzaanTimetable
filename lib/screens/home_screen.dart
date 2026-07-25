@@ -7,6 +7,7 @@ import '../services/notification_service.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
+import 'quran_home_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,6 +92,13 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color(0xFF14532D),
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book),
+            tooltip: 'Quran',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const QuranHomeScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => Navigator.of(context).push(
