@@ -194,6 +194,35 @@ class NotificationService {
   /// happens), but need completely different fixes.
   static Future<List<String>> getPendingAlarms() async {
     final pending = await _plugin.pendingNotificationRequests();
-    return pending.map((p) => '${p.title} (id: ${p.id})').toList();
+    return pending.map((p) => '${p.title}\n   payload: ${p.payload}').toList();
+  }
+
+  /// Returns the actual next-trigger time for each currently scheduled
+  /// prayer, computed the same way scheduling does - so we can directly
+  /// compare "what the app thinks is scheduled" against "what you just set".
+  static List<String> debugNextTriggerTimes(Masjid masjid) {
+    final times = masjid.prayerTimes;
+    final entries = {
+      'Fajr': times.fajr,
+      'Dhuhr': times.dhuhr,
+      'Asr': times.asr,
+      'Maghrib': times.maghrib,
+      'Isha': times.isha,
+      'Juma': times.juma,
+    };
+    final results = <String>[];
+    for (final e in entries.entries) {
+      final dt = _parseTimeToday(e.value);
+      if (dt == null) {
+        results.add('${e.key}: not set');
+        continue;
+      }
+      var scheduled = tz.TZDateTime.from(dt, tz.local);
+      if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
+      results.add('${e.key}: next fires at $scheduled');
+    }
+    return results;
   }
 }
