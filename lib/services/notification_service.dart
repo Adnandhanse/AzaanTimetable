@@ -29,13 +29,24 @@ class NotificationService {
   /// uses this to open the Azan ringing screen.
   static String _detectedTimezoneDebugInfo = 'not yet initialized';
 
+  // Some devices/plugins report older, retired IANA timezone names that
+  // aren't in the bundled tz database anymore - map the common ones to
+  // their current equivalents.
+  static const _legacyTimezoneAliases = {
+    'Asia/Calcutta': 'Asia/Kolkata',
+    'Asia/Katmandu': 'Asia/Kathmandu',
+    'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+    'Asia/Rangoon': 'Asia/Yangon',
+  };
+
   static Future<void> init({void Function(String? payload)? onTapPayload}) async {
     if (_initialized) return;
     tzdata.initializeTimeZones();
 
     try {
-      final deviceTimeZone = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(deviceTimeZone));
+      var deviceTimeZone = await FlutterTimezone.getLocalTimezone();
+      final resolvedName = _legacyTimezoneAliases[deviceTimeZone] ?? deviceTimeZone;
+      tz.setLocalLocation(tz.getLocation(resolvedName));
       _detectedTimezoneDebugInfo = 'Detected: "$deviceTimeZone" -> using: ${tz.local.name}';
     } catch (e) {
       _detectedTimezoneDebugInfo = 'FAILED to detect/set timezone: $e (falling back to ${tz.local.name})';
