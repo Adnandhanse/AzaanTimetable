@@ -27,19 +27,18 @@ class NotificationService {
   /// [onTapPayload] is called with the notification's payload string
   /// whenever the user taps a fired notification - the app (main.dart)
   /// uses this to open the Azan ringing screen.
+  static String _detectedTimezoneDebugInfo = 'not yet initialized';
+
   static Future<void> init({void Function(String? payload)? onTapPayload}) async {
     if (_initialized) return;
     tzdata.initializeTimeZones();
 
-    // Critical: without this, the timezone package silently assumes UTC,
-    // so "5:00 PM" would actually get scheduled for a completely different
-    // real clock time on the device (e.g. IST is UTC+5:30) - this was
-    // likely why alarms weren't firing at the expected time.
     try {
       final deviceTimeZone = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(deviceTimeZone));
-    } catch (_) {
-      // Fall back to UTC only if we genuinely can't detect it.
+      _detectedTimezoneDebugInfo = 'Detected: "$deviceTimeZone" -> using: ${tz.local.name}';
+    } catch (e) {
+      _detectedTimezoneDebugInfo = 'FAILED to detect/set timezone: $e (falling back to ${tz.local.name})';
     }
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -210,7 +209,7 @@ class NotificationService {
       'Isha': times.isha,
       'Juma': times.juma,
     };
-    final results = <String>[];
+    final results = <String>['[Timezone] $_detectedTimezoneDebugInfo'];
     for (final e in entries.entries) {
       final dt = _parseTimeToday(e.value);
       if (dt == null) {
