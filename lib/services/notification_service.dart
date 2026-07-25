@@ -197,6 +197,30 @@ class NotificationService {
     }
   }
 
+  /// Shows a notification RIGHT NOW, with no scheduling/timing involved
+  /// at all - isolates "can this phone display our notifications" from
+  /// "is the scheduled alarm timing correct".
+  static Future<void> showTestNotificationNow() async {
+    await init();
+    await _plugin.show(
+      999,
+      'Test Notification',
+      'If you see this, notifications work on this phone.',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'prayer_times_channel',
+          'Prayer Time Alarms',
+          channelDescription: 'Notifies you when it is time for prayer',
+          importance: Importance.max,
+          priority: Priority.high,
+          category: AndroidNotificationCategory.alarm,
+          fullScreenIntent: true,
+        ),
+      ),
+      payload: 'Test|||Test Masjid|||',
+    );
+  }
+
   /// Diagnostic helper: lists whatever is currently scheduled at the OS
   /// level, so we can tell "never scheduled" (a code bug) apart from
   /// "scheduled correctly but the phone is killing it" (an OEM battery

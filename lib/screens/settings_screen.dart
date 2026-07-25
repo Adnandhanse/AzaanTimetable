@@ -37,6 +37,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.notifications_active, color: Colors.grey),
+            title: const Text('Send Test Notification Now'),
+            subtitle: const Text('Debug: checks if notifications work at all on this phone'),
+            onTap: () async {
+              await NotificationService.showTestNotificationNow();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Test notification sent - check your notification shade now.')),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.bug_report, color: Colors.grey),
             title: const Text('Check Scheduled Alarms'),
             subtitle: const Text('Debug: see what alarms are currently set'),
