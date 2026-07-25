@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import '../models/masjid.dart';
@@ -29,6 +30,17 @@ class NotificationService {
   static Future<void> init({void Function(String? payload)? onTapPayload}) async {
     if (_initialized) return;
     tzdata.initializeTimeZones();
+
+    // Critical: without this, the timezone package silently assumes UTC,
+    // so "5:00 PM" would actually get scheduled for a completely different
+    // real clock time on the device (e.g. IST is UTC+5:30) - this was
+    // likely why alarms weren't firing at the expected time.
+    try {
+      final deviceTimeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(deviceTimeZone));
+    } catch (_) {
+      // Fall back to UTC only if we genuinely can't detect it.
+    }
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
@@ -135,10 +147,11 @@ class NotificationService {
     );
   }
 
-  static Future<void> scheduleForMasjid(Masjid masjid) async {
+  static Future<List<String>> scheduleForMasjid(Masjid masjid) async {
     await init();
     await cancelAll();
 
+    final scheduledSummary = <String>[];
     final times = masjid.prayerTimes;
     final entries = {
       'fajr': ('Fajr', times.fajr),
@@ -163,7 +176,9 @@ class NotificationService {
         timeToday: dt,
         payload: _buildPayload(label, masjid.name, masjid.customAzanAudioUrl),
       );
+      scheduledSummary.add('$label: $timeStr');
     }
+    return scheduledSummary;
   }
 
   static Future<void> cancelAll() async {

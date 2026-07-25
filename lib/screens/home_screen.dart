@@ -60,7 +60,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _scheduleAndCheckPermission(Masjid masjid) async {
     try {
-      await NotificationService.scheduleForMasjid(masjid);
+      final scheduled = await NotificationService.scheduleForMasjid(masjid);
+      if (mounted && scheduled.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Alarms set: ${scheduled.join(' • ')}'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
