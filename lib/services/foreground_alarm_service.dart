@@ -36,6 +36,16 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Future<void> onRepeatEvent(DateTime timestamp) async {
     await _ensurePluginInitialized();
 
+    // Proof-of-life: update the persistent notification's text with the
+    // last-checked time, so we can visually confirm this loop is really
+    // running, without needing device logs.
+    await FlutterForegroundTask.updateService(
+      notificationTitle: 'Masjid Namaz Alarm is active',
+      notificationText: 'Last checked: ${timestamp.hour.toString().padLeft(2, '0')}:'
+          '${timestamp.minute.toString().padLeft(2, '0')}:'
+          '${timestamp.second.toString().padLeft(2, '0')}',
+    );
+
     final dataString = await FlutterForegroundTask.getData<String>(key: 'prayer_times_data');
     if (dataString == null) return;
 
