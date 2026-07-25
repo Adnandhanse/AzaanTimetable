@@ -4,6 +4,7 @@ import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
 import '../services/notification_service.dart';
+import '../services/foreground_alarm_manager.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
@@ -62,6 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _scheduleAndCheckPermission(Masjid masjid) async {
     try {
       await NotificationService.scheduleForMasjid(masjid);
+      // Also run the persistent background service as a more reliable
+      // backup - some phones (notably Samsung) silently kill simple
+      // scheduled alarms, but are much less likely to kill an active
+      // foreground service with its own visible notification.
+      await ForegroundAlarmManager.startOrUpdate(masjid);
       final nextTriggers = NotificationService.debugNextTriggerTimes(masjid);
       if (mounted) {
         showDialog(
