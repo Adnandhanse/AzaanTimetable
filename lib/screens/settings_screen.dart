@@ -37,6 +37,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.battery_alert, color: Colors.orange),
+            title: const Text('Disable Battery Optimization'),
+            subtitle: const Text('Important: needed for alarms to fire reliably'),
+            onTap: () => NotificationService.requestIgnoreBatteryOptimizations(),
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.notifications_active, color: Colors.grey),
             title: const Text('Send Test Notification Now'),
             subtitle: const Text('Debug: checks if notifications work at all on this phone'),

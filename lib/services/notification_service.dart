@@ -90,6 +90,22 @@ class NotificationService {
     }
   }
 
+  /// Triggers Android's own native system dialog asking the user to
+  /// exempt this app from battery optimization - bypasses hunting through
+  /// Samsung's (or any OEM's) reorganized Settings menus entirely, since
+  /// this is a stock Android dialog the manufacturer can't hide or rename.
+  static Future<void> requestIgnoreBatteryOptimizations() async {
+    try {
+      const intent = AndroidIntent(
+        action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
+        data: 'package:com.example.masjid_alarm_app',
+      );
+      await intent.launch();
+    } catch (_) {
+      await openAppSettings();
+    }
+  }
+
   static DateTime? _parseTimeToday(String timeStr) {
     if (timeStr.trim() == '--:--' || timeStr.trim().isEmpty) return null;
     try {
