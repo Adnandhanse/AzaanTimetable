@@ -188,7 +188,8 @@ jobs:
       - name: Show final merged AndroidManifest.xml
         run: |
           echo "=== Searching for merged manifest ==="
-          find android/app/build -iname "AndroidManifest.xml" -exec echo "--- {} ---" \; -exec cat {} \;
+          find android -iname "AndroidManifest.xml" -exec echo "--- {} ---" \; -exec cat {} \; 2>/dev/null || echo "No manifest files found (non-fatal, continuing)."
+        continue-on-error: true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
