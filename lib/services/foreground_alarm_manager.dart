@@ -70,6 +70,10 @@ class ForegroundAlarmManager {
   }
 
   static Future<bool> isRunning() async {
+    // Starting a foreground service is async at the OS level - checking
+    // immediately after calling startService() can return false even
+    // though it's actually starting up. Give it a moment, then check.
+    await Future.delayed(const Duration(milliseconds: 800));
     return await FlutterForegroundTask.isRunningService;
   }
 
