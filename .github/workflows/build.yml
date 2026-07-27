@@ -164,6 +164,12 @@ jobs:
           echo "--- AndroidManifest.xml permissions ---"
           grep "uses-permission" android/app/src/main/AndroidManifest.xml
 
+      - name: Add required foreground service declaration (plugin needs this manually)
+        run: |
+          sed -i 's#</application>#    <service\n        android:name="com.pravera.flutter_foreground_task.service.ForegroundService"\n        android:foregroundServiceType="mediaPlayback"\n        android:exported="false" />\n</application>#' android/app/src/main/AndroidManifest.xml
+          echo "--- confirming service declaration added ---"
+          grep -A4 "ForegroundService" android/app/src/main/AndroidManifest.xml
+
       - name: Patch all plugin compileSdk to 34 (avoid corrupted SDK 35 jar on CI)
         run: |
           find "$HOME/.pub-cache" -name "build.gradle" -exec sed -i \
