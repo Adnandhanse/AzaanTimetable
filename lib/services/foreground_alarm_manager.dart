@@ -51,18 +51,26 @@ class ForegroundAlarmManager {
     await FlutterForegroundTask.saveData(key: 'prayer_times_data', value: json.encode(data));
 
     final isRunning = await FlutterForegroundTask.isRunningService;
-    if (!isRunning) {
-      await FlutterForegroundTask.startService(
-        notificationTitle: 'Masjid Namaz Alarm is active',
-        notificationText: 'Watching prayer times for ${masjid.name}',
-        callback: startForegroundTaskCallback,
-      );
-    } else {
-      await FlutterForegroundTask.updateService(
-        notificationTitle: 'Masjid Namaz Alarm is active',
-        notificationText: 'Watching prayer times for ${masjid.name}',
-      );
+    try {
+      if (!isRunning) {
+        await FlutterForegroundTask.startService(
+          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationText: 'Watching prayer times for ${masjid.name}',
+          callback: startForegroundTaskCallback,
+        );
+      } else {
+        await FlutterForegroundTask.updateService(
+          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationText: 'Watching prayer times for ${masjid.name}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Foreground service failed to start: $e');
     }
+  }
+
+  static Future<bool> isRunning() async {
+    return await FlutterForegroundTask.isRunningService;
   }
 
   static Future<void> stop() async {

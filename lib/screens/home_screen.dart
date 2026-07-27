@@ -68,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // scheduled alarms, but are much less likely to kill an active
       // foreground service with its own visible notification.
       await ForegroundAlarmManager.startOrUpdate(masjid);
+      final isServiceRunning = await ForegroundAlarmManager.isRunning();
       final nextTriggers = NotificationService.debugNextTriggerTimes(masjid);
+      nextTriggers.insert(0, '[Foreground service running: $isServiceRunning]');
       if (mounted) {
         showDialog(
           context: context,
