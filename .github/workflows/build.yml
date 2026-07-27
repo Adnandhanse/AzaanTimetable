@@ -144,6 +144,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Inspect flutter_foreground_task's actual native requirements
+        run: |
+          echo "=== flutter_foreground_task's own AndroidManifest.xml ==="
+          find "$HOME/.pub-cache" -path "*flutter_foreground_task*/android/src/main/AndroidManifest.xml" -exec cat {} \;
+          echo ""
+          echo "=== flutter_foreground_task's build.gradle ==="
+          find "$HOME/.pub-cache" -path "*flutter_foreground_task*/android/build.gradle" -exec cat {} \;
+
       - name: Set proper app display name
         run: |
           sed -i 's/android:label="[^"]*"/android:label="Masjid Namaz Alarm"/' android/app/src/main/AndroidManifest.xml
@@ -176,6 +184,11 @@ jobs:
 
       - name: Build APK (release)
         run: flutter build apk --release
+
+      - name: Show final merged AndroidManifest.xml
+        run: |
+          echo "=== Searching for merged manifest ==="
+          find android/app/build -iname "AndroidManifest.xml" -exec echo "--- {} ---" \; -exec cat {} \;
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
