@@ -39,3 +39,4 @@ flutter:
   assets:
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
+    - assets/duas/duas_en.json

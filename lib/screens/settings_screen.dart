@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'admin_login_screen.dart';
 import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -76,16 +75,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               );
             },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.admin_panel_settings, color: Color(0xFF14532D)),
-            title: const Text('Masjid Admin / Register a Masjid'),
-            subtitle: const Text('For imams and masjid trustees'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
-            ),
           ),
         ],
       ),

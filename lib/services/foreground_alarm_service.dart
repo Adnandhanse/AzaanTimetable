@@ -63,10 +63,16 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       final parsed = _parseTime(timeStr);
       if (parsed == null) continue;
 
-      final matchesNow = now.hour == parsed.$1 && now.minute == parsed.$2;
+      final scheduledMinutes = parsed.$1 * 60 + parsed.$2;
+      final nowMinutes = now.hour * 60 + now.minute;
+      // Allow a small window (the scheduled minute or the one right after)
+      // so a single slightly-delayed polling cycle doesn't cause a missed
+      // alarm - the _lastFiredKey check below still guarantees it only
+      // fires once per prayer per day.
+      final withinWindow = nowMinutes == scheduledMinutes || nowMinutes == scheduledMinutes + 1;
       final fireKey = '$todayKey-$label';
 
-      if (matchesNow && _lastFiredKey != fireKey) {
+      if (withinWindow && _lastFiredKey != fireKey) {
         _lastFiredKey = fireKey;
         await _fireAlarm(label, masjidName, audioUrl);
       }

@@ -29,7 +29,15 @@ class AuthService {
   /// Signs the user in anonymously - free, instant, no SMS cost. Used for
   /// regular app users so we can still remember their followed masjid
   /// (via Firestore keyed by this UID) without ever asking for OTP.
+  /// Waits for Firebase to finish restoring any previously-signed-in
+  /// session before we decide whether a new anonymous account is needed.
+  /// Without this, checking currentUser immediately on a fresh app start
+  /// (e.g. right after a phone reboot) can wrongly conclude "nobody is
+  /// logged in" before the real restored session has loaded - creating a
+  /// brand new anonymous account and orphaning the old one (along with
+  /// whatever masjid the user had previously followed).
   static Future<void> signInAnonymouslyIfNeeded() async {
+    await _auth.authStateChanges().first;
     if (currentUser == null) {
       await _auth.signInAnonymously();
     }
