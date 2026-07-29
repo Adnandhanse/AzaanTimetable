@@ -1,10 +1,14 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hijri/hijri_calendar.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
 import '../services/notification_service.dart';
 import '../services/foreground_alarm_manager.dart';
+import '../services/app_strings.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
@@ -27,11 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _lastScheduledSignature;
   bool _exactAlarmWarningDismissed = false;
   bool? _hasExactAlarmPermission;
+  late Timer _clockTimer;
+  DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _loadSelectedMasjid();
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _clockTimer.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSelectedMasjid() async {
@@ -75,24 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _scheduleAndCheckPermission(Masjid masjid) async {
     try {
       await NotificationService.scheduleForMasjid(masjid);
-      // Also run the persistent background service as a more reliable
-      // backup - some phones (notably Samsung) silently kill simple
-      // scheduled alarms, but are much less likely to kill an active
-      // foreground service with its own visible notification.
       await ForegroundAlarmManager.startOrUpdate(masjid);
-      final isServiceRunning = await ForegroundAlarmManager.isRunning();
-      final nextTriggers = NotificationService.debugNextTriggerTimes(masjid);
-      nextTriggers.insert(0, '[Foreground service running: $isServiceRunning]');
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Alarms Scheduled'),
-            content: SingleChildScrollView(child: Text(nextTriggers.join('\n\n'))),
-            actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK'))],
-          ),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,22 +102,81 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() => _hasExactAlarmPermission = granted);
   }
 
+  DateTime? _parseTimeToday(String timeStr) {
+    if (timeStr.trim() == '--:--' || timeStr.trim().isEmpty) return null;
+    try {
+      final parts = timeStr.trim().split(' ');
+      final hm = parts[0].split(':');
+      int hour = int.parse(hm[0]);
+      final minute = int.parse(hm[1]);
+      final isPM = parts.length > 1 && parts[1].toUpperCase() == 'PM';
+      final isAM = parts.length > 1 && parts[1].toUpperCase() == 'AM';
+      if (isPM && hour != 12) hour += 12;
+      if (isAM && hour == 12) hour = 0;
+      return DateTime(_now.year, _now.month, _now.day, hour, minute);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Returns (label, DateTime) for the next upcoming prayer today, or
+  /// tomorrow's Fajr if all of today's have passed.
+  (String, DateTime)? _nextPrayer(Masjid masjid) {
+    final entries = [
+      (S.fajr, masjid.prayerTimes.fajr),
+      (S.dhuhr, masjid.prayerTimes.dhuhr),
+      (S.asr, masjid.prayerTimes.asr),
+      (S.maghrib, masjid.prayerTimes.maghrib),
+      (S.isha, masjid.prayerTimes.isha),
+    ];
+    for (final entry in entries) {
+      final dt = _parseTimeToday(entry.$2);
+      if (dt != null && dt.isAfter(_now)) return (entry.$1, dt);
+    }
+    // All passed today - next is tomorrow's Fajr, if set.
+    final fajrToday = _parseTimeToday(masjid.prayerTimes.fajr);
+    if (fajrToday != null) {
+      return (S.fajr, fajrToday.add(const Duration(days: 1)));
+    }
+    return null;
+  }
+
+  /// A gradient that shifts with the time of day relative to prayer
+  /// times - dawn tones near Fajr, bright daylight through Dhuhr/Asr,
+  /// warm sunset near Maghrib, and a dark starry tone after Isha.
+  LinearGradient _skyGradient(Masjid? masjid) {
+    final hour = _now.hour;
+    if (hour >= 4 && hour < 6) {
+      return const LinearGradient(colors: [Color(0xFF2C3E67), Color(0xFFE8A87C), Color(0xFFF6D6AD)]);
+    } else if (hour >= 6 && hour < 15) {
+      return const LinearGradient(colors: [Color(0xFF4A90D9), Color(0xFF87CEEB), Color(0xFFD4E8F7)]);
+    } else if (hour >= 15 && hour < 18) {
+      return const LinearGradient(colors: [Color(0xFFE8935B), Color(0xFFF2B880), Color(0xFFFCE0B8)]);
+    } else if (hour >= 18 && hour < 20) {
+      return const LinearGradient(colors: [Color(0xFF6B3F5C), Color(0xFFD8703D), Color(0xFFF4A15C)]);
+    } else {
+      return const LinearGradient(colors: [Color(0xFF0B1229), Color(0xFF1A2744), Color(0xFF2C3E67)]);
+    }
+  }
+
+  bool get _isNightSky => _now.hour >= 20 || _now.hour < 4;
+
+  void _showHijriInfo() {
+    final hijri = HijriCalendar.now();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Islamic Date'),
+        content: Text('${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH\n\nFull calendar view is coming soon.'),
+        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK'))],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hijri = HijriCalendar.now();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Masjid Namaz Alarm'),
-        backgroundColor: const Color(0xFF14532D),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
-          ),
-        ],
-      ),
       body: Column(
         children: [
           if (_hasExactAlarmPermission == false && !_exactAlarmWarningDismissed)
@@ -164,19 +221,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (!snapshot.hasData) {
                             return const Center(child: CircularProgressIndicator());
                           }
-                    final masjid = snapshot.data;
-                    if (masjid == null) return _buildNoMasjidSelected();
-                    _maybeScheduleNotifications(masjid);
-                    return _buildSelectedMasjidView(masjid);
-                          },
-                        ),
+                          final masjid = snapshot.data;
+                          if (masjid == null) return _buildNoMasjidSelected();
+                          _maybeScheduleNotifications(masjid);
+                          return _buildPremiumHome(masjid, hijri);
+                        },
+                      ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF14532D),
         icon: const Icon(Icons.search, color: Colors.white),
-        label: const Text('Change Masjid', style: TextStyle(color: Colors.white)),
+        label: Text(S.changeMasjid, style: const TextStyle(color: Colors.white)),
         onPressed: () async {
           final result = await Navigator.of(context).push<Masjid>(
             MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
@@ -194,119 +251,174 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           if (index == 1) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const QuranHomeScreen()),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuranHomeScreen()));
           } else if (index == 2) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const HadithHomeScreen()),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HadithHomeScreen()));
           } else if (index == 3) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PrayersHomeScreen()),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrayersHomeScreen()));
           } else if (index == 4) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminLoginScreen()));
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.mosque), label: 'Prayer Time'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Quran'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Hadith'),
-          BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: 'Prayers'),
-          BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Masjid Admin'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.mosque), label: S.prayerTime),
+          BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: S.quran),
+          BottomNavigationBarItem(icon: const Icon(Icons.book), label: S.hadith),
+          BottomNavigationBarItem(icon: const Icon(Icons.self_improvement), label: S.prayers),
+          BottomNavigationBarItem(icon: const Icon(Icons.admin_panel_settings), label: S.masjidAdmin),
         ],
       ),
     );
   }
 
   Widget _buildNoMasjidSelected() {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24.0),
         child: Text(
-          'No masjid selected yet.\nTap "Change Masjid" below to follow one.',
+          S.noMasjidSelected,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
       ),
     );
   }
 
-  Widget _buildSelectedMasjidView(Masjid masjid) {
+  Widget _buildPremiumHome(Masjid masjid, HijriCalendar hijri) {
+    final next = _nextPrayer(masjid);
+    final textColor = _isNightSky ? Colors.white : Colors.white;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
-            color: const Color(0xFFF0FDF4),
-            child: ListTile(
-              leading: const Icon(Icons.mosque, color: Color(0xFF14532D), size: 36),
-              title: Text(masjid.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              subtitle: Text('${masjid.address}\n${masjid.city}'),
-              isThreeLine: true,
-              trailing: masjid.verificationStatus == 'Verified'
-                  ? const Icon(Icons.verified, color: Colors.green)
-                  : const Icon(Icons.hourglass_top, color: Colors.orange),
-            ),
-          ),
-          if (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-            Padding(
-              padding: const EdgeInsets.only(left: 8, top: 4),
-              child: InkWell(
-                onTap: () => _openDirections(masjid),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
+          // --- Dynamic sky header ---
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+            decoration: BoxDecoration(gradient: _skyGradient(masjid)),
+            child: Stack(
+              children: [
+                if (_isNightSky) ..._buildStars(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
-                    SizedBox(width: 6),
-                    Text(
-                      'Get Directions',
-                      style: TextStyle(color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                    IconButton(
+                      icon: const Icon(Icons.settings, color: Colors.white),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                      ),
+                      alignment: Alignment.topRight,
                     ),
+                    Icon(Icons.mosque, size: 72, color: Colors.white.withOpacity(0.95)),
+                    const SizedBox(height: 8),
+                    Text(masjid.name,
+                        style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')}',
+                      style: TextStyle(color: textColor, fontSize: 40, fontWeight: FontWeight.w300),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_now.day}/${_now.month}/${_now.year}',
+                      style: TextStyle(color: textColor.withOpacity(0.85), fontSize: 14),
+                    ),
+                    GestureDetector(
+                      onTap: _showHijriInfo,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
+                          style: TextStyle(
+                            color: textColor.withOpacity(0.85),
+                            fontSize: 13,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (next != null) ...[
+                      const SizedBox(height: 20),
+                      _buildCountdownCard(next.$1, next.$2),
+                    ],
                   ],
                 ),
-              ),
-            ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF14532D)),
-              icon: const Icon(Icons.explore),
-              label: const Text('Find Qibla Direction'),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const QiblaScreen()),
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          const Text("Today's Prayer Times", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                children: [
-                  _prayerRow('Fajr', masjid.prayerTimes.fajr),
-                  _prayerRow('Dhuhr', masjid.prayerTimes.dhuhr),
-                  _prayerRow('Asr', masjid.prayerTimes.asr),
-                  _prayerRow('Maghrib', masjid.prayerTimes.maghrib),
-                  _prayerRow('Isha', masjid.prayerTimes.isha),
-                  _prayerRow('Juma', masjid.prayerTimes.juma),
-                ],
-              ),
+
+          // --- Quick actions ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              children: [
+                Expanded(child: _quickActionButton(Icons.explore, S.findQiblaDirection, () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QiblaScreen()));
+                })),
+                const SizedBox(width: 10),
+                Expanded(child: _quickActionButton(Icons.near_me, S.nearbyMasjid, () async {
+                  final result = await Navigator.of(context).push<Masjid>(
+                    MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
+                  );
+                  if (result != null) {
+                    await UserRepository.setSelectedMasjid(result.id);
+                    setState(() => _selectedMasjidId = result.id);
+                  }
+                })),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.calendar_month),
-            label: const Text('View Full Prayer Schedule'),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => PrayerTimesScreen(masjid: masjid)),
+
+          // --- Masjid info glass card ---
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Card(
+                  color: const Color(0xFFF0FDF4),
+                  child: ListTile(
+                    leading: const Icon(Icons.mosque, color: Color(0xFF14532D), size: 32),
+                    title: Text(masjid.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    subtitle: Text('${masjid.address}\n${masjid.city}'),
+                    isThreeLine: true,
+                    trailing: Icon(
+                      masjid.verificationStatus == 'Verified' ? Icons.verified : Icons.hourglass_top,
+                      color: masjid.verificationStatus == 'Verified' ? Colors.green : Colors.orange,
+                    ),
+                  ),
+                ),
+                if (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8, top: 6),
+                    child: InkWell(
+                      onTap: () => _openDirections(masjid),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
+                          const SizedBox(width: 6),
+                          Text(S.getDirections,
+                              style: const TextStyle(
+                                  color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline)),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Text(S.todaysPrayerTimes, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                _prayerTimesGlassCard(masjid),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.calendar_month),
+                  label: Text(S.viewFullPrayerSchedule),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => PrayerTimesScreen(masjid: masjid)),
+                  ),
+                ),
+                const SizedBox(height: 80),
+              ],
             ),
           ),
         ],
@@ -314,16 +426,94 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _prayerRow(String name, String time) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildCountdownCard(String label, DateTime target) {
+    final diff = target.difference(_now);
+    final h = diff.inHours;
+    final m = diff.inMinutes % 60;
+    final s = diff.inSeconds % 60;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.4)),
+      ),
+      child: Column(
         children: [
-          Text(name, style: const TextStyle(fontSize: 16)),
-          Text(time, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('${S.nextPrayer}: $label', style: const TextStyle(color: Colors.white70, fontSize: 13)),
+          const SizedBox(height: 4),
+          Text(
+            '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}',
+            style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 2),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _quickActionButton(IconData icon, String label, VoidCallback onTap) {
+    return Material(
+      color: const Color(0xFFF0FDF4),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            children: [
+              Icon(icon, color: const Color(0xFF14532D), size: 26),
+              const SizedBox(height: 6),
+              Text(label, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF14532D), fontSize: 12, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _prayerTimesGlassCard(Masjid masjid) {
+    final rows = [
+      (S.fajr, masjid.prayerTimes.fajr),
+      (S.dhuhr, masjid.prayerTimes.dhuhr),
+      (S.asr, masjid.prayerTimes.asr),
+      (S.maghrib, masjid.prayerTimes.maghrib),
+      (S.isha, masjid.prayerTimes.isha),
+      (S.juma, masjid.prayerTimes.juma),
+    ];
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Column(
+        children: rows.map((r) {
+          final isNext = _nextPrayer(masjid)?.$1 == r.$1;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(r.$1, style: TextStyle(fontSize: 16, fontWeight: isNext ? FontWeight.bold : FontWeight.normal, color: isNext ? const Color(0xFF14532D) : Colors.black87)),
+                Text(r.$2, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isNext ? const Color(0xFF14532D) : Colors.black87)),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  List<Widget> _buildStars() {
+    final rnd = Random(42);
+    return List.generate(20, (i) {
+      return Positioned(
+        left: rnd.nextDouble() * 350,
+        top: rnd.nextDouble() * 150,
+        child: Icon(Icons.star, size: rnd.nextDouble() * 3 + 2, color: Colors.white.withOpacity(0.6)),
+      );
+    });
   }
 }

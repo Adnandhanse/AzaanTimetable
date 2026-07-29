@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
 import 'services/notification_service.dart';
+import 'services/app_language.dart';
 
 /// Lets code outside the widget tree (the notification tap callback) push
 /// a new screen - used to open the Azan ringing screen when an alarm fires.
@@ -16,6 +17,8 @@ void main() async {
   } catch (e) {
     initError = e.toString();
   }
+
+  await AppLanguageController.instance.load();
 
   await NotificationService.init(
     onTapPayload: (payload) {
@@ -76,16 +79,21 @@ class MasjidAlarmApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Masjid Namaz Alarm',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color(0xFF14532D),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF14532D)),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
+    return ListenableBuilder(
+      listenable: AppLanguageController.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'Masjid Namaz Alarm',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColor: const Color(0xFF14532D),
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF14532D)),
+            useMaterial3: true,
+          ),
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

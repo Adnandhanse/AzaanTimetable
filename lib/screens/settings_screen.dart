@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import '../services/auth_service.dart';
+import '../services/app_language.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,6 +25,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.language, color: Color(0xFF14532D)),
+            title: const Text('App Language'),
+            subtitle: Text(AppLanguageController.instance.isUrdu ? 'اردو (Urdu)' : 'English'),
+            trailing: DropdownButton<AppLanguage>(
+              value: AppLanguageController.instance.language,
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(value: AppLanguage.english, child: Text('English')),
+                DropdownMenuItem(value: AppLanguage.urdu, child: Text('اردو')),
+              ],
+              onChanged: (lang) {
+                if (lang != null) {
+                  AppLanguageController.instance.setLanguage(lang);
+                  setState(() {});
+                }
+              },
+            ),
+          ),
+          const Divider(),
           SwitchListTile(
             title: const Text('Azan Sound Alarm'),
             subtitle: const Text('Play Azan when prayer time arrives'),
