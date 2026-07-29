@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
 /// This runs in its own persistent background isolate, kept alive by a
 /// permanent low-priority "service" notification. Instead of relying on
@@ -103,19 +103,19 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     // "full screen intent", which Android only auto-launches when the
     // phone is locked. This guarantees the alert is seen either way.
     try {
-      final isActive = await FlutterOverlayWindow.isActive();
+      final isActive = await overlay.FlutterOverlayWindow.isActive();
       if (!isActive) {
-        await FlutterOverlayWindow.showOverlay(
-          height: WindowSize.matchParent,
-          width: WindowSize.matchParent,
-          flag: OverlayFlag.defaultFlag,
-          visibility: NotificationVisibility.visibilityPublic,
-          positionGravity: PositionGravity.none,
+        await overlay.FlutterOverlayWindow.showOverlay(
+          height: overlay.WindowSize.matchParent,
+          width: overlay.WindowSize.matchParent,
+          flag: overlay.OverlayFlag.defaultFlag,
+          visibility: overlay.NotificationVisibility.visibilityPublic,
+          positionGravity: overlay.PositionGravity.none,
         );
         // Give the overlay a moment to initialize before sending it data.
         await Future.delayed(const Duration(milliseconds: 400));
       }
-      await FlutterOverlayWindow.shareData({
+      await overlay.FlutterOverlayWindow.shareData({
         'prayer': label,
         'masjid': masjidName,
         'audioUrl': audioUrl ?? '',
