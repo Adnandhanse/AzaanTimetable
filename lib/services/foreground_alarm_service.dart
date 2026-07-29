@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
 /// This runs in its own persistent background isolate, kept alive by a
 /// permanent low-priority "service" notification. Instead of relying on
@@ -97,6 +98,35 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   }
 
   Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) async {
+    // Primary path: a real system overlay window that appears on top of
+    // ANY app or even the lock screen - stronger than a notification's
+    // "full screen intent", which Android only auto-launches when the
+    // phone is locked. This guarantees the alert is seen either way.
+    try {
+      final isActive = await FlutterOverlayWindow.isActive();
+      if (!isActive) {
+        await FlutterOverlayWindow.showOverlay(
+          height: WindowSize.matchParent,
+          width: WindowSize.matchParent,
+          flag: OverlayFlag.defaultFlag,
+          visibility: NotificationVisibility.visibilityPublic,
+          positionGravity: PositionGravity.none,
+        );
+        // Give the overlay a moment to initialize before sending it data.
+        await Future.delayed(const Duration(milliseconds: 400));
+      }
+      await FlutterOverlayWindow.shareData({
+        'prayer': label,
+        'masjid': masjidName,
+        'audioUrl': audioUrl ?? '',
+      });
+    } catch (_) {
+      // If overlay permission isn't granted, fall through to the
+      // notification below so the user still gets some alert.
+    }
+
+    // Also fire a regular notification as a backup/secondary signal -
+    // this still works even if overlay permission was never granted.
     await _plugin.show(
       200,
       '$label - $masjidName',

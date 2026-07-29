@@ -65,9 +65,9 @@ class HadithItem {
   });
 
   factory HadithItem.fromJson(Map<String, dynamic> json, {String arabicText = ''}) => HadithItem(
-        hadithNumber: json['hadithnumber'] ?? 0,
-        arabicNumber: json['arabicnumber'],
-        chapterNumber: (json['reference']?['book']) ?? 0,
+        hadithNumber: _toInt(json['hadithnumber']),
+        arabicNumber: json['arabicnumber'] != null ? _toInt(json['arabicnumber']) : null,
+        chapterNumber: _toInt(json['reference']?['book']),
         arabicText: arabicText,
         text: json['text'] ?? '',
         grades: (json['grades'] as List? ?? [])
@@ -75,6 +75,17 @@ class HadithItem {
             .where((g) => g.isNotEmpty && g != '-')
             .toList(),
       );
+
+  /// Some editions in this dataset encode numbers as doubles (e.g. 1.0)
+  /// instead of plain integers - this safely handles either format
+  /// instead of crashing with a type-cast error.
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString()) ?? 0;
+  }
 }
 
 class HadithCollection {
@@ -99,12 +110,12 @@ class HadithCollection {
     if (arabicJson != null) {
       for (final h in (arabicJson['hadiths'] as List)) {
         final num = h['hadithnumber'];
-        if (num != null) arabicByNumber[num] = h['text'] ?? '';
+        if (num != null) arabicByNumber[HadithItem._toInt(num)] = h['text'] ?? '';
       }
     }
 
     final hadiths = (json['hadiths'] as List)
-        .map((h) => HadithItem.fromJson(h, arabicText: arabicByNumber[h['hadithnumber']] ?? ''))
+        .map((h) => HadithItem.fromJson(h, arabicText: arabicByNumber[HadithItem._toInt(h['hadithnumber'])] ?? ''))
         .toList();
 
     return HadithCollection(

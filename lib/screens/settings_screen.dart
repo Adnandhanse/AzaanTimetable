@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import '../services/notification_service.dart';
 import '../services/auth_service.dart';
 
@@ -34,6 +35,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.picture_in_picture_alt, color: Colors.orange),
+            title: const Text('Enable Guaranteed Azan Popup'),
+            subtitle: const Text('Important: makes the Azan screen appear even while using your phone'),
+            onTap: () async {
+              await FlutterOverlayWindow.requestPermission();
+            },
           ),
           const Divider(),
           ListTile(

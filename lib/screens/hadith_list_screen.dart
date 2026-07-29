@@ -74,7 +74,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Hadith No. ${hadith.hadithNumber}',
+                          'Hadith No. ${hadith.hadithNumber} (Reference)',
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF14532D)),
                         ),
                       ),
@@ -87,7 +87,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Book Ref. ${hadith.arabicNumber}',
+                            'Arabic Edition No. ${hadith.arabicNumber}',
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8A6D1E)),
                           ),
                         ),
