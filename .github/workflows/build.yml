@@ -144,6 +144,45 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Auto-fix any plugin missing a namespace declaration
+        run: |
+          python3 << 'PYEOF'
+          import os, re, glob
+
+          pub_cache = os.path.expanduser(os.environ.get("PUB_CACHE", os.path.expanduser("~/.pub-cache")))
+          gradle_files = glob.glob(f"{pub_cache}/**/android/build.gradle", recursive=True)
+
+          for gradle_path in gradle_files:
+              with open(gradle_path, "r", encoding="utf-8", errors="ignore") as f:
+                  content = f.read()
+
+              if "namespace" in content:
+                  continue  # already has one, skip
+
+              # Find the matching AndroidManifest.xml's package attribute
+              manifest_path = os.path.join(os.path.dirname(gradle_path), "src", "main", "AndroidManifest.xml")
+              if not os.path.exists(manifest_path):
+                  continue
+              with open(manifest_path, "r", encoding="utf-8", errors="ignore") as f:
+                  manifest = f.read()
+              match = re.search(r'package="([^"]+)"', manifest)
+              if not match:
+                  continue
+              package_name = match.group(1)
+
+              # Insert namespace as the first line inside the android { } block
+              new_content = re.sub(
+                  r'(android\s*\{)',
+                  f'\\1\n    namespace "{package_name}"',
+                  content,
+                  count=1
+              )
+              if new_content != content:
+                  with open(gradle_path, "w", encoding="utf-8") as f:
+                      f.write(new_content)
+                  print(f"Patched namespace '{package_name}' into {gradle_path}")
+          PYEOF
+
       - name: Inspect flutter_foreground_task's actual native requirements
         run: |
           echo "=== flutter_foreground_task's own AndroidManifest.xml ==="
