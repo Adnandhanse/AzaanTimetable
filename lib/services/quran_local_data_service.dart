@@ -46,4 +46,30 @@ class QuranLocalDataService {
     }
     await prefs.setString(_notesKey, json.encode(notes));
   }
+
+  // --- Hadith bookmarks ---
+  static const _hadithBookmarksKey = 'hadith_bookmarks';
+
+  /// Each bookmark is stored as "bookKey|language|hadithNumber".
+  static Future<Set<String>> getHadithBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_hadithBookmarksKey) ?? []).toSet();
+  }
+
+  static Future<void> toggleHadithBookmark(String bookKey, String language, int hadithNumber) async {
+    final prefs = await SharedPreferences.getInstance();
+    final bookmarks = await getHadithBookmarks();
+    final id = '$bookKey|$language|$hadithNumber';
+    if (bookmarks.contains(id)) {
+      bookmarks.remove(id);
+    } else {
+      bookmarks.add(id);
+    }
+    await prefs.setStringList(_hadithBookmarksKey, bookmarks.toList());
+  }
+
+  static Future<bool> isHadithBookmarked(String bookKey, String language, int hadithNumber) async {
+    final bookmarks = await getHadithBookmarks();
+    return bookmarks.contains('$bookKey|$language|$hadithNumber');
+  }
 }

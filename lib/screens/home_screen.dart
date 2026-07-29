@@ -9,7 +9,9 @@ import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
 import 'quran_home_screen.dart';
-import 'dua_home_screen.dart';
+import 'hadith_home_screen.dart';
+import 'prayers_home_screen.dart';
+import 'qibla_screen.dart';
 import 'admin_login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,12 +35,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadSelectedMasjid() async {
-    final id = await UserRepository.getSelectedMasjidId();
-    if (!mounted) return;
-    setState(() {
-      _selectedMasjidId = id;
-      _loading = false;
-    });
+    try {
+      final id = await UserRepository.getSelectedMasjidId();
+      if (!mounted) return;
+      setState(() {
+        _selectedMasjidId = id;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not load your followed masjid: $e')),
+      );
+    }
   }
 
   Future<void> _openDirections(Masjid masjid) async {
@@ -189,9 +199,13 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           } else if (index == 2) {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DuaHomeScreen()),
+              MaterialPageRoute(builder: (_) => const HadithHomeScreen()),
             );
           } else if (index == 3) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PrayersHomeScreen()),
+            );
+          } else if (index == 4) {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
             );
@@ -200,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.mosque), label: 'Prayer Time'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Quran'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Duas'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Hadith'),
+          BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: 'Prayers'),
           BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Masjid Admin'),
         ],
       ),
@@ -256,6 +271,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF14532D)),
+              icon: const Icon(Icons.explore),
+              label: const Text('Find Qibla Direction'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const QiblaScreen()),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           const Text("Today's Prayer Times", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),

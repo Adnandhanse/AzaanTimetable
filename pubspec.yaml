@@ -28,6 +28,7 @@ dependencies:
   flutter_timezone: ^3.0.0
   flutter_foreground_task: ^8.13.0
   shared_preferences: ^2.3.2
+  flutter_compass: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -39,4 +40,16 @@ flutter:
   assets:
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
-    - assets/duas/duas_en.json
+    - assets/quran/quran_hi_lookup.json
+    - assets/hadith/eng_bukhari.json
+    - assets/hadith/urd_bukhari.json
+    - assets/hadith/eng_muslim.json
+    - assets/hadith/urd_muslim.json
+    - assets/hadith/eng_abudawud.json
+    - assets/hadith/urd_abudawud.json
+    - assets/hadith/eng_tirmidhi.json
+    - assets/hadith/urd_tirmidhi.json
+    - assets/hadith/eng_nasai.json
+    - assets/hadith/urd_nasai.json
+    - assets/hadith/eng_ibnmajah.json
+    - assets/hadith/urd_ibnmajah.json

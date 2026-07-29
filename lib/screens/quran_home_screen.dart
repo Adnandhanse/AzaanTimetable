@@ -65,6 +65,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
             itemBuilder: (_) => const [
               PopupMenuItem(value: QuranLanguage.english, child: Text('English')),
               PopupMenuItem(value: QuranLanguage.urdu, child: Text('اردو (Urdu)')),
+              PopupMenuItem(value: QuranLanguage.hindi, child: Text('हिन्दी (Hindi)')),
             ],
           ),
         ],

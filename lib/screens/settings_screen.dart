@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/notification_service.dart';
+import '../services/auth_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -51,6 +52,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Test notification sent - check your notification shade now.')),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.fingerprint, color: Colors.grey),
+            title: const Text('Show My Account ID'),
+            subtitle: const Text('Debug: check if this changes after a phone restart'),
+            onTap: () {
+              final uid = AuthService.currentUser?.uid ?? 'Not signed in';
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text('Account ID'),
+                  content: SelectableText(uid),
+                  actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close'))],
+                ),
               );
             },
           ),
