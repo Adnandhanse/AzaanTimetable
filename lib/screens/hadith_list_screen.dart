@@ -74,10 +74,24 @@ class _HadithListScreenState extends State<HadithListScreen> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Hadith ${hadith.hadithNumber}',
+                          'Hadith No. ${hadith.hadithNumber}',
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF14532D)),
                         ),
                       ),
+                      if (hadith.arabicNumber != null) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4AF37).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Book Ref. ${hadith.arabicNumber}',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8A6D1E)),
+                          ),
+                        ),
+                      ],
                       const Spacer(),
                       IconButton(
                         icon: Icon(
@@ -88,6 +102,17 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       ),
                     ],
                   ),
+                  if (hadith.arabicText.isNotEmpty) ...[
+                    Text(
+                      hadith.arabicText,
+                      textAlign: TextAlign.right,
+                      textDirection: TextDirection.rtl,
+                      style: const TextStyle(fontSize: 18, height: 1.8, fontFamily: 'serif'),
+                    ),
+                    const SizedBox(height: 10),
+                    const Divider(),
+                    const SizedBox(height: 4),
+                  ],
                   Text(hadith.text, style: const TextStyle(fontSize: 15, height: 1.5)),
                   if (hadith.grades.isNotEmpty) ...[
                     const SizedBox(height: 8),

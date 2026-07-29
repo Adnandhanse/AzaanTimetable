@@ -43,13 +43,19 @@ flutter:
     - assets/quran/quran_hi_lookup.json
     - assets/hadith/eng_bukhari.json
     - assets/hadith/urd_bukhari.json
+    - assets/hadith/ara_bukhari.json
     - assets/hadith/eng_muslim.json
     - assets/hadith/urd_muslim.json
+    - assets/hadith/ara_muslim.json
     - assets/hadith/eng_abudawud.json
     - assets/hadith/urd_abudawud.json
+    - assets/hadith/ara_abudawud.json
     - assets/hadith/eng_tirmidhi.json
     - assets/hadith/urd_tirmidhi.json
+    - assets/hadith/ara_tirmidhi.json
     - assets/hadith/eng_nasai.json
     - assets/hadith/urd_nasai.json
+    - assets/hadith/ara_nasai.json
     - assets/hadith/eng_ibnmajah.json
     - assets/hadith/urd_ibnmajah.json
+    - assets/hadith/ara_ibnmajah.json

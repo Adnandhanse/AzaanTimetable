@@ -69,6 +69,15 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
                         Text('Hadith ${hadith.hadithNumber}',
                             style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF14532D), fontSize: 12)),
                         const SizedBox(height: 6),
+                        if (hadith.arabicText.isNotEmpty) ...[
+                          Text(
+                            hadith.arabicText,
+                            textAlign: TextAlign.right,
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(fontSize: 16, fontFamily: 'serif'),
+                          ),
+                          const SizedBox(height: 6),
+                        ],
                         Text(hadith.text, style: const TextStyle(fontSize: 14)),
                       ],
                     ),

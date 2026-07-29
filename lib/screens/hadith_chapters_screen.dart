@@ -16,6 +16,7 @@ class HadithChaptersScreen extends StatefulWidget {
 
 class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
   HadithCollection? _collection;
+  String? _error;
   String _query = '';
 
   @override
@@ -25,9 +26,14 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
   }
 
   Future<void> _load() async {
-    final collection = await HadithRepository.loadCollection(widget.book, widget.language);
-    if (!mounted) return;
-    setState(() => _collection = collection);
+    try {
+      final collection = await HadithRepository.loadCollection(widget.book, widget.language);
+      if (!mounted) return;
+      setState(() => _collection = collection);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    }
   }
 
   String get _langCode => widget.language == HadithLanguage.english ? 'eng' : 'urd';
@@ -60,9 +66,31 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
             ),
         ],
       ),
-      body: _collection == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
+      body: _error != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                    const SizedBox(height: 12),
+                    Text('Could not load this book:\n$_error', textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() => _error = null);
+                        _load();
+                      },
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _collection == null
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(12),
