@@ -181,6 +181,30 @@ jobs:
                   with open(gradle_path, "w", encoding="utf-8") as f:
                       f.write(new_content)
                   print(f"Patched namespace '{package_name}' into {gradle_path}")
+
+          # Also force a modern compileSdk (34) on any plugin declaring a
+          # lower one - older plugins can specify a low compileSdk that's
+          # missing newer AndroidX resources (like android:attr/lStar),
+          # causing resource-merge failures even though our own app
+          # compiles against a modern SDK.
+          for gradle_path in gradle_files:
+              with open(gradle_path, "r", encoding="utf-8", errors="ignore") as f:
+                  content = f.read()
+
+              def bump(match):
+                  keyword, value = match.group(1), match.group(2)
+                  try:
+                      if int(value) < 34:
+                          return f'{keyword} 34'
+                  except ValueError:
+                      pass
+                  return match.group(0)
+
+              new_content = re.sub(r'(compileSdkVersion|compileSdk)\s+(\d+)', bump, content)
+              if new_content != content:
+                  with open(gradle_path, "w", encoding="utf-8") as f:
+                      f.write(new_content)
+                  print(f"Bumped compileSdk to 34 in {gradle_path}")
           PYEOF
 
       - name: Inspect flutter_foreground_task's actual native requirements
