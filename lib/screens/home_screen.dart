@@ -231,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         icon: const Icon(Icons.search, color: Colors.white),
         label: Text(S.changeMasjid, style: const TextStyle(color: Colors.white)),
         onPressed: () async {
@@ -247,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF14532D),
+        selectedItemColor: const Color(0xFF1F5E4A),
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           if (index == 1) {
@@ -304,8 +304,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        _skyGradient(masjid).colors.first.withOpacity(0.55),
-                        _skyGradient(masjid).colors.last.withOpacity(0.75),
+                        Colors.black.withOpacity(0.15),
+                        Colors.black.withOpacity(0.55),
                       ],
                     ),
                   ),
@@ -390,9 +390,9 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
-                  color: const Color(0xFFF0FDF4),
+                  color: const Color(0xFFFCFAF5),
                   child: ListTile(
-                    leading: const Icon(Icons.mosque, color: Color(0xFF14532D), size: 32),
+                    leading: const Icon(Icons.mosque, color: Color(0xFF1F5E4A), size: 32),
                     title: Text(masjid.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     subtitle: Text('${masjid.address}\n${masjid.city}'),
                     isThreeLine: true,
@@ -410,11 +410,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
+                          const Icon(Icons.directions, size: 18, color: Color(0xFF1F5E4A)),
                           const SizedBox(width: 6),
                           Text(S.getDirections,
                               style: const TextStyle(
-                                  color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline)),
+                                  color: Color(0xFF1F5E4A), fontWeight: FontWeight.w600, decoration: TextDecoration.underline)),
                         ],
                       ),
                     ),
@@ -467,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _quickActionButton(IconData icon, String label, VoidCallback onTap) {
     return Material(
-      color: const Color(0xFFF0FDF4),
+      color: const Color(0xFFFCFAF5),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -476,9 +476,9 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [
-              Icon(icon, color: const Color(0xFF14532D), size: 26),
+              Icon(icon, color: const Color(0xFF1F5E4A), size: 26),
               const SizedBox(height: 6),
-              Text(label, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF14532D), fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(label, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF1F5E4A), fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -510,8 +510,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(r.$1, style: TextStyle(fontSize: 16, fontWeight: isNext ? FontWeight.bold : FontWeight.normal, color: isNext ? const Color(0xFF14532D) : Colors.black87)),
-                Text(r.$2, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isNext ? const Color(0xFF14532D) : Colors.black87)),
+                Text(r.$1, style: TextStyle(fontSize: 16, fontWeight: isNext ? FontWeight.bold : FontWeight.normal, color: isNext ? const Color(0xFF1F5E4A) : Colors.black87)),
+                Text(r.$2, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: isNext ? const Color(0xFF1F5E4A) : Colors.black87)),
               ],
             ),
           );

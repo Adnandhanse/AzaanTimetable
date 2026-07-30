@@ -56,7 +56,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookmarked Hadiths'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: _loading
@@ -79,7 +79,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('$bookName • Hadith ${hadith.hadithNumber}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF14532D), fontSize: 12)),
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A), fontSize: 12)),
                             const SizedBox(height: 6),
                             Text(hadith.text, style: const TextStyle(fontSize: 14)),
                           ],

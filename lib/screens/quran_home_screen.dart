@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quran.dart';
 import '../services/quran_repository.dart';
 import '../services/quran_local_data_service.dart';
+import '../services/app_strings.dart';
 import '../data/juz_boundaries.dart';
 import 'surah_detail_screen.dart';
 import 'juz_detail_screen.dart';
@@ -50,7 +51,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quran'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
         actions: [
           PopupMenuButton<QuranLanguage>(
@@ -71,13 +72,13 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFFD4AF37),
+          indicatorColor: const Color(0xFFC8A86B),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'By Surah'),
-            Tab(text: 'By Juz'),
-            Tab(text: 'Favourites'),
+          tabs: [
+            Tab(text: S.bySurah),
+            Tab(text: S.byJuz),
+            Tab(text: S.favourites),
           ],
         ),
       ),
@@ -86,9 +87,13 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
           : Column(
               children: [
                 Container(
-                  height: 140,
+                  height: 220,
                   width: double.infinity,
-                  child: Image.asset('assets/images/quran_artwork.jpg', fit: BoxFit.cover),
+                  child: Image.asset(
+                    'assets/images/quran_artwork.jpg',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
                 ),
                 Expanded(
                   child: TabBarView(
@@ -120,10 +125,10 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
         Padding(
           padding: const EdgeInsets.all(16),
           child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search Surah by name or number',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: S.searchSurahHint,
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => setState(() => _query = v),
           ),
@@ -146,7 +151,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
                       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF14532D),
+                          backgroundColor: const Color(0xFF1F5E4A),
                           foregroundColor: Colors.white,
                           child: Text('${surah.number}', style: const TextStyle(fontSize: 13)),
                         ),
@@ -191,7 +196,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: const Color(0xFFD4AF37),
+              backgroundColor: const Color(0xFFC8A86B),
               child: Text('$juzNum', style: const TextStyle(color: Colors.black, fontSize: 13)),
             ),
             title: Text('Juz $juzNum'),

@@ -17,7 +17,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Prayer Time Dashboard'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: StreamBuilder<List<Masjid>>(

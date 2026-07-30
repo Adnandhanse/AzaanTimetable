@@ -3,6 +3,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
+import '../services/app_strings.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -20,14 +21,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: ListView(
         children: [
           ListTile(
-            leading: const Icon(Icons.language, color: Color(0xFF14532D)),
-            title: const Text('App Language'),
+            leading: const Icon(Icons.language, color: Color(0xFF1F5E4A)),
+            title: Text(S.appLanguage),
             subtitle: Text(AppLanguageController.instance.isUrdu ? 'اردو (Urdu)' : 'English'),
             trailing: DropdownButton<AppLanguage>(
               value: AppLanguageController.instance.language,
@@ -46,13 +47,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           SwitchListTile(
-            title: const Text('Azan Sound Alarm'),
+            title: Text(S.azanSoundAlarm),
             subtitle: const Text('Play Azan when prayer time arrives'),
             value: azanEnabled,
             onChanged: (v) => setState(() => azanEnabled = v),
           ),
           SwitchListTile(
-            title: const Text('Vibrate'),
+            title: Text(S.vibrate),
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),

@@ -160,7 +160,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.masjid.name),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -200,7 +200,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
               onPressed: _isSaving ? null : _saveTimes,
               child: _isSaving
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -218,10 +218,10 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
           if (_audioName != null)
             Card(
               child: ListTile(
-                leading: const Icon(Icons.audiotrack, color: Color(0xFF14532D)),
+                leading: const Icon(Icons.audiotrack, color: Color(0xFF1F5E4A)),
                 title: Text(_audioName!),
                 trailing: IconButton(
-                  icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF14532D), size: 32),
+                  icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF1F5E4A), size: 32),
                   onPressed: _togglePlayback,
                 ),
               ),
@@ -251,12 +251,12 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
               value.trim() == '--:--' || value.trim().isEmpty ? 'Not set' : value,
               style: TextStyle(
                 fontSize: 16,
-                color: value.trim() == '--:--' || value.trim().isEmpty ? Colors.grey : const Color(0xFF14532D),
+                color: value.trim() == '--:--' || value.trim().isEmpty ? Colors.grey : const Color(0xFF1F5E4A),
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.access_time, color: Color(0xFF14532D)),
+            const Icon(Icons.access_time, color: Color(0xFF1F5E4A)),
           ],
         ),
         onTap: () => _pickTime(value, onPicked),

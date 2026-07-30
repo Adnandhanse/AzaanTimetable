@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
 import 'services/notification_service.dart';
@@ -87,8 +88,17 @@ class MasjidAlarmApp extends StatelessWidget {
           title: 'Masjid Namaz Alarm',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            primaryColor: const Color(0xFF14532D),
-            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF14532D)),
+            scaffoldBackgroundColor: const Color(0xFFF8F5EE),
+            primaryColor: const Color(0xFF1F5E4A),
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F5E4A)).copyWith(
+              surface: const Color(0xFFFCFAF5),
+            ),
+            cardColor: const Color(0xFFFCFAF5),
+            fontFamily: GoogleFonts.inter().fontFamily,
+            textTheme: GoogleFonts.interTextTheme().apply(
+              bodyColor: const Color(0xFF2F3A35),
+              displayColor: const Color(0xFF2F3A35),
+            ),
             useMaterial3: true,
           ),
           home: const SplashScreen(),

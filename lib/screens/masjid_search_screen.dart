@@ -67,7 +67,7 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Masjid'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -137,7 +137,7 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
                     final masjid = all[index];
                     final distanceText = _userPosition != null ? ' • ${_distanceKm(masjid).toStringAsFixed(1)} km away' : '';
                     return ListTile(
-                      leading: const Icon(Icons.mosque, color: Color(0xFF14532D)),
+                      leading: const Icon(Icons.mosque, color: Color(0xFF1F5E4A)),
                       title: Text(masjid.name),
                       subtitle: Text('${masjid.city} • ${masjid.verificationStatus}$distanceText'),
                       trailing: const Icon(Icons.chevron_right),

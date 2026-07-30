@@ -26,7 +26,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform Admin'),
-        backgroundColor: const Color(0xFF0B1F14),
+        backgroundColor: const Color(0xFF164536),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -44,7 +44,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFFD4AF37),
+          indicatorColor: const Color(0xFFC8A86B),
           labelColor: Colors.white,
           tabs: const [Tab(text: 'Pending'), Tab(text: 'All Masjids')],
         ),
@@ -104,7 +104,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.mosque, color: Color(0xFF14532D)),
+                      const Icon(Icons.mosque, color: Color(0xFF1F5E4A)),
                       const SizedBox(width: 8),
                       Expanded(child: Text(m.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                       Container(
@@ -134,7 +134,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                     ),
                   const Padding(
                     padding: EdgeInsets.only(top: 6),
-                    child: Text('Tap for full details, audio, and approval', style: TextStyle(color: Color(0xFF14532D), fontSize: 12)),
+                    child: Text('Tap for full details, audio, and approval', style: TextStyle(color: Color(0xFF1F5E4A), fontSize: 12)),
                   ),
                 ],
               ),

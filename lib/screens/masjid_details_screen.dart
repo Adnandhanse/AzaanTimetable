@@ -30,7 +30,7 @@ class MasjidDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(masjid.name),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -53,11 +53,11 @@ class MasjidDetailsScreen extends StatelessWidget {
                 padding: EdgeInsets.only(left: 28),
                 child: Row(
                   children: [
-                    Icon(Icons.directions, size: 18, color: Color(0xFF14532D)),
+                    Icon(Icons.directions, size: 18, color: Color(0xFF1F5E4A)),
                     SizedBox(width: 6),
                     Text(
                       'Get Directions',
-                      style: TextStyle(color: Color(0xFF14532D), fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                      style: TextStyle(color: Color(0xFF1F5E4A), fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
                     ),
                   ],
                 ),
@@ -88,7 +88,7 @@ class MasjidDetailsScreen extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text(
                   'Follow This Masjid',

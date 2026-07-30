@@ -33,7 +33,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Confirm Exact Location'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Stack(
@@ -61,7 +61,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           // "confirm location" flow.
           const Padding(
             padding: EdgeInsets.only(bottom: 40),
-            child: Icon(Icons.location_pin, size: 48, color: Color(0xFFD4AF37)),
+            child: Icon(Icons.location_pin, size: 48, color: Color(0xFFC8A86B)),
           ),
           Positioned(
             top: 12,
@@ -86,7 +86,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             child: SizedBox(
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
                 onPressed: () => Navigator.of(context).pop(_center),
                 child: const Text('Confirm This Location', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),

@@ -11,7 +11,7 @@ class PrayerTimesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('${masjid.name} - Prayer Times'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -42,7 +42,7 @@ class PrayerTimesScreen extends StatelessWidget {
   Widget _tile(String name, String time, IconData icon) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF14532D)),
+        leading: Icon(icon, color: const Color(0xFF1F5E4A)),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: Text(time, style: const TextStyle(fontSize: 16)),
       ),

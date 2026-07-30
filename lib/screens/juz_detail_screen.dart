@@ -31,7 +31,7 @@ class JuzDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Juz $juzNumber'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: ListView.builder(
@@ -48,7 +48,7 @@ class JuzDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
                   child: Text(
                     '${surah.transliteration} (${surah.arabicName})',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF14532D)),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1F5E4A)),
                   ),
                 ),
               Card(

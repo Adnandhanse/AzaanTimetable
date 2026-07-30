@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/app_language.dart';
 import 'home_screen.dart';
+import 'language_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,8 +35,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         // masjid-following just won't persist until this is fixed.
       }
       if (!mounted) return;
+      final nextScreen = AppLanguageController.instance.hasChosenLanguage
+          ? const HomeScreen()
+          : const LanguageSelectionScreen();
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => nextScreen),
       );
     });
   }
@@ -55,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF0B1F14), Color(0xFF14532D), Color(0xFF0B1F14)],
+            colors: [Color(0xFF164536), Color(0xFF1F5E4A), Color(0xFF164536)],
           ),
         ),
         child: Stack(
@@ -76,17 +81,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         decoration: BoxDecoration(
                           color: const Color(0xFF1A1A1A),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFFD4AF37), width: 2),
+                          border: Border.all(color: const Color(0xFFC8A86B), width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFD4AF37).withOpacity(0.4),
+                              color: const Color(0xFFC8A86B).withOpacity(0.4),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                         child: Center(
-                          child: Container(width: 40, height: 6, color: const Color(0xFFD4AF37)),
+                          child: Container(width: 40, height: 6, color: const Color(0xFFC8A86B)),
                         ),
                       ),
                       ...List.generate(8, (i) {

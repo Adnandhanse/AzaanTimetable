@@ -7,6 +7,7 @@ import 'app_language.dart';
 /// whichever language the user picks.
 class S {
   static String _t(String en, String ur) => AppLanguageController.instance.isUrdu ? ur : en;
+  static bool get isUrdu => AppLanguageController.instance.isUrdu;
 
   static String get appTitle => _t('Masjid Namaz Alarm', 'مسجد نماز الارم');
   static String get prayerTime => _t('Prayer Time', 'نماز کا وقت');
@@ -37,4 +38,29 @@ class S {
 
   static String get verified => _t('Verified', 'تصدیق شدہ');
   static String get pendingVerification => _t('Pending Verification', 'توثیق زیر التواء');
+
+  // Quran screen
+  static String get bySurah => _t('By Surah', 'بالسورۃ');
+  static String get byJuz => _t('By Juz', 'بالجزء');
+  static String get favourites => _t('Favourites', 'پسندیدہ');
+  static String get searchSurahHint => _t('Search Surah by name or number', 'سورۃ کا نام یا نمبر تلاش کریں');
+
+  // Hadith screen
+  static String get hadithBooks => _t('Hadith Books', 'کتب حدیث');
+  static String get sixAuthenticBooks => _t('Kutub al-Sittah - The Six Authentic Books', 'کتب ستہ - چھ مستند کتابیں');
+  static String get myBookmarks => _t('My Bookmarks', 'میرے پسندیدہ');
+  static String get chapters => _t('Chapters', 'ابواب');
+
+  // Prayers screen
+  static String get fivePillars => _t('The Five Pillars of Islam', 'اسلام کے پانچ ارکان');
+  static String get shahada => _t('Shahada', 'شہادت');
+  static String get namaz => _t('Namaz (Salah)', 'نماز');
+  static String get roza => _t('Roza (Sawm)', 'روزہ');
+  static String get zakat => _t('Zakat', 'زکوٰۃ');
+  static String get hajjUmrah => _t('Hajj / Umrah', 'حج / عمرہ');
+
+  // Settings
+  static String get appLanguage => _t('App Language', 'ایپ کی زبان');
+  static String get azanSoundAlarm => _t('Azan Sound Alarm', 'اذان کی آواز');
+  static String get vibrate => _t('Vibrate', 'وائبریٹ');
 }

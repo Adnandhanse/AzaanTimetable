@@ -87,10 +87,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1F14),
+      backgroundColor: const Color(0xFF164536),
       appBar: AppBar(
         title: const Text('Qibla Direction'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: _loading
@@ -137,7 +137,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                           duration: const Duration(milliseconds: 250),
                           child: const Text(
                             '✓ Facing Qibla',
-                            style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(color: Color(0xFFC8A86B), fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -160,7 +160,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isAligned ? const Color(0xFFD4AF37) : Colors.white24,
+                                      color: isAligned ? const Color(0xFFC8A86B) : Colors.white24,
                                       width: 3,
                                     ),
                                   ),
@@ -174,34 +174,29 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                   ),
                                 ),
                               ),
-                              // Kaaba marker rotates to point at Qibla.
+                              // Kaaba image rotates to point at Qibla - shown
+                              // large enough to actually see clearly, not
+                              // cropped into a tiny fragment.
                               AnimatedRotation(
                                 turns: relativeAngle / 360,
                                 duration: const Duration(milliseconds: 150),
                                 curve: Curves.easeOut,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 52,
-                                      height: 52,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isAligned ? const Color(0xFFD4AF37) : Colors.white54,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: ClipOval(
-                                        child: Image.asset('assets/images/kaaba_qibla.jpg', fit: BoxFit.cover),
-                                      ),
+                                child: Container(
+                                  width: 150,
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isAligned ? const Color(0xFFC8A86B) : Colors.white54,
+                                      width: 3,
                                     ),
-                                    Container(
-                                      width: 4,
-                                      height: 100,
-                                      color: isAligned ? const Color(0xFFD4AF37) : Colors.white54,
-                                    ),
-                                  ],
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 12, spreadRadius: 1),
+                                    ],
+                                  ),
+                                  child: ClipOval(
+                                    child: Image.asset('assets/images/kaaba_qibla.jpg', fit: BoxFit.cover),
+                                  ),
                                 ),
                               ),
                             ],
@@ -233,7 +228,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: label == 'N' ? const Color(0xFFD4AF37) : Colors.white70,
+            color: label == 'N' ? const Color(0xFFC8A86B) : Colors.white70,
             fontWeight: FontWeight.bold,
             fontSize: 14,
           ),

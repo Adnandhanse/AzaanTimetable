@@ -47,7 +47,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.book.displayName),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
         actions: [
           if (_collection != null)
@@ -114,7 +114,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: const Color(0xFF14532D),
+                            backgroundColor: const Color(0xFF1F5E4A),
                             foregroundColor: Colors.white,
                             child: Text('${chapter.number}', style: const TextStyle(fontSize: 12)),
                           ),

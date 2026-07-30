@@ -27,7 +27,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Search ${widget.collection.name}'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -67,7 +67,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Hadith ${hadith.hadithNumber}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF14532D), fontSize: 12)),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A), fontSize: 12)),
                         const SizedBox(height: 6),
                         if (hadith.arabicText.isNotEmpty) ...[
                           Text(

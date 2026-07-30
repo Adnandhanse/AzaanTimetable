@@ -31,6 +31,7 @@ dependencies:
   flutter_compass: ^0.7.0
   flutter_overlay_window: ^0.4.5
   hijri: ^3.0.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

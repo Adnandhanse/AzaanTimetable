@@ -80,7 +80,7 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
     return Scaffold(
       appBar: AppBar(
         title: Text(m.name),
-        backgroundColor: const Color(0xFF0B1F14),
+        backgroundColor: const Color(0xFF164536),
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -122,10 +122,10 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
           else
             Card(
               child: ListTile(
-                leading: const Icon(Icons.audiotrack, color: Color(0xFF14532D)),
+                leading: const Icon(Icons.audiotrack, color: Color(0xFF1F5E4A)),
                 title: Text(m.customAzanAudioName ?? 'Azan audio'),
                 trailing: IconButton(
-                  icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF14532D), size: 32),
+                  icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF1F5E4A), size: 32),
                   onPressed: _togglePlayback,
                 ),
               ),

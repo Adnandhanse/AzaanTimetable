@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/hadith.dart';
+import '../services/app_strings.dart';
 import 'hadith_chapters_screen.dart';
 import 'hadith_bookmarks_screen.dart';
 
@@ -17,13 +18,13 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hadith Books'),
-        backgroundColor: const Color(0xFF14532D),
+        title: Text(S.hadithBooks),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.bookmark),
-            tooltip: 'My Bookmarks',
+            tooltip: S.myBookmarks,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HadithBookmarksScreen()),
             ),
@@ -43,26 +44,47 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Kutub al-Sittah - The Six Authentic Books',
-              style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+              S.sixAuthenticBooks,
+              style: const TextStyle(color: Color(0xFF7A7A7A), fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(
-            child: ListView(
+            child: GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: HadithBook.values.map((book) {
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.3,
+              ),
+              itemCount: HadithBook.values.length,
+              itemBuilder: (context, index) {
+                final book = HadithBook.values[index];
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: const Icon(Icons.menu_book, color: Color(0xFF14532D)),
-                    title: Text(book.displayName, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.chevron_right),
+                  color: const Color(0xFFFCFAF5),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => HadithChaptersScreen(book: book, language: _language)),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.menu_book, color: Color(0xFF1F5E4A), size: 28),
+                          const SizedBox(height: 8),
+                          Text(
+                            book.displayName,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
-              }).toList(),
+              },
             ),
           ),
           Padding(

@@ -35,7 +35,7 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Duas'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: _categories == null
@@ -61,7 +61,7 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         child: ListTile(
-                          leading: const Icon(Icons.favorite_border, color: Color(0xFF14532D)),
+                          leading: const Icon(Icons.favorite_border, color: Color(0xFF1F5E4A)),
                           title: Text(category.title),
                           subtitle: Text('${category.duas.length} dua(s)'),
                           trailing: const Icon(Icons.chevron_right),

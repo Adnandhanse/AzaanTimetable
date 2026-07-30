@@ -103,14 +103,14 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${surah.number}. ${surah.transliteration}'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
-            color: const Color(0xFFF0FDF4),
+            color: const Color(0xFFFCFAF5),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -140,17 +140,17 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       children: [
                         Text(
                           '${surah.number}.${verse.number}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF14532D)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A)),
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: Icon(isPlaying ? Icons.stop_circle : Icons.play_circle_outline, color: const Color(0xFF14532D)),
+                          icon: Icon(isPlaying ? Icons.stop_circle : Icons.play_circle_outline, color: const Color(0xFF1F5E4A)),
                           onPressed: () => _togglePlay(verse.number),
                         ),
                         IconButton(
                           icon: Icon(
                             hasNote ? Icons.note : Icons.note_add_outlined,
-                            color: hasNote ? const Color(0xFFD4AF37) : Colors.grey,
+                            color: hasNote ? const Color(0xFFC8A86B) : Colors.grey,
                           ),
                           onPressed: () => _openNoteEditor(verse.number),
                         ),

@@ -45,7 +45,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masjid Admin Login'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -56,7 +56,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.admin_panel_settings, size: 56, color: Color(0xFF14532D)),
+              const Icon(Icons.admin_panel_settings, size: 56, color: Color(0xFF1F5E4A)),
               const SizedBox(height: 16),
               const Text('Admin Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -73,7 +73,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
                   onPressed: _isChecking ? null : _login,
                   child: _isChecking
                       ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

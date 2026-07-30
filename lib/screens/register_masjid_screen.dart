@@ -203,7 +203,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register Masjid'),
-        backgroundColor: const Color(0xFF14532D),
+        backgroundColor: const Color(0xFF1F5E4A),
         foregroundColor: Colors.white,
       ),
       body: Form(
@@ -237,12 +237,12 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             _field(_email, 'Email', Icons.email, keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 8),
             Card(
-              color: const Color(0xFFF0FDF4),
+              color: const Color(0xFFFCFAF5),
               child: const Padding(
                 padding: EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Color(0xFF14532D)),
+                    Icon(Icons.info_outline, color: Color(0xFF1F5E4A)),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -259,7 +259,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             SizedBox(
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
                 onPressed: _isSendingOtp ? null : _submit,
                 child: _isSendingOtp
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

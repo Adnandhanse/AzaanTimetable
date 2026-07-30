@@ -54,7 +54,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1F14),
+      backgroundColor: const Color(0xFF164536),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -63,7 +63,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.shield, size: 56, color: Color(0xFFD4AF37)),
+                const Icon(Icons.shield, size: 56, color: Color(0xFFC8A86B)),
                 const SizedBox(height: 12),
                 const Text('Platform Admin', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
@@ -99,7 +99,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37)),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC8A86B)),
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))

@@ -58,14 +58,14 @@ class _AzanRingingScreenState extends State<AzanRingingScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B1F14),
+        backgroundColor: const Color(0xFF164536),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.mosque, size: 72, color: Color(0xFFD4AF37)),
+                const Icon(Icons.mosque, size: 72, color: Color(0xFFC8A86B)),
                 const SizedBox(height: 24),
                 Text(
                   widget.prayerName,
@@ -90,7 +90,7 @@ class _AzanRingingScreenState extends State<AzanRingingScreen> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37)),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC8A86B)),
                     onPressed: _stop,
                     child: const Text('Stop', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
                   ),

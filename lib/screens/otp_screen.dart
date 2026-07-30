@@ -74,7 +74,7 @@ class _OtpScreenState extends State<OtpScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF14532D)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
                 onPressed: _isVerifying ? null : _verifyOtp,
                 child: _isVerifying
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
