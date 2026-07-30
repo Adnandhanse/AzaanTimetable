@@ -49,15 +49,6 @@ flutter:
     - assets/images/quran_artwork.jpg
     - assets/images/kaaba_qibla.jpg
     - assets/icon/app_icon.png
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Variable.ttf
-    - family: Amiri
-      fonts:
-        - asset: assets/fonts/Amiri-Regular.ttf
-        - asset: assets/fonts/Amiri-Bold.ttf
-          weight: 700
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
     - assets/quran/quran_hi_lookup.json
@@ -79,3 +70,12 @@ flutter:
     - assets/hadith/eng_ibnmajah.json
     - assets/hadith/urd_ibnmajah.json
     - assets/hadith/ara_ibnmajah.json
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700
