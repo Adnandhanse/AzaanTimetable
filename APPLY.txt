@@ -1,0 +1,37 @@
+UI CHANGES ONLY - 9 files
+=========================
+
+Unzip over your repo root. Paths already match, so it overwrites the right
+files and creates lib/theme/ and lib/widgets/ for you.
+
+ADDED (2)
+  lib/theme/app_theme.dart              palette, type scale, ThemeData
+  lib/widgets/ornaments.dart            girih pattern, arch, rules, medallions
+
+REPLACED (7)
+  pubspec.yaml                          commented Cormorant block only -
+                                        nothing added to dependencies
+  lib/main.dart                         theme: AppTheme.light()
+  lib/screens/home_screen.dart
+  lib/screens/quran_home_screen.dart
+  lib/screens/hadith_home_screen.dart
+  lib/screens/qibla_screen.dart
+  lib/screens/prayers_home_screen.dart
+
+The five screens keep every piece of their logic. Only the presentation
+changed. Nothing else in lib/ is affected - all 48 other files, every service,
+every model, overlay_main.dart, the admin flow and your CI workflow stay as
+they are.
+
+BEFORE YOU PUSH
+  If you already have local changes to any of these seven files, this will
+  overwrite them. Commit or stash first.
+
+AFTER YOU INSTALL
+  Check an alarm actually fires. Alarm scheduling is triggered from inside
+  Home's StreamBuilder via _maybeScheduleNotifications, which makes
+  home_screen.dart the riskiest file here. It is preserved exactly and
+  commented, but verify it on the device rather than trusting it.
+
+See MERGE_NOTES.md for the full detail, including how to switch the display
+font to Cormorant Garamond later.

@@ -1,0 +1,165 @@
+import 'package:flutter/material.dart';
+
+/// Direction A — "Illuminated".
+///
+/// Single source of truth for colour and type. If a screen needs something not
+/// in here, that's a design decision, not a code decision — add it here rather
+/// than inlining a hex value in a widget.
+class AppColors {
+  AppColors._();
+
+  static const Color ivory = Color(0xFFFBF8F1); // page background
+  static const Color white = Color(0xFFFFFFFF); // cards, headers, nav bar
+  static const Color emerald = Color(0xFF14503E); // primary
+  static const Color emeraldTint = Color(0xFF2C6653); // ring track on emerald
+  static const Color gold = Color(0xFFC9A227); // accent, ornament
+  static const Color goldRule = Color(0xFFE3D5B0); // hairline borders
+  static const Color goldRuleFaint = Color(0xFFEFE7D3); // list separators
+  static const Color goldPale = Color(0xFFD9C27E); // labels on emerald
+  static const Color text = Color(0xFF2B322E);
+  static const Color textMid = Color(0xFF5C6560);
+  static const Color textMuted = Color(0xFF9A8F7D);
+  static const Color textFaint = Color(0xFFB5AC98);
+  static const Color chevron = Color(0xFFC0B79F);
+  static const Color navInactive = Color(0xFFA9A192);
+  static const Color onEmeraldMuted = Color(0xFFA9C0B6);
+  static const Color kaabaBlack = Color(0xFF23241F);
+  static const Color textDim = Color(0xFF8B8676);
+
+  /// Kept for the exact-alarm warning banner. Amber carries meaning there, so
+  /// it deliberately sits outside the palette.
+  static const Color warningBg = Color(0xFFFFF3CD);
+  static const Color warningFg = Color(0xFF8A5A00);
+}
+
+class AppFonts {
+  AppFonts._();
+
+  /// Display face — names, screen titles, all clock times.
+  ///
+  /// 'serif' is Android's built-in serif (Noto Serif). It needs no font file,
+  /// so the build stays green with nothing added to assets.
+  ///
+  /// To upgrade to Cormorant Garamond: drop the two .ttf files into
+  /// assets/fonts/, uncomment the Cormorant block in pubspec.yaml, and change
+  /// this one line to 'Cormorant'. Nothing else in the app needs touching.
+  static const String serif = 'serif';
+
+  /// Already bundled — Inter-Variable.ttf.
+  static const String sans = 'Inter';
+
+  /// Already bundled — Amiri-Regular.ttf and Amiri-Bold.ttf.
+  static const String arabic = 'Amiri';
+}
+
+class AppText {
+  AppText._();
+
+  /// Small tracked label. Uppercase at the call site.
+  static const TextStyle eyebrow = TextStyle(
+    fontFamily: AppFonts.sans,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 1.6,
+    height: 1.2,
+  );
+
+  static const TextStyle screenTitle = TextStyle(
+    fontFamily: AppFonts.serif,
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    height: 1.15,
+  );
+
+  static const TextStyle displayName = TextStyle(
+    fontFamily: AppFonts.serif,
+    fontSize: 23,
+    fontWeight: FontWeight.w600,
+    height: 1.15,
+  );
+
+  /// The next-prayer time and the qibla bearing — the two numbers this app
+  /// exists to show.
+  static const TextStyle hero = TextStyle(
+    fontFamily: AppFonts.serif,
+    fontSize: 44,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
+  );
+
+  static const TextStyle rowTitle = TextStyle(
+    fontFamily: AppFonts.serif,
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+  );
+
+  static const TextStyle listTime = TextStyle(
+    fontFamily: AppFonts.serif,
+    fontSize: 19,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
+  );
+
+  static const TextStyle body = TextStyle(
+    fontFamily: AppFonts.sans,
+    fontSize: 13,
+    height: 1.35,
+  );
+
+  static const TextStyle caption = TextStyle(
+    fontFamily: AppFonts.sans,
+    fontSize: 11.5,
+    height: 1.3,
+  );
+
+  /// Arabic sits small on the line, so it needs a larger size than the Latin
+  /// text beside it to read as the same weight.
+  static const TextStyle arabic = TextStyle(
+    fontFamily: AppFonts.arabic,
+    fontSize: 18,
+    height: 1.9,
+  );
+}
+
+class AppTheme {
+  AppTheme._();
+
+  static ThemeData light() {
+    final ColorScheme scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.emerald,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: AppColors.emerald,
+      secondary: AppColors.gold,
+      surface: AppColors.ivory,
+      onSurface: AppColors.text,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: AppColors.ivory,
+      primaryColor: AppColors.emerald,
+      cardColor: AppColors.white,
+      fontFamily: AppFonts.sans,
+      iconTheme: const IconThemeData(color: AppColors.text),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.emerald,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        titleTextStyle: AppText.screenTitle,
+        shape: Border(bottom: BorderSide(color: AppColors.goldRule)),
+      ),
+      textTheme: Typography.material2021().black.apply(
+            fontFamily: AppFonts.sans,
+            bodyColor: AppColors.text,
+            displayColor: AppColors.text,
+          ),
+    );
+  }
+}

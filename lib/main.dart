@@ -4,6 +4,7 @@ import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
 import 'services/notification_service.dart';
 import 'services/app_language.dart';
+import 'theme/app_theme.dart';
 
 /// Lets code outside the widget tree (the notification tap callback) push
 /// a new screen - used to open the Azan ringing screen when an alarm fires.
@@ -86,21 +87,7 @@ class MasjidAlarmApp extends StatelessWidget {
           navigatorKey: navigatorKey,
           title: 'Masjid Namaz Alarm',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            scaffoldBackgroundColor: const Color(0xFFF8F5EE),
-            primaryColor: const Color(0xFF1F5E4A),
-            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F5E4A)).copyWith(
-              surface: const Color(0xFFFCFAF5),
-            ),
-            cardColor: const Color(0xFFFCFAF5),
-            fontFamily: 'Inter',
-            textTheme: Typography.material2021().black.apply(
-              fontFamily: 'Inter',
-              bodyColor: const Color(0xFF2F3A35),
-              displayColor: const Color(0xFF2F3A35),
-            ),
-            useMaterial3: true,
-          ),
+          theme: AppTheme.light(),
           home: const SplashScreen(),
         );
       },

@@ -4,6 +4,8 @@ import '../services/quran_repository.dart';
 import '../services/quran_local_data_service.dart';
 import '../services/app_strings.dart';
 import '../data/juz_boundaries.dart';
+import '../theme/app_theme.dart';
+import '../widgets/ornaments.dart';
 import 'surah_detail_screen.dart';
 import 'juz_detail_screen.dart';
 
@@ -14,7 +16,8 @@ class QuranHomeScreen extends StatefulWidget {
   State<QuranHomeScreen> createState() => _QuranHomeScreenState();
 }
 
-class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProviderStateMixin {
+class _QuranHomeScreenState extends State<QuranHomeScreen>
+    with SingleTickerProviderStateMixin {
   QuranLanguage _language = QuranLanguage.english;
   List<Surah>? _surahs;
   String _query = '';
@@ -27,6 +30,12 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
     _tabController = TabController(length: 3, vsync: this);
     _load();
     _loadFavourites();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -50,12 +59,10 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quran'),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
+        title: Text(S.quran),
         actions: [
           PopupMenuButton<QuranLanguage>(
-            icon: const Icon(Icons.translate),
+            icon: const Icon(Icons.translate, size: 20),
             onSelected: (lang) {
               setState(() {
                 _language = lang;
@@ -70,38 +77,70 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
             ],
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFFC8A86B),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: [
-            Tab(text: S.bySurah),
-            Tab(text: S.byJuz),
-            Tab(text: S.favourites),
-          ],
-        ),
       ),
       body: _surahs == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Container(
-                  height: 200,
-                  width: double.infinity,
-                  color: const Color(0xFFF3ECDD),
-                  child: Image.asset(
-                    'assets/images/quran_artwork.jpg',
-                    fit: BoxFit.contain,
+                // Calligraphic title inside the arch, in place of the artwork
+                // photo. Drawn in code, so nothing to load and nothing to
+                // scale badly.
+                IlluminatedHeader(
+                  height: 150,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'القرآن الكريم',
+                        style: AppText.arabic.copyWith(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          color: AppColors.emerald,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '114 SURAHS',
+                        style: AppText.eyebrow.copyWith(
+                          letterSpacing: 1.8,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                    ],
                   ),
                 ),
+                Container(
+                  color: AppColors.white,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: AppColors.gold,
+                    indicatorWeight: 2,
+                    labelColor: AppColors.emerald,
+                    unselectedLabelColor: AppColors.textMuted,
+                    labelStyle: AppText.body.copyWith(fontSize: 12.5),
+                    unselectedLabelStyle: AppText.body.copyWith(fontSize: 12.5),
+                    tabs: [
+                      Tab(text: S.bySurah),
+                      Tab(text: S.byJuz),
+                      Tab(text: S.favourites),
+                    ],
+                  ),
+                ),
+                Container(height: 1, color: AppColors.goldRule),
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
                     children: [
                       _buildSurahList(_surahs!),
                       _buildJuzList(),
-                      _buildSurahList(_surahs!.where((s) => _favourites.contains(s.number)).toList(), isFavouriteTab: true),
+                      _buildSurahList(
+                        _surahs!
+                            .where((s) => _favourites.contains(s.number))
+                            .toList(),
+                        isFavouriteTab: true,
+                      ),
                     ],
                   ),
                 ),
@@ -123,12 +162,31 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
           child: TextField(
+            style: AppText.body,
             decoration: InputDecoration(
               hintText: S.searchSurahHint,
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
+              hintStyle: AppText.body.copyWith(color: AppColors.textFaint),
+              prefixIcon: const Icon(Icons.search,
+                  size: 18, color: AppColors.textMuted),
+              filled: true,
+              fillColor: AppColors.white,
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.goldRule),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.goldRule),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.gold),
+              ),
             ),
             onChanged: (v) => setState(() => _query = v),
           ),
@@ -136,39 +194,84 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
         Expanded(
           child: filtered.isEmpty
               ? Center(
-                  child: Text(
-                    isFavouriteTab ? 'No favourites yet.\nTap the heart on any Surah to save it here.' : 'No Surah found.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.grey),
+                  child: Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Text(
+                      isFavouriteTab
+                          ? 'No favourites yet.\nTap the heart on any Surah to save it here.'
+                          : 'No Surah found.',
+                      textAlign: TextAlign.center,
+                      style:
+                          AppText.body.copyWith(color: AppColors.textMuted),
+                    ),
                   ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final surah = filtered[index];
                     final isFav = _favourites.contains(surah.number);
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFF1F5E4A),
-                          foregroundColor: Colors.white,
-                          child: Text('${surah.number}', style: const TextStyle(fontSize: 13)),
-                        ),
-                        title: Text(surah.transliteration, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text('${surah.englishMeaning} • ${surah.totalVerses} verses'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(surah.arabicName, style: const TextStyle(fontSize: 18, fontFamily: 'serif')),
-                            IconButton(
-                              icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: isFav ? Colors.red : Colors.grey),
-                              onPressed: () => _toggleFavourite(surah.number),
-                            ),
-                          ],
-                        ),
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: index == 0
+                            ? null
+                            : const Border(
+                                top: BorderSide(
+                                    color: AppColors.goldRuleFaint)),
+                      ),
+                      child: InkWell(
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => SurahDetailScreen(surah: surah)),
+                          MaterialPageRoute(
+                              builder: (_) => SurahDetailScreen(surah: surah)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                              Medallion(label: '${surah.number}'),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      surah.transliteration,
+                                      style: AppText.rowTitle.copyWith(
+                                          fontSize: 18, color: AppColors.text),
+                                    ),
+                                    Text(
+                                      '${surah.englishMeaning} · ${surah.totalVerses} verses',
+                                      style: AppText.caption.copyWith(
+                                          color: AppColors.textMuted),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                surah.arabicName,
+                                style: AppText.arabic.copyWith(
+                                  fontSize: 17,
+                                  height: 1.3,
+                                  color: AppColors.gold,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  isFav
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  size: 18,
+                                  color: isFav
+                                      ? AppColors.emerald
+                                      : AppColors.chevron,
+                                ),
+                                onPressed: () =>
+                                    _toggleFavourite(surah.number),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -176,10 +279,11 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
                 ),
         ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
           child: Text(
-            'Text: quran-json (CC BY-SA 4.0) • Works fully offline',
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            'Text: quran-json (CC BY-SA 4.0) · Works fully offline',
+            textAlign: TextAlign.center,
+            style: AppText.caption.copyWith(color: AppColors.textFaint),
           ),
         ),
       ],
@@ -188,22 +292,51 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
 
   Widget _buildJuzList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       itemCount: juzBoundaries.length,
       itemBuilder: (context, index) {
         final (juzNum, startSurah, startVerse) = juzBoundaries[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: const Color(0xFFC8A86B),
-              child: Text('$juzNum', style: const TextStyle(color: Colors.black, fontSize: 13)),
-            ),
-            title: Text('Juz $juzNum'),
-            subtitle: Text('Starts at Surah $startSurah, Ayah $startVerse'),
-            trailing: const Icon(Icons.chevron_right),
+        return Container(
+          decoration: BoxDecoration(
+            border: index == 0
+                ? null
+                : const Border(
+                    top: BorderSide(color: AppColors.goldRuleFaint)),
+          ),
+          child: InkWell(
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => JuzDetailScreen(juzNumber: juzNum, allSurahs: _surahs!)),
+              MaterialPageRoute(
+                builder: (_) =>
+                    JuzDetailScreen(juzNumber: juzNum, allSurahs: _surahs!),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  Medallion(label: '$juzNum'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Juz $juzNum',
+                          style: AppText.rowTitle
+                              .copyWith(fontSize: 18, color: AppColors.text),
+                        ),
+                        Text(
+                          'Starts at Surah $startSurah, Ayah $startVerse',
+                          style: AppText.caption
+                              .copyWith(color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right,
+                      size: 18, color: AppColors.chevron),
+                ],
+              ),
             ),
           ),
         );

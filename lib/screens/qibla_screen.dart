@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
+import '../theme/app_theme.dart';
+import '../widgets/ornaments.dart';
 
 /// The Kaaba's coordinates - fixed, well-established location.
 const double _kaabaLat = 21.4225;
@@ -36,7 +38,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         throw Exception('Location permission is needed to find Qibla direction.');
       }
       if (!await Geolocator.isLocationServiceEnabled()) {
@@ -48,7 +51,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
         timeLimit: const Duration(seconds: 20),
       );
 
-      final bearing = _calculateQiblaBearing(position.latitude, position.longitude);
+      final bearing =
+          _calculateQiblaBearing(position.latitude, position.longitude);
       final distance = Geolocator.distanceBetween(
             position.latitude,
             position.longitude,
@@ -87,153 +91,391 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF164536),
-      appBar: AppBar(
-        title: const Text('Qibla Direction'),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Qibla')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.redAccent)),
-                        const SizedBox(height: 16),
-                        ElevatedButton(onPressed: _findQiblaDirection, child: const Text('Try Again')),
-                      ],
-                    ),
-                  ),
-                )
+              ? _buildError()
               : StreamBuilder<CompassEvent>(
                   stream: FlutterCompass.events,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData || snapshot.data!.heading == null) {
-                      return const Center(
-                        child: Text('Compass not available on this device.', style: TextStyle(color: Colors.white70)),
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28),
+                          child: Text(
+                            'Compass not available on this device.',
+                            textAlign: TextAlign.center,
+                            style: AppText.body
+                                .copyWith(color: AppColors.textMuted),
+                          ),
+                        ),
                       );
                     }
                     final heading = snapshot.data!.heading!;
-                    // Angle to rotate the Kaaba marker so it points at
-                    // Qibla relative to the phone's current heading.
                     var relativeAngle = _qiblaBearing! - heading;
                     relativeAngle = (relativeAngle + 360) % 360;
                     final isAligned = relativeAngle < 5 || relativeAngle > 355;
 
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${_distanceKm!.toStringAsFixed(0)} km to Makkah',
-                          style: const TextStyle(fontSize: 16, color: Colors.white70),
-                        ),
-                        const SizedBox(height: 8),
-                        AnimatedOpacity(
-                          opacity: isAligned ? 1 : 0,
-                          duration: const Duration(milliseconds: 250),
-                          child: const Text(
-                            '✓ Facing Qibla',
-                            style: TextStyle(color: Color(0xFFC8A86B), fontWeight: FontWeight.bold, fontSize: 16),
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 18),
+                          _CompassDial(
+                            headingTurns: -heading / 360,
+                            qiblaTurns: relativeAngle / 360,
+                            isAligned: isAligned,
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: 280,
-                          height: 280,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Static outer dial with N/E/S/W - this dial
-                              // rotates opposite to phone heading so North
-                              // always points to true North visually.
-                              AnimatedRotation(
-                                turns: -heading / 360,
-                                duration: const Duration(milliseconds: 150),
-                                curve: Curves.easeOut,
-                                child: Container(
-                                  width: 280,
-                                  height: 280,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isAligned ? const Color(0xFFC8A86B) : Colors.white24,
-                                      width: 3,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      _compassLabel('N', Alignment.topCenter),
-                                      _compassLabel('E', Alignment.centerRight),
-                                      _compassLabel('S', Alignment.bottomCenter),
-                                      _compassLabel('W', Alignment.centerLeft),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // Kaaba image rotates to point at Qibla - shown
-                              // large enough to actually see clearly, not
-                              // cropped into a tiny fragment.
-                              AnimatedRotation(
-                                turns: relativeAngle / 360,
-                                duration: const Duration(milliseconds: 150),
-                                curve: Curves.easeOut,
-                                child: Container(
-                                  width: 150,
-                                  height: 150,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isAligned ? const Color(0xFFC8A86B) : Colors.white54,
-                                      width: 3,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 12, spreadRadius: 1),
-                                    ],
-                                  ),
-                                  child: ClipOval(
-                                    child: Image.asset('assets/images/kaaba_qibla.jpg', fit: BoxFit.cover),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 10),
+                          Text(
+                            '${_qiblaBearing!.toStringAsFixed(0)}°',
+                            style:
+                                AppText.hero.copyWith(color: AppColors.emerald),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Heading: ${heading.toStringAsFixed(0)}°  •  Qibla: ${_qiblaBearing!.toStringAsFixed(0)}°',
-                          style: const TextStyle(color: Colors.white54, fontSize: 13),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Hold your phone flat and turn until the Kaaba icon\npoints straight up.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white54, fontSize: 13),
-                        ),
-                      ],
+                          Text(
+                            _cardinalName(_qiblaBearing!).toUpperCase(),
+                            style: AppText.eyebrow.copyWith(
+                              fontSize: 12,
+                              letterSpacing: 1.5,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          AnimatedOpacity(
+                            opacity: isAligned ? 1 : 0,
+                            duration: const Duration(milliseconds: 250),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.emerald,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              child: Text(
+                                'FACING QIBLA',
+                                style: AppText.eyebrow
+                                    .copyWith(color: AppColors.goldPale),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                            child: Column(
+                              children: [
+                                const DiamondRule(),
+                                const SizedBox(height: 14),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _Stat(
+                                        label: 'To Makkah',
+                                        value:
+                                            '${_distanceKm!.toStringAsFixed(0)} km',
+                                      ),
+                                    ),
+                                    Container(
+                                        width: 1,
+                                        height: 34,
+                                        color: AppColors.goldRule),
+                                    Expanded(
+                                      child: _Stat(
+                                        label: 'Heading',
+                                        value:
+                                            '${heading.toStringAsFixed(0)}°',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 18),
+                                Text(
+                                  'Hold your phone flat and turn until the Kaaba points straight up.',
+                                  textAlign: TextAlign.center,
+                                  style: AppText.caption
+                                      .copyWith(color: AppColors.textMuted),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
     );
   }
 
-  Widget _compassLabel(String label, Alignment alignment) {
-    return Align(
-      alignment: alignment,
+  Widget _buildError() {
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: label == 'N' ? const Color(0xFFC8A86B) : Colors.white70,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Medallion(icon: Icons.location_off_outlined, size: 52),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: AppText.body.copyWith(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 18),
+            OutlinedButton(
+              onPressed: _findQiblaDirection,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.emerald,
+                side: const BorderSide(color: AppColors.gold),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                textStyle: AppText.body,
+              ),
+              child: const Text('Try again'),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  String _cardinalName(double bearing) {
+    const List<String> names = <String>[
+      'North',
+      'North east',
+      'East',
+      'South east',
+      'South',
+      'South west',
+      'West',
+      'North west',
+    ];
+    final int index = (((bearing + 22.5) % 360) / 45).floor();
+    return names[index % 8];
+  }
+}
+
+/// The dial rotates opposite to the phone heading so North stays visually
+/// north; the Kaaba glyph rotates to the qibla. Both are drawn in code, so the
+/// old kaaba_qibla.jpg is no longer needed.
+class _CompassDial extends StatelessWidget {
+  const _CompassDial({
+    required this.headingTurns,
+    required this.qiblaTurns,
+    required this.isAligned,
+  });
+
+  final double headingTurns;
+  final double qiblaTurns;
+  final bool isAligned;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      height: 260,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedRotation(
+            turns: headingTurns,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            child: CustomPaint(
+              size: const Size(260, 260),
+              painter: _DialPainter(isAligned: isAligned),
+            ),
+          ),
+          AnimatedRotation(
+            turns: qiblaTurns,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            child: CustomPaint(
+              size: const Size(260, 260),
+              painter: const _NeedlePainter(),
+              child: const SizedBox(
+                width: 260,
+                height: 260,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 34),
+                    child: _KaabaGlyph(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DialPainter extends CustomPainter {
+  const _DialPainter({required this.isAligned});
+
+  final bool isAligned;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final double r = size.width / 2;
+
+    canvas.drawCircle(c, r - 5, Paint()..color = AppColors.white);
+    canvas.drawCircle(
+      c,
+      r - 5,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = AppColors.goldRule,
+    );
+    canvas.drawCircle(
+      c,
+      r - 21,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isAligned ? 2.4 : 1.4
+        ..color = AppColors.gold,
+    );
+    canvas.drawCircle(c, r - 29, Paint()..color = AppColors.ivory);
+
+    final Paint minor = Paint()
+      ..strokeWidth = 0.8
+      ..color = const Color(0xFFDFD3B4);
+    final Paint major = Paint()
+      ..strokeWidth = 1.3
+      ..color = AppColors.gold;
+
+    for (int d = 0; d < 360; d += 6) {
+      final bool isMajor = d % 30 == 0;
+      final double a = (d - 90) * pi / 180;
+      final double inner = isMajor ? r - 39 : r - 34;
+      final double outer = r - 29;
+      canvas.drawLine(
+        c + Offset(cos(a) * inner, sin(a) * inner),
+        c + Offset(cos(a) * outer, sin(a) * outer),
+        isMajor ? major : minor,
+      );
+    }
+
+    _cardinal(canvas, size, 'N', const Offset(0, -1), AppColors.emerald);
+    _cardinal(canvas, size, 'S', const Offset(0, 1), AppColors.textMuted);
+    _cardinal(canvas, size, 'E', const Offset(1, 0), AppColors.textMuted);
+    _cardinal(canvas, size, 'W', const Offset(-1, 0), AppColors.textMuted);
+  }
+
+  void _cardinal(
+      Canvas canvas, Size size, String letter, Offset dir, Color colour) {
+    final TextPainter tp = TextPainter(
+      text: TextSpan(
+        text: letter,
+        style: TextStyle(
+          fontFamily: AppFonts.serif,
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          color: colour,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final Offset centre = Offset(size.width / 2, size.height / 2);
+    final double radius = size.width / 2 - 14;
+    final Offset at = centre +
+        Offset(dir.dx * radius, dir.dy * radius) -
+        Offset(tp.width / 2, tp.height / 2);
+    tp.paint(canvas, at);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DialPainter old) =>
+      old.isAligned != isAligned;
+}
+
+class _NeedlePainter extends CustomPainter {
+  const _NeedlePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    canvas.drawLine(
+      Offset(c.dx, c.dy - (size.height / 2 - 56)),
+      c,
+      Paint()
+        ..color = AppColors.emerald
+        ..strokeWidth = 1.6,
+    );
+    canvas.drawCircle(c, 3, Paint()..color = AppColors.gold);
+  }
+
+  @override
+  bool shouldRepaint(covariant _NeedlePainter old) => false;
+}
+
+/// Simple geometric Kaaba — a cube with the kiswah band. Deliberately not a
+/// photograph: it stays sharp at every density and needs no asset.
+class _KaabaGlyph extends StatelessWidget {
+  const _KaabaGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 34,
+      height: 34,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.kaabaBlack,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 11,
+            child: SizedBox(
+              height: 6,
+              child: ColoredBox(color: AppColors.gold),
+            ),
+          ),
+          Positioned(
+            left: 13,
+            bottom: 0,
+            child:
+                Container(width: 8, height: 11, color: const Color(0xFF8C7326)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppText.eyebrow
+              .copyWith(letterSpacing: 1.3, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: AppText.listTime.copyWith(fontSize: 20, color: AppColors.text),
+        ),
+      ],
     );
   }
 }

@@ -79,3 +79,20 @@ flutter:
         - asset: assets/fonts/Amiri-Regular.ttf
         - asset: assets/fonts/Amiri-Bold.ttf
           weight: 700
+    # OPTIONAL UPGRADE — the display face.
+    #
+    # The UI currently uses Android's built-in 'serif' (see AppFonts.serif in
+    # lib/theme/app_theme.dart), so it builds with no extra files. To use
+    # Cormorant Garamond instead:
+    #   1. put the two .ttf files below into assets/fonts/
+    #   2. uncomment this block
+    #   3. change AppFonts.serif to 'Cormorant'
+    # Do all three or none — a declared font file that isn't there fails the
+    # build, and a family name with no declaration silently falls back.
+    #
+    # - family: Cormorant
+    #   fonts:
+    #     - asset: assets/fonts/CormorantGaramond-Regular.ttf
+    #       weight: 400
+    #     - asset: assets/fonts/CormorantGaramond-SemiBold.ttf
+    #       weight: 600
