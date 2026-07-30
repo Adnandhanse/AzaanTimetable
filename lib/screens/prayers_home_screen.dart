@@ -44,9 +44,9 @@ class PrayersHomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
+          Text(
             S.fivePillars,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1F5E4A)),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1F5E4A)),
           ),
           const SizedBox(height: 12),
           ..._pillars.map((pillar) => Card(

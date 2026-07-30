@@ -144,6 +144,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate app launcher icon
+        run: dart run flutter_launcher_icons
+
       - name: Auto-fix any plugin missing a namespace declaration
         run: |
           python3 << 'PYEOF'
