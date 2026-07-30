@@ -31,7 +31,6 @@ dependencies:
   flutter_compass: ^0.7.0
   flutter_overlay_window: ^0.4.5
   hijri: ^3.0.0
-  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +49,15 @@ flutter:
     - assets/images/quran_artwork.jpg
     - assets/images/kaaba_qibla.jpg
     - assets/icon/app_icon.png
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
     - assets/quran/quran_hi_lookup.json

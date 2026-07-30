@@ -87,12 +87,12 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
           : Column(
               children: [
                 Container(
-                  height: 220,
+                  height: 200,
                   width: double.infinity,
+                  color: const Color(0xFFF3ECDD),
                   child: Image.asset(
                     'assets/images/quran_artwork.jpg',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 Expanded(
