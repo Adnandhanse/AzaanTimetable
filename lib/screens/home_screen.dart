@@ -286,62 +286,76 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPremiumHome(Masjid masjid, HijriCalendar hijri) {
     final next = _nextPrayer(masjid);
-    final textColor = _isNightSky ? Colors.white : Colors.white;
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // --- Dynamic sky header ---
+          // --- Mosque header with real photo + time-tinted overlay ---
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
-            decoration: BoxDecoration(gradient: _skyGradient(masjid)),
+            height: 280,
             child: Stack(
+              fit: StackFit.expand,
               children: [
-                if (_isNightSky) ..._buildStars(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.settings, color: Colors.white),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                      ),
-                      alignment: Alignment.topRight,
+                Image.asset('assets/images/mosque_header.jpg', fit: BoxFit.cover),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        _skyGradient(masjid).colors.first.withOpacity(0.55),
+                        _skyGradient(masjid).colors.last.withOpacity(0.75),
+                      ],
                     ),
-                    Icon(Icons.mosque, size: 72, color: Colors.white.withOpacity(0.95)),
-                    const SizedBox(height: 8),
-                    Text(masjid.name,
-                        style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')}',
-                      style: TextStyle(color: textColor, fontSize: 40, fontWeight: FontWeight.w300),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${_now.day}/${_now.month}/${_now.year}',
-                      style: TextStyle(color: textColor.withOpacity(0.85), fontSize: 14),
-                    ),
-                    GestureDetector(
-                      onTap: _showHijriInfo,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
-                          style: TextStyle(
-                            color: textColor.withOpacity(0.85),
-                            fontSize: 13,
-                            decoration: TextDecoration.underline,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 44, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: const Icon(Icons.settings, color: Colors.white),
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
                           ),
                         ),
                       ),
-                    ),
-                    if (next != null) ...[
-                      const SizedBox(height: 20),
-                      _buildCountdownCard(next.$1, next.$2),
+                      Text(masjid.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}:${_now.second.toString().padLeft(2, '0')}',
+                        style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w300),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_now.day}/${_now.month}/${_now.year}',
+                        style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 14),
+                      ),
+                      GestureDetector(
+                        onTap: _showHijriInfo,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (next != null) ...[
+                        const SizedBox(height: 16),
+                        _buildCountdownCard(next.$1, next.$2),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ],
             ),

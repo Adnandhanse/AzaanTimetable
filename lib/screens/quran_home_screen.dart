@@ -83,12 +83,23 @@ class _QuranHomeScreenState extends State<QuranHomeScreen> with SingleTickerProv
       ),
       body: _surahs == null
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
+          : Column(
               children: [
-                _buildSurahList(_surahs!),
-                _buildJuzList(),
-                _buildSurahList(_surahs!.where((s) => _favourites.contains(s.number)).toList(), isFavouriteTab: true),
+                Container(
+                  height: 140,
+                  width: double.infinity,
+                  child: Image.asset('assets/images/quran_artwork.jpg', fit: BoxFit.cover),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildSurahList(_surahs!),
+                      _buildJuzList(),
+                      _buildSurahList(_surahs!.where((s) => _favourites.contains(s.number)).toList(), isFavouriteTab: true),
+                    ],
+                  ),
+                ),
               ],
             ),
     );

@@ -182,7 +182,20 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.mosque, size: 42, color: isAligned ? const Color(0xFFD4AF37) : Colors.white),
+                                    Container(
+                                      width: 52,
+                                      height: 52,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isAligned ? const Color(0xFFD4AF37) : Colors.white54,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: ClipOval(
+                                        child: Image.asset('assets/images/kaaba_qibla.jpg', fit: BoxFit.cover),
+                                      ),
+                                    ),
                                     Container(
                                       width: 4,
                                       height: 100,
