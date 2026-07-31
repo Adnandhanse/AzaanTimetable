@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class PillarDetailScreen extends StatelessWidget {
   final String title;
@@ -11,7 +12,7 @@ class PillarDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: Padding(

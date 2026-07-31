@@ -45,6 +45,16 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
+    # Artwork, drawn flat in the app palette. Ships at 1x/2x/3x; Flutter picks
+    # the right density automatically from assets/images/2.0x and 3.0x.
+    # Photographs, cropped and converted to WebP at 1x/2x/3x. Flutter picks the
+    # right density automatically from assets/images/2.0x and 3.0x.
+    # About 330 KB in total for all three.
+    - assets/images/nabawi_header.webp
+    - assets/images/kaaba_dial.webp
+    - assets/images/quran_header.webp
+    # The three photos below are no longer referenced anywhere in lib/.
+    # Safe to delete along with these lines - saves about 368 KB.
     - assets/images/mosque_header.jpg
     - assets/images/quran_artwork.jpg
     - assets/images/kaaba_qibla.jpg
@@ -70,6 +80,8 @@ flutter:
     - assets/hadith/eng_ibnmajah.json
     - assets/hadith/urd_ibnmajah.json
     - assets/hadith/ara_ibnmajah.json
+    # Urdu chapter-title overrides. Ships empty; see the _readme inside.
+    - assets/hadith/urd_sections.json
   fonts:
     - family: Inter
       fonts:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/quran.dart';
 import '../data/juz_boundaries.dart';
 
@@ -31,7 +32,7 @@ class JuzDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Juz $juzNumber'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView.builder(
@@ -48,7 +49,7 @@ class JuzDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
                   child: Text(
                     '${surah.transliteration} (${surah.arabicName})',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1F5E4A)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.emerald),
                   ),
                 ),
               Card(
@@ -67,7 +68,7 @@ class JuzDetailScreen extends StatelessWidget {
                         verse.arabicText,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
-                        style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: 'serif'),
+                        style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: AppFonts.arabic),
                       ),
                       const SizedBox(height: 8),
                       const Divider(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
 import '../services/quran_local_data_service.dart';
@@ -103,19 +104,19 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${surah.number}. ${surah.transliteration}'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
-            color: const Color(0xFFFCFAF5),
+            color: AppColors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Text(surah.arabicName, style: const TextStyle(fontSize: 32, fontFamily: 'serif')),
+                  Text(surah.arabicName, style: const TextStyle(fontSize: 32, fontFamily: AppFonts.arabic)),
                   const SizedBox(height: 4),
                   Text(
                     '${surah.englishMeaning} • ${surah.type.isNotEmpty ? '${surah.type[0].toUpperCase()}${surah.type.substring(1)}' : ''} • ${surah.totalVerses} verses',
@@ -140,17 +141,17 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       children: [
                         Text(
                           '${surah.number}.${verse.number}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A)),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald),
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: Icon(isPlaying ? Icons.stop_circle : Icons.play_circle_outline, color: const Color(0xFF1F5E4A)),
+                          icon: Icon(isPlaying ? Icons.stop_circle : Icons.play_circle_outline, color: AppColors.emerald),
                           onPressed: () => _togglePlay(verse.number),
                         ),
                         IconButton(
                           icon: Icon(
                             hasNote ? Icons.note : Icons.note_add_outlined,
-                            color: hasNote ? const Color(0xFFC8A86B) : Colors.grey,
+                            color: hasNote ? AppColors.gold : Colors.grey,
                           ),
                           onPressed: () => _openNoteEditor(verse.number),
                         ),
@@ -160,7 +161,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       verse.arabicText,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.rtl,
-                      style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: 'serif'),
+                      style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: AppFonts.arabic),
                     ),
                     const SizedBox(height: 8),
                     const Divider(),

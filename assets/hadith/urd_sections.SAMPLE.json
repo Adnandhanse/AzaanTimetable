@@ -1,0 +1,21 @@
+{
+  "_readme": "FORMAT EXAMPLE ONLY - this file is not loaded by the app. Copy entries into urd_sections.json once verified.",
+  "_warning": "The entries below are the conventional Arabic/Urdu book titles as they appear in common Urdu editions. They are NOT verified by a translator. Check them before use.",
+  "bukhari": {
+    "1": "کتاب الوحی",
+    "2": "کتاب الایمان",
+    "3": "کتاب العلم",
+    "4": "کتاب الوضو",
+    "5": "کتاب الغسل",
+    "6": "کتاب الحیض",
+    "8": "کتاب الصلاۃ",
+    "24": "کتاب الزکاۃ",
+    "25": "کتاب الحج",
+    "30": "کتاب الصوم"
+  },
+  "muslim": {
+    "1": "کتاب الایمان",
+    "2": "کتاب الطہارت",
+    "4": "کتاب الصلاۃ"
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/dua.dart';
 import '../services/dua_repository.dart';
 import 'dua_detail_screen.dart';
@@ -35,7 +36,7 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Duas'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: _categories == null
@@ -61,7 +62,7 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         child: ListTile(
-                          leading: const Icon(Icons.favorite_border, color: Color(0xFF1F5E4A)),
+                          leading: Icon(Icons.favorite_border, color: AppColors.emerald),
                           title: Text(category.title),
                           subtitle: Text('${category.duas.length} dua(s)'),
                           trailing: const Icon(Icons.chevron_right),

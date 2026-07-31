@@ -1,0 +1,10 @@
+{
+  "_readme": "Urdu chapter (section) titles. The bundled hadith-api dataset only has English section names, in every language file, so this is the only place Urdu titles can come from. Fill in what you have verified; anything missing falls back to the English title automatically. Keys are the book fileKey, then the section number as a string. See urd_sections.SAMPLE.json for the format.",
+  "_warning": "This is religious content. Have the titles checked by someone who reads Urdu before shipping them. A wrong chapter title is worse than an English one.",
+  "bukhari": {},
+  "muslim": {},
+  "abudawud": {},
+  "tirmidhi": {},
+  "nasai": {},
+  "ibnmajah": {}
+}

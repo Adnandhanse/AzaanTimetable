@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/dua.dart';
 
 class DuaDetailScreen extends StatelessWidget {
@@ -10,7 +11,7 @@ class DuaDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(category.title),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView.builder(
@@ -29,7 +30,7 @@ class DuaDetailScreen extends StatelessWidget {
                     dua.arabicText,
                     textAlign: TextAlign.right,
                     textDirection: TextDirection.rtl,
-                    style: const TextStyle(fontSize: 20, height: 1.8, fontFamily: 'serif'),
+                    style: const TextStyle(fontSize: 20, height: 1.8, fontFamily: AppFonts.arabic),
                   ),
                   const SizedBox(height: 10),
                   const Divider(),

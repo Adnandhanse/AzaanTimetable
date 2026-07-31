@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
 
@@ -49,7 +50,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chapter.title, overflow: TextOverflow.ellipsis),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView.builder(
@@ -70,12 +71,12 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1F5E4A).withOpacity(0.1),
+                          color: AppColors.emerald.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           'Hadith No. ${hadith.hadithNumber} (Reference)',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A)),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.emerald),
                         ),
                       ),
                       if (hadith.arabicNumber != null) ...[
@@ -83,7 +84,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFC8A86B).withOpacity(0.15),
+                            color: AppColors.gold.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -96,7 +97,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       IconButton(
                         icon: Icon(
                           isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                          color: isBookmarked ? const Color(0xFFC8A86B) : Colors.grey,
+                          color: isBookmarked ? AppColors.gold : Colors.grey,
                         ),
                         onPressed: () => _toggleBookmark(hadith.hadithNumber),
                       ),
@@ -107,7 +108,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       hadith.arabicText,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.rtl,
-                      style: const TextStyle(fontSize: 18, height: 1.8, fontFamily: 'serif'),
+                      style: const TextStyle(fontSize: 18, height: 1.8, fontFamily: AppFonts.arabic),
                     ),
                     const SizedBox(height: 10),
                     const Divider(),
@@ -121,7 +122,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       children: hadith.grades
                           .map((g) => Chip(
                                 label: Text(g, style: const TextStyle(fontSize: 11)),
-                                backgroundColor: const Color(0xFFFCFAF5),
+                                backgroundColor: AppColors.white,
                               ))
                           .toList(),
                     ),

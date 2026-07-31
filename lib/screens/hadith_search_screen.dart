@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 
 class HadithSearchScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Search ${widget.collection.name}'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -67,14 +68,14 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Hadith ${hadith.hadithNumber}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A), fontSize: 12)),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald, fontSize: 12)),
                         const SizedBox(height: 6),
                         if (hadith.arabicText.isNotEmpty) ...[
                           Text(
                             hadith.arabicText,
                             textAlign: TextAlign.right,
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(fontSize: 16, fontFamily: 'serif'),
+                            style: const TextStyle(fontSize: 16, fontFamily: AppFonts.arabic),
                           ),
                           const SizedBox(height: 6),
                         ],

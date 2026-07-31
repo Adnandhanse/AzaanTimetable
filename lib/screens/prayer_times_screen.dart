@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/masjid.dart';
 
 class PrayerTimesScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class PrayerTimesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('${masjid.name} - Prayer Times'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -42,7 +43,7 @@ class PrayerTimesScreen extends StatelessWidget {
   Widget _tile(String name, String time, IconData icon) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF1F5E4A)),
+        leading: Icon(icon, color: AppColors.emerald),
         title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: Text(time, style: const TextStyle(fontSize: 16)),
       ),

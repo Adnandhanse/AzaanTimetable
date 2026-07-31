@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import '../services/auth_service.dart';
@@ -21,13 +22,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: ListView(
         children: [
           ListTile(
-            leading: const Icon(Icons.language, color: Color(0xFF1F5E4A)),
+            leading: Icon(Icons.language, color: AppColors.emerald),
             title: Text(S.appLanguage),
             subtitle: Text(AppLanguageController.instance.isUrdu ? 'اردو (Urdu)' : 'English'),
             trailing: DropdownButton<AppLanguage>(

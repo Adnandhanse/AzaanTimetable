@@ -82,35 +82,25 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Calligraphic title inside the arch, in place of the artwork
-                // photo. Drawn in code, so nothing to load and nothing to
-                // scale badly.
-                IlluminatedHeader(
-                  height: 150,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'القرآن الكريم',
-                        style: AppText.arabic.copyWith(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          height: 1.2,
-                          color: AppColors.emerald,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '114 SURAHS',
-                        style: AppText.eyebrow.copyWith(
-                          letterSpacing: 1.8,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 22),
-                    ],
+                // The artwork carries the القرآن الكريم title itself, so
+                // there is no text title here — it would double up.
+                // BoxFit.contain, not cover: the image is square and the
+                // header is a band, so cropping would cut the lanterns.
+                // Its cream ground matches the palette, so the letterboxing
+                // is invisible.
+                Container(
+                  width: double.infinity,
+                  height: 186,
+                  color: AppColors.white,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/images/quran_header.webp',
+                    fit: BoxFit.contain,
+                    height: 186,
+                    semanticsLabel: 'Illustration of the Qur\u2019an on a stand',
                   ),
                 ),
+                Container(height: 1, color: AppColors.goldRule),
                 Container(
                   color: AppColors.white,
                   child: TabBar(

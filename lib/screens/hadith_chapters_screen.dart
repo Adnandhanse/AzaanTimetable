@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 import '../services/hadith_repository.dart';
+import '../services/hadith_section_titles.dart';
+import '../widgets/ornaments.dart';
 import 'hadith_list_screen.dart';
 import 'hadith_search_screen.dart';
 
@@ -27,7 +30,9 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
 
   Future<void> _load() async {
     try {
-      final collection = await HadithRepository.loadCollection(widget.book, widget.language);
+      await HadithSectionTitles.load();
+      final collection =
+          await HadithRepository.loadCollection(widget.book, widget.language);
       if (!mounted) return;
       setState(() => _collection = collection);
     } catch (e) {
@@ -40,14 +45,30 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Titles are resolved through the Urdu override before filtering, so the
+    // filter matches what the reader can actually see.
+    String displayTitle(HadithChapter c) => HadithSectionTitles.resolve(
+          book: widget.book,
+          sectionNumber: c.number,
+          language: widget.language,
+          englishTitle: c.title,
+        );
+
     final chapters = _collection == null
         ? <HadithChapter>[]
-        : _collection!.chapters.where((c) => c.title.toLowerCase().contains(_query.toLowerCase())).toList();
+        : _collection!.chapters
+            .where((c) => displayTitle(c)
+                .toLowerCase()
+                .contains(_query.toLowerCase()))
+            .toList();
+
+    final bool urduTitlesMissing = widget.language == HadithLanguage.urdu &&
+        HadithSectionTitles.overrideCount(widget.book) == 0;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.book.displayName),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
         actions: [
           if (_collection != null)
@@ -103,24 +124,46 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                     onChanged: (v) => setState(() => _query = v),
                   ),
                 ),
+                if (urduTitlesMissing)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    child: Text(
+                      'Chapter names are shown in English \u2014 the offline hadith dataset does not include Urdu chapter names. The hadith text itself is in Urdu.',
+                      style: AppText.caption
+                          .copyWith(color: AppColors.textMuted),
+                    ),
+                  ),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: chapters.length,
                     itemBuilder: (context, index) {
                       final chapter = chapters[index];
                       final count = _collection!.hadithsInChapter(chapter.number).length;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
+                      return Container(
+                        decoration: BoxDecoration(
+                          border: index == 0
+                              ? null
+                              : const Border(
+                                  top: BorderSide(
+                                      color: AppColors.goldRuleFaint)),
+                        ),
                         child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: const Color(0xFF1F5E4A),
-                            foregroundColor: Colors.white,
-                            child: Text('${chapter.number}', style: const TextStyle(fontSize: 12)),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 4),
+                          leading: Medallion(label: '${chapter.number}'),
+                          title: Text(
+                            displayTitle(chapter),
+                            style: AppText.rowTitle
+                                .copyWith(fontSize: 17, color: AppColors.text),
                           ),
-                          title: Text(chapter.title),
-                          subtitle: Text('$count hadith(s)'),
-                          trailing: const Icon(Icons.chevron_right),
+                          subtitle: Text(
+                            '$count hadith',
+                            style: AppText.caption
+                                .copyWith(color: AppColors.textMuted),
+                          ),
+                          trailing: const Icon(Icons.chevron_right,
+                              size: 18, color: AppColors.chevron),
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => HadithListScreen(

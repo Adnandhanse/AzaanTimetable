@@ -121,10 +121,14 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 18),
-                          _CompassDial(
-                            headingTurns: -heading / 360,
-                            qiblaTurns: relativeAngle / 360,
-                            isAligned: isAligned,
+                          // Centred in a fixed square. The dial was
+                          // drifting because the Column was stretching it.
+                          Center(
+                            child: _CompassDial(
+                              headingTurns: -heading / 360,
+                              qiblaTurns: relativeAngle / 360,
+                              isAligned: isAligned,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Text(
@@ -255,9 +259,12 @@ class _QiblaScreenState extends State<QiblaScreen> {
   }
 }
 
-/// The dial rotates opposite to the phone heading so North stays visually
-/// north; the Kaaba glyph rotates to the qibla. Both are drawn in code, so the
-/// old kaaba_qibla.jpg is no longer needed.
+/// The compass.
+///
+/// The Kaaba photograph stays **upright and static** in the centre. Only the
+/// rose ring and the qibla pointer rotate. Spinning a photograph of the Kaaba
+/// upside down as the phone turns would look wrong, so the rose is drawn in
+/// code around it instead of being baked into the image.
 class _CompassDial extends StatelessWidget {
   const _CompassDial({
     required this.headingTurns,
@@ -265,42 +272,73 @@ class _CompassDial extends StatelessWidget {
     required this.isAligned,
   });
 
+  /// Negative heading — the rose turns opposite the phone so North stays north.
   final double headingTurns;
+
+  /// Where the qibla is, relative to the phone.
   final double qiblaTurns;
+
   final bool isAligned;
+
+  static const double _size = 300;
+  static const double _medallion = 168;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 260,
-      height: 260,
+      width: _size,
+      height: _size,
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Rose: ticks and cardinals, rotating against the heading.
           AnimatedRotation(
             turns: headingTurns,
             duration: const Duration(milliseconds: 150),
             curve: Curves.easeOut,
             child: CustomPaint(
-              size: const Size(260, 260),
-              painter: _DialPainter(isAligned: isAligned),
+              size: const Size(_size, _size),
+              painter: _RosePainter(isAligned: isAligned),
             ),
           ),
+
+          // The Kaaba, upright, centred, never rotated.
+          Container(
+            width: _medallion,
+            height: _medallion,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isAligned ? AppColors.gold : AppColors.goldRule,
+                width: isAligned ? 3 : 1.6,
+              ),
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/kaaba_dial.webp',
+                fit: BoxFit.cover,
+                semanticsLabel: 'Photograph of the Kaaba',
+              ),
+            ),
+          ),
+
+          // Qibla pointer, rotating to the bearing. This is the only thing on
+          // screen that tells you which way to face, so nothing else should
+          // compete with it.
           AnimatedRotation(
             turns: qiblaTurns,
             duration: const Duration(milliseconds: 150),
             curve: Curves.easeOut,
-            child: CustomPaint(
-              size: const Size(260, 260),
-              painter: const _NeedlePainter(),
-              child: const SizedBox(
-                width: 260,
-                height: 260,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 34),
-                    child: _KaabaGlyph(),
+            child: SizedBox(
+              width: _size,
+              height: _size,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: CustomPaint(
+                    size: const Size(22, 28),
+                    painter: _PointerPainter(isAligned: isAligned),
                   ),
                 ),
               ),
@@ -312,8 +350,34 @@ class _CompassDial extends StatelessWidget {
   }
 }
 
-class _DialPainter extends CustomPainter {
-  const _DialPainter({required this.isAligned});
+class _PointerPainter extends CustomPainter {
+  const _PointerPainter({required this.isAligned});
+
+  final bool isAligned;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path p = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width / 2, size.height * 0.74)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(
+      p,
+      Paint()..color = isAligned ? AppColors.gold : AppColors.emerald,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PointerPainter old) =>
+      old.isAligned != isAligned;
+}
+
+/// Ticks every 6 degrees, longer every 30, with serif cardinals. Transparent
+/// centre — the Kaaba medallion sits inside it.
+class _RosePainter extends CustomPainter {
+  const _RosePainter({required this.isAligned});
 
   final bool isAligned;
 
@@ -322,37 +386,27 @@ class _DialPainter extends CustomPainter {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final double r = size.width / 2;
 
-    canvas.drawCircle(c, r - 5, Paint()..color = AppColors.white);
     canvas.drawCircle(
       c,
-      r - 5,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = AppColors.goldRule,
-    );
-    canvas.drawCircle(
-      c,
-      r - 21,
+      r - 30,
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = isAligned ? 2.4 : 1.4
-        ..color = AppColors.gold,
+        ..color = isAligned ? AppColors.gold : AppColors.goldRule,
     );
-    canvas.drawCircle(c, r - 29, Paint()..color = AppColors.ivory);
 
     final Paint minor = Paint()
-      ..strokeWidth = 0.8
+      ..strokeWidth = 0.9
       ..color = const Color(0xFFDFD3B4);
     final Paint major = Paint()
-      ..strokeWidth = 1.3
+      ..strokeWidth = 1.4
       ..color = AppColors.gold;
 
     for (int d = 0; d < 360; d += 6) {
       final bool isMajor = d % 30 == 0;
       final double a = (d - 90) * pi / 180;
-      final double inner = isMajor ? r - 39 : r - 34;
-      final double outer = r - 29;
+      final double inner = isMajor ? r - 24 : r - 20;
+      final double outer = r - 14;
       canvas.drawLine(
         c + Offset(cos(a) * inner, sin(a) * inner),
         c + Offset(cos(a) * outer, sin(a) * outer),
@@ -373,7 +427,7 @@ class _DialPainter extends CustomPainter {
         text: letter,
         style: TextStyle(
           fontFamily: AppFonts.serif,
-          fontSize: 17,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
           color: colour,
         ),
@@ -382,7 +436,7 @@ class _DialPainter extends CustomPainter {
     )..layout();
 
     final Offset centre = Offset(size.width / 2, size.height / 2);
-    final double radius = size.width / 2 - 14;
+    final double radius = size.width / 2 - 6;
     final Offset at = centre +
         Offset(dir.dx * radius, dir.dy * radius) -
         Offset(tp.width / 2, tp.height / 2);
@@ -390,69 +444,7 @@ class _DialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DialPainter old) =>
-      old.isAligned != isAligned;
-}
-
-class _NeedlePainter extends CustomPainter {
-  const _NeedlePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Offset c = Offset(size.width / 2, size.height / 2);
-    canvas.drawLine(
-      Offset(c.dx, c.dy - (size.height / 2 - 56)),
-      c,
-      Paint()
-        ..color = AppColors.emerald
-        ..strokeWidth = 1.6,
-    );
-    canvas.drawCircle(c, 3, Paint()..color = AppColors.gold);
-  }
-
-  @override
-  bool shouldRepaint(covariant _NeedlePainter old) => false;
-}
-
-/// Simple geometric Kaaba — a cube with the kiswah band. Deliberately not a
-/// photograph: it stays sharp at every density and needs no asset.
-class _KaabaGlyph extends StatelessWidget {
-  const _KaabaGlyph();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 34,
-      height: 34,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.kaabaBlack,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            top: 11,
-            child: SizedBox(
-              height: 6,
-              child: ColoredBox(color: AppColors.gold),
-            ),
-          ),
-          Positioned(
-            left: 13,
-            bottom: 0,
-            child:
-                Container(width: 8, height: 11, color: const Color(0xFF8C7326)),
-          ),
-        ],
-      ),
-    );
-  }
+  bool shouldRepaint(covariant _RosePainter old) => old.isAligned != isAligned;
 }
 
 class _Stat extends StatelessWidget {

@@ -10,6 +10,8 @@ import '../services/foreground_alarm_manager.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
+import '../widgets/artwork_header.dart';
+import '../widgets/sky_artwork.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
@@ -38,7 +40,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  /// Drives the one-off entrance animation: the artwork settles and the
+  /// content below it fades and slides up. Runs once on open, not on every
+  /// rebuild - the 1-second clock timer would otherwise restart it 60 times a
+  /// minute.
+  late final AnimationController _intro;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
   String? _selectedMasjidId;
   bool _loading = true;
   String? _lastScheduledSignature;
@@ -50,6 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 620),
+    );
+    _fade = CurvedAnimation(parent: _intro, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.045),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic));
+    _intro.forward();
     _loadSelectedMasjid();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
@@ -59,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _clockTimer.cancel();
+    _intro.dispose();
     super.dispose();
   }
 
@@ -342,58 +364,27 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          IlluminatedHeader(
-            height: 186 + MediaQuery.of(context).padding.top,
-            withDome: true,
-            child: Padding(
-              padding:
-                  EdgeInsets.only(top: MediaQuery.of(context).padding.top + 6),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.settings_outlined,
-                          color: AppColors.text, size: 20),
-                      tooltip: S.settings,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (_) => const SettingsScreen()),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      masjid.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.displayName
-                          .copyWith(color: AppColors.emerald),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  GestureDetector(
-                    onTap: _showHijriInfo,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        '${masjid.city.toUpperCase()}  ·  ${hijri.hDay} ${hijri.longMonthName.toUpperCase()} ${hijri.hYear}',
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.eyebrow.copyWith(
-                          letterSpacing: 1.2,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+          AnimatedBuilder(
+            animation: _intro,
+            builder: (context, _) => ArtworkHeader(
+              masjidName: masjid.name,
+              metaLine:
+                  '${masjid.city.toUpperCase()}  \u00b7  ${hijri.hDay} ${hijri.longMonthName.toUpperCase()} ${hijri.hYear}',
+              phase: _skyPhase(masjid),
+              settle: _fade.value,
+              onSettingsTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
+              onMetaTap: _showHijriInfo,
             ),
           ),
+          FadeTransition(
+            opacity: _fade,
+            child: SlideTransition(
+              position: _slide,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
             child: Column(
@@ -415,9 +406,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: AppText.eyebrow.copyWith(color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    _clockLabel(next.$2),
-                    style: AppText.hero.copyWith(color: AppColors.emerald),
+                  // Cross-fades when the minute rolls over, so the number
+                  // changes softly instead of snapping.
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                    child: Text(
+                      _clockLabel(next.$2),
+                      key: ValueKey<String>(_clockLabel(next.$2)),
+                      style: AppText.hero.copyWith(color: AppColors.emerald),
+                    ),
                   ),
                   Text.rich(
                     TextSpan(
@@ -511,9 +512,45 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  /// Which sky the header shows, derived from this masjid's prayer times rather
+  /// than raw clock hours — so it tracks the actual day here, and moves with
+  /// the season and the city without any extra data.
+  ///
+  ///   before Fajr .......... night
+  ///   Fajr  -> Dhuhr ....... morning   (sun rises, birds)
+  ///   Dhuhr -> Asr ......... midday    (sun overhead, still)
+  ///   Asr   -> Isha ........ evening   (sun sets, birds)
+  ///   after Isha ........... night     (stars, crescent)
+  ///
+  /// Falls back to clock hours if the masjid hasn't set its times yet.
+  SkyPhase _skyPhase(Masjid masjid) {
+    final DateTime? fajr = _parseTimeToday(masjid.prayerTimes.fajr);
+    final DateTime? dhuhr = _parseTimeToday(masjid.prayerTimes.dhuhr);
+    final DateTime? asr = _parseTimeToday(masjid.prayerTimes.asr);
+    final DateTime? isha = _parseTimeToday(masjid.prayerTimes.isha);
+
+    if (fajr == null || dhuhr == null || asr == null || isha == null) {
+      final int h = _now.hour;
+      if (h >= 5 && h < 11) return SkyPhase.morning;
+      if (h >= 11 && h < 16) return SkyPhase.midday;
+      if (h >= 16 && h < 19) return SkyPhase.evening;
+      return SkyPhase.night;
+    }
+
+    if (_now.isBefore(fajr)) return SkyPhase.night;
+    if (_now.isBefore(dhuhr)) return SkyPhase.morning;
+    if (_now.isBefore(asr)) return SkyPhase.midday;
+    if (_now.isBefore(isha)) return SkyPhase.evening;
+    return SkyPhase.night;
   }
 
   String _clockLabel(DateTime target) {

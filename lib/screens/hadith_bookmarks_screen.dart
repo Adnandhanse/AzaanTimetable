@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 import '../services/hadith_repository.dart';
 import '../services/quran_local_data_service.dart';
@@ -56,7 +57,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookmarked Hadiths'),
-        backgroundColor: const Color(0xFF1F5E4A),
+        backgroundColor: AppColors.emerald,
         foregroundColor: Colors.white,
       ),
       body: _loading
@@ -79,7 +80,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('$bookName • Hadith ${hadith.hadithNumber}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F5E4A), fontSize: 12)),
+                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald, fontSize: 12)),
                             const SizedBox(height: 6),
                             Text(hadith.text, style: const TextStyle(fontSize: 14)),
                           ],

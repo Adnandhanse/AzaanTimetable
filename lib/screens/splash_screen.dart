@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
 import 'home_screen.dart';
@@ -60,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF164536), Color(0xFF1F5E4A), Color(0xFF164536)],
+            colors: [AppColors.emerald, AppColors.emerald, AppColors.emerald],
           ),
         ),
         child: Stack(
@@ -81,17 +82,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         decoration: BoxDecoration(
                           color: const Color(0xFF1A1A1A),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFFC8A86B), width: 2),
+                          border: Border.all(color: AppColors.gold, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFC8A86B).withOpacity(0.4),
+                              color: AppColors.gold.withOpacity(0.4),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                         child: Center(
-                          child: Container(width: 40, height: 6, color: const Color(0xFFC8A86B)),
+                          child: Container(width: 40, height: 6, color: AppColors.gold),
                         ),
                       ),
                       ...List.generate(8, (i) {
