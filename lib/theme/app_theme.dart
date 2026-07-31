@@ -10,6 +10,11 @@ class AppColors {
 
   static const Color ivory = Color(0xFFFBF8F1); // page background
   static const Color white = Color(0xFFFFFFFF); // cards, headers, nav bar
+
+  /// Sits between white and ivory. Used for Material 3 surface containers —
+  /// menus, bottom sheets, anything layered over the page — so they read as
+  /// slightly recessed rather than picking up the seed-derived blue-green.
+  static const Color cream = Color(0xFFF4EFE3);
   static const Color emerald = Color(0xFF14503E); // primary
   static const Color emeraldTint = Color(0xFF2C6653); // ring track on emerald
   static const Color gold = Color(0xFFC9A227); // accent, ornament
