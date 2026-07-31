@@ -57,10 +57,16 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     }
     if (surah == null) return;
 
+    // Copied into a final before the closure. Dart does not carry a local's
+    // promoted non-null type into a closure body, because the closure may run
+    // after the variable has been reassigned — so `surah` is still Surah? in
+    // there, but `target` is plainly Surah.
+    final Surah target = surah;
+
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SurahDetailScreen(
-          surah: surah,
+          surah: target,
           initialOffset: (last['scrollOffset'] as num?)?.toDouble(),
           initialVerse: last['verseNumber'] as int?,
         ),
