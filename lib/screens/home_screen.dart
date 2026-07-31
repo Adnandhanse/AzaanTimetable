@@ -368,8 +368,11 @@ class _HomeScreenState extends State<HomeScreen>
             animation: _intro,
             builder: (context, _) => ArtworkHeader(
               masjidName: masjid.name,
-              metaLine:
-                  '${masjid.city.toUpperCase()}  \u00b7  ${hijri.hDay} ${hijri.longMonthName.toUpperCase()} ${hijri.hYear}',
+              // Address on the first line, date on the second. Two lines beat
+              // one long dotted string once the address is in there — most
+              // masjid addresses are too long to sit beside a date.
+              metaLine: '${masjid.address.trim().isEmpty ? masjid.city : '${masjid.address}, ${masjid.city}'}\n'
+                  '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
               phase: _skyPhase(masjid),
               settle: _fade.value,
               onSettingsTap: () => Navigator.of(context).push(

@@ -7,7 +7,18 @@ import '../services/quran_local_data_service.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final Surah surah;
-  const SurahDetailScreen({super.key, required this.surah});
+
+  /// Where to land when resuming. Both optional — opening a surah normally
+  /// passes neither.
+  final double? initialOffset;
+  final int? initialVerse;
+
+  const SurahDetailScreen({
+    super.key,
+    required this.surah,
+    this.initialOffset,
+    this.initialVerse,
+  });
 
   @override
   State<SurahDetailScreen> createState() => _SurahDetailScreenState();
@@ -15,13 +26,67 @@ class SurahDetailScreen extends StatefulWidget {
 
 class _SurahDetailScreenState extends State<SurahDetailScreen> {
   final AudioPlayer _player = AudioPlayer();
+  final ScrollController _scroll = ScrollController();
   int? _playingVerse;
   final Map<int, String> _notes = {};
+
+  /// The verse the reader explicitly marked in this surah, if any.
+  int? _markedVerse;
+
+  /// Throttles the auto-save. Writing to shared_preferences on every scroll
+  /// frame would hammer the disk for no benefit.
+  DateTime _lastSave = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
     super.initState();
+    _markedVerse = widget.initialVerse;
     _loadNotes();
+    _scroll.addListener(_onScroll);
+
+    final double? jumpTo = widget.initialOffset;
+    if (jumpTo != null && jumpTo > 0) {
+      // After first layout, or the scroll view has no extent to jump into yet.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scroll.hasClients) return;
+        _scroll.jumpTo(jumpTo.clamp(0.0, _scroll.position.maxScrollExtent));
+      });
+    }
+  }
+
+  void _onScroll() {
+    final DateTime now = DateTime.now();
+    if (now.difference(_lastSave) < const Duration(seconds: 2)) return;
+    _lastSave = now;
+    _saveposition();
+  }
+
+  Future<void> _saveposition({int? verseNumber}) async {
+    await QuranLocalDataService.saveLastRead(
+      surahNumber: widget.surah.number,
+      surahName: widget.surah.transliteration,
+      verseNumber: verseNumber,
+      scrollOffset: _scroll.hasClients ? _scroll.offset : 0,
+    );
+  }
+
+  Future<void> _markVerse(int verseNumber) async {
+    final bool unmark = _markedVerse == verseNumber;
+    setState(() => _markedVerse = unmark ? null : verseNumber);
+    if (unmark) {
+      await QuranLocalDataService.clearLastRead();
+    } else {
+      await _saveposition(verseNumber: verseNumber);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(unmark
+            ? 'Reading position cleared'
+            : 'Saved — Continue reading will return to ${widget.surah.transliteration} $verseNumber'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _loadNotes() async {
@@ -37,6 +102,10 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
 
   @override
   void dispose() {
+    // Last write wins, so leaving the screen records exactly where they were.
+    _saveposition();
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
     _player.dispose();
     super.dispose();
   }
@@ -134,8 +203,9 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         ],
       ),
       body: _mushafMode
-          ? MushafView(surah: surah)
+          ? MushafView(verses: surah.verses)
           : ListView(
+        controller: _scroll,
         padding: const EdgeInsets.all(16),
         children: [
           Card(
@@ -179,9 +249,26 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                         IconButton(
                           icon: Icon(
                             hasNote ? Icons.note : Icons.note_add_outlined,
-                            color: hasNote ? AppColors.gold : Colors.grey,
+                            color: hasNote ? AppColors.gold : AppColors.chevron,
                           ),
+                          tooltip: 'Note',
                           onPressed: () => _openNoteEditor(verse.number),
+                        ),
+                        // Explicitly mark where reading stopped. Scroll
+                        // position is saved automatically too, but an offset
+                        // stops meaning anything if the font size or the device
+                        // changes — a verse number always survives.
+                        IconButton(
+                          icon: Icon(
+                            _markedVerse == verse.number
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: _markedVerse == verse.number
+                                ? AppColors.emerald
+                                : AppColors.chevron,
+                          ),
+                          tooltip: 'Continue from here',
+                          onPressed: () => _markVerse(verse.number),
                         ),
                       ],
                     ),

@@ -28,12 +28,14 @@ import '../theme/app_theme.dart';
 class MushafView extends StatefulWidget {
   const MushafView({
     super.key,
-    required this.surah,
+    required this.verses,
     this.fontSize = 26,
     this.targetLines = 15,
   });
 
-  final Surah surah;
+  /// Any run of verses — a whole surah, or the span a juz covers. Taking a
+  /// list rather than a Surah is what lets the Juz screen reuse this.
+  final List<QuranVerse> verses;
 
   /// Arabic reading size. Larger than the translation view on purpose — this
   /// mode exists to be read from the Arabic alone.
@@ -70,7 +72,7 @@ class _MushafViewState extends State<MushafView> {
   /// mark with its number.
   String _flowText() {
     final StringBuffer b = StringBuffer();
-    for (final QuranVerse v in widget.surah.verses) {
+    for (final QuranVerse v in widget.verses) {
       b.write(v.arabicText.trim());
       b.write(' \u06DD');
       b.write(_arabicDigits(v.number));

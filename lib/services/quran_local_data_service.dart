@@ -47,6 +47,66 @@ class QuranLocalDataService {
     await prefs.setString(_notesKey, json.encode(notes));
   }
 
+  // --- Where the reader stopped -------------------------------------------
+
+  static const _lastReadKey = 'quran_last_read';
+
+  /// Remembers where reading stopped.
+  ///
+  /// Two levels of precision, both stored:
+  ///   * [scrollOffset] - saved automatically whenever the reader scrolls, so
+  ///     reopening a surah lands exactly where they were, mid-screen and all.
+  ///   * [verseNumber]  - set only when the reader explicitly marks a verse.
+  ///     Offsets are meaningless across a font-size or device change, so the
+  ///     verse is what survives; the offset is the nicety on top.
+  ///
+  /// Only one position is kept. A reading app that remembers thirty places
+  /// remembers none of them usefully.
+  static Future<void> saveLastRead({
+    required int surahNumber,
+    required String surahName,
+    int? verseNumber,
+    double? scrollOffset,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = await getLastRead();
+
+    // Auto-saves must not wipe a verse the reader deliberately marked in this
+    // same surah - keep the explicit mark unless a new one replaces it.
+    final int? keepVerse = verseNumber ??
+        (existing != null && existing['surahNumber'] == surahNumber
+            ? existing['verseNumber'] as int?
+            : null);
+
+    await prefs.setString(
+      _lastReadKey,
+      json.encode(<String, dynamic>{
+        'surahNumber': surahNumber,
+        'surahName': surahName,
+        'verseNumber': keepVerse,
+        'scrollOffset': scrollOffset ?? 0.0,
+        'savedAt': DateTime.now().millisecondsSinceEpoch,
+      }),
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getLastRead() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_lastReadKey);
+    if (raw == null) return null;
+    try {
+      return Map<String, dynamic>.from(json.decode(raw));
+    } catch (_) {
+      // Corrupt entry should never block reading.
+      return null;
+    }
+  }
+
+  static Future<void> clearLastRead() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_lastReadKey);
+  }
+
   // --- Hadith bookmarks ---
   static const _hadithBookmarksKey = 'hadith_bookmarks';
 

@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'sky_artwork.dart';
 
-/// Home header: a compact white title bar, then the picture edge to edge.
+/// Home header: the masjid name, city and Hijri date sit **on** the
+/// photograph, top-left, over a scrim.
 ///
-/// The title bar is deliberately tight. An earlier version stacked the settings
-/// icon on its own row above the name, which left a tall band of empty white
-/// above the photograph. Icon and title now share one row, which halves the
-/// height of the bar and lets the picture start much higher up the screen.
+/// This is the third arrangement we have tried, so the reasoning is worth
+/// recording. Originally the name sat over the middle of the picture, across
+/// the dome, which was unreadable. Moving it to a white bar above fixed that
+/// but cost about 90px of vertical space and made the photograph feel like a
+/// thumbnail. Anchoring it top-left over a gradient scrim gets both: the type
+/// stays legible because the scrim guarantees contrast regardless of what the
+/// sky is doing, and the picture gets the full height back.
+///
+/// The scrim is not decoration — the sky behind it swings from pale midday
+/// blue to near-black at night, and cream text would vanish against the bright
+/// states without it.
 class ArtworkHeader extends StatelessWidget {
   const ArtworkHeader({
     super.key,
@@ -17,7 +25,7 @@ class ArtworkHeader extends StatelessWidget {
     required this.onSettingsTap,
     required this.onMetaTap,
     required this.phase,
-    this.artworkHeight = 214,
+    this.artworkHeight = 300,
     this.settle = 1.0,
   });
 
@@ -39,74 +47,94 @@ class ArtworkHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Container(
-          color: AppColors.white,
-          child: SafeArea(
+    return SizedBox(
+      height: artworkHeight,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Opacity(
+            opacity: settle.clamp(0.0, 1.0),
+            child: SkyArtwork(phase: phase, height: artworkHeight),
+          ),
+
+          // Top-down scrim. Strongest at the very top where the type sits,
+          // gone by a third of the way down so it never dulls the building.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+                  Color(0xB3000000),
+                  Color(0x59000000),
+                  Color(0x00000000),
+                ],
+                stops: <double>[0.0, 0.18, 0.42],
+              ),
+            ),
+          ),
+
+          SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 2, 8, 8),
+              padding: const EdgeInsets.fromLTRB(20, 4, 8, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
                     child: GestureDetector(
                       onTap: onMetaTap,
                       child: Column(
-                        // Left-aligned. Centred type over a wide photograph
-                        // reads as a caption; ranged left it reads as a
-                        // heading, and long masjid names truncate predictably
-                        // from one edge instead of drifting.
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
+                          const SizedBox(height: 6),
                           Text(
                             masjidName,
                             textAlign: TextAlign.left,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppText.displayName
-                                .copyWith(fontSize: 21, color: AppColors.emerald),
+                            style: AppText.displayName.copyWith(
+                              fontSize: 24,
+                              color: Colors.white,
+                              shadows: const <Shadow>[
+                                Shadow(blurRadius: 8, color: Color(0x66000000)),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 1),
+                          const SizedBox(height: 3),
                           Text(
                             metaLine,
                             textAlign: TextAlign.left,
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.eyebrow.copyWith(
-                              fontSize: 10.5,
-                              letterSpacing: 1.1,
-                              color: AppColors.textMuted,
+                              fontSize: 11,
+                              letterSpacing: 1.2,
+                              height: 1.45,
+                              color: const Color(0xE6FFFFFF),
+                              shadows: const <Shadow>[
+                                Shadow(blurRadius: 6, color: Color(0x59000000)),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 44,
-                    child: IconButton(
-                      icon: const Icon(Icons.settings_outlined,
-                          color: AppColors.text, size: 20),
-                      tooltip: 'Settings',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: onSettingsTap,
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined,
+                        color: Colors.white, size: 21),
+                    tooltip: 'Settings',
+                    onPressed: onSettingsTap,
                   ),
                 ],
               ),
             ),
           ),
-        ),
-
-        // The picture, full bleed. SkyArtwork animates the time of day over it.
-        Opacity(
-          opacity: settle.clamp(0.0, 1.0),
-          child: SkyArtwork(phase: phase, height: artworkHeight),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

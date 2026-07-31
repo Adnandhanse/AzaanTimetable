@@ -22,6 +22,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
   List<Surah>? _surahs;
   String _query = '';
   Set<int> _favourites = {};
+  Map<String, dynamic>? _lastRead;
   late TabController _tabController;
 
   @override
@@ -30,6 +31,43 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     _tabController = TabController(length: 3, vsync: this);
     _load();
     _loadFavourites();
+    _loadLastRead();
+  }
+
+  Future<void> _loadLastRead() async {
+    final data = await QuranLocalDataService.getLastRead();
+    if (!mounted) return;
+    setState(() => _lastRead = data);
+  }
+
+  Future<void> _resume() async {
+    final Map<String, dynamic>? last = _lastRead;
+    final List<Surah>? all = _surahs;
+    if (last == null || all == null) return;
+
+    final int number = last['surahNumber'] as int;
+    // Plain loop rather than firstOrNull — that lives in package:collection,
+    // which is not a direct dependency, and this is not worth adding one for.
+    Surah? surah;
+    for (final Surah candidate in all) {
+      if (candidate.number == number) {
+        surah = candidate;
+        break;
+      }
+    }
+    if (surah == null) return;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SurahDetailScreen(
+          surah: surah,
+          initialOffset: (last['scrollOffset'] as num?)?.toDouble(),
+          initialVerse: last['verseNumber'] as int?,
+        ),
+      ),
+    );
+    // The position moves while they read, so refresh the card on the way back.
+    _loadLastRead();
   }
 
   @override
@@ -100,6 +138,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                   ),
                 ),
                 Container(height: 1, color: AppColors.goldRule),
+                if (_lastRead != null) _buildContinueCard(),
                 Container(
                   color: AppColors.white,
                   child: TabBar(
@@ -135,6 +174,51 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildContinueCard() {
+    final Map<String, dynamic> last = _lastRead!;
+    final String name = (last['surahName'] as String?) ?? 'your last surah';
+    final int? verse = last['verseNumber'] as int?;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+      child: Material(
+        color: AppColors.emerald,
+        borderRadius: BorderRadius.circular(4),
+        child: InkWell(
+          onTap: _resume,
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 13, 12, 13),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CONTINUE READING',
+                        style: AppText.eyebrow
+                            .copyWith(letterSpacing: 1.5, color: AppColors.goldPale),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        verse == null ? name : '$name  \u00b7  Ayah $verse',
+                        style: AppText.rowTitle
+                            .copyWith(fontSize: 19, color: AppColors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.play_arrow_rounded,
+                    color: AppColors.goldPale, size: 26),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
