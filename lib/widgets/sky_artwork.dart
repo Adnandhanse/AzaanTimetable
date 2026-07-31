@@ -135,7 +135,7 @@ class _SkyArtworkState extends State<SkyArtwork>
               'assets/images/nabawi_header.webp',
               fit: BoxFit.cover,
               alignment: Alignment.bottomCenter,
-              semanticsLabel: 'Photograph of Masjid an-Nabawi',
+              semanticLabel: 'Photograph of Masjid an-Nabawi',
               frameBuilder: (_, Widget child, int? frame, bool wasSync) {
                 if (wasSync || frame != null) return child;
                 // Without this the header flashes white on first launch.

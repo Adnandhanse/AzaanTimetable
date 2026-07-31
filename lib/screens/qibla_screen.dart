@@ -317,7 +317,7 @@ class _CompassDial extends StatelessWidget {
               child: Image.asset(
                 'assets/images/kaaba_dial.webp',
                 fit: BoxFit.cover,
-                semanticsLabel: 'Photograph of the Kaaba',
+                semanticLabel: 'Photograph of the Kaaba',
               ),
             ),
           ),

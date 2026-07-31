@@ -97,7 +97,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                     'assets/images/quran_header.webp',
                     fit: BoxFit.contain,
                     height: 186,
-                    semanticsLabel: 'Illustration of the Qur\u2019an on a stand',
+                    semanticLabel: 'Illustration of the Qur\u2019an on a stand',
                   ),
                 ),
                 Container(height: 1, color: AppColors.goldRule),
