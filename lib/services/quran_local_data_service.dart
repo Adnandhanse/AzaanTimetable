@@ -84,6 +84,7 @@ class QuranLocalDataService {
     required String surahName,
     int? verseNumber,
     double? scrollOffset,
+    int? juzNumber,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final existing = await getLastRead();
@@ -102,6 +103,10 @@ class QuranLocalDataService {
         'surahName': surahName,
         'verseNumber': keepVerse,
         'scrollOffset': scrollOffset ?? 0.0,
+        // Set when the position was saved from the Juz screen, so Continue
+        // reading returns to the juz rather than dumping the reader into a
+        // surah they were reading as part of something larger.
+        'juzNumber': juzNumber,
         'savedAt': DateTime.now().millisecondsSinceEpoch,
       }),
     );

@@ -9,10 +9,16 @@ class JuzDetailScreen extends StatefulWidget {
   final int juzNumber;
   final List<Surah> allSurahs;
 
+  /// Where to resume: the surah and verse the reader saved inside this juz.
+  final int? initialSurahNumber;
+  final int? initialVerse;
+
   const JuzDetailScreen({
     super.key,
     required this.juzNumber,
     required this.allSurahs,
+    this.initialSurahNumber,
+    this.initialVerse,
   });
 
   @override
@@ -25,10 +31,46 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
   /// once and both screens respect it.
   bool _mushafMode = true;
 
+  /// (surahNumber, verseNumber) saved inside this juz, if any.
+  (int, int)? _marked;
+
   @override
   void initState() {
     super.initState();
+    if (widget.initialSurahNumber != null && widget.initialVerse != null) {
+      _marked = (widget.initialSurahNumber!, widget.initialVerse!);
+    }
     _loadReadingMode();
+  }
+
+  /// Saves surah AND verse, not just a verse number. A juz spans several
+  /// surahs, so "verse 12" on its own points at nothing — that ambiguity is
+  /// why the Save button was missing here before, and storing the surah
+  /// alongside it is the whole fix.
+  Future<void> _markAt(Surah surah, QuranVerse verse) async {
+    final bool unmark =
+        _marked != null && _marked!.$1 == surah.number && _marked!.$2 == verse.number;
+    setState(() => _marked = unmark ? null : (surah.number, verse.number));
+
+    if (unmark) {
+      await QuranLocalDataService.clearLastRead();
+    } else {
+      await QuranLocalDataService.saveLastRead(
+        surahNumber: surah.number,
+        surahName: surah.transliteration,
+        verseNumber: verse.number,
+        juzNumber: widget.juzNumber,
+      );
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(unmark
+            ? 'Reading position cleared'
+            : 'Saved \u2014 Juz ${widget.juzNumber}, ${surah.transliteration} ${verse.number}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _loadReadingMode() async {
@@ -101,6 +143,18 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: items.map((e) => e.$2).toList(),
+              markedIndex: _marked == null
+                  ? null
+                  : items.indexWhere((e) =>
+                      e.$1.number == _marked!.$1 && e.$2.number == _marked!.$2),
+              initialVerseIndex: (widget.initialSurahNumber == null ||
+                      widget.initialVerse == null)
+                  ? null
+                  : items.indexWhere((e) =>
+                      e.$1.number == widget.initialSurahNumber &&
+                      e.$2.number == widget.initialVerse),
+              onMarkIndex: (int index) =>
+                  _markAt(items[index].$1, items[index].$2),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -140,12 +194,37 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '${surah.number}:${verse.number}',
-                              style: AppText.caption.copyWith(
-                                color: AppColors.emerald,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${surah.number}:${verse.number}',
+                                    style: AppText.caption.copyWith(
+                                      color: AppColors.emerald,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () => _markAt(surah, verse),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Icon(
+                                      (_marked != null &&
+                                              _marked!.$1 == surah.number &&
+                                              _marked!.$2 == verse.number)
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_border,
+                                      size: 18,
+                                      color: (_marked != null &&
+                                              _marked!.$1 == surah.number &&
+                                              _marked!.$2 == verse.number)
+                                          ? AppColors.emerald
+                                          : AppColors.chevron,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 8),
                             Text(

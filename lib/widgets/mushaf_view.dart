@@ -11,11 +11,15 @@ class _MushafPage {
     required this.text,
     required this.firstVerse,
     required this.lastVerse,
+    required this.firstIndex,
+    required this.lastIndex,
   });
 
   final String text;
   final int firstVerse;
   final int lastVerse;
+  final int firstIndex;
+  final int lastIndex;
 }
 
 /// Arabic-only continuous reading, paginated so a whole number of lines fits
@@ -38,8 +42,9 @@ class MushafView extends StatefulWidget {
     required this.verses,
     this.fontSize = 26,
     this.targetLines = 15,
-    this.onMarkVerse,
-    this.markedVerse,
+    this.onMarkIndex,
+    this.markedIndex,
+    this.initialVerseIndex,
   });
 
   /// Any run of verses — a whole surah, or the span a juz covers.
@@ -51,12 +56,17 @@ class MushafView extends StatefulWidget {
   /// actually fits, so text is never clipped.
   final int targetLines;
 
-  /// Save the reading position from inside this view. Null hides the control —
-  /// the Juz screen has no single surah to attribute a verse to.
-  final void Function(int verseNumber)? onMarkVerse;
+  /// Save the reading position. Receives the INDEX of the first verse on the
+  /// current page, not its number — across a juz the same verse number occurs
+  /// in several surahs, so an index is the only unambiguous handle. The parent
+  /// resolves it to whatever it needs to store.
+  final void Function(int firstVerseIndexOnPage)? onMarkIndex;
 
-  /// Highlights the control when the saved verse is on the current page.
-  final int? markedVerse;
+  /// Index of the saved verse, so the control can show it is already saved.
+  final int? markedIndex;
+
+  /// Open on the page holding this verse, for resuming.
+  final int? initialVerseIndex;
 
   @override
   State<MushafView> createState() => _MushafViewState();
@@ -69,6 +79,7 @@ class _MushafViewState extends State<MushafView> {
   // Pagination is cached: recomputing it on every rebuild would re-lay-out the
   // whole surah each time the reader turns a page.
   List<_MushafPage>? _pages;
+  bool _jumpedToInitial = false;
   double? _cachedWidth;
   int? _cachedLines;
   int? _cachedVerseCount;
@@ -161,6 +172,8 @@ class _MushafViewState extends State<MushafView> {
         text: text.substring(from, to).trim(),
         firstVerse: widget.verses[firstIdx].number,
         lastVerse: widget.verses[lastIdx].number,
+        firstIndex: firstIdx,
+        lastIndex: lastIdx,
       ));
     }
     return pages;
@@ -204,11 +217,33 @@ class _MushafViewState extends State<MushafView> {
         if (pages.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
+
+        // Resume: land on the page holding the saved verse. Done once, after
+        // pagination exists — page numbers are meaningless before that, and
+        // repeating it would fight the reader every time they turn a page.
+        final int? resumeAt = widget.initialVerseIndex;
+        if (!_jumpedToInitial && resumeAt != null) {
+          _jumpedToInitial = true;
+          for (int i = 0; i < pages.length; i++) {
+            if (resumeAt >= pages[i].firstIndex &&
+                resumeAt <= pages[i].lastIndex) {
+              if (i != 0) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _controller.hasClients) {
+                    _controller.jumpToPage(i);
+                    setState(() => _page = i);
+                  }
+                });
+              }
+              break;
+            }
+          }
+        }
         final int safePage = _page.clamp(0, pages.length - 1);
         final _MushafPage current = pages[safePage];
-        final bool markedHere = widget.markedVerse != null &&
-            widget.markedVerse! >= current.firstVerse &&
-            widget.markedVerse! <= current.lastVerse;
+        final bool markedHere = widget.markedIndex != null &&
+            widget.markedIndex! >= current.firstIndex &&
+            widget.markedIndex! <= current.lastIndex;
 
         return Column(
           children: <Widget>[
@@ -256,10 +291,9 @@ class _MushafViewState extends State<MushafView> {
                           AppText.caption.copyWith(color: AppColors.textMuted),
                     ),
                   ),
-                  if (widget.onMarkVerse != null)
+                  if (widget.onMarkIndex != null)
                     TextButton.icon(
-                      onPressed: () =>
-                          widget.onMarkVerse!(current.firstVerse),
+                      onPressed: () => widget.onMarkIndex!(current.firstIndex),
                       icon: Icon(
                         markedHere ? Icons.bookmark : Icons.bookmark_border,
                         size: 18,

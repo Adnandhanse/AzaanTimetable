@@ -46,6 +46,25 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     if (last == null || all == null) return;
 
     final int number = last['surahNumber'] as int;
+    final int? juz = last['juzNumber'] as int?;
+
+    // Saved from inside a juz? Go back to the juz. Dropping the reader into a
+    // lone surah loses the thing they were actually working through.
+    if (juz != null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => JuzDetailScreen(
+            juzNumber: juz,
+            allSurahs: all,
+            initialSurahNumber: number,
+            initialVerse: last['verseNumber'] as int?,
+          ),
+        ),
+      );
+      _loadLastRead();
+      return;
+    }
+
     // Plain loop rather than firstOrNull — that lives in package:collection,
     // which is not a direct dependency, and this is not worth adding one for.
     Surah? surah;
@@ -187,6 +206,8 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     final Map<String, dynamic> last = _lastRead!;
     final String name = (last['surahName'] as String?) ?? 'your last surah';
     final int? verse = last['verseNumber'] as int?;
+    final int? juz = last['juzNumber'] as int?;
+    final String where = juz == null ? name : 'Juz $juz  \u00b7  $name';
 
     // White card, gold hairline, emerald type — the same construction as every
     // other card in the app. The solid green block read as a banner from a
@@ -221,7 +242,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        verse == null ? name : '$name  \u00b7  Ayah $verse',
+                        verse == null ? where : '$where  \u00b7  Ayah $verse',
                         style: AppText.rowTitle
                             .copyWith(fontSize: 18, color: AppColors.emerald),
                       ),

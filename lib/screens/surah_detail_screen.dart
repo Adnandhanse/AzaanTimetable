@@ -219,8 +219,16 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: surah.verses,
-              markedVerse: _markedVerse,
-              onMarkVerse: _markVerse,
+              markedIndex: _markedVerse == null
+                  ? null
+                  : surah.verses
+                      .indexWhere((QuranVerse v) => v.number == _markedVerse),
+              initialVerseIndex: widget.initialVerse == null
+                  ? null
+                  : surah.verses.indexWhere(
+                      (QuranVerse v) => v.number == widget.initialVerse),
+              onMarkIndex: (int index) =>
+                  _markVerse(surah.verses[index].number),
             )
           : ListView(
         controller: _scroll,
