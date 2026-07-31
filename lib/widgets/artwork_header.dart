@@ -47,21 +47,23 @@ class ArtworkHeader extends StatelessWidget {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
+              padding: const EdgeInsets.fromLTRB(20, 2, 8, 8),
               child: Row(
                 children: <Widget>[
-                  // Balances the icon on the right so the title stays optically
-                  // centred without a second row.
-                  const SizedBox(width: 44),
                   Expanded(
                     child: GestureDetector(
                       onTap: onMetaTap,
                       child: Column(
+                        // Left-aligned. Centred type over a wide photograph
+                        // reads as a caption; ranged left it reads as a
+                        // heading, and long masjid names truncate predictably
+                        // from one edge instead of drifting.
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Text(
                             masjidName,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.displayName
@@ -70,7 +72,7 @@ class ArtworkHeader extends StatelessWidget {
                           const SizedBox(height: 1),
                           Text(
                             metaLine,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.eyebrow.copyWith(

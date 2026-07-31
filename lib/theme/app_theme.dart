@@ -160,6 +160,26 @@ class AppTheme {
       secondary: AppColors.gold,
       surface: AppColors.ivory,
       onSurface: AppColors.text,
+
+      // THIS IS THE FIX FOR THE "BLUISH" CARDS.
+      //
+      // Material 3 ignores ThemeData.cardColor. Card, Dialog, BottomSheet and
+      // friends take their background from these surfaceContainer tones, which
+      // Flutter derives from the seed colour's tonal palette. A green seed
+      // produces a desaturated blue-green — which is what was showing up on
+      // the admin, hadith and surah screens.
+      //
+      // Pinning them to our own ivory/cream/white removes the tint everywhere
+      // at once. Do not delete these lines to "simplify" the theme.
+      surfaceContainerLowest: AppColors.white,
+      surfaceContainerLow: AppColors.white,
+      surfaceContainer: AppColors.cream,
+      surfaceContainerHigh: AppColors.cream,
+      surfaceContainerHighest: AppColors.ivory,
+
+      // Stops Material tinting surfaces by elevation, which reintroduces the
+      // same cast through a different route.
+      surfaceTint: Colors.transparent,
     );
 
     return ThemeData(
@@ -170,6 +190,57 @@ class AppTheme {
       cardColor: AppColors.white,
       fontFamily: AppFonts.sans,
       iconTheme: const IconThemeData(color: AppColors.text),
+      // Every Card in the app: white, flat, gold hairline, 4px corners.
+      // ~20 screens use bare Card widgets, so this is what makes them agree.
+      cardTheme: CardTheme(
+        color: AppColors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: const BorderSide(color: AppColors.goldRule),
+        ),
+      ),
+
+      dialogTheme: DialogTheme(
+        backgroundColor: AppColors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: const BorderSide(color: AppColors.goldRule),
+        ),
+      ),
+
+      // Every text field, so the admin forms stop looking like a different app.
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.white,
+        isDense: true,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        hintStyle: AppText.body.copyWith(color: AppColors.textFaint),
+        labelStyle: AppText.body.copyWith(color: AppColors.textMuted),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: AppColors.goldRule),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: AppColors.goldRule),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(color: AppColors.gold),
+        ),
+      ),
+
+      listTileTheme: const ListTileThemeData(
+        tileColor: Colors.transparent,
+        iconColor: AppColors.emerald,
+      ),
+
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.emerald,

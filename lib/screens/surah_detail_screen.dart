@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../widgets/mushaf_view.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
 import '../services/quran_local_data_service.dart';
@@ -98,14 +99,43 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
   }
 
+  /// false = verse-by-verse with translation, true = Arabic-only continuous.
+  bool _mushafMode = false;
+
   @override
   Widget build(BuildContext context) {
     final surah = widget.surah;
     return Scaffold(
       appBar: AppBar(
         title: Text('${surah.number}. ${surah.transliteration}'),
+        actions: [
+          // Two ways to read the same surah. One control, so it is always
+          // obvious which mode you are in.
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
+              onPressed: () => setState(() => _mushafMode = !_mushafMode),
+              icon: Icon(
+                _mushafMode ? Icons.list_alt_outlined : Icons.menu_book_outlined,
+                size: 18,
+                color: AppColors.emerald,
+              ),
+              label: Text(
+                _mushafMode ? 'Translation' : 'Arabic only',
+                style: AppText.caption.copyWith(color: AppColors.emerald),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ),
+        ],
       ),
-      body: ListView(
+      body: _mushafMode
+          ? MushafView(surah: surah)
+          : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(

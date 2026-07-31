@@ -1,62 +1,86 @@
-UI CHANGES v5.1 - 45 files
-==========================
+UI CHANGES v6 - 46 files
+========================
 
-FULL superset of v1 through v5. If you have not applied v5 yet, apply this
-instead and you get everything in one go.
+Full superset of v1-v5.1. Unzip over your repo root, overwriting.
 
-NEW IN v5.1 - lib/screens/hadith_chapters_screen.dart
-=====================================================
+=====================================================================
+THE "BLUISH" COLOUR - FOUND IT, AND IT WAS ONE THING
+=====================================================================
 
-1. HADITH NUMBER RANGE UNDER EVERY CHAPTER
-   Each chapter row now reads, for example:
+Your screenshots 2, 3 and 4 all show the same pale blue-green card. Cause:
 
-     2   Belief
-         Hadith 8-58  ·  51 total
+  ~20 screens use a bare Card() widget. Material 3 IGNORES
+  ThemeData.cardColor. Card, Dialog and BottomSheet take their background
+  from colorScheme.surfaceContainerLow, which Flutter derives from the SEED
+  colour's tonal palette. A green seed yields a desaturated blue-green.
 
-   Verified against your own eng_bukhari.json:
-     Revelation  1-7      (7)
-     Belief      8-58     (51)
-     Knowledge   59-134   (76)
-     Prayers     349-520  (167)
+That is the blue. It was never a font or a screen - it was the theme, on every
+screen that uses a Card. Fixed centrally in app_theme.dart:
 
-   Note your example said "believe 222-385". The real range in your dataset is
-   8-58 - your data uses international hadith numbering, and that is what the
-   app will show. If you wanted the Arabic-edition numbering instead, say so;
-   the field is in the data and it is a small change.
+  - surfaceContainerLowest/Low  -> white
+  - surfaceContainer/High       -> cream
+  - surfaceContainerHighest     -> ivory
+  - surfaceTint                 -> transparent (stops elevation re-tinting)
+  - cardTheme                   -> white, flat, gold hairline, 4px corners
+  - dialogTheme, inputDecorationTheme, listTileTheme to match
 
-   Ranges are computed once when the book loads, not per row. Computing them
-   inside the list builder would rescan all 7000+ hadith on every frame of
-   every scroll.
+One change, every screen. Admin panel, hadith cards and surah verse cards all
+go white with a gold hairline. Do not delete those surfaceContainer lines to
+"tidy up" the theme - the tint comes straight back.
 
-2. SEARCH BY HADITH NUMBER
-   The filter box now takes either a chapter name or a number.
-   Type 300 and you get the chapter CONTAINING hadith 300 - not the chapter
-   numbered 300, which is the less useful reading. A chapter whose own number
-   matches also shows. A confirmation line appears above the results, and it
-   tells you plainly when no chapter contains that number.
+=====================================================================
+OTHER FIXES
+=====================================================================
 
-   The box is also restyled to match the rest of the app - it was still using
-   the bare Material default, which is part of why that screen looked foreign.
+1. HOME HEADER LEFT-ALIGNED
+   Masjid name, city and Hijri date now range left instead of centred.
+   Centred type over a wide photo reads as a caption; ranged left it reads as
+   a heading, and long names truncate predictably from one edge.
 
-ALREADY FIXED IN v5 - please confirm you have built it
-======================================================
-Your message repeated these four word for word from last time, so I think it
-was written before you built v5. All four were addressed there:
+=====================================================================
+NEW - TWO WAYS TO READ A SURAH
+=====================================================================
 
-  - white band above the Home image      -> title bar halved in height
-  - white space left/right on Quran      -> image re-cropped to 1.70:1, cover
-  - fonts/colours differing per screen   -> 40 AppBar overrides stripped;
-                                            shared arabicVerse / arabicTitle /
-                                            translation styles everywhere
-  - Hadith Arabic names not visible      -> cards were too short, now taller
+A toggle in the surah screen's app bar switches between:
 
-If you HAVE built v5 and still see any of them, send a screenshot - that means
-my fix missed and I need to see it rather than guess again.
+  TRANSLATION   verse by verse, Arabic + translation, audio, notes (as now)
+  ARABIC ONLY   continuous flowing text, paginated, verse-end markers with
+                Arabic-Indic numerals, right-to-left page turns
 
-ON THE BLUE
-Still no blue anywhere in the codebase. Only blue-dominant values are the night
-sky in sky_artwork.dart. A screenshot would settle it in one look.
+READ THIS BEFORE YOU CALL IT A MUSHAF - IT IS NOT ONE.
 
+A real Madani Mushaf page is a fixed typographic object: specific words on
+specific lines of specific pages, in the Uthmani glyph set, identical in every
+printed copy. Reproducing that needs two things you do not have:
+
+  1. a page-and-line layout table mapping every word to its position
+  2. the QCF/Uthmani font that table is measured against
+
+Your bundled quran-json has verse text only, and Amiri is not the Mushaf font.
+
+So this view flows the text and paginates it to the READER'S SCREEN. It fits a
+whole number of lines per page - up to 15, fewer on a short phone so nothing
+clips - and never splits a line. But the breaks will not match a printed
+Mushaf.
+
+That matters. People who memorise do it by page position, and a view that looks
+like a Mushaf while breaking lines somewhere else is worse than one that
+plainly does not pretend. The footer shows "Page 3 of 12 - 15 lines" rather
+than claiming a Mushaf page number.
+
+If you want the real thing, it needs a licensed Madani layout dataset plus the
+matching fonts. That is a data and licensing problem, not a UI one, and I can
+wire it up in a day once you have the files.
+
+PERFORMANCE NOTE: pagination lays the full surah out ONCE and reads its line
+metrics. The obvious approach - re-measuring the remaining text for each page -
+is quadratic and visibly janky on Al-Baqarah's 286 verses.
+
+=====================================================================
 STILL OPEN
-Urdu CHAPTER names. Your dataset has none, in any file. Mechanism is ready at
-assets/hadith/urd_sections.json.
+=====================================================================
+- Urdu CHAPTER names: your dataset has none, in any file.
+- Hadith numbering: display and search both use the international numbering in
+  your data. The Arabic-edition number is also on each hadith if you prefer it.
+
+NOT COMPILE-CHECKED. All 55 Dart files balance, 26 declared assets all exist.
