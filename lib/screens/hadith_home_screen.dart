@@ -64,9 +64,12 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              // Tuned so the longest name fits on two lines without the card
-              // growing. Re-check if you change the display font size.
-              childAspectRatio: 0.80,
+              // Taller than it looks like it needs to be. At 0.80 the Arabic
+              // title and the volume count were being clipped off the bottom
+              // of the card on narrower phones — the content is medallion +
+              // two lines of name + Arabic + rule + count, and it does not fit
+              // in a shorter box.
+              childAspectRatio: 0.70,
             ),
             itemBuilder: (context, index) {
               final book = HadithBook.values[index];

@@ -7,11 +7,33 @@ import '../widgets/ornaments.dart';
 import 'hadith_list_screen.dart';
 import 'hadith_search_screen.dart';
 
+/// The hadith numbers a chapter covers, and how many it holds.
+class _ChapterRange {
+  const _ChapterRange({
+    required this.first,
+    required this.last,
+    required this.count,
+  });
+
+  final int first;
+  final int last;
+  final int count;
+
+  bool contains(int n) => n >= first && n <= last;
+
+  /// "222-385" or just "222" for a single-hadith chapter.
+  String get label => first == last ? '$first' : '$first\u2013$last';
+}
+
 class HadithChaptersScreen extends StatefulWidget {
   final HadithBook book;
   final HadithLanguage language;
 
-  const HadithChaptersScreen({super.key, required this.book, required this.language});
+  const HadithChaptersScreen({
+    super.key,
+    required this.book,
+    required this.language,
+  });
 
   @override
   State<HadithChaptersScreen> createState() => _HadithChaptersScreenState();
@@ -21,6 +43,11 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
   HadithCollection? _collection;
   String? _error;
   String _query = '';
+
+  /// Chapter number -> range. Computed once when the book loads. Doing this
+  /// per-row inside the ListView would rescan every hadith in the book on
+  /// every frame of every scroll.
+  final Map<int, _ChapterRange> _ranges = <int, _ChapterRange>{};
 
   @override
   void initState() {
@@ -34,6 +61,21 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
       final collection =
           await HadithRepository.loadCollection(widget.book, widget.language);
       if (!mounted) return;
+
+      _ranges.clear();
+      for (final HadithChapter c in collection.chapters) {
+        final List<HadithItem> items = collection.hadithsInChapter(c.number);
+        if (items.isEmpty) continue;
+        int lo = items.first.hadithNumber;
+        int hi = items.first.hadithNumber;
+        for (final HadithItem h in items) {
+          if (h.hadithNumber < lo) lo = h.hadithNumber;
+          if (h.hadithNumber > hi) hi = h.hadithNumber;
+        }
+        _ranges[c.number] =
+            _ChapterRange(first: lo, last: hi, count: items.length);
+      }
+
       setState(() => _collection = collection);
     } catch (e) {
       if (!mounted) return;
@@ -41,12 +83,13 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
     }
   }
 
-  String get _langCode => widget.language == HadithLanguage.english ? 'eng' : 'urd';
+  String get _langCode =>
+      widget.language == HadithLanguage.english ? 'eng' : 'urd';
 
   @override
   Widget build(BuildContext context) {
-    // Titles are resolved through the Urdu override before filtering, so the
-    // filter matches what the reader can actually see.
+    // Titles resolve through the Urdu override before filtering, so the filter
+    // matches what the reader can actually see.
     String displayTitle(HadithChapter c) => HadithSectionTitles.resolve(
           book: widget.book,
           sectionNumber: c.number,
@@ -54,13 +97,23 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
           englishTitle: c.title,
         );
 
-    final chapters = _collection == null
+    final String q = _query.trim();
+    final int? asNumber = int.tryParse(q);
+
+    final List<HadithChapter> chapters = _collection == null
         ? <HadithChapter>[]
-        : _collection!.chapters
-            .where((c) => displayTitle(c)
-                .toLowerCase()
-                .contains(_query.toLowerCase()))
-            .toList();
+        : _collection!.chapters.where((HadithChapter c) {
+            if (q.isEmpty) return true;
+            // A number matches the chapter that CONTAINS that hadith, or the
+            // chapter with that number. Typing 300 should take you to the
+            // chapter holding hadith 300, which is the useful behaviour.
+            if (asNumber != null) {
+              final _ChapterRange? r = _ranges[c.number];
+              return (r != null && r.contains(asNumber)) ||
+                  c.number == asNumber;
+            }
+            return displayTitle(c).toLowerCase().contains(q.toLowerCase());
+          }).toList();
 
     final bool urduTitlesMissing = widget.language == HadithLanguage.urdu &&
         HadithSectionTitles.overrideCount(widget.book) == 0;
@@ -68,12 +121,10 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.book.displayName),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
         actions: [
           if (_collection != null)
             IconButton(
-              icon: const Icon(Icons.search),
+              icon: const Icon(Icons.search, size: 20),
               tooltip: 'Search hadith text',
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -88,99 +139,177 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
         ],
       ),
       body: _error != null
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
-                    const SizedBox(height: 12),
-                    Text('Could not load this book:\n$_error', textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() => _error = null);
-                        _load();
-                      },
-                      child: const Text('Try Again'),
-                    ),
-                  ],
-                ),
-              ),
-            )
+          ? _buildError()
           : _collection == null
               ? const Center(child: CircularProgressIndicator())
               : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Filter chapters by name',
-                      prefixIcon: Icon(Icons.filter_list),
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (v) => setState(() => _query = v),
-                  ),
-                ),
-                if (urduTitlesMissing)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    child: Text(
-                      'Chapter names are shown in English \u2014 the offline hadith dataset does not include Urdu chapter names. The hadith text itself is in Urdu.',
-                      style: AppText.caption
-                          .copyWith(color: AppColors.textMuted),
-                    ),
-                  ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: chapters.length,
-                    itemBuilder: (context, index) {
-                      final chapter = chapters[index];
-                      final count = _collection!.hadithsInChapter(chapter.number).length;
-                      return Container(
-                        decoration: BoxDecoration(
-                          border: index == 0
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+                      child: TextField(
+                        keyboardType: TextInputType.text,
+                        style: AppText.body.copyWith(color: AppColors.text),
+                        decoration: InputDecoration(
+                          hintText: 'Chapter name, or a hadith number',
+                          hintStyle:
+                              AppText.body.copyWith(color: AppColors.textFaint),
+                          prefixIcon: const Icon(Icons.search,
+                              size: 18, color: AppColors.textMuted),
+                          suffixIcon: q.isEmpty
                               ? null
-                              : const Border(
-                                  top: BorderSide(
-                                      color: AppColors.goldRuleFaint)),
+                              : IconButton(
+                                  icon: const Icon(Icons.close, size: 17),
+                                  color: AppColors.textMuted,
+                                  onPressed: () => setState(() => _query = ''),
+                                ),
+                          filled: true,
+                          fillColor: AppColors.white,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide:
+                                const BorderSide(color: AppColors.goldRule),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide:
+                                const BorderSide(color: AppColors.goldRule),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide: const BorderSide(color: AppColors.gold),
+                          ),
                         ),
-                        child: ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 4),
-                          leading: Medallion(label: '${chapter.number}'),
-                          title: Text(
-                            displayTitle(chapter),
-                            style: AppText.rowTitle
-                                .copyWith(fontSize: 17, color: AppColors.text),
-                          ),
-                          subtitle: Text(
-                            '$count hadith',
-                            style: AppText.caption
-                                .copyWith(color: AppColors.textMuted),
-                          ),
-                          trailing: const Icon(Icons.chevron_right,
-                              size: 18, color: AppColors.chevron),
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => HadithListScreen(
-                                collection: _collection!,
-                                chapter: chapter,
-                                bookKey: widget.book.fileKey,
-                                language: _langCode,
+                        onChanged: (v) => setState(() => _query = v),
+                      ),
+                    ),
+                    if (asNumber != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                        child: Text(
+                          chapters.isEmpty
+                              ? 'No chapter contains hadith $asNumber.'
+                              : 'Chapter containing hadith $asNumber',
+                          style: AppText.caption
+                              .copyWith(color: AppColors.emerald),
+                        ),
+                      ),
+                    if (urduTitlesMissing)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                        child: Text(
+                          'Chapter names are shown in English \u2014 the offline hadith dataset does not include Urdu chapter names. The hadith text itself is in Urdu.',
+                          style: AppText.caption
+                              .copyWith(color: AppColors.textMuted),
+                        ),
+                      ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: chapters.length,
+                        itemBuilder: (context, index) {
+                          final HadithChapter chapter = chapters[index];
+                          final _ChapterRange? r = _ranges[chapter.number];
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: index == 0
+                                  ? null
+                                  : const Border(
+                                      top: BorderSide(
+                                          color: AppColors.goldRuleFaint)),
+                            ),
+                            child: ListTile(
+                              contentPadding:
+                                  const EdgeInsets.symmetric(vertical: 6),
+                              leading: Medallion(label: '${chapter.number}'),
+                              title: Text(
+                                displayTitle(chapter),
+                                style: AppText.rowTitle.copyWith(
+                                    fontSize: 17, color: AppColors.text),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: r == null
+                                    ? Text(
+                                        'No hadith in this chapter',
+                                        style: AppText.caption.copyWith(
+                                            color: AppColors.textFaint),
+                                      )
+                                    : Row(
+                                        children: [
+                                          Text(
+                                            'Hadith ${r.label}',
+                                            style: AppText.caption.copyWith(
+                                              color: AppColors.emerald,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Text(
+                                            '  \u00b7  ${r.count} total',
+                                            style: AppText.caption.copyWith(
+                                                color: AppColors.textMuted),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                              trailing: const Icon(Icons.chevron_right,
+                                  size: 18, color: AppColors.chevron),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => HadithListScreen(
+                                    collection: _collection!,
+                                    chapter: chapter,
+                                    bookKey: widget.book.fileKey,
+                                    language: _langCode,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+    );
+  }
+
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Medallion(icon: Icons.error_outline, size: 52),
+            const SizedBox(height: 14),
+            Text(
+              'Could not load this book:\n$_error',
+              textAlign: TextAlign.center,
+              style: AppText.body.copyWith(color: AppColors.textMuted),
             ),
+            const SizedBox(height: 18),
+            OutlinedButton(
+              onPressed: () {
+                setState(() => _error = null);
+                _load();
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.emerald,
+                side: const BorderSide(color: AppColors.gold),
+                shape:
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                textStyle: AppText.body,
+              ),
+              child: const Text('Try again'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

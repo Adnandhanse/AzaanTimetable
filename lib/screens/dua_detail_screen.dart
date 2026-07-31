@@ -11,8 +11,6 @@ class DuaDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(category.title),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -30,7 +28,7 @@ class DuaDetailScreen extends StatelessWidget {
                     dua.arabicText,
                     textAlign: TextAlign.right,
                     textDirection: TextDirection.rtl,
-                    style: const TextStyle(fontSize: 20, height: 1.8, fontFamily: AppFonts.arabic),
+                    style: AppText.arabicVerse.copyWith(color: AppColors.text),
                   ),
                   const SizedBox(height: 10),
                   const Divider(),

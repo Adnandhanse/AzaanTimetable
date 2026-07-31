@@ -36,8 +36,6 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Duas'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: _categories == null
           ? const Center(child: CircularProgressIndicator())

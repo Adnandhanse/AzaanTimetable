@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'sky_artwork.dart';
 
-/// Home header: masjid name and date at the **top**, artwork beneath.
+/// Home header: a compact white title bar, then the picture edge to edge.
 ///
-/// The name used to sit over the middle of the artwork, which put type across
-/// the dome and made both harder to read. Text on top, picture below — each
-/// gets its own space and neither fights the other.
-///
-/// The picture below the type is [SkyArtwork]: the Masjid an-Nabawi photograph
-/// with the time of day animated on top of it — light, birds, stars.
+/// The title bar is deliberately tight. An earlier version stacked the settings
+/// icon on its own row above the name, which left a tall band of empty white
+/// above the photograph. Icon and title now share one row, which halves the
+/// height of the bar and lets the picture start much higher up the screen.
 class ArtworkHeader extends StatelessWidget {
   const ArtworkHeader({
     super.key,
@@ -19,7 +17,7 @@ class ArtworkHeader extends StatelessWidget {
     required this.onSettingsTap,
     required this.onMetaTap,
     required this.phase,
-    this.artworkHeight = 200,
+    this.artworkHeight = 214,
     this.settle = 1.0,
   });
 
@@ -36,74 +34,77 @@ class ArtworkHeader extends StatelessWidget {
 
   final double artworkHeight;
 
-  /// 0 → just landed, 1 → settled. Drives the artwork's scale-in.
+  /// 0 → just landed, 1 → settled. Fades the picture in.
   final double settle;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SafeArea(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          color: AppColors.white,
+          child: SafeArea(
             bottom: false,
-            child: Column(
-              children: <Widget>[
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.settings_outlined,
-                        color: AppColors.text, size: 20),
-                    tooltip: 'Settings',
-                    onPressed: onSettingsTap,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    masjidName,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        AppText.displayName.copyWith(color: AppColors.emerald),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: onMetaTap,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      metaLine,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.eyebrow.copyWith(
-                        letterSpacing: 1.2,
-                        color: AppColors.textMuted,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
+              child: Row(
+                children: <Widget>[
+                  // Balances the icon on the right so the title stays optically
+                  // centred without a second row.
+                  const SizedBox(width: 44),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: onMetaTap,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            masjidName,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.displayName
+                                .copyWith(fontSize: 21, color: AppColors.emerald),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            metaLine,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.eyebrow.copyWith(
+                              fontSize: 10.5,
+                              letterSpacing: 1.1,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 14),
-              ],
+                  SizedBox(
+                    width: 44,
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined,
+                          color: AppColors.text, size: 20),
+                      tooltip: 'Settings',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: onSettingsTap,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+        ),
 
-          // The animated sky. Sunrise and birds in the morning, a still sun
-          // overhead at midday, sunset and birds in the evening, stars and a
-          // crescent at night — driven by the masjid's own prayer times.
-          //
-          // The building is a transparent PNG layered inside SkyArtwork, so the
-          // sky animates behind it.
-          Opacity(
-            opacity: settle.clamp(0.0, 1.0),
-            child: SkyArtwork(phase: phase, height: artworkHeight),
-          ),
-        ],
-      ),
+        // The picture, full bleed. SkyArtwork animates the time of day over it.
+        Opacity(
+          opacity: settle.clamp(0.0, 1.0),
+          child: SkyArtwork(phase: phase, height: artworkHeight),
+        ),
+      ],
     );
   }
 }

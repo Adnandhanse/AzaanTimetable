@@ -26,8 +26,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform Admin'),
-        backgroundColor: const Color(0xFF164536),
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),

@@ -32,8 +32,6 @@ class JuzDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Juz $juzNumber'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -68,11 +66,11 @@ class JuzDetailScreen extends StatelessWidget {
                         verse.arabicText,
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
-                        style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: AppFonts.arabic),
+                        style: AppText.arabicVerse.copyWith(color: AppColors.text),
                       ),
                       const SizedBox(height: 8),
                       const Divider(),
-                      Text(verse.translation, style: const TextStyle(fontSize: 15)),
+                      Text(verse.translation, style: AppText.translation.copyWith(color: AppColors.text)),
                     ],
                   ),
                 ),

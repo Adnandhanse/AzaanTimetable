@@ -45,8 +45,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masjid Admin Login'),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),

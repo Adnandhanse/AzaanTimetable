@@ -33,8 +33,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Confirm Exact Location'),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
       ),
       body: Stack(
         alignment: Alignment.center,

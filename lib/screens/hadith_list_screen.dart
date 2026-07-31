@@ -50,8 +50,6 @@ class _HadithListScreenState extends State<HadithListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chapter.title, overflow: TextOverflow.ellipsis),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -108,7 +106,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                       hadith.arabicText,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.rtl,
-                      style: const TextStyle(fontSize: 18, height: 1.8, fontFamily: AppFonts.arabic),
+                      style: AppText.arabicVerse.copyWith(fontSize: 21, color: AppColors.text),
                     ),
                     const SizedBox(height: 10),
                     const Divider(),

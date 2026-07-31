@@ -28,8 +28,6 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Search ${widget.collection.name}'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -75,7 +73,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
                             hadith.arabicText,
                             textAlign: TextAlign.right,
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(fontSize: 16, fontFamily: AppFonts.arabic),
+                            style: AppText.arabic.copyWith(fontSize: 18, color: AppColors.text),
                           ),
                           const SizedBox(height: 6),
                         ],

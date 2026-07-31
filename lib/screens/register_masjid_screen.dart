@@ -203,8 +203,6 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register Masjid'),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
       ),
       body: Form(
         key: _formKey,

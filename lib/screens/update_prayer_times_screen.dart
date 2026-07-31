@@ -160,8 +160,6 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.masjid.name),
-        backgroundColor: const Color(0xFF1F5E4A),
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

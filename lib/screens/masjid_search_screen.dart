@@ -68,8 +68,6 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Masjid'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [

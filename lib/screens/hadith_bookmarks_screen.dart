@@ -57,8 +57,6 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookmarked Hadiths'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

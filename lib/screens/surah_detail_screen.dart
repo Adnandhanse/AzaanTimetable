@@ -104,8 +104,6 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${surah.number}. ${surah.transliteration}'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -116,7 +114,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Text(surah.arabicName, style: const TextStyle(fontSize: 32, fontFamily: AppFonts.arabic)),
+                  Text(surah.arabicName, style: AppText.arabicTitle.copyWith(color: AppColors.emerald)),
                   const SizedBox(height: 4),
                   Text(
                     '${surah.englishMeaning} • ${surah.type.isNotEmpty ? '${surah.type[0].toUpperCase()}${surah.type.substring(1)}' : ''} • ${surah.totalVerses} verses',
@@ -161,12 +159,12 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       verse.arabicText,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.rtl,
-                      style: const TextStyle(fontSize: 22, height: 1.8, fontFamily: AppFonts.arabic),
+                      style: AppText.arabicVerse.copyWith(color: AppColors.text),
                     ),
                     const SizedBox(height: 8),
                     const Divider(),
                     const SizedBox(height: 4),
-                    Text(verse.translation, style: const TextStyle(fontSize: 15, color: Colors.black87)),
+                    Text(verse.translation, style: AppText.translation.copyWith(color: AppColors.text)),
                     if (hasNote) ...[
                       const SizedBox(height: 8),
                       Container(

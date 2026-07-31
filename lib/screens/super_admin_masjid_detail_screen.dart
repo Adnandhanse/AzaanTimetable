@@ -80,8 +80,6 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
     return Scaffold(
       appBar: AppBar(
         title: Text(m.name),
-        backgroundColor: const Color(0xFF164536),
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

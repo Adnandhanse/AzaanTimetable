@@ -12,8 +12,6 @@ class PrayerTimesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('${masjid.name} - Prayer Times'),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

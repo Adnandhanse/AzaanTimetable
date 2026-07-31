@@ -84,19 +84,18 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
               children: [
                 // The artwork carries the القرآن الكريم title itself, so
                 // there is no text title here — it would double up.
-                // BoxFit.contain, not cover: the image is square and the
-                // header is a band, so cropping would cut the lanterns.
-                // Its cream ground matches the palette, so the letterboxing
-                // is invisible.
-                Container(
+                //
+                // The source image was square, which letterboxed white bars
+                // down either side of the band. It is now cropped to 1.70:1 at
+                // build time and drawn with BoxFit.cover, so it fills the width
+                // edge to edge with no empty space.
+                SizedBox(
                   width: double.infinity,
-                  height: 186,
-                  color: AppColors.white,
-                  alignment: Alignment.center,
+                  height: 196,
                   child: Image.asset(
                     'assets/images/quran_header.webp',
-                    fit: BoxFit.contain,
-                    height: 186,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
                     semanticLabel: 'Illustration of the Qur\u2019an on a stand',
                   ),
                 ),

@@ -31,8 +31,6 @@ class MasjidDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(masjid.name),
-        backgroundColor: AppColors.emerald,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

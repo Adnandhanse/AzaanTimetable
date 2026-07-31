@@ -115,6 +115,30 @@ class AppText {
     height: 1.3,
   );
 
+  /// Arabic scripture, at reading size. Every Qur'an verse and every hadith
+  /// body in the app uses this one style — if you change the reading size,
+  /// change it here and it changes everywhere.
+  static const TextStyle arabicVerse = TextStyle(
+    fontFamily: AppFonts.arabic,
+    fontSize: 23,
+    height: 2.0,
+  );
+
+  /// Large Arabic, for surah and book titles.
+  static const TextStyle arabicTitle = TextStyle(
+    fontFamily: AppFonts.arabic,
+    fontSize: 30,
+    fontWeight: FontWeight.w700,
+    height: 1.5,
+  );
+
+  /// The English/Urdu/Hindi translation sitting under a verse or hadith.
+  static const TextStyle translation = TextStyle(
+    fontFamily: AppFonts.sans,
+    fontSize: 14.5,
+    height: 1.55,
+  );
+
   /// Arabic sits small on the line, so it needs a larger size than the Latin
   /// text beside it to read as the same weight.
   static const TextStyle arabic = TextStyle(

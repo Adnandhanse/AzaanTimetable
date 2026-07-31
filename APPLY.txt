@@ -1,37 +1,62 @@
-UI CHANGES ONLY - 9 files
-=========================
+UI CHANGES v5.1 - 45 files
+==========================
 
-Unzip over your repo root. Paths already match, so it overwrites the right
-files and creates lib/theme/ and lib/widgets/ for you.
+FULL superset of v1 through v5. If you have not applied v5 yet, apply this
+instead and you get everything in one go.
 
-ADDED (2)
-  lib/theme/app_theme.dart              palette, type scale, ThemeData
-  lib/widgets/ornaments.dart            girih pattern, arch, rules, medallions
+NEW IN v5.1 - lib/screens/hadith_chapters_screen.dart
+=====================================================
 
-REPLACED (7)
-  pubspec.yaml                          commented Cormorant block only -
-                                        nothing added to dependencies
-  lib/main.dart                         theme: AppTheme.light()
-  lib/screens/home_screen.dart
-  lib/screens/quran_home_screen.dart
-  lib/screens/hadith_home_screen.dart
-  lib/screens/qibla_screen.dart
-  lib/screens/prayers_home_screen.dart
+1. HADITH NUMBER RANGE UNDER EVERY CHAPTER
+   Each chapter row now reads, for example:
 
-The five screens keep every piece of their logic. Only the presentation
-changed. Nothing else in lib/ is affected - all 48 other files, every service,
-every model, overlay_main.dart, the admin flow and your CI workflow stay as
-they are.
+     2   Belief
+         Hadith 8-58  ·  51 total
 
-BEFORE YOU PUSH
-  If you already have local changes to any of these seven files, this will
-  overwrite them. Commit or stash first.
+   Verified against your own eng_bukhari.json:
+     Revelation  1-7      (7)
+     Belief      8-58     (51)
+     Knowledge   59-134   (76)
+     Prayers     349-520  (167)
 
-AFTER YOU INSTALL
-  Check an alarm actually fires. Alarm scheduling is triggered from inside
-  Home's StreamBuilder via _maybeScheduleNotifications, which makes
-  home_screen.dart the riskiest file here. It is preserved exactly and
-  commented, but verify it on the device rather than trusting it.
+   Note your example said "believe 222-385". The real range in your dataset is
+   8-58 - your data uses international hadith numbering, and that is what the
+   app will show. If you wanted the Arabic-edition numbering instead, say so;
+   the field is in the data and it is a small change.
 
-See MERGE_NOTES.md for the full detail, including how to switch the display
-font to Cormorant Garamond later.
+   Ranges are computed once when the book loads, not per row. Computing them
+   inside the list builder would rescan all 7000+ hadith on every frame of
+   every scroll.
+
+2. SEARCH BY HADITH NUMBER
+   The filter box now takes either a chapter name or a number.
+   Type 300 and you get the chapter CONTAINING hadith 300 - not the chapter
+   numbered 300, which is the less useful reading. A chapter whose own number
+   matches also shows. A confirmation line appears above the results, and it
+   tells you plainly when no chapter contains that number.
+
+   The box is also restyled to match the rest of the app - it was still using
+   the bare Material default, which is part of why that screen looked foreign.
+
+ALREADY FIXED IN v5 - please confirm you have built it
+======================================================
+Your message repeated these four word for word from last time, so I think it
+was written before you built v5. All four were addressed there:
+
+  - white band above the Home image      -> title bar halved in height
+  - white space left/right on Quran      -> image re-cropped to 1.70:1, cover
+  - fonts/colours differing per screen   -> 40 AppBar overrides stripped;
+                                            shared arabicVerse / arabicTitle /
+                                            translation styles everywhere
+  - Hadith Arabic names not visible      -> cards were too short, now taller
+
+If you HAVE built v5 and still see any of them, send a screenshot - that means
+my fix missed and I need to see it rather than guess again.
+
+ON THE BLUE
+Still no blue anywhere in the codebase. Only blue-dominant values are the night
+sky in sky_artwork.dart. A screenshot would settle it in one look.
+
+STILL OPEN
+Urdu CHAPTER names. Your dataset has none, in any file. Mechanism is ready at
+assets/hadith/urd_sections.json.
