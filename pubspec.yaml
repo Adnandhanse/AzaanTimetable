@@ -45,12 +45,16 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
+    # Artwork, drawn flat in the app palette. Ships at 1x/2x/3x; Flutter picks
+    # the right density automatically from assets/images/2.0x and 3.0x.
     # Photographs, cropped and converted to WebP at 1x/2x/3x. Flutter picks the
     # right density automatically from assets/images/2.0x and 3.0x.
     # About 330 KB in total for all three.
     - assets/images/nabawi_header.webp
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp
+    # The three photos below are no longer referenced anywhere in lib/.
+    # Safe to delete along with these lines - saves about 368 KB.
     - assets/icon/app_icon.png
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
