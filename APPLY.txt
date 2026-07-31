@@ -1,70 +1,54 @@
-UI CHANGES v7 - 48 files
+UI CHANGES v8 - 48 files
 ========================
 
-Full superset of v1-v6.1. Unzip over your repo root, overwriting.
+Full superset of v1-v7.2. Unzip over your repo root, overwriting.
 
-1. JUZ NOW HAS BOTH READING MODES
-   lib/screens/juz_detail_screen.dart, lib/widgets/mushaf_view.dart
+1. MARK YOUR PLACE WHILE READING ARABIC-ONLY
+   lib/widgets/mushaf_view.dart
 
-   The Arabic-only / Translation toggle existed on the surah screen only. It is
-   now on Juz too, same control in the same place.
+   You were right - the bookmark only existed on translation verse rows, so in
+   Arabic-only mode there was no way to save where you were.
 
-   To do it, MushafView was changed to take a plain LIST OF VERSES instead of a
-   Surah. A juz spans several surahs, so a Surah-shaped API could never have
-   worked for it. Surah screen updated for the new signature.
+   The footer now reads:
 
-   The Juz screen also picks up proper theming: verse references in emerald,
-   gold hairline dividers, surah headers with the Arabic name in gold.
+     Page 3 of 12  ·  Ayah 45-58  ·  15 lines        [Save page]
 
-2. CONTINUE READING
-   lib/services/quran_local_data_service.dart  - storage
-   lib/screens/surah_detail_screen.dart        - tracking + resume
-   lib/screens/quran_home_screen.dart          - the card
+   Tap "Save page" and the first ayah on that page becomes your saved position.
+   It flips to "Saved" when your saved verse is on the page you are looking at.
 
-   A green "CONTINUE READING" card sits at the top of the Quran tab showing
-   the surah, and the ayah when you have marked one. Tapping it reopens the
-   surah exactly where you were.
+   Making this work needed a change under the hood. The view flows all the
+   verses into one string to paginate them, which normally throws away where
+   each verse begins. It now records every verse's character offset and does a
+   binary search to work out which verses a page holds. Without that, a page
+   could not tell you what was on it, and marking from this view would have
+   been impossible.
 
-   TWO LEVELS OF PRECISION, BOTH SAVED:
-     - Scroll position, saved automatically as you read (throttled to once
-       every 2 seconds - writing on every scroll frame would hammer the disk),
-       and once more when you leave the screen.
-     - An exact verse, when you tap the new bookmark icon on any verse.
+   The Juz screen shows no Save button. A juz spans several surahs, so a bare
+   verse number there is ambiguous - there is no single surah to attribute it
+   to. Say the word if you want juz positions saved too; it needs the surah
+   stored alongside the verse.
 
-   Why both: a scroll offset stops meaning anything if the font size or the
-   device changes. A verse number always survives. The offset is the nicety;
-   the verse is the guarantee. Auto-saves deliberately do NOT overwrite a verse
-   you marked by hand in the same surah.
+2. ARABIC-ONLY IS NOW THE DEFAULT
+   Surahs and juz open in Arabic only. Translation is a button away, not the
+   starting point.
 
-   Only ONE position is kept. A reading app that remembers thirty places
-   remembers none of them usefully.
+   The choice is remembered. Turn translation on and it stays on until you turn
+   it off - nobody re-toggles it every time they open a surah. Surah and Juz
+   share the one preference, so setting it in either place sets it for both.
 
-3. NAME, ADDRESS AND DATE MOVED ONTO THE IMAGE
-   lib/widgets/artwork_header.dart, lib/screens/home_screen.dart
+3. CONTINUE READING CARD RESTYLED
+   Off the solid green. It is now a white card with a gold hairline, a gold
+   medallion and emerald type - the same construction as every other card in
+   the app.
 
-   Header is now 300px, up from a 200px picture under a ~90px white bar. The
-   photograph gets all that space back.
-
-   Text sits top-left over a gradient scrim. The scrim is not decoration: the
-   sky swings from pale midday blue to near-black at night, and white text
-   would disappear against the bright states without it. Type also carries a
-   soft shadow as a second line of defence.
-
-   Address is included, on its own line above the date - most masjid addresses
-   are too long to sit beside a date on one line.
-
-   NOTE: this is the third arrangement we have tried, and it reverses the v5
-   change. Originally the name sat over the middle of the picture, across the
-   dome, and was unreadable. Top-left over a scrim is a different thing from
-   that, and it buys back the height. If it still reads badly on a bright
-   midday sky, the scrim stops are one line to deepen.
+   The green slab read as a banner from a different product. A card that
+   belongs to the palette gets noticed by the medallion, not by shouting.
 
 STILL OPEN
 - Urdu CHAPTER names: your dataset has none, in any file.
-- The Arabic-only view is not a Madani Mushaf and does not claim to be. Real
-  Mushaf pagination needs a page-and-line layout table plus the QCF font.
+- The Arabic-only view is not a Madani Mushaf and does not claim to be.
 
 NOT COMPILE-CHECKED
-All 55 Dart files balance. Every AppColors and AppText reference cross-checked
-against app_theme.dart - none undefined. No package:collection dependency was
-added; firstOrNull was avoided deliberately.
+All Dart files balance. Every AppColors/AppText reference cross-checked. Also
+re-scanned for the nullable-local-inside-a-closure pattern that broke v7.1 -
+none present.

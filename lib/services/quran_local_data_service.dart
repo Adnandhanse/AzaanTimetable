@@ -47,6 +47,23 @@ class QuranLocalDataService {
     await prefs.setString(_notesKey, json.encode(notes));
   }
 
+  // --- Reading mode preference --------------------------------------------
+
+  static const _arabicOnlyKey = 'quran_arabic_only';
+
+  /// Defaults to TRUE — the Qur'an opens in Arabic only, and translation is
+  /// something the reader turns on. Whichever way they last left it sticks, so
+  /// nobody has to re-toggle it every time they open a surah.
+  static Future<bool> getArabicOnly() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_arabicOnlyKey) ?? true;
+  }
+
+  static Future<void> setArabicOnly(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_arabicOnlyKey, value);
+  }
+
   // --- Where the reader stopped -------------------------------------------
 
   static const _lastReadKey = 'quran_last_read';

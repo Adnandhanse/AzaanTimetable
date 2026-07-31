@@ -188,38 +188,48 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     final String name = (last['surahName'] as String?) ?? 'your last surah';
     final int? verse = last['verseNumber'] as int?;
 
+    // White card, gold hairline, emerald type — the same construction as every
+    // other card in the app. The solid green block read as a banner from a
+    // different product; this belongs to the palette instead of shouting over
+    // it. The gold medallion is what draws the eye, not a slab of colour.
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
       child: Material(
-        color: AppColors.emerald,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(4),
         child: InkWell(
           onTap: _resume,
           borderRadius: BorderRadius.circular(4),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 13, 12, 13),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppColors.goldRule),
+            ),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
             child: Row(
               children: [
+                const Medallion(icon: Icons.play_arrow_rounded, size: 36),
+                const SizedBox(width: 13),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'CONTINUE READING',
-                        style: AppText.eyebrow
-                            .copyWith(letterSpacing: 1.5, color: AppColors.goldPale),
+                        style: AppText.eyebrow.copyWith(
+                            letterSpacing: 1.5, color: AppColors.textMuted),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         verse == null ? name : '$name  \u00b7  Ayah $verse',
                         style: AppText.rowTitle
-                            .copyWith(fontSize: 19, color: AppColors.white),
+                            .copyWith(fontSize: 18, color: AppColors.emerald),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.play_arrow_rounded,
-                    color: AppColors.goldPale, size: 26),
+                const Icon(Icons.chevron_right,
+                    size: 18, color: AppColors.chevron),
               ],
             ),
           ),

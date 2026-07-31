@@ -41,6 +41,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   void initState() {
     super.initState();
     _markedVerse = widget.initialVerse;
+    _loadReadingMode();
     _loadNotes();
     _scroll.addListener(_onScroll);
 
@@ -52,6 +53,17 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         _scroll.jumpTo(jumpTo.clamp(0.0, _scroll.position.maxScrollExtent));
       });
     }
+  }
+
+  Future<void> _loadReadingMode() async {
+    final bool arabicOnly = await QuranLocalDataService.getArabicOnly();
+    if (!mounted) return;
+    setState(() => _mushafMode = arabicOnly);
+  }
+
+  Future<void> _setReadingMode(bool arabicOnly) async {
+    setState(() => _mushafMode = arabicOnly);
+    await QuranLocalDataService.setArabicOnly(arabicOnly);
   }
 
   void _onScroll() {
@@ -168,8 +180,9 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
   }
 
-  /// false = verse-by-verse with translation, true = Arabic-only continuous.
-  bool _mushafMode = false;
+  /// true = Arabic only (the default), false = verse-by-verse with translation.
+  /// Loaded from preferences, so the reader's last choice sticks.
+  bool _mushafMode = true;
 
   @override
   Widget build(BuildContext context) {
@@ -183,13 +196,14 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-              onPressed: () => setState(() => _mushafMode = !_mushafMode),
+              onPressed: () => _setReadingMode(!_mushafMode),
               icon: Icon(
                 _mushafMode ? Icons.list_alt_outlined : Icons.menu_book_outlined,
                 size: 18,
                 color: AppColors.emerald,
               ),
               label: Text(
+                // Names what you get, not what you are in.
                 _mushafMode ? 'Translation' : 'Arabic only',
                 style: AppText.caption.copyWith(color: AppColors.emerald),
               ),
@@ -203,7 +217,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         ],
       ),
       body: _mushafMode
-          ? MushafView(verses: surah.verses)
+          ? MushafView(
+              verses: surah.verses,
+              markedVerse: _markedVerse,
+              onMarkVerse: _markVerse,
+            )
           : ListView(
         controller: _scroll,
         padding: const EdgeInsets.all(16),

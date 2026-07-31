@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../models/quran.dart';
 import '../data/juz_boundaries.dart';
 import '../widgets/mushaf_view.dart';
+import '../services/quran_local_data_service.dart';
 
 class JuzDetailScreen extends StatefulWidget {
   final int juzNumber;
@@ -19,10 +20,27 @@ class JuzDetailScreen extends StatefulWidget {
 }
 
 class _JuzDetailScreenState extends State<JuzDetailScreen> {
-  /// false = verse by verse with translation, true = Arabic-only continuous.
-  /// Same control as the surah screen — the two reading modes should be
-  /// available wherever Qur'an is read, not just in one place.
-  bool _mushafMode = false;
+  /// true = Arabic only (the default), false = verse by verse with translation.
+  /// Shares the stored preference with the surah screen, so the reader sets it
+  /// once and both screens respect it.
+  bool _mushafMode = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReadingMode();
+  }
+
+  Future<void> _loadReadingMode() async {
+    final bool arabicOnly = await QuranLocalDataService.getArabicOnly();
+    if (!mounted) return;
+    setState(() => _mushafMode = arabicOnly);
+  }
+
+  Future<void> _setReadingMode(bool arabicOnly) async {
+    setState(() => _mushafMode = arabicOnly);
+    await QuranLocalDataService.setArabicOnly(arabicOnly);
+  }
 
   /// The (surah, verse) pairs falling inside this juz.
   List<(Surah, QuranVerse)> _items() {
@@ -61,7 +79,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-              onPressed: () => setState(() => _mushafMode = !_mushafMode),
+              onPressed: () => _setReadingMode(!_mushafMode),
               icon: Icon(
                 _mushafMode ? Icons.list_alt_outlined : Icons.menu_book_outlined,
                 size: 18,

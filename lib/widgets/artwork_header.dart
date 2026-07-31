@@ -96,7 +96,11 @@ class ArtworkHeader extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.displayName.copyWith(
-                              fontSize: 24,
+                              // 20, down from 24. Over a photograph the name
+                              // does not need to shout — the scrim and the
+                              // white already separate it from the sky, and a
+                              // smaller name lets more of the building show.
+                              fontSize: 20,
                               color: Colors.white,
                               shadows: const <Shadow>[
                                 Shadow(blurRadius: 8, color: Color(0x66000000)),
