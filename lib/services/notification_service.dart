@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -36,23 +39,103 @@ class NotificationService {
   ///
   /// usage: alarm means it plays at ALARM volume and follows alarm rules rather
   /// than notification ones, which is what a prayer call should do.
-  static AndroidNotificationDetails _alarmChannel() =>
-      const AndroidNotificationDetails(
-        _channelId,
+  /// Channel carrying the bundled azan.
+  static const String channelIdAzan = _channelId;
+
+  /// Fallback channel using the system alert sound. A separate id is required:
+  /// a channel's sound is fixed the moment Android creates it.
+  static const String channelIdPlain = 'prayer_alarm_plain_v1';
+
+  static AndroidNotificationDetails alarmChannel({bool withAzan = true}) =>
+      AndroidNotificationDetails(
+        withAzan ? channelIdAzan : channelIdPlain,
         _channelName,
-        channelDescription: 'Plays the azan when it is time for prayer',
+        channelDescription: withAzan
+            ? 'Plays the azan when it is time for prayer'
+            : 'Alerts you when it is time for prayer',
         importance: Importance.max,
         priority: Priority.high,
         category: AndroidNotificationCategory.alarm,
         fullScreenIntent: true,
         playSound: true,
-        sound: RawResourceAndroidNotificationSound('azan'),
+        sound: withAzan
+            ? const RawResourceAndroidNotificationSound('azan')
+            : null,
         audioAttributesUsage: AudioAttributesUsage.alarm,
-        // The azan runs over three minutes; without this Android can cut it
-        // short when the notification is auto-dismissed.
-        ongoing: false,
         autoCancel: true,
       );
+
+  /// What happened on the last scheduling run.
+  ///
+  /// Scheduling used to fail silently: cancelAll() ran, something threw,
+  /// nothing was re-armed, and there was no trace of it anywhere. An alarm app
+  /// must never lose its alarms quietly.
+  static const _diagKey = 'alarm_last_diagnostics';
+
+  static Future<void> _writeDiagnostics(Map<String, dynamic> d) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      d['at'] = DateTime.now().millisecondsSinceEpoch;
+      await prefs.setString(_diagKey, json.encode(d));
+    } catch (_) {}
+  }
+
+  static Future<Map<String, dynamic>?> lastDiagnostics() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_diagKey);
+      return raw == null
+          ? null
+          : Map<String, dynamic>.from(json.decode(raw));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Schedules one alarm, degrading rather than failing.
+  ///
+  ///   1. alarmClock + bundled azan
+  ///   2. alarmClock + default alert sound   (bad or missing azan resource)
+  ///   3. exactAllowWhileIdle + default      (alarmClock refused by the OS)
+  ///
+  /// An alarm that rings with the wrong sound beats one that does not ring.
+  /// Returns which tier worked, or null if all three were refused.
+  static Future<String?> _scheduleWithFallback({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime when,
+    required String? payload,
+    DateTimeComponents? match,
+  }) async {
+    const attempts = <(String, bool, AndroidScheduleMode)>[
+      ('azan + alarmClock', true, AndroidScheduleMode.alarmClock),
+      ('default sound + alarmClock', false, AndroidScheduleMode.alarmClock),
+      ('default sound + exactAllowWhileIdle', false,
+          AndroidScheduleMode.exactAllowWhileIdle),
+    ];
+
+    for (final (String label, bool azan, AndroidScheduleMode mode) in attempts) {
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          title,
+          body,
+          when,
+          NotificationDetails(android: alarmChannel(withAzan: azan)),
+          androidScheduleMode: mode,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: match,
+          payload: payload,
+        );
+        return label;
+      } catch (_) {
+        // fall through to the next tier
+      }
+    }
+    return null;
+  }
 
   static const _ids = {
     'fajr': 100,
@@ -211,7 +294,7 @@ class NotificationService {
     return (prayer, masjid, audio);
   }
 
-  static Future<void> _scheduleDaily({
+  static Future<String?> _scheduleDaily({
     required int id,
     required String title,
     required String body,
@@ -223,10 +306,8 @@ class NotificationService {
     var scheduled = tz.TZDateTime.from(timeToday, tz.local);
 
     if (fridayOnly) {
-      // BUG FIX: Juma was scheduled with DateTimeComponents.time like every
-      // other prayer, which made the Friday prayer alarm ring EVERY DAY.
-      // Walk forward to the next Friday that is still in the future, and
-      // match on day-of-week as well as time.
+      // Juma used to be scheduled with DateTimeComponents.time like the other
+      // five, which made the Friday prayer ring every single day.
       while (scheduled.weekday != DateTime.friday || !scheduled.isAfter(now)) {
         scheduled = scheduled.add(const Duration(days: 1));
       }
@@ -234,28 +315,15 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      NotificationDetails(android: _alarmChannel()),
-      // HIGHEST TIER ANDROID OFFERS.
-      //
-      // exactAllowWhileIdle is an exact alarm that doze *permits*; alarmClock
-      // is the primitive the OS uses for the user's own alarm clock. It is
-      // exempt from doze, survives battery optimisation far better, and is the
-      // most reliable scheduling call available to a third-party app.
-      //
-      // The cost: the phone shows an alarm icon in the status bar and reports
-      // the next prayer as the device's next alarm. For a prayer alarm app
-      // that is arguably correct behaviour rather than a side effect.
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: fridayOnly
+    return _scheduleWithFallback(
+      id: id,
+      title: title,
+      body: body,
+      when: scheduled,
+      payload: payload,
+      match: fridayOnly
           ? DateTimeComponents.dayOfWeekAndTime
           : DateTimeComponents.time,
-      payload: payload,
     );
   }
 
@@ -283,10 +351,16 @@ class NotificationService {
     await init();
 
     final CachedSchedule? schedule = given ?? await PrayerScheduleCache.load();
-    if (schedule == null) return <String>['No cached schedule yet'];
+    if (schedule == null) {
+      await _writeDiagnostics(
+          <String, dynamic>{'result': 'no cached schedule yet', 'scheduled': 0});
+      return <String>['No cached schedule yet'];
+    }
 
     await cancelAll();
     final scheduledSummary = <String>[];
+    final failures = <String>[];
+    String? modeUsed;
 
     for (final entry in _labels.entries) {
       final key = entry.key;
@@ -296,18 +370,40 @@ class NotificationService {
       final dt = _parseTimeToday(timeStr);
       if (dt == null) continue;
 
-      await _scheduleDaily(
-        id: _ids[key]!,
-        title: '$label - ${schedule.masjidName}',
-        body: "It's time for $label prayer.",
-        timeToday: dt,
-        payload:
-            _buildPayload(label, schedule.masjidName, schedule.audioUrl),
-        fridayOnly: key == 'juma',
-      );
-      scheduledSummary
-          .add('$label: $timeStr${key == 'juma' ? ' (Fridays only)' : ''}');
+      // One prayer failing must not abort the rest. Previously a single throw
+      // left every alarm cancelled and nothing rescheduled — which is exactly
+      // how the app went from "one notification" to total silence.
+      String? tier;
+      try {
+        tier = await _scheduleDaily(
+          id: _ids[key]!,
+          title: '$label - ${schedule.masjidName}',
+          body: "It's time for $label prayer.",
+          timeToday: dt,
+          payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
+          fridayOnly: key == 'juma',
+        );
+      } catch (_) {
+        tier = null;
+      }
+
+      if (tier == null) {
+        failures.add(label);
+      } else {
+        modeUsed ??= tier;
+        scheduledSummary
+            .add('$label: $timeStr${key == 'juma' ? ' (Fridays only)' : ''}');
+      }
     }
+
+    await _writeDiagnostics(<String, dynamic>{
+      'result': failures.isEmpty ? 'ok' : 'partial',
+      'scheduled': scheduledSummary.length,
+      'failed': failures,
+      'mode': modeUsed ?? 'none',
+      'masjid': schedule.masjidName,
+    });
+
     return scheduledSummary;
   }
 
@@ -347,21 +443,26 @@ class NotificationService {
   /// Fires a real alarm-path notification after [delay]. This is the only
   /// honest way for someone to find out whether alarms work on THEIR phone,
   /// rather than discovering it at Fajr.
-  static Future<void> scheduleTestAlarm(
+  /// Fires a real alarm down the exact path a prayer uses. Returns which tier
+  /// worked, or null if the system refused all three — that null is the
+  /// diagnosis.
+  static Future<String?> scheduleTestAlarm(
       {Duration delay = const Duration(seconds: 60)}) async {
     await init();
-    final when = tz.TZDateTime.now(tz.local).add(delay);
-    await _plugin.zonedSchedule(
-      998,
-      'Test alarm',
-      'If you are seeing this, alarms work on this phone.',
-      when,
-      NotificationDetails(android: _alarmChannel()),
-      androidScheduleMode: AndroidScheduleMode.alarmClock,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+    final tier = await _scheduleWithFallback(
+      id: 998,
+      title: 'Test alarm',
+      body: 'If you are seeing this, alarms work on this phone.',
+      when: tz.TZDateTime.now(tz.local).add(delay),
       payload: 'Test|||Test|||',
     );
+    await _writeDiagnostics(<String, dynamic>{
+      'result':
+          tier == null ? 'test alarm REFUSED by the system' : 'test alarm armed',
+      'mode': tier ?? 'none',
+      'scheduled': tier == null ? 0 : 1,
+    });
+    return tier;
   }
 
   static Future<void> cancelTestAlarm() async => _plugin.cancel(998);
@@ -381,7 +482,7 @@ class NotificationService {
       999,
       'Test Notification',
       'If you see this, notifications work on this phone.',
-      NotificationDetails(android: _alarmChannel()),
+      NotificationDetails(android: alarmChannel()),
       payload: 'Test|||Test Masjid|||',
     );
   }

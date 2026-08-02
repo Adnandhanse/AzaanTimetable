@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import 'notification_service.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
 /// This runs in its own persistent background isolate, kept alive by a
@@ -132,14 +134,23 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       '$label - $masjidName',
       "It's time for $label prayer.",
       NotificationDetails(
+        // MUST match the channel NotificationService creates.
+        //
+        // This posted to 'prayer_times_channel', which NotificationService now
+        // deletes on startup. On Android 8+ posting to a deleted channel fails
+        // SILENTLY - so this backup path, the one that matters most when the
+        // app has been killed, was doing nothing at all.
         android: AndroidNotificationDetails(
-          'prayer_times_channel',
+          NotificationService.channelIdAzan,
           'Prayer Time Alarms',
-          channelDescription: 'Notifies you when it is time for prayer',
+          channelDescription: 'Plays the azan when it is time for prayer',
           importance: Importance.max,
           priority: Priority.high,
           category: AndroidNotificationCategory.alarm,
           fullScreenIntent: true,
+          playSound: true,
+          sound: const RawResourceAndroidNotificationSound('azan'),
+          audioAttributesUsage: AudioAttributesUsage.alarm,
         ),
       ),
       payload: '$label|||$masjidName|||${audioUrl ?? ''}',

@@ -48,6 +48,10 @@ flutter:
     # Photographs, cropped and converted to WebP at 1x/2x/3x. Flutter picks the
     # right density automatically from assets/images/2.0x and 3.0x.
     # About 330 KB in total for all three.
+    # Default azan. Also copied into android/app/src/main/res/raw/azan.mp3 by
+    # the CI workflow, where Android needs it to serve as a notification
+    # channel sound. Both copies are the same file - replace both to change it.
+    - assets/audio/azan.mp3
     - assets/images/nabawi_header.webp
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp

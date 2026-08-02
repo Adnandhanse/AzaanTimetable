@@ -1,95 +1,76 @@
-UI + ALARM RELIABILITY - v11 - 50 files
-=======================================
+v13 - ALARM FAILURE FIXES
+=========================
 
-Full superset of v1-v10. Unzip over your repo root, overwriting.
-No new packages. No pubspec change. Nothing new for CI to trip on.
-
-=====================================================================
-BE CLEAR ABOUT WHAT THIS ACHIEVES
-=====================================================================
-100% is not reachable on Android, by anyone. If the user swipes the app out of
-recents on a Xiaomi, or the system force-stops it, Android CANCELS every alarm
-the app registered. No third-party app survives that - Google's own Clock is
-whitelisted by name.
-
-What this gets you is as reliable as Android permits, roughly 95-99% once the
-user grants three things, plus the app now noticing and repairing its own
-failures instead of dying quietly.
+Full superset of v1-v12. Unzip over your repo root, overwriting.
 
 =====================================================================
-1. HIGHEST-TIER SCHEDULING  (biggest single win)
+I BROKE YOUR BACKUP ALARM PATH IN v12. THAT IS ON ME.
 =====================================================================
-  AndroidScheduleMode.exactAllowWhileIdle  ->  AndroidScheduleMode.alarmClock
+v12 created a new notification channel for the azan and DELETED the old one,
+'prayer_times_channel'. But foreground_alarm_service.dart - the background
+path that fires when the app has been killed, the one that matters most - was
+still posting to that deleted channel.
 
-exactAllowWhileIdle is an exact alarm doze PERMITS. alarmClock is the primitive
-Android uses for the user's own alarm clock: exempt from doze, far more
-resistant to battery optimisation, the strongest scheduling call a third-party
-app can make.
+On Android 8+, posting to a deleted channel fails SILENTLY. No error, no
+notification, nothing in the log. That is very likely why your later prayers
+produced nothing at all.
 
-Tradeoff, so you are not surprised: the phone shows an alarm icon in the status
-bar and reports the next prayer as the device's next alarm. For a prayer alarm
-app I would argue that is correct, not a side effect.
-
-=====================================================================
-2. ALARMS NO LONGER DEPEND ON THE NETWORK
-=====================================================================
-  NEW  lib/services/prayer_schedule_cache.dart
-
-Alarms were armed only when Home's Firestore stream emitted. Open the app on a
-bad connection and NOTHING was scheduled.
-
-Prayer times are now cached on the device. main() arms alarms from that cache
-before Firebase or Firestore is touched. Firestore updates prayer times; it no
-longer decides whether an alarm exists.
+Fixed: the foreground service now uses the same channel constant as
+NotificationService, with the azan sound attached.
 
 =====================================================================
-3. THE APP NOW CHECKS ITS OWN ALARMS AND REPAIRS THEM
+THE DESIGN FAULT BEHIND "ONE NOTIFICATION, THEN SILENCE"
 =====================================================================
-  NotificationService.verifyAndRepair()
+scheduleFromCache() called cancelAll() and then scheduled each prayer in a
+loop. A single throw anywhere in that loop left EVERY alarm cancelled and
+nothing rescheduled. main() then swallowed the exception with catch (_) {}.
 
-Runs at every app start and every time the app returns to the foreground. It
-asks the OS what it still holds, compares against what should be there, and
-re-arms the whole set if anything is missing.
+So one bad sound resource, or one refused schedule call, silently wiped the
+whole schedule. That matches your symptoms exactly: change the timings, get
+nothing.
 
-Alarms disappear for reasons the app cannot see - a force-stop, an OEM cleanup,
-a reboot. Previously the app scheduled and hoped, and a wipe was invisible
-until someone missed a prayer. Now it self-heals on next open.
+THREE CHANGES SO THIS CANNOT HAPPEN AGAIN:
 
-=====================================================================
-4. ALARM HEALTH SCREEN  (Settings > Alarm health)
-=====================================================================
-  NEW  lib/screens/alarm_health_screen.dart
+1. THREE-TIER FALLBACK per alarm, instead of all-or-nothing:
+     1. alarmClock + bundled azan
+     2. alarmClock + default alert sound      (bad/missing azan resource)
+     3. exactAllowWhileIdle + default sound   (alarmClock refused by the OS)
+   An alarm that rings with the wrong sound beats one that does not ring.
 
-- Live status of every permission that matters, each with its own Fix button
-- Whether the background service is actually running
-- What the OS currently has scheduled, with next fire times
-- TEST ALARM IN 60 SECONDS - fires down the exact same path a prayer alarm
-  uses, so someone can verify on THEIR handset instead of finding out at Fajr
-- Step-by-step Autostart instructions for Xiaomi/Redmi/POCO, Realme/OPPO,
-  vivo/iQOO, Samsung, OnePlus and stock Android
+2. ONE PRAYER FAILING NO LONGER ABORTS THE REST. Each is scheduled in its own
+   try block; failures are collected, not fatal.
 
-Written out per manufacturer rather than auto-detected, deliberately - that
-would have meant adding device_info_plus, and you have had enough plugin
-trouble in CI.
+3. NOTHING IS SWALLOWED. Every run records what happened.
 
 =====================================================================
-CARRIED OVER FROM v10 (you said you had not applied it)
+SETTINGS > ALARM HEALTH NOW TELLS YOU WHAT WENT WRONG
 =====================================================================
-- JUMA WAS RINGING EVERY DAY. Scheduled with matchDateTimeComponents.time like
-  the other five. Now walks to the next Friday, matches dayOfWeekAndTime.
-- Home banner now warns about battery restriction as well as exact alarms, each
-  with a Fix button. requestIgnoreBatteryOptimizations existed in your code but
-  was buried in Settings and nothing ever prompted for it - the most likely
-  cause of "sometimes it comes, sometimes not".
-- Hadith bookmark no longer pushed off screen past hadith 100.
+New "Last scheduling run" panel:
+    Result         ok / partial / no cached schedule
+    Alarms armed   how many actually took
+    Method used    which of the three tiers worked
+    FAILED         which prayers were refused, in red
+
+The test alarm now REPORTS instead of just firing. If the system refuses all
+three tiers, it says so - "The system REFUSED to schedule an alarm" - which is
+the answer you needed when nothing happened after 60 seconds. That message
+means the phone is blocking scheduling outright, and no app code fixes it;
+it is the permissions above or Autostart.
+
+Also added: "Re-arm alarms now" button.
 
 =====================================================================
-STILL NEEDS YOU
+WHAT TO DO WHEN YOU INSTALL THIS
 =====================================================================
-1. AN AZAN MP3. Right now the sound depends on the ringing screen launching;
-   when Android blocks that you get a default chime. Bundling an azan as the
-   notification CHANNEL sound with alarm audio attributes makes the OS play it
-   directly, independent of any activity starting. Send the file.
+1. Settings > Alarm health
+2. Look at "Last scheduling run" - Alarms armed should be 5 or 6
+3. Press the 60-second test, lock the phone
+4. If it does not fire, come back to that screen and tell me EXACTLY what
+   Result, Method used and FAILED say. That will identify the cause in one
+   step instead of another guessing round.
 
-2. THE SAHIH / DAIF FILTER. Your data has gradings, but scholars disagree - 564
-   times in Abu Dawud alone. Tell me whose gradings to use and I will build it.
+Note: the channel changed again in v12 (prayer_alarm_azan_v1). If you are
+upgrading over an install that already had v12, Android keeps the existing
+channel - that is normal and correct.
+
+NOT COMPILE-CHECKED. All Dart files balance, all theme references defined.

@@ -26,6 +26,8 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   bool? _serviceRunning;
   bool _loading = true;
   bool _testArmed = false;
+  Map<String, dynamic>? _diag;
+  String? _testResult;
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
     setState(() => _loading = true);
     final health = await NotificationService.alarmHealth();
     final pending = await NotificationService.getPendingAlarms();
+    final diag = await NotificationService.lastDiagnostics();
     bool? running;
     try {
       running = await ForegroundAlarmManager.isRunning();
@@ -48,6 +51,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
       _health = health;
       _pending = pending;
       _serviceRunning = running;
+      _diag = diag;
       _loading = false;
     });
   }
@@ -64,16 +68,32 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   }
 
   Future<void> _runTest() async {
-    await NotificationService.scheduleTestAlarm();
+    final tier = await NotificationService.scheduleTestAlarm();
     if (!mounted) return;
-    setState(() => _testArmed = true);
+    setState(() {
+      _testArmed = tier != null;
+      _testResult = tier;
+    });
+    await _refresh();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Test alarm set for 60 seconds. Lock the phone and wait — do not close the app from recents.'),
-        duration: Duration(seconds: 5),
+      SnackBar(
+        content: Text(tier == null
+            // This is the useful case. If every tier is refused, the phone is
+            // blocking scheduling outright and no amount of app code fixes it.
+            ? 'The system REFUSED to schedule an alarm. Check the permissions above, then the Autostart steps.'
+            : 'Test alarm set for 60 seconds ($tier). Lock the phone and wait — do not swipe the app away.'),
+        duration: const Duration(seconds: 6),
       ),
     );
+  }
+
+  Future<void> _rearm() async {
+    await NotificationService.scheduleFromCache();
+    await _refresh();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Alarms re-armed.')));
   }
 
   @override
@@ -179,6 +199,40 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                       ),
                     ],
                   ],
+                ),
+
+                const SizedBox(height: 22),
+                const SectionRule(label: 'Last scheduling run'),
+                const SizedBox(height: 8),
+                if (_diag == null)
+                  Text('Nothing recorded yet.',
+                      style:
+                          AppText.caption.copyWith(color: AppColors.textMuted))
+                else ...[
+                  _DiagLine('Result', '${_diag!['result']}'),
+                  _DiagLine('Alarms armed', '${_diag!['scheduled']}'),
+                  _DiagLine('Method used', '${_diag!['mode'] ?? '-'}'),
+                  if ((_diag!['failed'] as List?)?.isNotEmpty ?? false)
+                    _DiagLine('FAILED', (_diag!['failed'] as List).join(', '),
+                        bad: true),
+                ],
+                if (_testResult != null) ...[
+                  const SizedBox(height: 6),
+                  _DiagLine('Last test', _testResult!),
+                ],
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: _rearm,
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('Re-arm alarms now'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.emerald,
+                    side: const BorderSide(color: AppColors.goldRule),
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                    textStyle: AppText.body,
+                  ),
                 ),
 
                 const SizedBox(height: 22),
@@ -351,6 +405,40 @@ class _OemTile extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DiagLine extends StatelessWidget {
+  const _DiagLine(this.label, this.value, {this.bad = false});
+
+  final String label;
+  final String value;
+  final bool bad;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(label,
+                style: AppText.caption.copyWith(color: AppColors.textMuted)),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: AppText.caption.copyWith(
+                color: bad ? const Color(0xFFB3261E) : AppColors.text,
+                fontWeight: bad ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

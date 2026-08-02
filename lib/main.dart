@@ -40,9 +40,15 @@ void main() async {
   // updates prayer times; it must never be what decides whether an alarm
   // exists. Failures here are swallowed on purpose — a scheduling problem must
   // not stop the app from opening.
+  // Errors are recorded rather than swallowed. Startup must not be blocked by
+  // a scheduling problem, but an alarm app that loses its alarms without
+  // leaving a trace is worse than one that crashes — the diagnostics land on
+  // Settings > Alarm health.
   try {
     await NotificationService.scheduleFromCache();
-  } catch (_) {}
+  } catch (e) {
+    debugPrint('Alarm scheduling failed at startup: $e');
+  }
 
   runApp(initError == null ? const MasjidAlarmApp() : _FirebaseErrorApp(error: initError));
 }
