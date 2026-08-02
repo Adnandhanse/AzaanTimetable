@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
@@ -40,6 +41,21 @@ void main() async {
   // updates prayer times; it must never be what decides whether an alarm
   // exists. Failures here are swallowed on purpose — a scheduling problem must
   // not stop the app from opening.
+  // Errors are recorded rather than swallowed. Startup must not be blocked by
+  // a scheduling problem, but an alarm app that loses its alarms without
+  // leaving a trace is worse than one that crashes — the diagnostics land on
+  // Settings > Alarm health.
+  // Ask for everything the alarm needs, once, on first launch.
+  // A prayer alarm missing one permission is not partly working, it is broken
+  // — so there is nothing to gain by asking for them lazily.
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('permissions_requested_v1') ?? false)) {
+      await NotificationService.requestAllPermissions();
+      await prefs.setBool('permissions_requested_v1', true);
+    }
+  } catch (_) {}
+
   // Errors are recorded rather than swallowed. Startup must not be blocked by
   // a scheduling problem, but an alarm app that loses its alarms without
   // leaving a trace is worse than one that crashes — the diagnostics land on

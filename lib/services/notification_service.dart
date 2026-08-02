@@ -25,7 +25,7 @@ class NotificationService {
   /// cannot be changed afterwards — editing the old channel would do nothing on
   /// any phone that already had the app. Bumping the id creates a fresh channel
   /// carrying the azan. If you ever change the sound again, bump it again.
-  static const _channelId = 'prayer_alarm_azan_v1';
+  static const _channelId = 'prayer_alarm_azan_v2';
   static const _channelName = 'Prayer Time Alarms';
 
   /// The azan plays as the NOTIFICATION'S OWN SOUND, not from the ringing
@@ -44,7 +44,7 @@ class NotificationService {
 
   /// Fallback channel using the system alert sound. A separate id is required:
   /// a channel's sound is fixed the moment Android creates it.
-  static const String channelIdPlain = 'prayer_alarm_plain_v1';
+  static const String channelIdPlain = 'prayer_alarm_plain_v2';
 
   static AndroidNotificationDetails alarmChannel({bool withAzan = true}) =>
       AndroidNotificationDetails(
@@ -71,6 +71,84 @@ class NotificationService {
   /// nothing was re-armed, and there was no trace of it anywhere. An alarm app
   /// must never lose its alarms quietly.
   static const _diagKey = 'alarm_last_diagnostics';
+
+  static const _useAzanKey = 'alarm_use_azan_sound';
+
+  /// Whether to use the bundled azan or the phone's default alert sound.
+  ///
+  /// This is a user-facing escape hatch, not a preference. If the azan
+  /// resource is missing from the build, every notification posted to the azan
+  /// channel is dropped by Android without a word. Flipping this moves to a
+  /// channel that cannot fail that way, which both restores alarms
+  /// immediately and PROVES the sound was the cause.
+  static Future<bool> useAzanSound() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_useAzanKey) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  static Future<void> setUseAzanSound(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_useAzanKey, value);
+  }
+
+  /// Creates both channels up front.
+  ///
+  /// Previously channels were created implicitly by the first notification.
+  /// That is fragile: it happens once, invisibly, and whatever state it
+  /// captures is permanent. Creating them explicitly at startup makes the
+  /// moment of creation something we control.
+  static Future<void> _createChannels() async {
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (android == null) return;
+
+    try {
+      await android.createNotificationChannel(const AndroidNotificationChannel(
+        _channelId,
+        _channelName,
+        description: 'Plays the azan when it is time for prayer',
+        importance: Importance.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('azan'),
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+      ));
+    } catch (_) {}
+
+    try {
+      await android.createNotificationChannel(const AndroidNotificationChannel(
+        channelIdPlain,
+        'Prayer Alarms (default sound)',
+        description: 'Alerts you when it is time for prayer',
+        importance: Importance.max,
+        playSound: true,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+      ));
+    } catch (_) {}
+  }
+
+  /// Posts a notification immediately, bypassing AlarmManager entirely.
+  ///
+  /// This is the single most useful diagnostic in the app. If this shows
+  /// nothing, the problem is the CHANNEL and no scheduling fix will ever help.
+  /// If it shows, the channel is fine and the problem is scheduling or the
+  /// phone freezing the app. Nothing else separates those two.
+  static Future<void> showNotificationNow({bool? withAzan}) async {
+    await init();
+    final bool azan = withAzan ?? await useAzanSound();
+    await _plugin.show(
+      997,
+      'Immediate test',
+      azan
+          ? 'Posted to the azan channel. You should hear the azan.'
+          : 'Posted to the default-sound channel.',
+      NotificationDetails(android: alarmChannel(withAzan: azan)),
+      payload: 'Test|||Test|||',
+    );
+  }
 
   static Future<void> _writeDiagnostics(Map<String, dynamic> d) async {
     try {
@@ -108,8 +186,10 @@ class NotificationService {
     required String? payload,
     DateTimeComponents? match,
   }) async {
-    const attempts = <(String, bool, AndroidScheduleMode)>[
-      ('azan + alarmClock', true, AndroidScheduleMode.alarmClock),
+    final bool azanWanted = await useAzanSound();
+    final attempts = <(String, bool, AndroidScheduleMode)>[
+      if (azanWanted)
+        ('azan + alarmClock', true, AndroidScheduleMode.alarmClock),
       ('default sound + alarmClock', false, AndroidScheduleMode.alarmClock),
       ('default sound + exactAllowWhileIdle', false,
           AndroidScheduleMode.exactAllowWhileIdle),
@@ -186,12 +266,23 @@ class NotificationService {
     // Remove the pre-azan channel. Anyone upgrading already has it, it has no
     // sound attached, and leaving it behind means a stale duplicate sitting in
     // the phone's notification settings.
-    try {
-      await _plugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.deleteNotificationChannel('prayer_times_channel');
-    } catch (_) {}
+    // Remove every channel this app has ever used except the current pair.
+    // A channel created with a bad sound URI keeps that URI forever and
+    // silently swallows notifications, so old ids must not linger.
+    for (final String dead in <String>[
+      'prayer_times_channel',
+      'prayer_alarm_azan_v1',
+      'prayer_alarm_plain_v1',
+    ]) {
+      try {
+        await _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.deleteNotificationChannel(dead);
+      } catch (_) {}
+    }
+
+    await _createChannels();
 
     await Permission.notification.request();
     await Permission.scheduleExactAlarm.request();
@@ -242,6 +333,25 @@ class NotificationService {
 
   /// One call, everything that has to be true for an alarm to fire.
   /// Anything false here explains a missed prayer.
+  /// Requests everything the alarm system needs, in one pass.
+  ///
+  /// Asked all at once at first launch rather than scattered through the app.
+  /// A prayer alarm that is missing one permission is not partly working, it
+  /// is broken, so there is no point deferring any of them.
+  static Future<Map<String, bool>> requestAllPermissions() async {
+    await init();
+    try {
+      await Permission.notification.request();
+    } catch (_) {}
+    try {
+      await Permission.scheduleExactAlarm.request();
+    } catch (_) {}
+    try {
+      await Permission.ignoreBatteryOptimizations.request();
+    } catch (_) {}
+    return alarmHealth();
+  }
+
   static Future<Map<String, bool>> alarmHealth() async {
     return <String, bool>{
       'Notifications allowed': await Permission.notification.isGranted,

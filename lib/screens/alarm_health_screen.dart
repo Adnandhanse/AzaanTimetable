@@ -28,6 +28,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   bool _testArmed = false;
   Map<String, dynamic>? _diag;
   String? _testResult;
+  bool _useAzan = true;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
     final health = await NotificationService.alarmHealth();
     final pending = await NotificationService.getPendingAlarms();
     final diag = await NotificationService.lastDiagnostics();
+    final useAzan = await NotificationService.useAzanSound();
     bool? running;
     try {
       running = await ForegroundAlarmManager.isRunning();
@@ -52,6 +54,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
       _pending = pending;
       _serviceRunning = running;
       _diag = diag;
+      _useAzan = useAzan;
       _loading = false;
     });
   }
@@ -86,6 +89,24 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
         duration: const Duration(seconds: 6),
       ),
     );
+  }
+
+  Future<void> _showNow() async {
+    await NotificationService.showNotificationNow();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            'Posted now. If nothing appeared, the problem is the notification channel, not the alarm.'),
+        duration: Duration(seconds: 6),
+      ),
+    );
+  }
+
+  Future<void> _toggleSound(bool value) async {
+    await NotificationService.setUseAzanSound(value);
+    await NotificationService.scheduleFromCache();
+    await _refresh();
   }
 
   Future<void> _rearm() async {
@@ -169,6 +190,65 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                   'Sets a real alarm for 60 seconds from now, using exactly the same path a prayer alarm uses. Lock the phone and wait.',
                   style: AppText.caption.copyWith(color: AppColors.textMuted),
                 ),
+                const SizedBox(height: 10),
+
+                // Start here. This bypasses AlarmManager completely, so it
+                // separates "the channel is broken" from "scheduling is
+                // broken" — two problems that look identical from outside and
+                // need entirely different fixes.
+                OutlinedButton.icon(
+                  onPressed: _showNow,
+                  icon: const Icon(Icons.notifications_active_outlined, size: 17),
+                  label: const Text('Show a notification RIGHT NOW'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.emerald,
+                    side: const BorderSide(color: AppColors.gold),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                    textStyle: AppText.body,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'If nothing appears, the alarm is not the problem — the notification channel is.',
+                  style: AppText.caption.copyWith(color: AppColors.textMuted),
+                ),
+
+                const SizedBox(height: 14),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.goldRule),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Use the bundled azan',
+                                style: AppText.body
+                                    .copyWith(color: AppColors.text)),
+                            Text(
+                              'Turn OFF to use the phone\u2019s default alert sound. If alarms are silent or missing, try this.',
+                              style: AppText.caption
+                                  .copyWith(color: AppColors.textMuted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: _useAzan,
+                        activeColor: AppColors.emerald,
+                        onChanged: _toggleSound,
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 12),
                 Row(
                   children: [
