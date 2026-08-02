@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/setup_wizard_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
@@ -45,15 +46,13 @@ void main() async {
   // a scheduling problem, but an alarm app that loses its alarms without
   // leaving a trace is worse than one that crashes — the diagnostics land on
   // Settings > Alarm health.
-  // Ask for everything the alarm needs, once, on first launch.
-  // A prayer alarm missing one permission is not partly working, it is broken
-  // — so there is nothing to gain by asking for them lazily.
+  // Has the user been through alarm setup yet? If not, the wizard is shown
+  // instead of the splash screen. A prayer alarm missing one permission is not
+  // partly working, it is broken, so this comes before anything else.
+  bool needsSetup = false;
   try {
     final prefs = await SharedPreferences.getInstance();
-    if (!(prefs.getBool('permissions_requested_v1') ?? false)) {
-      await NotificationService.requestAllPermissions();
-      await prefs.setBool('permissions_requested_v1', true);
-    }
+    needsSetup = !(prefs.getBool('alarm_setup_done_v1') ?? false);
   } catch (_) {}
 
   // Errors are recorded rather than swallowed. Startup must not be blocked by
@@ -66,7 +65,9 @@ void main() async {
     debugPrint('Alarm scheduling failed at startup: $e');
   }
 
-  runApp(initError == null ? const MasjidAlarmApp() : _FirebaseErrorApp(error: initError));
+    runApp(initError == null
+      ? MasjidAlarmApp(needsSetup: needsSetup)
+      : _FirebaseErrorApp(error: initError));
 }
 
 /// Shown instead of crashing silently if Firebase fails to initialize,
@@ -109,7 +110,9 @@ class _FirebaseErrorApp extends StatelessWidget {
 }
 
 class MasjidAlarmApp extends StatelessWidget {
-  const MasjidAlarmApp({super.key});
+  const MasjidAlarmApp({super.key, this.needsSetup = false});
+
+  final bool needsSetup;
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +124,36 @@ class MasjidAlarmApp extends StatelessWidget {
           title: 'Masjid Namaz Alarm',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(),
-          home: const SplashScreen(),
+          home: needsSetup
+              ? const _SetupGate()
+              : const SplashScreen(),
         );
+      },
+    );
+  }
+}
+
+/// Shows the alarm setup wizard once, then hands over to the normal app.
+class _SetupGate extends StatefulWidget {
+  const _SetupGate();
+
+  @override
+  State<_SetupGate> createState() => _SetupGateState();
+}
+
+class _SetupGateState extends State<_SetupGate> {
+  bool _done = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_done) return const SplashScreen();
+    return SetupWizardScreen(
+      onFinished: () async {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('alarm_setup_done_v1', true);
+        } catch (_) {}
+        if (mounted) setState(() => _done = true);
       },
     );
   }

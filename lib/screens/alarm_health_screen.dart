@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
+
+import '../services/alarm_event_log.dart';
 import '../services/notification_service.dart';
 import '../services/foreground_alarm_manager.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
+import 'setup_wizard_screen.dart';
 
 /// Everything that decides whether a prayer alarm fires, on one screen, with a
 /// way to test it.
@@ -29,6 +33,9 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   Map<String, dynamic>? _diag;
   String? _testResult;
   bool _useAzan = true;
+  bool _useAlarmClock = false;
+  List<AlarmLogEntry> _log = <AlarmLogEntry>[];
+  bool _showHeartbeats = false;
 
   @override
   void initState() {
@@ -42,6 +49,8 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
     final pending = await NotificationService.getPendingAlarms();
     final diag = await NotificationService.lastDiagnostics();
     final useAzan = await NotificationService.useAzanSound();
+    final useAc = await NotificationService.useAlarmClockMode();
+    final log = await AlarmEventLog.read();
     bool? running;
     try {
       running = await ForegroundAlarmManager.isRunning();
@@ -55,6 +64,8 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
       _serviceRunning = running;
       _diag = diag;
       _useAzan = useAzan;
+      _useAlarmClock = useAc;
+      _log = log;
       _loading = false;
     });
   }
@@ -105,6 +116,12 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
 
   Future<void> _toggleSound(bool value) async {
     await NotificationService.setUseAzanSound(value);
+    await NotificationService.scheduleFromCache();
+    await _refresh();
+  }
+
+  Future<void> _toggleAlarmClock(bool value) async {
+    await NotificationService.setUseAlarmClockMode(value);
     await NotificationService.scheduleFromCache();
     await _refresh();
   }
@@ -169,6 +186,30 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 14),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SetupWizardScreen(
+                        onFinished: () {
+                          Navigator.of(context).pop();
+                          _refresh();
+                        },
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.checklist_rtl, size: 17),
+                  label: const Text('Run setup again'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.emerald,
+                    side: const BorderSide(color: AppColors.gold),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                    textStyle: AppText.body,
+                  ),
+                ),
+
                 const SizedBox(height: 20),
                 const SectionRule(label: 'Permissions'),
                 for (final MapEntry<String, bool> e in _health.entries)
@@ -229,11 +270,11 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Use the bundled azan',
+                            Text('Azan as the notification sound',
                                 style: AppText.body
                                     .copyWith(color: AppColors.text)),
                             Text(
-                              'Turn OFF to use the phone\u2019s default alert sound. If alarms are silent or missing, try this.',
+                              'OFF by default. The azan still plays on the ringing screen either way \u2014 this only changes the notification\u2019s own sound, and it can stop alarms firing on some builds. Turn it on only after alarms are working.',
                               style: AppText.caption
                                   .copyWith(color: AppColors.textMuted),
                             ),
@@ -244,6 +285,40 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                         value: _useAzan,
                         activeColor: AppColors.emerald,
                         onChanged: _toggleSound,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.goldRule),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Alarm-clock scheduling',
+                                style: AppText.body
+                                    .copyWith(color: AppColors.text)),
+                            Text(
+                              'Stronger on paper, but some phones accept it and never deliver. Leave OFF unless alarms are late.',
+                              style: AppText.caption
+                                  .copyWith(color: AppColors.textMuted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: _useAlarmClock,
+                        activeColor: AppColors.emerald,
+                        onChanged: _toggleAlarmClock,
                       ),
                     ],
                   ),
@@ -295,6 +370,14 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                   if ((_diag!['failed'] as List?)?.isNotEmpty ?? false)
                     _DiagLine('FAILED', (_diag!['failed'] as List).join(', '),
                         bad: true),
+                  if ((_diag!['next'] as List?)?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 6),
+                    // Setting a time that has already passed today is not a
+                    // bug, but it looks exactly like one. Saying "tomorrow"
+                    // out loud removes the confusion.
+                    for (final n in (_diag!['next'] as List))
+                      _DiagLine('', '$n'),
+                  ],
                 ],
                 if (_testResult != null) ...[
                   const SizedBox(height: 6),
@@ -330,6 +413,99 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                       child: Text(p,
                           style: AppText.caption
                               .copyWith(color: AppColors.textMuted)),
+                    ),
+
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    const Expanded(child: SectionRule(label: 'Event log')),
+                    TextButton(
+                      onPressed: () async {
+                        await Clipboard.setData(
+                            ClipboardData(text: await AlarmEventLog.asText()));
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Log copied.')),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.emerald,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text('Copy'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'What the alarm system actually did, kept across restarts. When a prayer is missed, this says whether it was armed, whether the service was running, and whether anything fired.',
+                  style: AppText.caption.copyWith(color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Show service heartbeats',
+                          style: AppText.caption
+                              .copyWith(color: AppColors.textMuted)),
+                    ),
+                    Switch(
+                      value: _showHeartbeats,
+                      activeColor: AppColors.emerald,
+                      onChanged: (v) => setState(() => _showHeartbeats = v),
+                    ),
+                  ],
+                ),
+                if (_log.isEmpty)
+                  Text('Nothing logged yet.',
+                      style:
+                          AppText.caption.copyWith(color: AppColors.textFaint))
+                else
+                  for (final AlarmLogEntry e in _log
+                      .where((e) => _showHeartbeats || !e.isHeartbeat)
+                      .take(60))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 92,
+                            child: Text(e.stamp,
+                                style: AppText.caption.copyWith(
+                                    fontSize: 11, color: AppColors.textFaint)),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e.event,
+                                  style: AppText.caption.copyWith(
+                                    color: e.event.contains('FAILED') ||
+                                            e.event.contains('MISSING') ||
+                                            e.event.contains('REFUSED')
+                                        ? const Color(0xFFB3261E)
+                                        : e.event.startsWith('FIRED')
+                                            ? AppColors.emerald
+                                            : AppColors.text,
+                                    fontWeight: e.event.startsWith('FIRED')
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                                if (e.detail != null)
+                                  Text(e.detail!,
+                                      style: AppText.caption.copyWith(
+                                          fontSize: 11,
+                                          color: AppColors.textMuted)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
                 const SizedBox(height: 22),

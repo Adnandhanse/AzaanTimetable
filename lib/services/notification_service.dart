@@ -8,6 +8,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import '../models/masjid.dart';
+import 'alarm_event_log.dart';
 import 'foreground_alarm_manager.dart';
 import 'notification_channels.dart';
 import 'prayer_schedule_cache.dart';
@@ -96,25 +97,37 @@ class NotificationService {
     await prefs.setBool(_useAlarmClockKey, value);
   }
 
-  /// Whether to use the bundled azan or the phone's default alert sound.
+  /// Whether to attach the bundled azan to the notification CHANNEL.
   ///
-  /// This is a user-facing escape hatch, not a preference. If the azan
-  /// resource is missing from the build, every notification posted to the azan
-  /// channel is dropped by Android without a word. Flipping this moves to a
-  /// channel that cannot fail that way, which both restores alarms
-  /// immediately and PROVES the sound was the cause.
+  /// DEFAULTS TO FALSE, deliberately.
+  ///
+  /// The channel sound is an Android raw resource, copied into res/raw by the
+  /// CI workflow. If that copy has not happened, the sound URI is invalid —
+  /// and while a notification posted from the app still appears (silently), a
+  /// SCHEDULED one is rebuilt by a background receiver that throws on the bad
+  /// resource, so nothing appears at all.
+  ///
+  /// That is a catastrophic failure mode for an optional feature: a missing
+  /// sound file silently disables every prayer alarm. The alarm must never
+  /// depend on it.
+  ///
+  /// With this off, notifications use the system alarm sound, which cannot
+  /// fail, and the azan itself is played by the ringing screen from the
+  /// bundled Flutter asset — which ships with the app as a matter of course.
   static Future<bool> useAzanSound() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(_useAzanKey) ?? true;
+      return prefs.getBool(_useAzanKey) ?? false;
     } catch (_) {
-      return true;
+      return false;
     }
   }
 
   static Future<void> setUseAzanSound(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_useAzanKey, value);
+    // Create the channel now, so the very next notification can use it.
+    if (value) await _createChannels();
   }
 
   /// Creates both channels up front.
@@ -128,17 +141,23 @@ class NotificationService {
         AndroidFlutterLocalNotificationsPlugin>();
     if (android == null) return;
 
-    try {
-      await android.createNotificationChannel(const AndroidNotificationChannel(
-        _channelId,
-        _channelName,
-        description: 'Plays the azan when it is time for prayer',
-        importance: Importance.max,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound('azan'),
-        audioAttributesUsage: AudioAttributesUsage.alarm,
-      ));
-    } catch (_) {}
+    // The plain channel always exists. The azan channel is only created once
+    // the user opts in — creating it eagerly would bake a possibly-invalid
+    // sound URI into a channel permanently, and Android never lets you change
+    // a channel's sound afterwards.
+    if (await useAzanSound()) {
+      try {
+        await android.createNotificationChannel(const AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: 'Plays the azan when it is time for prayer',
+          importance: Importance.max,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound('azan'),
+          audioAttributesUsage: AudioAttributesUsage.alarm,
+        ));
+      } catch (_) {}
+    }
 
     try {
       await android.createNotificationChannel(const AndroidNotificationChannel(
@@ -565,6 +584,13 @@ class NotificationService {
       'next': nextFires,
     });
 
+    await AlarmEventLog.add(
+      'alarms armed',
+      detail: '${scheduledSummary.length} set via ${modeUsed ?? 'none'}'
+          '${failures.isEmpty ? '' : ', FAILED: ${failures.join('/')}'}'
+          '${nextFires.isEmpty ? '' : ' | ${nextFires.join(', ')}'}',
+    );
+
     return scheduledSummary;
   }
 
@@ -595,6 +621,11 @@ class NotificationService {
     final missing = expected.difference(pendingIds);
     if (missing.isEmpty) return false;
 
+    // The important line in the whole log. If alarms are being wiped between
+    // app opens, this is where it shows up.
+    await AlarmEventLog.add('alarms MISSING, repairing',
+        detail: '${missing.length} of ${expected.length} gone');
+
     // Re-arm the whole set rather than patching individual ids — cheap, and it
     // avoids a half-armed state if several went missing at once.
     await scheduleFromCache(schedule);
@@ -623,6 +654,10 @@ class NotificationService {
       'mode': tier ?? 'none',
       'scheduled': tier == null ? 0 : 1,
     });
+    await AlarmEventLog.add(
+      tier == null ? 'test alarm REFUSED' : 'test alarm armed',
+      detail: tier ?? 'all scheduling modes refused',
+    );
     return tier;
   }
 

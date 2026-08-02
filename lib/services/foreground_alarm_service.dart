@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'alarm_event_log.dart';
 import 'notification_channels.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
@@ -49,8 +50,12 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           '${timestamp.second.toString().padLeft(2, '0')}',
     );
 
-    final dataString = await FlutterForegroundTask.getData<String>(key: 'prayer_times_data');
-    if (dataString == null) return;
+    final dataString =
+        await FlutterForegroundTask.getData<String>(key: 'prayer_times_data');
+    if (dataString == null) {
+      await AlarmEventLog.add('service tick', detail: 'NO PRAYER DATA STORED');
+      return;
+    }
 
     final Map<String, dynamic> data = json.decode(dataString);
     final masjidName = data['masjidName'] as String? ?? 'Your Masjid';
@@ -59,6 +64,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
     final now = DateTime.now();
     final todayKey = '${now.year}-${now.month}-${now.day}';
+
+    // One heartbeat a minute, not one every 20 seconds. Its value is not the
+    // beat itself but the GAP: a hole in these timestamps is the OS having
+    // frozen the service, which is invisible any other way.
+    if (now.second < 20) {
+      await AlarmEventLog.add('service tick',
+          detail: 'watching ${times.values.join(', ')}');
+    }
 
     for (final entry in times.entries) {
       final label = entry.key;
@@ -77,6 +90,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
       if (withinWindow && _lastFiredKey != fireKey) {
         _lastFiredKey = fireKey;
+        await AlarmEventLog.add('FIRED by service', detail: '$label at $timeStr');
         await _fireAlarm(label, masjidName, audioUrl);
       }
     }
@@ -141,15 +155,19 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         // SILENTLY - so this backup path, the one that matters most when the
         // app has been killed, was doing nothing at all.
         android: AndroidNotificationDetails(
-          NotificationChannels.azan,
+          NotificationChannels.plain,
           'Prayer Time Alarms',
-          channelDescription: 'Plays the azan when it is time for prayer',
+          channelDescription: 'Alerts you when it is time for prayer',
           importance: Importance.max,
           priority: Priority.high,
           category: AndroidNotificationCategory.alarm,
           fullScreenIntent: true,
           playSound: true,
-          sound: const RawResourceAndroidNotificationSound('azan'),
+          // Deliberately NOT the raw azan resource. If that file is missing
+          // from the build the URI is invalid, and this path — the one that
+          // actually delivers on restrictive phones — would break with it.
+          // The azan plays from the bundled Flutter asset in the ringing
+          // screen instead.
           audioAttributesUsage: AudioAttributesUsage.alarm,
         ),
       ),
