@@ -1,78 +1,76 @@
-v14 - FINDING THE ALARM FAILURE
-===============================
+v16 - THE ACTUAL CAUSE
+======================
 
-Full superset of v1-v13. Unzip over your repo root, overwriting.
-
-*** IT INCLUDES .github/workflows/build.yml - YOU MUST APPLY THAT FILE ***
-That workflow step is what copies the azan into android/app/src/main/res/raw.
-If you only ever copied lib/ files, the azan has never been in your APK, and
-that alone explains everything you are seeing. See below.
+Full superset of v1-v15. Unzip over your repo root, overwriting.
+INCLUDES .github/workflows/build.yml - apply it.
 
 =====================================================================
-ANSWERS
+YOUR THREE RESULTS SOLVED IT
 =====================================================================
-Does the azan need an audio permission?  NO. Notification sound is not
-permission-gated. That is not the cause.
+  instant notification works        -> the channel is FINE. I was wrong about
+                                       that for three versions.
+  60-second test never fires        -> AlarmManager scheduling is broken here
+  8:20 fired, 8:24 did not          -> something delivers sometimes
 
-Can we take all permissions at the start?  YES - added. First launch now
-requests notifications, exact alarms and battery exemption in one pass, and
-records that it asked so it does not nag.
+TWO CAUSES, BOTH MINE.
 
-=====================================================================
-WHAT YOUR SCREENSHOT RULES OUT, AND WHAT IT POINTS AT
-=====================================================================
-All four checks green. Test armed on tier 1 (azan + alarmClock). And it still
-did not fire. Scheduling SUCCEEDED and the alarm still produced nothing - so
-the failure is AFTER scheduling, when Android tries to post the notification.
+--- CAUSE 1: alarmClock scheduling fails SILENTLY on your phone -------------
+In v11 I switched to AndroidScheduleMode.alarmClock, calling it "the biggest
+single win". On paper it is. In practice several Android ROMs accept
+setAlarmClock and then never deliver it. It does not throw, so my three-tier
+try/catch ladder could not detect it — scheduling reported success, tier 1,
+and nothing ever fired. Your screenshot said "azan + alarmClock" and that was
+the app confidently reporting a method that does nothing on your device.
 
-Combined with your hint - one notification, no azan, then nothing ever again -
-this points hard at the NOTIFICATION CHANNEL.
+FIXED: alarmClock is no longer the default. exactAllowWhileIdle is - weaker on
+paper, actually delivers. There is a switch in Alarm health if you want to try
+alarmClock on a different phone.
 
-The mechanism: a channel's sound is frozen when Android first creates it. If
-res/raw/azan.mp3 was not in the APK at that moment, the channel was created
-with a dangling sound URI, permanently. Android then DROPS every notification
-posted to it, silently. App updates do not repair it, because Android refuses
-to modify an existing channel.
+--- CAUSE 2: the thing that DID work was running on stale data --------------
+The 8:20 alarm was not the scheduler. It was the foreground service, which
+polls every 20 seconds and posts the notification itself. That is the one path
+proven to work on your phone.
 
-=====================================================================
-WHAT v14 DOES ABOUT IT
-=====================================================================
+But its copy of your prayer times was only ever refreshed from the Home screen.
+Save a new time in the admin panel and the service kept watching the OLD one.
+8:20 was in its data; 8:24 never got there.
 
-1. CHANNEL IDS BUMPED TO v2, and every older id is now deleted on startup
-   (prayer_times_channel, prayer_alarm_azan_v1, prayer_alarm_plain_v1).
-   This escapes any channel that was created broken.
-
-2. CHANNELS ARE CREATED EXPLICITLY at startup instead of implicitly by the
-   first notification. Implicit creation happens once, invisibly, and whatever
-   state it captures is permanent - not something to leave to chance.
-
-3. "SHOW A NOTIFICATION RIGHT NOW" button in Alarm health.
-   This bypasses AlarmManager entirely. It is the diagnostic that has been
-   missing:
-       nothing appears  -> the CHANNEL is broken. Alarms are irrelevant.
-       it appears       -> the channel is fine; the problem is scheduling or
-                           the phone freezing the app.
-   Nothing else separates those two, and they need opposite fixes.
-
-4. "USE THE BUNDLED AZAN" SWITCH in Alarm health.
-   Turn it OFF and alarms move to a channel with the phone's default alert
-   sound - a channel that cannot fail the dangling-URI way. If alarms start
-   working with it off, the azan resource is confirmed as the cause.
+FIXED: ForegroundAlarmManager.refreshFromCache(), called on every scheduling
+run, so the polling service and the scheduler can never disagree again.
 
 =====================================================================
-DO THIS, IN THIS ORDER
+ALSO IN THIS BUILD
 =====================================================================
-1. Apply v14 INCLUDING .github/workflows/build.yml, and rebuild.
-2. UNINSTALL the app from the phone first, then install the new APK.
-   Not an upgrade - an uninstall. Channels survive upgrades, and a broken one
-   has to be removed with the app.
-3. Settings > Alarm health > "Show a notification RIGHT NOW".
-      appears with azan     -> fixed, go to step 4
-      appears, wrong sound  -> azan not in the APK; check the workflow ran
-      nothing at all        -> tell me, that is a different fault
-4. Turn the azan switch OFF and press it again. If it appears now, the azan
-   resource is the problem.
-5. Then the 60-second test.
 
-Also: your status bar showed the ringer muted. Check media/alarm volume and
-whether Do Not Disturb is on before concluding anything.
+REDUNDANT ONE-SHOT ALARMS (ids 300+)
+Each prayer is now also scheduled as explicit one-shots for the next 3 days,
+separately from the repeating alarm. The repeating alarm depends on the plugin
+re-arming itself after each firing; if that link breaks, everything after today
+was being lost silently. Every app open pushes the 3-day window forward.
+
+NEXT FIRE TIMES ARE NOW SHOWN
+Alarm health lists "Maghrib -> tomorrow 20:24" for each prayer. Setting a time
+that has already passed today is not a bug, but it looks exactly like one.
+This may well explain the 8:24 case on its own.
+
+SHARED CHANNEL CONSTANTS
+NotificationService and the background isolate had their own copies of the
+channel id and drifted apart in v12 — the foreground service posted to a
+channel the other had deleted, and Android drops those silently. One constants
+file now, so that class of bug cannot recur. It also breaks an import cycle I
+had just created.
+
+AZAN FALLBACK (from v15)
+"Masjid has not uploaded a custom azan yet" was literal: with no upload the
+ringing screen played NOTHING, and with an upload it streamed from Firebase
+Storage at the exact moment the alarm fired. The bundled azan is now the floor.
+
+=====================================================================
+WHAT TO DO
+=====================================================================
+1. Apply v16 INCLUDING the workflow file. Rebuild. UNINSTALL, then install.
+2. Alarm health > check "Alarm-clock scheduling" is OFF.
+3. Run the 60-second test. It should now fire.
+4. Change a prayer time to 3 minutes from now and wait. Two things should
+   deliver it: the scheduler and the polling service.
+5. Alarm health now lists next fire times - check they say what you expect.

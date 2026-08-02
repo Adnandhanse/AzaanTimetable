@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import '../models/masjid.dart';
+import 'prayer_schedule_cache.dart';
 import 'foreground_alarm_service.dart';
 
 /// Controls the persistent background service that reliably checks
@@ -33,6 +34,64 @@ class ForegroundAlarmManager {
   /// Pushes the current masjid's prayer times + Azan audio URL into the
   /// background service's storage, and (re)starts the service so it
   /// picks up the new data immediately.
+  /// Refreshes the background service from the device cache.
+  ///
+  /// The service polls prayer times every 20 seconds and posts the alarm
+  /// itself — on phones that block AlarmManager's alarm-clock scheduling, this
+  /// is the only path that actually delivers. It was only ever refreshed from
+  /// the Home screen, so saving new prayer times left the service watching the
+  /// OLD ones. That is why a changed time fired once and then never again.
+  static Future<void> refreshFromCache() async {
+    final CachedSchedule? c = await PrayerScheduleCache.load();
+    if (c == null) return;
+    await _push(
+      masjidName: c.masjidName,
+      audioUrl: c.audioUrl,
+      times: <String, String>{
+        'Fajr': c.times['fajr'] ?? '',
+        'Dhuhr': c.times['dhuhr'] ?? '',
+        'Asr': c.times['asr'] ?? '',
+        'Maghrib': c.times['maghrib'] ?? '',
+        'Isha': c.times['isha'] ?? '',
+        'Juma (Friday)': c.times['juma'] ?? '',
+      },
+    );
+  }
+
+  static Future<void> _push({
+    required String masjidName,
+    required String? audioUrl,
+    required Map<String, String> times,
+  }) async {
+    _configureIfNeeded();
+    await FlutterForegroundTask.saveData(
+      key: 'prayer_times_data',
+      value: json.encode(<String, dynamic>{
+        'masjidName': masjidName,
+        'audioUrl': audioUrl,
+        'times': times,
+      }),
+    );
+
+    final isRunning = await FlutterForegroundTask.isRunningService;
+    try {
+      if (!isRunning) {
+        await FlutterForegroundTask.startService(
+          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationText: 'Watching prayer times for $masjidName',
+          callback: startForegroundTaskCallback,
+        );
+      } else {
+        await FlutterForegroundTask.updateService(
+          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationText: 'Watching prayer times for $masjidName',
+        );
+      }
+    } catch (e) {
+      throw Exception('Foreground service failed to start: $e');
+    }
+  }
+
   static Future<void> startOrUpdate(Masjid masjid) async {
     _configureIfNeeded();
 

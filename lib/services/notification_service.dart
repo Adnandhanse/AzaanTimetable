@@ -8,6 +8,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import '../models/masjid.dart';
+import 'foreground_alarm_manager.dart';
+import 'notification_channels.dart';
 import 'prayer_schedule_cache.dart';
 
 /// Schedules local notifications that fire daily at each prayer time for
@@ -25,8 +27,8 @@ class NotificationService {
   /// cannot be changed afterwards — editing the old channel would do nothing on
   /// any phone that already had the app. Bumping the id creates a fresh channel
   /// carrying the azan. If you ever change the sound again, bump it again.
-  static const _channelId = 'prayer_alarm_azan_v2';
-  static const _channelName = 'Prayer Time Alarms';
+  static const _channelId = NotificationChannels.azan;
+  static const _channelName = NotificationChannels.name;
 
   /// The azan plays as the NOTIFICATION'S OWN SOUND, not from the ringing
   /// screen.
@@ -44,7 +46,7 @@ class NotificationService {
 
   /// Fallback channel using the system alert sound. A separate id is required:
   /// a channel's sound is fixed the moment Android creates it.
-  static const String channelIdPlain = 'prayer_alarm_plain_v2';
+  static const String channelIdPlain = NotificationChannels.plain;
 
   static AndroidNotificationDetails alarmChannel({bool withAzan = true}) =>
       AndroidNotificationDetails(
@@ -73,6 +75,26 @@ class NotificationService {
   static const _diagKey = 'alarm_last_diagnostics';
 
   static const _useAzanKey = 'alarm_use_azan_sound';
+  static const _useAlarmClockKey = 'alarm_use_alarmclock_mode';
+
+  /// Whether to use AlarmManager's alarm-clock scheduling.
+  ///
+  /// Defaults to FALSE. It is the strongest API Android exposes, but some ROMs
+  /// accept the call and never deliver, without error. exactAllowWhileIdle is
+  /// less privileged and more honest about failing.
+  static Future<bool> useAlarmClockMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_useAlarmClockKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<void> setUseAlarmClockMode(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_useAlarmClockKey, value);
+  }
 
   /// Whether to use the bundled azan or the phone's default alert sound.
   ///
@@ -187,12 +209,26 @@ class NotificationService {
     DateTimeComponents? match,
   }) async {
     final bool azanWanted = await useAzanSound();
+    final bool useAlarmClock = await useAlarmClockMode();
+
+    // ORDER MATTERS, AND alarmClock IS NO LONGER FIRST BY DEFAULT.
+    //
+    // setAlarmClock is the strongest API on paper, but several Android ROMs
+    // accept the call and then never deliver. It does not throw, so a
+    // try/catch ladder cannot detect it — scheduling reports success and the
+    // alarm silently never fires. exactAllowWhileIdle is slightly weaker on
+    // paper and actually delivers, which wins.
+    final AndroidScheduleMode primary = useAlarmClock
+        ? AndroidScheduleMode.alarmClock
+        : AndroidScheduleMode.exactAllowWhileIdle;
+    final AndroidScheduleMode secondary = useAlarmClock
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.alarmClock;
+
     final attempts = <(String, bool, AndroidScheduleMode)>[
-      if (azanWanted)
-        ('azan + alarmClock', true, AndroidScheduleMode.alarmClock),
-      ('default sound + alarmClock', false, AndroidScheduleMode.alarmClock),
-      ('default sound + exactAllowWhileIdle', false,
-          AndroidScheduleMode.exactAllowWhileIdle),
+      if (azanWanted) ('azan + ${primary.name}', true, primary),
+      ('default sound + ${primary.name}', false, primary),
+      ('default sound + ${secondary.name}', false, secondary),
     ];
 
     for (final (String label, bool azan, AndroidScheduleMode mode) in attempts) {
@@ -269,11 +305,7 @@ class NotificationService {
     // Remove every channel this app has ever used except the current pair.
     // A channel created with a bad sound URI keeps that URI forever and
     // silently swallows notifications, so old ids must not linger.
-    for (final String dead in <String>[
-      'prayer_times_channel',
-      'prayer_alarm_azan_v1',
-      'prayer_alarm_plain_v1',
-    ]) {
+    for (final String dead in NotificationChannels.retired) {
       try {
         await _plugin
             .resolvePlatformSpecificImplementation<
@@ -469,6 +501,7 @@ class NotificationService {
 
     await cancelAll();
     final scheduledSummary = <String>[];
+    final nextFires = <String>[];
     final failures = <String>[];
     String? modeUsed;
 
@@ -503,8 +536,25 @@ class NotificationService {
         modeUsed ??= tier;
         scheduledSummary
             .add('$label: $timeStr${key == 'juma' ? ' (Fridays only)' : ''}');
+        nextFires.add('$label -> ${_describeNext(dt, key == 'juma')}');
+      }
+
+      // REDUNDANCY. The repeating alarm above relies on the plugin re-arming
+      // itself after each firing; if that link breaks, everything after today
+      // is lost silently. These explicit one-shots cover the next few days on
+      // their own, and are re-armed every time the app opens.
+      if (key != 'juma') {
+        await _scheduleExtraDays(key: key, label: label, base: dt,
+            masjidName: schedule.masjidName, audioUrl: schedule.audioUrl);
       }
     }
+
+    // Keep the polling service's copy of the times in step. It is only ever
+    // refreshed here and from Home; forgetting it is what left the service
+    // watching yesterday's times.
+    try {
+      await ForegroundAlarmManager.refreshFromCache();
+    } catch (_) {}
 
     await _writeDiagnostics(<String, dynamic>{
       'result': failures.isEmpty ? 'ok' : 'partial',
@@ -512,6 +562,7 @@ class NotificationService {
       'failed': failures,
       'mode': modeUsed ?? 'none',
       'masjid': schedule.masjidName,
+      'next': nextFires,
     });
 
     return scheduledSummary;
@@ -577,9 +628,64 @@ class NotificationService {
 
   static Future<void> cancelTestAlarm() async => _plugin.cancel(998);
 
+  /// Base id for the redundant one-shot alarms. Kept well clear of the
+  /// repeating ids (100-105) and the test ids (997/998).
+  static const int _extraBase = 300;
+  static const int _extraDays = 3;
+
+  /// Explicit one-shot alarms for the next few days, independent of the
+  /// repeating alarm. If the plugin's re-arm-after-firing ever fails, these
+  /// still ring, and every app open pushes the window forward again.
+  static Future<void> _scheduleExtraDays({
+    required String key,
+    required String label,
+    required DateTime base,
+    required String masjidName,
+    required String? audioUrl,
+  }) async {
+    final int slot = _ids[key]! - 100; // 0..5
+    final now = tz.TZDateTime.now(tz.local);
+
+    for (int day = 1; day <= _extraDays; day++) {
+      var when = tz.TZDateTime.from(base, tz.local).add(Duration(days: day));
+      if (!when.isAfter(now)) continue;
+      await _scheduleWithFallback(
+        id: _extraBase + slot * 10 + day,
+        title: '$label - $masjidName',
+        body: "It's time for $label prayer.",
+        when: when,
+        payload: _buildPayload(label, masjidName, audioUrl),
+      );
+    }
+  }
+
+  static String _describeNext(DateTime timeToday, bool fridayOnly) {
+    final now = tz.TZDateTime.now(tz.local);
+    var when = tz.TZDateTime.from(timeToday, tz.local);
+    if (fridayOnly) {
+      while (when.weekday != DateTime.friday || !when.isAfter(now)) {
+        when = when.add(const Duration(days: 1));
+      }
+    } else if (!when.isAfter(now)) {
+      when = when.add(const Duration(days: 1));
+    }
+    final bool today = when.day == now.day && when.month == now.month;
+    final String hh = when.hour.toString().padLeft(2, '0');
+    final String mm = when.minute.toString().padLeft(2, '0');
+    // Saying "tomorrow" out loud matters: setting a time that has already
+    // passed today is not a bug, but it looks exactly like one.
+    return today ? 'today $hh:$mm' : 'tomorrow $hh:$mm';
+  }
+
   static Future<void> cancelAll() async {
     for (final id in _ids.values) {
       await _plugin.cancel(id);
+    }
+    // The redundant one-shots too, or old times linger alongside new ones.
+    for (int slot = 0; slot < 6; slot++) {
+      for (int day = 1; day <= _extraDays; day++) {
+        await _plugin.cancel(_extraBase + slot * 10 + day);
+      }
     }
   }
 

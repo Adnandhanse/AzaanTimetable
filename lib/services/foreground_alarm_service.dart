@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import 'notification_service.dart';
+import 'notification_channels.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
 /// This runs in its own persistent background isolate, kept alive by a
@@ -141,7 +141,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         // SILENTLY - so this backup path, the one that matters most when the
         // app has been killed, was doing nothing at all.
         android: AndroidNotificationDetails(
-          NotificationService.channelIdAzan,
+          NotificationChannels.azan,
           'Prayer Time Alarms',
           channelDescription: 'Plays the azan when it is time for prayer',
           importance: Importance.max,
