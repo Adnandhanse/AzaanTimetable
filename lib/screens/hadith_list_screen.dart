@@ -64,43 +64,79 @@ class _HadithListScreenState extends State<HadithListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Badges WRAP, bookmark is pinned.
+                  //
+                  // These were three items in a plain Row with a Spacer. Once
+                  // hadith numbers reached three and four digits the badges
+                  // outgrew the width, the Spacer collapsed to nothing, and the
+                  // bookmark got pushed off the right edge — which is exactly
+                  // what you saw past hadith 100. Expanded + Wrap lets the
+                  // badges take a second line instead of shoving the icon out.
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.emerald.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'Hadith No. ${hadith.hadithNumber} (Reference)',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                      Expanded(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.emerald.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Hadith ${hadith.hadithNumber}',
+                                style: AppText.caption.copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.emerald,
+                                ),
+                              ),
+                            ),
+                            if (hadith.arabicNumber != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.gold.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Arabic ed. ${hadith.arabicNumber}',
+                                  style: AppText.caption.copyWith(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF8A6D1E),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (hadith.arabicNumber != null) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(6),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        width: 40,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(
+                            isBookmarked
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: isBookmarked
+                                ? AppColors.gold
+                                : AppColors.chevron,
                           ),
-                          child: Text(
-                            'Arabic Edition No. ${hadith.arabicNumber}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8A6D1E)),
-                          ),
+                          tooltip: 'Bookmark',
+                          onPressed: () => _toggleBookmark(hadith.hadithNumber),
                         ),
-                      ],
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                          color: isBookmarked ? AppColors.gold : Colors.grey,
-                        ),
-                        onPressed: () => _toggleBookmark(hadith.hadithNumber),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
                   if (hadith.arabicText.isNotEmpty) ...[
                     Text(
                       hadith.arabicText,

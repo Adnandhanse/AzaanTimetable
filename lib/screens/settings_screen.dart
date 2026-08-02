@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
+import 'alarm_health_screen.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
 import '../services/app_strings.dart';
@@ -56,6 +57,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),
+          ),
+          const Divider(),
+          // Put the diagnostics first. When alarms miss, this is the screen
+          // that separates "a permission is off" from "the phone is killing
+          // the app" — they look identical from the outside and need
+          // completely different fixes.
+          ListTile(
+            leading: const Icon(Icons.health_and_safety_outlined,
+                color: AppColors.emerald),
+            title: const Text('Alarm health'),
+            subtitle: const Text(
+                'Check why alarms may not fire, and test one on this phone'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AlarmHealthScreen()),
+            ),
           ),
           const Divider(),
           ListTile(

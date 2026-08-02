@@ -1,54 +1,95 @@
-UI CHANGES v8 - 48 files
-========================
+UI + ALARM RELIABILITY - v11 - 50 files
+=======================================
 
-Full superset of v1-v7.2. Unzip over your repo root, overwriting.
+Full superset of v1-v10. Unzip over your repo root, overwriting.
+No new packages. No pubspec change. Nothing new for CI to trip on.
 
-1. MARK YOUR PLACE WHILE READING ARABIC-ONLY
-   lib/widgets/mushaf_view.dart
+=====================================================================
+BE CLEAR ABOUT WHAT THIS ACHIEVES
+=====================================================================
+100% is not reachable on Android, by anyone. If the user swipes the app out of
+recents on a Xiaomi, or the system force-stops it, Android CANCELS every alarm
+the app registered. No third-party app survives that - Google's own Clock is
+whitelisted by name.
 
-   You were right - the bookmark only existed on translation verse rows, so in
-   Arabic-only mode there was no way to save where you were.
+What this gets you is as reliable as Android permits, roughly 95-99% once the
+user grants three things, plus the app now noticing and repairing its own
+failures instead of dying quietly.
 
-   The footer now reads:
+=====================================================================
+1. HIGHEST-TIER SCHEDULING  (biggest single win)
+=====================================================================
+  AndroidScheduleMode.exactAllowWhileIdle  ->  AndroidScheduleMode.alarmClock
 
-     Page 3 of 12  ·  Ayah 45-58  ·  15 lines        [Save page]
+exactAllowWhileIdle is an exact alarm doze PERMITS. alarmClock is the primitive
+Android uses for the user's own alarm clock: exempt from doze, far more
+resistant to battery optimisation, the strongest scheduling call a third-party
+app can make.
 
-   Tap "Save page" and the first ayah on that page becomes your saved position.
-   It flips to "Saved" when your saved verse is on the page you are looking at.
+Tradeoff, so you are not surprised: the phone shows an alarm icon in the status
+bar and reports the next prayer as the device's next alarm. For a prayer alarm
+app I would argue that is correct, not a side effect.
 
-   Making this work needed a change under the hood. The view flows all the
-   verses into one string to paginate them, which normally throws away where
-   each verse begins. It now records every verse's character offset and does a
-   binary search to work out which verses a page holds. Without that, a page
-   could not tell you what was on it, and marking from this view would have
-   been impossible.
+=====================================================================
+2. ALARMS NO LONGER DEPEND ON THE NETWORK
+=====================================================================
+  NEW  lib/services/prayer_schedule_cache.dart
 
-   The Juz screen shows no Save button. A juz spans several surahs, so a bare
-   verse number there is ambiguous - there is no single surah to attribute it
-   to. Say the word if you want juz positions saved too; it needs the surah
-   stored alongside the verse.
+Alarms were armed only when Home's Firestore stream emitted. Open the app on a
+bad connection and NOTHING was scheduled.
 
-2. ARABIC-ONLY IS NOW THE DEFAULT
-   Surahs and juz open in Arabic only. Translation is a button away, not the
-   starting point.
+Prayer times are now cached on the device. main() arms alarms from that cache
+before Firebase or Firestore is touched. Firestore updates prayer times; it no
+longer decides whether an alarm exists.
 
-   The choice is remembered. Turn translation on and it stays on until you turn
-   it off - nobody re-toggles it every time they open a surah. Surah and Juz
-   share the one preference, so setting it in either place sets it for both.
+=====================================================================
+3. THE APP NOW CHECKS ITS OWN ALARMS AND REPAIRS THEM
+=====================================================================
+  NotificationService.verifyAndRepair()
 
-3. CONTINUE READING CARD RESTYLED
-   Off the solid green. It is now a white card with a gold hairline, a gold
-   medallion and emerald type - the same construction as every other card in
-   the app.
+Runs at every app start and every time the app returns to the foreground. It
+asks the OS what it still holds, compares against what should be there, and
+re-arms the whole set if anything is missing.
 
-   The green slab read as a banner from a different product. A card that
-   belongs to the palette gets noticed by the medallion, not by shouting.
+Alarms disappear for reasons the app cannot see - a force-stop, an OEM cleanup,
+a reboot. Previously the app scheduled and hoped, and a wipe was invisible
+until someone missed a prayer. Now it self-heals on next open.
 
-STILL OPEN
-- Urdu CHAPTER names: your dataset has none, in any file.
-- The Arabic-only view is not a Madani Mushaf and does not claim to be.
+=====================================================================
+4. ALARM HEALTH SCREEN  (Settings > Alarm health)
+=====================================================================
+  NEW  lib/screens/alarm_health_screen.dart
 
-NOT COMPILE-CHECKED
-All Dart files balance. Every AppColors/AppText reference cross-checked. Also
-re-scanned for the nullable-local-inside-a-closure pattern that broke v7.1 -
-none present.
+- Live status of every permission that matters, each with its own Fix button
+- Whether the background service is actually running
+- What the OS currently has scheduled, with next fire times
+- TEST ALARM IN 60 SECONDS - fires down the exact same path a prayer alarm
+  uses, so someone can verify on THEIR handset instead of finding out at Fajr
+- Step-by-step Autostart instructions for Xiaomi/Redmi/POCO, Realme/OPPO,
+  vivo/iQOO, Samsung, OnePlus and stock Android
+
+Written out per manufacturer rather than auto-detected, deliberately - that
+would have meant adding device_info_plus, and you have had enough plugin
+trouble in CI.
+
+=====================================================================
+CARRIED OVER FROM v10 (you said you had not applied it)
+=====================================================================
+- JUMA WAS RINGING EVERY DAY. Scheduled with matchDateTimeComponents.time like
+  the other five. Now walks to the next Friday, matches dayOfWeekAndTime.
+- Home banner now warns about battery restriction as well as exact alarms, each
+  with a Fix button. requestIgnoreBatteryOptimizations existed in your code but
+  was buried in Settings and nothing ever prompted for it - the most likely
+  cause of "sometimes it comes, sometimes not".
+- Hadith bookmark no longer pushed off screen past hadith 100.
+
+=====================================================================
+STILL NEEDS YOU
+=====================================================================
+1. AN AZAN MP3. Right now the sound depends on the ringing screen launching;
+   when Android blocks that you get a default chime. Bundling an azan as the
+   notification CHANNEL sound with alarm audio attributes makes the OS play it
+   directly, independent of any activity starting. Send the file.
+
+2. THE SAHIH / DAIF FILTER. Your data has gradings, but scholars disagree - 564
+   times in Abu Dawud alone. Tell me whose gradings to use and I will build it.

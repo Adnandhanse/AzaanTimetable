@@ -33,6 +33,17 @@ void main() async {
     },
   );
 
+  // Arm alarms from the DEVICE CACHE before anything touches the network.
+  //
+  // Previously alarms were only armed when Home's Firestore stream emitted, so
+  // opening the app on a bad connection scheduled nothing at all. Firestore
+  // updates prayer times; it must never be what decides whether an alarm
+  // exists. Failures here are swallowed on purpose — a scheduling problem must
+  // not stop the app from opening.
+  try {
+    await NotificationService.scheduleFromCache();
+  } catch (_) {}
+
   runApp(initError == null ? const MasjidAlarmApp() : _FirebaseErrorApp(error: initError));
 }
 

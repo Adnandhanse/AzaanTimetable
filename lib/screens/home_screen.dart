@@ -41,7 +41,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   /// Drives the one-off entrance animation: the artwork settles and the
   /// content below it fades and slides up. Runs once on open, not on every
   /// rebuild - the 1-second clock timer would otherwise restart it 60 times a
@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
   String? _lastScheduledSignature;
   bool _exactAlarmWarningDismissed = false;
   bool? _hasExactAlarmPermission;
+  bool? _hasBatteryExemption;
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
 
@@ -71,14 +72,45 @@ class _HomeScreenState extends State<HomeScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic));
     _intro.forward();
+    // Re-check the alarms whenever the app comes back to the foreground.
+    WidgetsBinding.instance.addObserver(this);
     _loadSelectedMasjid();
+    _repairAlarmsIfNeeded();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) _repairAlarmsIfNeeded();
+  }
+
+  /// Ask the OS what it still holds and re-arm anything missing. Alarms vanish
+  /// for reasons the app cannot see — a force-stop, an OEM cleanup, a reboot.
+  /// Checking on every resume turns a silent failure into a self-repair.
+  Future<void> _repairAlarmsIfNeeded() async {
+    try {
+      final repaired = await NotificationService.verifyAndRepair();
+      if (repaired) {
+        // Also refresh the permission state, since a wipe is often the
+        // fingerprint of the app having been frozen or force-stopped.
+        final granted = await NotificationService.hasExactAlarmPermission();
+        final exempt = await NotificationService.hasBatteryExemption();
+        if (mounted) {
+          setState(() {
+            _hasExactAlarmPermission = granted;
+            _hasBatteryExemption = exempt;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _clockTimer.cancel();
     _intro.dispose();
     super.dispose();
@@ -138,7 +170,13 @@ class _HomeScreenState extends State<HomeScreen>
       }
     }
     final granted = await NotificationService.hasExactAlarmPermission();
-    if (mounted) setState(() => _hasExactAlarmPermission = granted);
+    final exempt = await NotificationService.hasBatteryExemption();
+    if (mounted) {
+      setState(() {
+        _hasExactAlarmPermission = granted;
+        _hasBatteryExemption = exempt;
+      });
+    }
   }
 
   DateTime? _parseTimeToday(String timeStr) {
@@ -207,38 +245,73 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       body: Column(
         children: [
-          if (_hasExactAlarmPermission == false && !_exactAlarmWarningDismissed)
+          // Anything here being off means a prayer alarm can silently fail to
+          // fire. Both are surfaced, not just the exact-alarm one — battery
+          // restriction is the more common cause on Indian handsets, and it
+          // used to be buried in Settings where nobody found it.
+          if (!_exactAlarmWarningDismissed &&
+              (_hasExactAlarmPermission == false ||
+                  _hasBatteryExemption == false))
             Material(
               color: AppColors.warningBg,
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_amber,
-                          color: AppColors.warningFg, size: 20),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Icon(Icons.warning_amber,
+                            color: AppColors.warningFg, size: 20),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          'Prayer alarms are OFF. Enable "Alarms & Reminders" for this app in phone settings so notifications fire on time.',
-                          style: AppText.caption.copyWith(
-                              fontSize: 12.5, color: AppColors.warningFg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Prayer alarms may not fire',
+                              style: AppText.rowTitle.copyWith(
+                                  fontSize: 15, color: AppColors.warningFg),
+                            ),
+                            const SizedBox(height: 3),
+                            if (_hasExactAlarmPermission == false)
+                              _FixRow(
+                                label:
+                                    '"Alarms & reminders" is off for this app.',
+                                onFix: () async {
+                                  await NotificationService
+                                      .openExactAlarmSettings();
+                                  final g = await NotificationService
+                                      .hasExactAlarmPermission();
+                                  if (mounted) {
+                                    setState(
+                                        () => _hasExactAlarmPermission = g);
+                                  }
+                                },
+                              ),
+                            if (_hasBatteryExemption == false)
+                              _FixRow(
+                                label:
+                                    'Battery saver can freeze the app and stop alarms.',
+                                onFix: () async {
+                                  await NotificationService
+                                      .requestIgnoreBatteryOptimizations();
+                                  final e = await NotificationService
+                                      .hasBatteryExemption();
+                                  if (mounted) {
+                                    setState(() => _hasBatteryExemption = e);
+                                  }
+                                },
+                              ),
+                          ],
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await NotificationService.openExactAlarmSettings();
-                          final granted = await NotificationService
-                              .hasExactAlarmPermission();
-                          if (mounted) {
-                            setState(() => _hasExactAlarmPermission = granted);
-                          }
-                        },
-                        child: const Text('Fix'),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, size: 18),
+                        color: AppColors.warningFg,
                         onPressed: () =>
                             setState(() => _exactAlarmWarningDismissed = true),
                       ),
@@ -742,6 +815,41 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FixRow extends StatelessWidget {
+  const _FixRow({required this.label, required this.onFix});
+
+  final String label;
+  final VoidCallback onFix;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: AppText.caption
+                  .copyWith(fontSize: 12.5, color: AppColors.warningFg),
+            ),
+          ),
+          TextButton(
+            onPressed: onFix,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.warningFg,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Fix'),
           ),
         ],
       ),

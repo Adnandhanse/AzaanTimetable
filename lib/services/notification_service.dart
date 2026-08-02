@@ -5,6 +5,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import '../models/masjid.dart';
+import 'prayer_schedule_cache.dart';
 
 /// Schedules local notifications that fire daily at each prayer time for
 /// the masjid a user is following. Uses a full-screen alarm-style
@@ -94,6 +95,30 @@ class NotificationService {
   /// exempt this app from battery optimization - bypasses hunting through
   /// Samsung's (or any OEM's) reorganized Settings menus entirely, since
   /// this is a stock Android dialog the manufacturer can't hide or rename.
+  /// Whether this app is exempt from battery optimisation.
+  ///
+  /// This is the single biggest cause of "sometimes the alarm comes, sometimes
+  /// it doesn't" on Xiaomi, Realme, Oppo, Vivo and Samsung handsets. Without
+  /// the exemption the OS is free to freeze the app, and a frozen app's
+  /// alarms simply do not fire.
+  static Future<bool> hasBatteryExemption() async {
+    try {
+      return await Permission.ignoreBatteryOptimizations.isGranted;
+    } catch (_) {
+      return true; // unknown - do not nag the user over a failed check
+    }
+  }
+
+  /// One call, everything that has to be true for an alarm to fire.
+  /// Anything false here explains a missed prayer.
+  static Future<Map<String, bool>> alarmHealth() async {
+    return <String, bool>{
+      'Notifications allowed': await Permission.notification.isGranted,
+      'Alarms & reminders': await Permission.scheduleExactAlarm.isGranted,
+      'Battery unrestricted': await hasBatteryExemption(),
+    };
+  }
+
   static Future<void> requestIgnoreBatteryOptimizations() async {
     try {
       const intent = AndroidIntent(
@@ -144,9 +169,20 @@ class NotificationService {
     required String body,
     required DateTime timeToday,
     String? payload,
+    bool fridayOnly = false,
   }) async {
+    final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime.from(timeToday, tz.local);
-    if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) {
+
+    if (fridayOnly) {
+      // BUG FIX: Juma was scheduled with DateTimeComponents.time like every
+      // other prayer, which made the Friday prayer alarm ring EVERY DAY.
+      // Walk forward to the next Friday that is still in the future, and
+      // match on day-of-week as well as time.
+      while (scheduled.weekday != DateTime.friday || !scheduled.isAfter(now)) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
+    } else if (!scheduled.isAfter(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
@@ -166,46 +202,141 @@ class NotificationService {
           fullScreenIntent: true,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // HIGHEST TIER ANDROID OFFERS.
+      //
+      // exactAllowWhileIdle is an exact alarm that doze *permits*; alarmClock
+      // is the primitive the OS uses for the user's own alarm clock. It is
+      // exempt from doze, survives battery optimisation far better, and is the
+      // most reliable scheduling call available to a third-party app.
+      //
+      // The cost: the phone shows an alarm icon in the status bar and reports
+      // the next prayer as the device's next alarm. For a prayer alarm app
+      // that is arguably correct behaviour rather than a side effect.
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: fridayOnly
+          ? DateTimeComponents.dayOfWeekAndTime
+          : DateTimeComponents.time,
       payload: payload,
     );
   }
 
+  static const _labels = {
+    'fajr': 'Fajr',
+    'dhuhr': 'Dhuhr',
+    'asr': 'Asr',
+    'maghrib': 'Maghrib',
+    'isha': 'Isha',
+    'juma': 'Juma (Friday)',
+  };
+
+  /// Arms alarms from fresh Firestore data, and caches that data so the next
+  /// app start can arm without any network at all.
   static Future<List<String>> scheduleForMasjid(Masjid masjid) async {
+    final cached = CachedSchedule.fromMasjid(masjid);
+    await PrayerScheduleCache.save(cached);
+    return scheduleFromCache(cached);
+  }
+
+  /// Arms alarms from device storage. This is the path used at app start,
+  /// before Firestore is consulted — Firestore updates prayer times, it does
+  /// not gate them.
+  static Future<List<String>> scheduleFromCache([CachedSchedule? given]) async {
     await init();
+
+    final CachedSchedule? schedule = given ?? await PrayerScheduleCache.load();
+    if (schedule == null) return <String>['No cached schedule yet'];
+
     await cancelAll();
-
     final scheduledSummary = <String>[];
-    final times = masjid.prayerTimes;
-    final entries = {
-      'fajr': ('Fajr', times.fajr),
-      'dhuhr': ('Dhuhr', times.dhuhr),
-      'asr': ('Asr', times.asr),
-      'maghrib': ('Maghrib', times.maghrib),
-      'isha': ('Isha', times.isha),
-      'juma': ('Juma (Friday)', times.juma),
-    };
 
-    for (final entry in entries.entries) {
+    for (final entry in _labels.entries) {
       final key = entry.key;
-      final label = entry.value.$1;
-      final timeStr = entry.value.$2;
+      final label = entry.value;
+      final timeStr = schedule.times[key];
+      if (timeStr == null) continue;
       final dt = _parseTimeToday(timeStr);
       if (dt == null) continue;
 
       await _scheduleDaily(
         id: _ids[key]!,
-        title: '$label - ${masjid.name}',
+        title: '$label - ${schedule.masjidName}',
         body: "It's time for $label prayer.",
         timeToday: dt,
-        payload: _buildPayload(label, masjid.name, masjid.customAzanAudioUrl),
+        payload:
+            _buildPayload(label, schedule.masjidName, schedule.audioUrl),
+        fridayOnly: key == 'juma',
       );
-      scheduledSummary.add('$label: $timeStr');
+      scheduledSummary
+          .add('$label: $timeStr${key == 'juma' ? ' (Fridays only)' : ''}');
     }
     return scheduledSummary;
   }
+
+  /// Checks what the OS actually still holds and re-arms anything missing.
+  ///
+  /// The app used to schedule and hope. Alarms disappear for reasons outside
+  /// the app's control — a force-stop, an OEM cleanup, a reboot the boot
+  /// receiver did not survive. Verifying on every app start turns a silent
+  /// failure into a self-repair.
+  ///
+  /// Returns true if it had to repair anything.
+  static Future<bool> verifyAndRepair() async {
+    await init();
+    final CachedSchedule? schedule = await PrayerScheduleCache.load();
+    if (schedule == null) return false;
+
+    final pending = await _plugin.pendingNotificationRequests();
+    final pendingIds = pending.map((p) => p.id).toSet();
+
+    final expected = <int>{};
+    for (final entry in _labels.entries) {
+      final t = schedule.times[entry.key];
+      if (t == null) continue;
+      if (_parseTimeToday(t) == null) continue;
+      expected.add(_ids[entry.key]!);
+    }
+
+    final missing = expected.difference(pendingIds);
+    if (missing.isEmpty) return false;
+
+    // Re-arm the whole set rather than patching individual ids — cheap, and it
+    // avoids a half-armed state if several went missing at once.
+    await scheduleFromCache(schedule);
+    return true;
+  }
+
+  /// Fires a real alarm-path notification after [delay]. This is the only
+  /// honest way for someone to find out whether alarms work on THEIR phone,
+  /// rather than discovering it at Fajr.
+  static Future<void> scheduleTestAlarm(
+      {Duration delay = const Duration(seconds: 60)}) async {
+    await init();
+    final when = tz.TZDateTime.now(tz.local).add(delay);
+    await _plugin.zonedSchedule(
+      998,
+      'Test alarm',
+      'If you are seeing this, alarms work on this phone.',
+      when,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'prayer_times_channel',
+          'Prayer Time Alarms',
+          channelDescription: 'Notifies you when it is time for prayer',
+          importance: Importance.max,
+          priority: Priority.high,
+          category: AndroidNotificationCategory.alarm,
+          fullScreenIntent: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: 'Test|||Test|||',
+    );
+  }
+
+  static Future<void> cancelTestAlarm() async => _plugin.cancel(998);
 
   static Future<void> cancelAll() async {
     for (final id in _ids.values) {
