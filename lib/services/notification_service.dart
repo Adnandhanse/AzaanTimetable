@@ -16,6 +16,44 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
+  /// NEW CHANNEL ID ON PURPOSE.
+  ///
+  /// A notification channel's sound is fixed the moment Android creates it and
+  /// cannot be changed afterwards — editing the old channel would do nothing on
+  /// any phone that already had the app. Bumping the id creates a fresh channel
+  /// carrying the azan. If you ever change the sound again, bump it again.
+  static const _channelId = 'prayer_alarm_azan_v1';
+  static const _channelName = 'Prayer Time Alarms';
+
+  /// The azan plays as the NOTIFICATION'S OWN SOUND, not from the ringing
+  /// screen.
+  ///
+  /// Previously the sound depended on the full-screen intent launching an
+  /// activity, and when Android blocked that — Android 14 restrictions, OEM
+  /// background limits, or the app having been killed — you got a default
+  /// chime and no azan. A channel sound is played by the OS itself, so it works
+  /// whether or not the app can start anything.
+  ///
+  /// usage: alarm means it plays at ALARM volume and follows alarm rules rather
+  /// than notification ones, which is what a prayer call should do.
+  static AndroidNotificationDetails _alarmChannel() =>
+      const AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: 'Plays the azan when it is time for prayer',
+        importance: Importance.max,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.alarm,
+        fullScreenIntent: true,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('azan'),
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+        // The azan runs over three minutes; without this Android can cut it
+        // short when the notification is auto-dismissed.
+        ongoing: false,
+        autoCancel: true,
+      );
+
   static const _ids = {
     'fajr': 100,
     'dhuhr': 101,
@@ -61,6 +99,16 @@ class NotificationService {
         onTapPayload?.call(response.payload);
       },
     );
+
+    // Remove the pre-azan channel. Anyone upgrading already has it, it has no
+    // sound attached, and leaving it behind means a stale duplicate sitting in
+    // the phone's notification settings.
+    try {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.deleteNotificationChannel('prayer_times_channel');
+    } catch (_) {}
 
     await Permission.notification.request();
     await Permission.scheduleExactAlarm.request();
@@ -191,17 +239,7 @@ class NotificationService {
       title,
       body,
       scheduled,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'prayer_times_channel',
-          'Prayer Time Alarms',
-          channelDescription: 'Notifies you when it is time for prayer',
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          fullScreenIntent: true,
-        ),
-      ),
+      NotificationDetails(android: _alarmChannel()),
       // HIGHEST TIER ANDROID OFFERS.
       //
       // exactAllowWhileIdle is an exact alarm that doze *permits*; alarmClock
@@ -318,17 +356,7 @@ class NotificationService {
       'Test alarm',
       'If you are seeing this, alarms work on this phone.',
       when,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'prayer_times_channel',
-          'Prayer Time Alarms',
-          channelDescription: 'Notifies you when it is time for prayer',
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          fullScreenIntent: true,
-        ),
-      ),
+      NotificationDetails(android: _alarmChannel()),
       androidScheduleMode: AndroidScheduleMode.alarmClock,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
@@ -353,17 +381,7 @@ class NotificationService {
       999,
       'Test Notification',
       'If you see this, notifications work on this phone.',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'prayer_times_channel',
-          'Prayer Time Alarms',
-          channelDescription: 'Notifies you when it is time for prayer',
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          fullScreenIntent: true,
-        ),
-      ),
+      NotificationDetails(android: _alarmChannel()),
       payload: 'Test|||Test Masjid|||',
     );
   }

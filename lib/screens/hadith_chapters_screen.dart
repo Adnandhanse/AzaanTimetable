@@ -185,16 +185,34 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                         onChanged: (v) => setState(() => _query = v),
                       ),
                     ),
+                    // A number search should hand back the HADITH, not a
+                    // chapter to go hunting in. This is the direct answer:
+                    // tapping it opens the chapter already scrolled to that
+                    // hadith, with the card outlined in gold.
                     if (asNumber != null)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                        child: Text(
-                          chapters.isEmpty
-                              ? 'No chapter contains hadith $asNumber.'
-                              : 'Chapter containing hadith $asNumber',
-                          style: AppText.caption
-                              .copyWith(color: AppColors.emerald),
-                        ),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                        child: chapters.isEmpty
+                            ? Text(
+                                'No hadith numbered $asNumber in this book.',
+                                style: AppText.caption
+                                    .copyWith(color: AppColors.textMuted),
+                              )
+                            : _DirectHit(
+                                hadithNumber: asNumber,
+                                chapterTitle: displayTitle(chapters.first),
+                                onOpen: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => HadithListScreen(
+                                      collection: _collection!,
+                                      chapter: chapters.first,
+                                      bookKey: widget.book.fileKey,
+                                      language: _langCode,
+                                      highlightHadithNumber: asNumber,
+                                    ),
+                                  ),
+                                ),
+                              ),
                       ),
                     if (urduTitlesMissing)
                       Padding(
@@ -308,6 +326,64 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
               child: const Text('Try again'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DirectHit extends StatelessWidget {
+  const _DirectHit({
+    required this.hadithNumber,
+    required this.chapterTitle,
+    required this.onOpen,
+  });
+
+  final int hadithNumber;
+  final String chapterTitle;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.gold, width: 1.4),
+          ),
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+          child: Row(
+            children: [
+              Medallion(label: '$hadithNumber', size: 36, filled: true),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'GO TO HADITH $hadithNumber',
+                      style: AppText.eyebrow
+                          .copyWith(letterSpacing: 1.4, color: AppColors.gold),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      chapterTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.rowTitle
+                          .copyWith(fontSize: 16, color: AppColors.emerald),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward, size: 18, color: AppColors.emerald),
+            ],
+          ),
         ),
       ),
     );

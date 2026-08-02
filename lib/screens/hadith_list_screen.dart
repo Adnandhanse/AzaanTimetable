@@ -9,12 +9,17 @@ class HadithListScreen extends StatefulWidget {
   final String bookKey;
   final String language;
 
+  /// Scroll to and highlight this hadith on open. Used when someone searches
+  /// for a number and wants the hadith itself, not the chapter it lives in.
+  final int? highlightHadithNumber;
+
   const HadithListScreen({
     super.key,
     required this.collection,
     required this.chapter,
     required this.bookKey,
     required this.language,
+    this.highlightHadithNumber,
   });
 
   @override
@@ -23,11 +28,56 @@ class HadithListScreen extends StatefulWidget {
 
 class _HadithListScreenState extends State<HadithListScreen> {
   Set<String> _bookmarks = {};
+  final ScrollController _scroll = ScrollController();
+  final GlobalKey _targetKey = GlobalKey();
+  int? _highlight;
 
   @override
   void initState() {
     super.initState();
+    _highlight = widget.highlightHadithNumber;
     _loadBookmarks();
+    if (_highlight != null) _jumpToTarget();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Bring the searched hadith into view.
+  ///
+  /// Two passes, because a ListView.builder only builds what is on screen: an
+  /// estimated jump to get the target into the build window, then
+  /// ensureVisible to land on it exactly. A single ensureVisible would fail for
+  /// anything far down the list, since the widget would not exist yet.
+  Future<void> _jumpToTarget() async {
+    final hadiths = widget.collection.hadithsInChapter(widget.chapter.number);
+    final int index =
+        hadiths.indexWhere((h) => h.hadithNumber == _highlight);
+    if (index < 0) return;
+
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || !_scroll.hasClients) return;
+
+    // Rough card height. Only needs to be close enough to put the target in
+    // the build window; the second pass corrects it.
+    const double estimate = 430;
+    final double target =
+        (index * estimate).clamp(0.0, _scroll.position.maxScrollExtent);
+    _scroll.jumpTo(target);
+
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    final ctx = _targetKey.currentContext;
+    if (ctx != null) {
+      await Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        alignment: 0.1,
+      );
+    }
   }
 
   Future<void> _loadBookmarks() async {
@@ -52,13 +102,24 @@ class _HadithListScreenState extends State<HadithListScreen> {
         title: Text(widget.chapter.title, overflow: TextOverflow.ellipsis),
       ),
       body: ListView.builder(
+        controller: _scroll,
         padding: const EdgeInsets.all(16),
         itemCount: hadiths.length,
         itemBuilder: (context, index) {
           final hadith = hadiths[index];
           final isBookmarked = _isBookmarked(hadith.hadithNumber);
+          final bool isTarget = _highlight == hadith.hadithNumber;
           return Card(
+            key: isTarget ? _targetKey : null,
             margin: const EdgeInsets.only(bottom: 12),
+            // The searched hadith gets a gold border so it is obvious which
+            // one the search meant, once several are on screen together.
+            shape: isTarget
+                ? RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    side: const BorderSide(color: AppColors.gold, width: 2),
+                  )
+                : null,
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(

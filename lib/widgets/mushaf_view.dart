@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show LineMetrics;
 
 import 'package:flutter/material.dart';
@@ -254,24 +255,31 @@ class _MushafViewState extends State<MushafView> {
                 reverse: true,
                 itemCount: pages.length,
                 onPageChanged: (int i) => setState(() => _page = i),
-                itemBuilder: (BuildContext context, int i) => Container(
-                  margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.goldRule),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: hPad, vertical: vPad),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Text(
-                      pages[i].text,
-                      textAlign: TextAlign.justify,
-                      style: style,
+                itemBuilder: (BuildContext context, int i) {
+                  final Widget page = Container(
+                    margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.goldRule),
                     ),
-                  ),
-                ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: hPad, vertical: vPad),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Text(
+                        pages[i].text,
+                        textAlign: TextAlign.justify,
+                        style: style,
+                      ),
+                    ),
+                  );
+                  return _PageTurn(
+                    controller: _controller,
+                    index: i,
+                    child: page,
+                  );
+                },
               ),
             ),
 
@@ -319,6 +327,96 @@ class _MushafViewState extends State<MushafView> {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// Makes a page swing on its spine instead of sliding.
+///
+/// The leaf rotates about its inner edge with a perspective transform, so it
+/// tips away from you as it leaves and settles flat as it arrives — the motion
+/// a paper page makes. A shadow deepens across the turning leaf and the spine
+/// edge darkens, which is what sells it as paper rather than a rotating
+/// rectangle.
+///
+/// A true page CURL — paper bending in an arc, the back of the sheet showing
+/// through — needs a fragment shader deforming a mesh. This is the hinge, not
+/// the curl: convincing, and it costs one Transform per page instead of a
+/// custom render pipeline on every frame.
+class _PageTurn extends StatelessWidget {
+  const _PageTurn({
+    required this.controller,
+    required this.index,
+    required this.child,
+  });
+
+  final PageController controller;
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (BuildContext context, Widget? _) {
+        // Before the first layout the controller has no page value at all.
+        double delta = 0;
+        if (controller.hasClients &&
+            controller.position.haveDimensions &&
+            controller.page != null) {
+          delta = controller.page! - index;
+        }
+
+        // Only the two pages either side of the fold are moving.
+        final double t = delta.clamp(-1.0, 1.0);
+
+        // The leaf hinges on its inner edge. reverse: true on the PageView
+        // means the incoming page arrives from the left, so the spine sits on
+        // the opposite side to a left-to-right book.
+        final Alignment hinge =
+            t >= 0 ? Alignment.centerLeft : Alignment.centerRight;
+
+        final Matrix4 m = Matrix4.identity()
+          ..setEntry(3, 2, 0.0016) // perspective; without it this is 2D skew
+          ..rotateY(t * math.pi * 0.5);
+
+        // Paper does not brighten as it turns away from the light.
+        final double shade = (t.abs() * 0.45).clamp(0.0, 0.45);
+
+        return Transform(
+          alignment: hinge,
+          transform: m,
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: <Widget>[
+              child,
+              if (shade > 0.001)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        gradient: LinearGradient(
+                          begin: t >= 0
+                              ? Alignment.centerLeft
+                              : Alignment.centerRight,
+                          end: t >= 0
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          colors: <Color>[
+                            Colors.black.withOpacity(shade),
+                            Colors.black.withOpacity(shade * 0.15),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
