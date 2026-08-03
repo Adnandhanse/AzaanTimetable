@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/alarm_event_log.dart';
+import '../services/foreground_alarm_manager.dart';
 import '../services/notification_service.dart';
 import '../services/foreground_alarm_manager.dart';
 import '../theme/app_theme.dart';
@@ -79,6 +80,28 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
       await NotificationService.openExactAlarmSettings();
     }
     await _refresh();
+  }
+
+  /// Queues the test on the polling service AND the OS scheduler, so the log
+  /// shows which one delivered. On this project's test device only one of them
+  /// ever does.
+  Future<void> _runBothTests() async {
+    await ForegroundAlarmManager.queueServiceTest();
+    final tier = await NotificationService.scheduleTestAlarm();
+    if (!mounted) return;
+    setState(() {
+      _testArmed = true;
+      _testResult = tier == null ? 'OS scheduler refused' : tier;
+    });
+    await _refresh();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            'Two tests queued for 60 seconds: one via the background service, one via the OS scheduler. Lock the phone. The log will show which arrived.'),
+        duration: Duration(seconds: 6),
+      ),
+    );
   }
 
   Future<void> _runTest() async {
@@ -228,7 +251,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                 const SectionRule(label: 'Test it on this phone'),
                 const SizedBox(height: 10),
                 Text(
-                  'Sets a real alarm for 60 seconds from now, using exactly the same path a prayer alarm uses. Lock the phone and wait.',
+                  'Queues two tests 60 seconds out — one through the background service, one through the OS scheduler. Lock the phone and wait. The event log records which one actually arrived, which is the thing worth knowing.',
                   style: AppText.caption.copyWith(color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 10),
@@ -329,9 +352,9 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: _runTest,
+                        onPressed: _runBothTests,
                         icon: const Icon(Icons.alarm, size: 17),
-                        label: const Text('Test alarm in 60 seconds'),
+                        label: const Text('Test both paths in 60 seconds'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
                           side: const BorderSide(color: AppColors.gold),

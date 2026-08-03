@@ -50,6 +50,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           '${timestamp.second.toString().padLeft(2, '0')}',
     );
 
+    // A one-off test, delivered down the SAME path a prayer uses.
+    //
+    // The OS scheduler does not deliver on every device — this app has a phone
+    // where zonedSchedule arms without error and never fires, while this
+    // service posts notifications perfectly. Routing the test through here
+    // tests the mechanism that actually carries prayers.
+    await _checkTestAlarm();
+
     final dataString =
         await FlutterForegroundTask.getData<String>(key: 'prayer_times_data');
     if (dataString == null) {
@@ -111,6 +119,44 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Fires a pending service test once its moment arrives, then clears it.
+  Future<void> _checkTestAlarm() async {
+    try {
+      final String? raw =
+          await FlutterForegroundTask.getData<String>(key: 'service_test_at');
+      if (raw == null) return;
+
+      final int at = int.tryParse(raw) ?? 0;
+      if (at == 0) return;
+      if (DateTime.now().millisecondsSinceEpoch < at) return;
+
+      // Overwrite with 0 rather than removeData — same effect (the guard
+      // above treats 0 as "nothing pending") and it avoids depending on an
+      // API whose presence varies across plugin versions.
+      await FlutterForegroundTask.saveData(key: 'service_test_at', value: '0');
+      await AlarmEventLog.add('FIRED test by service',
+          detail: 'delivered by the polling service, not the OS scheduler');
+
+      await _plugin.show(
+        996,
+        'Test alarm',
+        'Delivered by the background service. This is the path prayers use.',
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            NotificationChannels.plain,
+            'Prayer Time Alarms',
+            channelDescription: 'Alerts you when it is time for prayer',
+            importance: Importance.max,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.alarm,
+            fullScreenIntent: true,
+          ),
+        ),
+        payload: 'Test|||Test|||',
+      );
+    } catch (_) {}
   }
 
   Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) async {

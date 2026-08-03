@@ -41,6 +41,20 @@ class ForegroundAlarmManager {
   /// is the only path that actually delivers. It was only ever refreshed from
   /// the Home screen, so saving new prayer times left the service watching the
   /// OLD ones. That is why a changed time fired once and then never again.
+  /// Queues a test to be delivered by the polling service.
+  ///
+  /// Deliberately not AlarmManager. On devices where the OS scheduler silently
+  /// refuses to deliver, this is the only honest way to test the path that
+  /// actually carries prayer alarms.
+  static Future<void> queueServiceTest(
+      {Duration delay = const Duration(seconds: 60)}) async {
+    _configureIfNeeded();
+    await FlutterForegroundTask.saveData(
+      key: 'service_test_at',
+      value: DateTime.now().add(delay).millisecondsSinceEpoch.toString(),
+    );
+  }
+
   static Future<void> refreshFromCache() async {
     final CachedSchedule? c = await PrayerScheduleCache.load();
     if (c == null) return;

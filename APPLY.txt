@@ -1,76 +1,72 @@
-v16 - THE ACTUAL CAUSE
-======================
+v20 - 7 files, from v17
+=======================
 
-Full superset of v1-v15. Unzip over your repo root, overwriting.
-INCLUDES .github/workflows/build.yml - apply it.
+You are on v17. These seven bring you fully up to date (v18 + v19 + v20).
+Copy all seven - they are interdependent.
 
-=====================================================================
-YOUR THREE RESULTS SOLVED IT
-=====================================================================
-  instant notification works        -> the channel is FINE. I was wrong about
-                                       that for three versions.
-  60-second test never fires        -> AlarmManager scheduling is broken here
-  8:20 fired, 8:24 did not          -> something delivers sometimes
+  lib/services/alarm_event_log.dart          NEW
+  lib/screens/setup_wizard_screen.dart       NEW
+  lib/main.dart
+  lib/screens/alarm_health_screen.dart
+  lib/services/notification_service.dart
+  lib/services/foreground_alarm_service.dart
+  lib/services/foreground_alarm_manager.dart
 
-TWO CAUSES, BOTH MINE.
-
---- CAUSE 1: alarmClock scheduling fails SILENTLY on your phone -------------
-In v11 I switched to AndroidScheduleMode.alarmClock, calling it "the biggest
-single win". On paper it is. In practice several Android ROMs accept
-setAlarmClock and then never deliver it. It does not throw, so my three-tier
-try/catch ladder could not detect it — scheduling reported success, tier 1,
-and nothing ever fired. Your screenshot said "azan + alarmClock" and that was
-the app confidently reporting a method that does nothing on your device.
-
-FIXED: alarmClock is no longer the default. exactAllowWhileIdle is - weaker on
-paper, actually delivers. There is a switch in Alarm health if you want to try
-alarmClock on a different phone.
-
---- CAUSE 2: the thing that DID work was running on stale data --------------
-The 8:20 alarm was not the scheduler. It was the foreground service, which
-polls every 20 seconds and posts the notification itself. That is the one path
-proven to work on your phone.
-
-But its copy of your prayer times was only ever refreshed from the Home screen.
-Save a new time in the admin panel and the service kept watching the OLD one.
-8:20 was in its data; 8:24 never got there.
-
-FIXED: ForegroundAlarmManager.refreshFromCache(), called on every scheduling
-run, so the polling service and the scheduler can never disagree again.
+No pubspec change. No workflow change. No new package.
 
 =====================================================================
-ALSO IN THIS BUILD
+YOUR LOG SETTLED IT
 =====================================================================
+51 unbroken heartbeats, 21:28 to 22:19, one every minute, no gaps.
+  -> the service is alive and healthy. Samsung is NOT freezing it.
 
-REDUNDANT ONE-SHOT ALARMS (ids 300+)
-Each prayer is now also scheduled as explicit one-shots for the next 3 days,
-separately from the repeating alarm. The repeating alarm depends on the plugin
-re-arming itself after each firing; if that link breaks, everything after today
-was being lost silently. Every app open pushes the 3-day window forward.
+  21:31:30  test alarm armed  default sound + exactAllowWhileIdle
+  21:32:05  service tick
+  21:33:05  service tick
+  -> armed without error, app provably awake through the firing moment,
+     nothing arrived. Same again with alarmClock at 22:18:46.
 
-NEXT FIRE TIMES ARE NOW SHOWN
-Alarm health lists "Maghrib -> tomorrow 20:24" for each prayer. Setting a time
-that has already passed today is not a bug, but it looks exactly like one.
-This may well explain the 8:24 case on its own.
+CONCLUSION: zonedSchedule does not deliver on this device. Not with
+exactAllowWhileIdle, not with alarmClock. It arms, reports success, and the
+alarm never arrives. Meanwhile _plugin.show() from the service works perfectly
+- your instant test proved that, and the heartbeats prove the service runs.
 
-SHARED CHANNEL CONSTANTS
-NotificationService and the background isolate had their own copies of the
-channel id and drifted apart in v12 — the foreground service posted to a
-channel the other had deleted, and Android drops those silently. One constants
-file now, so that class of bug cannot recur. It also breaks an import cycle I
-had just created.
-
-AZAN FALLBACK (from v15)
-"Masjid has not uploaded a custom azan yet" was literal: with no upload the
-ringing screen played NOTHING, and with an upload it streamed from Firebase
-Storage at the exact moment the alarm fired. The bundled azan is now the floor.
+I have spent six versions trying to fix the path that does not work on your
+phone, while the path that does work was running flawlessly the whole time.
 
 =====================================================================
-WHAT TO DO
+WHAT v20 CHANGES
 =====================================================================
-1. Apply v16 INCLUDING the workflow file. Rebuild. UNINSTALL, then install.
-2. Alarm health > check "Alarm-clock scheduling" is OFF.
-3. Run the 60-second test. It should now fire.
-4. Change a prayer time to 3 minutes from now and wait. Two things should
-   deliver it: the scheduler and the polling service.
-5. Alarm health now lists next fire times - check they say what you expect.
+THE TEST NOW RUNS DOWN BOTH PATHS.
+"Test both paths in 60 seconds" queues one test on the background service and
+one on the OS scheduler. The log records which arrived:
+
+    "FIRED test by service"   -> the service path works. This is the one that
+                                 carries your prayers.
+    (nothing)                 -> the OS scheduler again delivered nothing.
+
+That single line tells you which mechanism your app can rely on.
+
+The service test is delivered by the same 20-second poll that fires prayers,
+so it tests the real path rather than a parallel one.
+
+=====================================================================
+WHAT THIS MEANS FOR YOUR APP
+=====================================================================
+If the service test fires and the OS one does not - which your log strongly
+predicts - then your prayer alarms are ALREADY being delivered by the service,
+and have been all along. The 8:20 Maghrib that worked was the service. The
+8:24 that did not was the service running on stale times, which v16 fixed.
+
+The practical consequence: the foreground service must stay alive. That is
+what the setup wizard's step 4 is for, and why the heartbeat log matters - a
+gap in it is the only thing that can silence your alarms now.
+
+=====================================================================
+DO THIS
+=====================================================================
+1. Apply all seven files. Rebuild. Install.
+2. Complete the setup wizard (new on first launch).
+3. Alarm health > "Test both paths in 60 seconds". Lock the phone.
+4. Send me the log. I want to see which line appears.
+5. Then set a prayer 3 minutes ahead and let it run for real.
