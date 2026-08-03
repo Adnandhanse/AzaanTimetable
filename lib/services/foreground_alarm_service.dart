@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -119,6 +120,21 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       final parsed = _parseTime(timeStr);
       if (parsed == null) continue;
 
+      // JUMA IS A FRIDAY PRAYER.
+      //
+      // The scheduler was taught this in v10 (matchDateTimeComponents set to
+      // dayOfWeekAndTime), but this loop was not — it walks all six times and
+      // fires whichever matches the clock, on any day. Since this service is
+      // the path that actually delivers on restrictive phones, the scheduler
+      // fix never took effect where it counted, and Juma rang on a Monday.
+      //
+      // Matching on the label rather than a key because that is what the
+      // service is given: 'Juma (Friday)'.
+      if (label.toLowerCase().contains('juma') &&
+          now.weekday != DateTime.friday) {
+        continue;
+      }
+
       final scheduledMinutes = parsed.$1 * 60 + parsed.$2;
       final nowMinutes = now.hour * 60 + now.minute;
       // Allow a small window (the scheduled minute or the one right after)
@@ -208,7 +224,21 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     }
   }
 
+  /// Belt and braces. If playback somehow loops or hangs, this ends it without
+  /// the user having to do anything. An azan that will not stop is worse than
+  /// one that is a minute late.
+  void _armAutoStop() {
+    _autoStop?.cancel();
+    _autoStop = Timer(const Duration(minutes: 6), () {
+      _stopAzan();
+      _setServiceNotice('Watching prayer times');
+    });
+  }
+
+  Timer? _autoStop;
+
   Future<void> _stopAzan() async {
+    _autoStop?.cancel();
     try {
       await _azanPlayer.stop();
       await AlarmEventLog.add('azan stopped');
@@ -222,6 +252,32 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     if (data == 'stop_azan') {
       _stopAzan();
     }
+  }
+
+  /// The Stop button on the service's own persistent notification.
+  ///
+  /// THIS is the reliable stop. The ringing screen's button only exists if
+  /// Android launched that screen, which is the very thing it refuses to do
+  /// when the phone is locked — so the azan could play with no way to stop it
+  /// short of powering the phone off.
+  ///
+  /// The service notification is always present whenever the service is
+  /// running, and this handler executes in the isolate that owns the player.
+  @override
+  void onNotificationButtonPressed(String id) {
+    if (id == 'stop_azan') {
+      _stopAzan();
+      _setServiceNotice('Watching prayer times');
+    }
+  }
+
+  Future<void> _setServiceNotice(String text) async {
+    try {
+      await FlutterForegroundTask.updateService(
+        notificationTitle: 'Masjid Namaz Alarm is active',
+        notificationText: text,
+      );
+    } catch (_) {}
   }
 
   /// Keeps the fired set across isolate restarts. Scoped to the day, so it
@@ -266,6 +322,15 @@ class PrayerAlarmTaskHandler extends TaskHandler {
             priority: Priority.high,
             category: AndroidNotificationCategory.alarm,
             fullScreenIntent: true,
+            ongoing: true,
+            actions: <AndroidNotificationAction>[
+              AndroidNotificationAction(
+                'stop_azan',
+                'Stop azan',
+                showsUserInterface: false,
+                cancelNotification: true,
+              ),
+            ],
           ),
         ),
         payload: 'Test|||Test|||',
@@ -273,6 +338,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
       // Play the azan on the test too — otherwise the test proves the
       // notification works while saying nothing about the part that matters.
+      await _setServiceNotice('Azan playing - tap Stop azan to end it');
+      _armAutoStop();
       await _playAzan(null);
     } catch (_) {}
   }
@@ -330,15 +397,29 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           // Deliberately NOT the raw azan resource. If that file is missing
           // from the build the URI is invalid, and this path — the one that
           // actually delivers on restrictive phones — would break with it.
-          // The azan plays from the bundled Flutter asset in the ringing
-          // screen instead.
+          // The service plays the azan itself instead.
           audioAttributesUsage: AudioAttributesUsage.alarm,
+          // Stop, on the notification you actually see. The service's own
+          // notification also carries one, but that sits collapsed at the
+          // bottom of the shade at LOW importance — no use when an azan is
+          // playing and you want it to stop NOW.
+          ongoing: true,
+          actions: <AndroidNotificationAction>[
+            AndroidNotificationAction(
+              'stop_azan',
+              'Stop azan',
+              showsUserInterface: false,
+              cancelNotification: true,
+            ),
+          ],
         ),
       ),
       payload: '$label|||$masjidName|||${audioUrl ?? ''}',
     );
 
     // Play it here, from the service. Whether or not any screen opens.
+    await _setServiceNotice('Azan playing - tap Stop azan to end it');
+    _armAutoStop();
     await _playAzan(audioUrl);
   }
 

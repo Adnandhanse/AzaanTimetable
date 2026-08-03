@@ -93,6 +93,13 @@ class ForegroundAlarmManager {
         await FlutterForegroundTask.startService(
           notificationTitle: 'Masjid Namaz Alarm is active',
           notificationText: 'Watching prayer times for $masjidName',
+          // The only stop control that is ALWAYS reachable. The ringing
+          // screen's button only exists if Android launched that screen,
+          // which it refuses to do exactly when the phone is locked — so
+          // without this the azan could play with no way to stop it.
+          notificationButtons: [
+            const NotificationButton(id: 'stop_azan', text: 'Stop azan'),
+          ],
           callback: startForegroundTaskCallback,
         );
       } else {
@@ -129,6 +136,9 @@ class ForegroundAlarmManager {
         await FlutterForegroundTask.startService(
           notificationTitle: 'Masjid Namaz Alarm is active',
           notificationText: 'Watching prayer times for ${masjid.name}',
+          notificationButtons: [
+            const NotificationButton(id: 'stop_azan', text: 'Stop azan'),
+          ],
           callback: startForegroundTaskCallback,
         );
       } else {

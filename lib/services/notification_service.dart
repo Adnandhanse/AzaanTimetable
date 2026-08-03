@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:ui' show DartPluginRegistrant;
 
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -136,6 +138,14 @@ class NotificationService {
   /// That is fragile: it happens once, invisibly, and whatever state it
   /// captures is permanent. Creating them explicitly at startup makes the
   /// moment of creation something we control.
+  /// Tells the background service to stop the azan. The player lives in that
+  /// isolate; this one cannot touch it directly.
+  static void _stopAzanEverywhere() {
+    try {
+      FlutterForegroundTask.sendDataToTask('stop_azan');
+    } catch (_) {}
+  }
+
   static Future<void> _createChannels() async {
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -314,8 +324,16 @@ class NotificationService {
     await _plugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (response) {
+        if (response.actionId == 'stop_azan') {
+          _stopAzanEverywhere();
+          return;
+        }
         onTapPayload?.call(response.payload);
       },
+      // Taps that arrive while the app is not running come here instead.
+      // Without this, the Stop button on a prayer notification would do
+      // nothing in exactly the case that matters — phone locked, app closed.
+      onDidReceiveBackgroundNotificationResponse: notificationActionBackground,
     );
 
     // Remove the pre-azan channel. Anyone upgrading already has it, it has no
@@ -776,4 +794,21 @@ class NotificationService {
     }
     return results;
   }
+}
+
+/// Handles notification actions when the app is not running.
+///
+/// Must be top level and marked as an entry point, or the compiler drops it in
+/// release builds and Stop does nothing when the phone is locked — the one
+/// situation it exists for.
+@pragma('vm:entry-point')
+void notificationActionBackground(NotificationResponse response) {
+  if (response.actionId != 'stop_azan') return;
+  try {
+    // Plugins are not registered by default in a background isolate.
+    DartPluginRegistrant.ensureInitialized();
+  } catch (_) {}
+  try {
+    FlutterForegroundTask.sendDataToTask('stop_azan');
+  } catch (_) {}
 }
