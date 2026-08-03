@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
-/// Shown when a prayer time alarm fires - plays the masjid's Azan audio
-/// (their custom upload if they have one, otherwise the phone vibrates
-/// with a visual reminder only, since we don't bundle a default Azan
-/// recording - that would need a properly licensed audio file).
+/// Shown when a prayer time alarm fires.
+///
+/// Plays the masjid's own uploaded azan when one is reachable, and the bundled
+/// recording otherwise. The bundled file is the floor: no masjid upload, no
+/// network, no problem — it still calls to prayer.
 class AzanRingingScreen extends StatefulWidget {
   final String prayerName;
   final String masjidName;
@@ -31,19 +33,48 @@ class _AzanRingingScreenState extends State<AzanRingingScreen> {
     _startPlayback();
   }
 
+  /// Plays the azan, with the bundled recording as a guaranteed floor.
+  ///
+  /// THIS USED TO BE THE MAIN REASON THE AZAN WAS SILENT.
+  ///
+  /// The old version did two things wrong. If the masjid had not uploaded a
+  /// custom azan it returned immediately and played NOTHING — the ringing
+  /// screen appeared in silence, by design. And when a URL did exist it was
+  /// streamed from Firebase Storage at the exact moment the alarm fired.
+  ///
+  /// An alarm that needs a network round trip when it rings fails precisely
+  /// when you need it most: overnight, on a locked phone, with doze throttling
+  /// the radio and weak signal. The catch block then swallowed the failure, so
+  /// it failed silently every time.
+  ///
+  /// Now: the bundled asset always works, offline, instantly. A masjid's own
+  /// recording is attempted first but is only ever an upgrade on top of
+  /// something that already works.
+  /// Playback now belongs to the BACKGROUND SERVICE, not this screen.
+  ///
+  /// This screen only appears if Android honours the full-screen intent, which
+  /// it often refuses to do when the phone is locked or the app was killed —
+  /// the precise moments a prayer alarm matters. Tying the azan to a screen
+  /// that may never open meant the notification arrived and the azan did not.
+  ///
+  /// The service is already awake and already posting the notification, so it
+  /// plays the audio. This screen is now just the face of it, plus a way to
+  /// stop it.
   Future<void> _startPlayback() async {
-    if (widget.audioUrl == null) return;
-    try {
-      await _player.play(UrlSource(widget.audioUrl!));
-      if (mounted) setState(() => _isPlaying = true);
-    } catch (_) {
-      // If playback fails (e.g. no internet right now), the screen still
-      // shows so the user knows it's prayer time, just silently.
-    }
+    // Already playing, out in the service. Nothing to start here — playing a
+    // second copy would give two overlapping azans.
+    if (mounted) setState(() => _isPlaying = true);
   }
 
   Future<void> _stop() async {
-    await _player.stop();
+    // Cross-isolate: the service holds the player, so stopping is a message
+    // rather than a method call.
+    try {
+      FlutterForegroundTask.sendDataToTask('stop_azan');
+    } catch (_) {}
+    try {
+      await _player.stop();
+    } catch (_) {}
     if (mounted) Navigator.of(context).pop();
   }
 

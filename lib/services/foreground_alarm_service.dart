@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'alarm_event_log.dart';
@@ -21,7 +22,20 @@ void startForegroundTaskCallback() {
 class PrayerAlarmTaskHandler extends TaskHandler {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _pluginInitialized = false;
-  String? _lastFiredKey;
+  /// Prayers already fired, as "date-label-time" strings.
+  ///
+  /// A SET, not a single value, and the TIME is part of the key. Both matter:
+  ///
+  ///   * A single value meant Fajr firing wiped the memory of Dhuhr, so
+  ///     ordering bugs were possible.
+  ///   * Keying on date+label alone meant a prayer could only ever fire once
+  ///     per day. Correct a time after that prayer has already passed — which
+  ///     an admin fixing a mistake does, and which is exactly how this app
+  ///     gets tested — and the corrected alarm was silently skipped.
+  ///
+  /// Including the time means a changed time is a genuinely new alarm and
+  /// rings, while an unchanged one still fires only once.
+  Set<String> _firedKeys = <String>{};
 
   Future<void> _ensurePluginInitialized() async {
     if (_pluginInitialized) return;
@@ -73,6 +87,24 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     final now = DateTime.now();
     final todayKey = '${now.year}-${now.month}-${now.day}';
 
+    // Restore from disk on the first tick after an isolate restart. Held only
+    // in memory, this set resets whenever Android recreates the isolate — and
+    // a forgotten "already fired" means the same prayer rings twice.
+    if (!_restored) {
+      _restored = true;
+      try {
+        final String? raw =
+            await FlutterForegroundTask.getData<String>(key: 'fired_keys');
+        if (raw != null) {
+          final decoded = json.decode(raw) as Map<String, dynamic>;
+          if (decoded['day'] == todayKey) {
+            _firedKeys =
+                (decoded['keys'] as List).map((e) => e.toString()).toSet();
+          }
+        }
+      } catch (_) {}
+    }
+
     // One heartbeat a minute, not one every 20 seconds. Its value is not the
     // beat itself but the GAP: a hole in these timestamps is the OS having
     // frozen the service, which is invisible any other way.
@@ -91,13 +123,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       final nowMinutes = now.hour * 60 + now.minute;
       // Allow a small window (the scheduled minute or the one right after)
       // so a single slightly-delayed polling cycle doesn't cause a missed
-      // alarm - the _lastFiredKey check below still guarantees it only
-      // fires once per prayer per day.
+      // alarm - the _firedKeys check below still guarantees a given
+      // prayer at a given time fires only once.
       final withinWindow = nowMinutes == scheduledMinutes || nowMinutes == scheduledMinutes + 1;
-      final fireKey = '$todayKey-$label';
+      final fireKey = '$todayKey-$label-$timeStr';
 
-      if (withinWindow && _lastFiredKey != fireKey) {
-        _lastFiredKey = fireKey;
+      if (withinWindow && !_firedKeys.contains(fireKey)) {
+        _firedKeys.add(fireKey);
+        await _persistFired(todayKey);
         await AlarmEventLog.add('FIRED by service', detail: '$label at $timeStr');
         await _fireAlarm(label, masjidName, audioUrl);
       }
@@ -122,6 +155,87 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   }
 
   /// Fires a pending service test once its moment arrives, then clears it.
+  bool _restored = false;
+
+  /// The azan is played BY THE SERVICE, not by the ringing screen.
+  ///
+  /// It used to depend on the full-screen intent launching an activity — which
+  /// is the exact thing Android blocks when the phone is locked or the app has
+  /// been killed. So the alarm arrived and the azan did not, which is the
+  /// worst possible half-success for this app.
+  ///
+  /// This isolate is already alive and already posting the notifications. It
+  /// can play audio too, needing no activity, no full-screen intent and no
+  /// notification channel sound. Nothing has to be granted for it to work.
+  static final AudioPlayer _azanPlayer = AudioPlayer();
+
+  Future<void> _playAzan(String? audioUrl) async {
+    try {
+      // Alarm usage: plays at alarm volume and is not silenced by the ringer
+      // switch, which is what a call to prayer should do.
+      await _azanPlayer.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.alarm,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+        ),
+      );
+      await _azanPlayer.setVolume(1.0);
+    } catch (_) {}
+
+    if (audioUrl != null && audioUrl.isNotEmpty) {
+      try {
+        // Short timeout. If the masjid's own recording is not reachable within
+        // a few seconds the moment has passed — fall back rather than stand in
+        // silence waiting on a download.
+        await _azanPlayer
+            .play(UrlSource(audioUrl))
+            .timeout(const Duration(seconds: 4));
+        await AlarmEventLog.add('azan playing', detail: 'masjid recording');
+        return;
+      } catch (_) {}
+    }
+
+    try {
+      await _azanPlayer.play(AssetSource('audio/azan.mp3'));
+      await AlarmEventLog.add('azan playing', detail: 'bundled recording');
+    } catch (e) {
+      await AlarmEventLog.add('azan FAILED', detail: '$e');
+    }
+  }
+
+  Future<void> _stopAzan() async {
+    try {
+      await _azanPlayer.stop();
+      await AlarmEventLog.add('azan stopped');
+    } catch (_) {}
+  }
+
+  /// Lets the app tell the service to stop the azan. The two live in different
+  /// isolates and cannot share the player, so this is the only route.
+  @override
+  void onReceiveData(Object data) {
+    if (data == 'stop_azan') {
+      _stopAzan();
+    }
+  }
+
+  /// Keeps the fired set across isolate restarts. Scoped to the day, so it
+  /// clears itself at midnight rather than growing forever.
+  Future<void> _persistFired(String todayKey) async {
+    try {
+      await FlutterForegroundTask.saveData(
+        key: 'fired_keys',
+        value: json.encode(
+            <String, dynamic>{'day': todayKey, 'keys': _firedKeys.toList()}),
+      );
+    } catch (_) {}
+  }
+
   Future<void> _checkTestAlarm() async {
     try {
       final String? raw =
@@ -156,6 +270,10 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         ),
         payload: 'Test|||Test|||',
       );
+
+      // Play the azan on the test too — otherwise the test proves the
+      // notification works while saying nothing about the part that matters.
+      await _playAzan(null);
     } catch (_) {}
   }
 
@@ -219,6 +337,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       ),
       payload: '$label|||$masjidName|||${audioUrl ?? ''}',
     );
+
+    // Play it here, from the service. Whether or not any screen opens.
+    await _playAzan(audioUrl);
   }
 
   @override
