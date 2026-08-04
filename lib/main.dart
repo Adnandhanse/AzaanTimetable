@@ -49,10 +49,29 @@ void main() async {
   // Has the user been through alarm setup yet? If not, the wizard is shown
   // instead of the splash screen. A prayer alarm missing one permission is not
   // partly working, it is broken, so this comes before anything else.
+  // Show the setup wizard on first launch, AND AGAIN whenever something it
+  // asked for has gone missing.
+  //
+  // It used to appear only if 'alarm_setup_done_v1' was false, so tapping
+  // through it once silenced it forever. That is wrong for permissions: the
+  // user can revoke them, an OS update can reset them, and Samsung can quietly
+  // re-restrict the app. The one thing the app cannot afford to be quiet about
+  // is a prayer alarm that will not fire.
+  //
+  // 'alarm_setup_dismissed_v1' is the escape hatch — if the user chooses not to
+  // be asked again, it stops for good.
   bool needsSetup = false;
   try {
     final prefs = await SharedPreferences.getInstance();
-    needsSetup = !(prefs.getBool('alarm_setup_done_v1') ?? false);
+    final bool done = prefs.getBool('alarm_setup_done_v1') ?? false;
+    final bool dismissed = prefs.getBool('alarm_setup_dismissed_v1') ?? false;
+
+    if (!done) {
+      needsSetup = true;
+    } else if (!dismissed) {
+      final health = await NotificationService.alarmHealth();
+      needsSetup = health.values.any((bool ok) => !ok);
+    }
   } catch (_) {}
 
   // Errors are recorded rather than swallowed. Startup must not be blocked by

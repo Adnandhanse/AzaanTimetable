@@ -138,7 +138,8 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
             _Step(
               number: 1,
               title: 'Allow notifications',
-              detail: 'Without this the alarm has no way to reach you.',
+              detail:
+                  'One tap. Without this the alarm has no way to reach you.',
               done: notif,
               busy: _busy,
               onTap: _grantNotifications,
@@ -147,16 +148,16 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               number: 2,
               title: 'Allow alarms & reminders',
               detail:
-                  'Lets the alarm fire at an exact minute instead of whenever Android feels like it.',
+                  'Lets the alarm fire at an exact minute rather than whenever Android feels like it. Android gives no dialog for this one, so it opens a settings screen — and on newer phones it is often already on.',
               done: exact,
               busy: _busy,
               onTap: _grantExactAlarm,
             ),
             _Step(
               number: 3,
-              title: 'Set battery to unrestricted',
+              title: 'Let the app run in the background',
               detail:
-                  'A battery-restricted app gets frozen, and a frozen app cannot ring.',
+                  'One tap. A battery-restricted app gets frozen, and a frozen app cannot ring.',
               done: batt,
               busy: _busy,
               onTap: _grantBattery,
@@ -205,9 +206,27 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'You can reopen this any time from Settings → Alarm health.',
+              'Steps 1 and 3 are one-tap system prompts. Steps 2 and 4 have no prompt Android will show on an app\u2019s behalf, so they open the right screen instead.',
               textAlign: TextAlign.center,
               style: AppText.caption.copyWith(color: AppColors.textFaint),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'You can reopen this any time from Settings \u2192 Alarm health.',
+              textAlign: TextAlign.center,
+              style: AppText.caption.copyWith(color: AppColors.textFaint),
+            ),
+            const SizedBox(height: 12),
+            // The wizard now returns whenever a permission goes missing, so
+            // there has to be a way out for someone who does not want it.
+            TextButton(
+              onPressed: () async {
+                await NotificationService.setSetupDismissed(true);
+                await _finish();
+              },
+              style: TextButton.styleFrom(foregroundColor: AppColors.textMuted),
+              child: Text('Don\u2019t show this again',
+                  style: AppText.caption.copyWith(color: AppColors.textMuted)),
             ),
           ],
         ),

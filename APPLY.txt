@@ -1,88 +1,47 @@
-v27 - 8 files  (includes v26 Ibadat work)
-=========================================
+v32 - 3 files - HADITH DEFAULTS TO URDU
+=======================================
 
-  pubspec.yaml                              adds flutter_tts
-  lib/models/hadith.dart                    drops blank hadith at source
-  lib/services/tts_service.dart        NEW  translations only, never Arabic
-  lib/screens/hadith_list_screen.dart       collapsible cards, TTS, landing fix
-  lib/services/hadith_link.dart        NEW  (v26) tap a citation, open it
-  lib/data/ibadat_content.dart         NEW  (v26) namaz steps, draft
-  lib/screens/pillar_detail_screen.dart     (v26) step-by-step screen
-  lib/screens/prayers_home_screen.dart      (v26) two-up grid
+  lib/services/quran_local_data_service.dart
+  lib/screens/hadith_home_screen.dart
+  lib/services/hadith_link.dart
 
-NEW DEPENDENCY: flutter_tts ^4.0.2. Run flutter pub get / let CI do it.
-No manifest changes needed.
+Overwrite all three. Nothing else changes.
 
 =====================================================================
-1. BLANK HADITH - IT IS THE DATA, AND NOW THEY ARE GONE
+WHAT CHANGED
 =====================================================================
-I checked. Sahih Muslim has 203 numbered entries with NO CONTENT AT ALL - not
-in English, not in Urdu, and not in Arabic either. I verified against
-ara_muslim.json: of the 203 blank English entries, ZERO have Arabic text. They
-are empty placeholders in the dataset. Bukhari has 9.
+Hadith open in Urdu by default instead of English.
 
-Filtered out where the collection is built, so nothing downstream ever sees
-them - lists, chapter counts, hadith number ranges and search all become
-correct for free. Filtering in the UI instead would have left the counts lying.
+The choice is also STORED now. Someone who prefers English switches once and
+keeps it - previously the menu reset to English on every visit, so an Urdu
+reader had to re-select it constantly.
 
-Hadith numbers will now SKIP in those chapters. That is honest: the data does
-not contain them. Blank cards were worse.
+Citations in the Ibadat section follow the same preference. HadithLink had
+English hardcoded, so tapping "Bukhari 735" under a namaz step would have opened
+in English while the rest of the app was in Urdu.
 
 =====================================================================
-2. HADITH CARDS NOW COLLAPSE
+URDU COVERAGE - CHECKED, AND ONE BOOK IS THIN
 =====================================================================
-Collapsed: the number badges, its grade if it has one, and the first three
-lines of the translation. Tap for the full Arabic and full translation.
+Counted from your own files, after the blank-entry filter:
 
-The preview is the opening of the real text, truncated - NOT a summary.
-Paraphrasing a hadith to fit a card is not something an app should do.
+  Abu Dawud    5274 shown, 5273 have Urdu text   (100%)
+  Ibn Majah    4340 shown, 4329 have Urdu text   (100%)
+  Muslim       7482 shown, 7459 have Urdu text   (100%)
+  Bukhari      7583 shown, 7019 have Urdu text   ( 93%)
+  NASA'I       5683 shown, 3874 have Urdu text   ( 68%)
 
-Where there is no translation, the preview shows the Arabic instead, and the
-expanded view says plainly that no translation exists in the offline dataset.
+So roughly a third of Sunan an-Nasa'i has Arabic but NO Urdu translation, and
+about 7% of Bukhari. Those hadith are not blank - the Arabic is there - so they
+still appear, showing the Arabic with a plain note that no translation exists in
+the offline dataset. Nothing silently disappears.
 
-=====================================================================
-3. WHY NUMBER SEARCH WAS NOT LANDING - AND WHY IT WORKS NOW
-=====================================================================
-The landing code jumps to an estimated offset, then refines with
-ensureVisible. The estimate assumed cards of roughly equal height.
-
-With every card rendering its full text, heights ranged from about 200 pixels
-to several thousand. The estimate could be off by tens of screens, the target
-was never built, ensureVisible had nothing to work with, and you landed
-somewhere arbitrary.
-
-Collapsed cards are near-uniform, so the estimate is now close, and there are
-two refinement passes rather than one - the second is needed because the target
-expands and changes height after the first.
-
-The searched hadith also opens ALREADY EXPANDED. Landing on a collapsed card
-would have made you tap again to see the thing you searched for.
+If that gap in Nasa'i matters to you, the fix is a better Urdu dataset for that
+book, not code. Worth knowing before users find it.
 
 =====================================================================
-4. TTS FOR TRANSLATIONS - ENGLISH AND URDU
+ALSO
 =====================================================================
-"Listen to translation" on each expanded hadith. Follows the language you have
-selected: English text reads in en-US, Urdu in ur-PK.
-
-NEVER ARABIC. The service takes a language from a fixed list of two and Arabic
-is not on it. Android's TTS mispronounces Arabic badly - wrong vowels, harakat
-ignored - and a phone mispronouncing the words of the Prophet inside a worship
-app is a religious problem, not a quality one. Your Qur'an recitation uses a
-real qari for that reason. The button is labelled "Listen to translation" so
-nobody assumes otherwise.
-
-URDU IS OFTEN NOT INSTALLED. Google's TTS supports it but many handsets ship
-without the voice data. The app checks first, and if it is missing it says so
-and tells the user where to add it, rather than offering a button that
-silently does nothing. Speech rate is slowed to 0.45 - hadith translations are
-long sentences full of unfamiliar names.
-
-=====================================================================
-TEST
-=====================================================================
-1. Sahih Muslim, Introduction - no more blank cards.
-2. Search 101 in a book, tap "GO TO HADITH 101" - it should land ON it,
-   expanded, gold outline.
-3. Expand any hadith, tap Listen to translation.
-4. Switch to Urdu and try again - it will either speak or tell you Urdu speech
-   is not installed.
+"Listen to translation" follows the language, so it now speaks Urdu by default.
+Remember Urdu TTS voice data is often not installed on Samsung handsets - the
+app checks and says so rather than doing nothing.

@@ -368,11 +368,24 @@ class NotificationService {
     return await Permission.scheduleExactAlarm.isGranted;
   }
 
+  /// Exact alarms have NO system dialog — Android only offers a settings screen
+  /// for this one. On Android 14+ it is usually already granted, because the
+  /// manifest declares USE_EXACT_ALARM, which the OS grants automatically to
+  /// apps whose core purpose is alarms.
   static Future<void> openExactAlarmSettings() async {
+    // permission_handler first: on Android 14+ this can return granted without
+    // showing anything at all.
     try {
+      final status = await Permission.scheduleExactAlarm.request();
+      if (status.isGranted) return;
+    } catch (_) {}
+
+    try {
+      // No package name hardcoded. It was com.example.masjid_alarm_app, which
+      // would break silently the moment the package is renamed for the Play
+      // Store.
       const intent = AndroidIntent(
         action: 'android.settings.REQUEST_SCHEDULE_EXACT_ALARM',
-        data: 'package:com.example.masjid_alarm_app',
       );
       await intent.launch();
     } catch (_) {
@@ -407,6 +420,14 @@ class NotificationService {
   /// Asked all at once at first launch rather than scattered through the app.
   /// A prayer alarm that is missing one permission is not partly working, it
   /// is broken, so there is no point deferring any of them.
+  /// Stops the setup wizard reappearing. Only the user sets this.
+  static Future<void> setSetupDismissed(bool value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('alarm_setup_dismissed_v1', value);
+    } catch (_) {}
+  }
+
   static Future<Map<String, bool>> requestAllPermissions() async {
     await init();
     try {
@@ -429,11 +450,26 @@ class NotificationService {
     };
   }
 
+  /// Asks for the battery exemption with the SYSTEM DIALOG, the same kind of
+  /// prompt as the notification permission — not a settings page.
+  ///
+  /// The old version launched REQUEST_IGNORE_BATTERY_OPTIMIZATIONS by intent
+  /// with the package name HARDCODED as com.example.masjid_alarm_app. Two
+  /// problems: it dropped the user onto a screen instead of a one-tap dialog,
+  /// and it would silently stop working the moment the package is renamed for
+  /// the Play Store — which is still on the to-do list.
+  ///
+  /// permission_handler needs no package name and shows the real dialog. The
+  /// intent stays as a fallback for devices that refuse the dialog.
   static Future<void> requestIgnoreBatteryOptimizations() async {
     try {
+      final status = await Permission.ignoreBatteryOptimizations.request();
+      if (status.isGranted) return;
+    } catch (_) {}
+
+    try {
       const intent = AndroidIntent(
-        action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
-        data: 'package:com.example.masjid_alarm_app',
+        action: 'android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS',
       );
       await intent.launch();
     } catch (_) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/hadith.dart';
 import '../services/app_strings.dart';
+import '../services/quran_local_data_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'hadith_chapters_screen.dart';
@@ -25,7 +26,25 @@ class HadithHomeScreen extends StatefulWidget {
 }
 
 class _HadithHomeScreenState extends State<HadithHomeScreen> {
-  HadithLanguage _language = HadithLanguage.english;
+  /// Urdu by default. Loaded from storage, so a switch to English persists.
+  HadithLanguage _language = HadithLanguage.urdu;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final urdu = await QuranLocalDataService.getHadithUrdu();
+    if (!mounted) return;
+    setState(() => _language = urdu ? HadithLanguage.urdu : HadithLanguage.english);
+  }
+
+  Future<void> _setLanguage(HadithLanguage lang) async {
+    setState(() => _language = lang);
+    await QuranLocalDataService.setHadithUrdu(lang == HadithLanguage.urdu);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +61,7 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
           ),
           PopupMenuButton<HadithLanguage>(
             icon: const Icon(Icons.translate, size: 20),
-            onSelected: (lang) => setState(() => _language = lang),
+            onSelected: _setLanguage,
             itemBuilder: (_) => const [
               PopupMenuItem(value: HadithLanguage.english, child: Text('English')),
               PopupMenuItem(value: HadithLanguage.urdu, child: Text('اردو (Urdu)')),

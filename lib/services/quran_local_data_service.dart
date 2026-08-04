@@ -47,6 +47,24 @@ class QuranLocalDataService {
     await prefs.setString(_notesKey, json.encode(notes));
   }
 
+  // --- Hadith translation language ----------------------------------------
+
+  static const _hadithLangKey = 'hadith_language';
+
+  /// Defaults to URDU. Most of this app's readers read Urdu more comfortably
+  /// than English, so the common case should not require a menu on every visit.
+  ///
+  /// Stored, so someone who prefers English switches once and keeps it.
+  static Future<bool> getHadithUrdu() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hadithLangKey) ?? true;
+  }
+
+  static Future<void> setHadithUrdu(bool urdu) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hadithLangKey, urdu);
+  }
+
   // --- Reading mode preference --------------------------------------------
 
   static const _arabicOnlyKey = 'quran_arabic_only';

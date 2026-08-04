@@ -15,6 +15,7 @@ import '../widgets/sky_artwork.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
+import 'setup_wizard_screen.dart';
 import 'quran_home_screen.dart';
 import 'hadith_home_screen.dart';
 import 'prayers_home_screen.dart';
@@ -198,23 +199,45 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// Returns (label, DateTime) for the next upcoming prayer today, or
   /// tomorrow's Fajr if all of today's have passed.
+  /// The prayer that comes soonest.
+  ///
+  /// THIS USED TO PICK THE FIRST FUTURE PRAYER IN LIST ORDER, NOT THE EARLIEST.
+  ///
+  /// It walked Fajr, Dhuhr, Asr, Maghrib, Isha and returned the first whose
+  /// time had not yet passed — which is only correct if the stored times happen
+  /// to be in chronological order. With Fajr at 6:35 PM and Asr at 5:40 PM it
+  /// checked Fajr first, saw a future time, and stopped without ever looking at
+  /// Asr, which was sooner.
+  ///
+  /// Now every prayer's next occurrence is computed and the minimum wins, so
+  /// list order cannot affect the answer. That also removes the need for the
+  /// old special case that hard-coded "otherwise, tomorrow's Fajr": once each
+  /// prayer knows its own next occurrence, after Isha it is simply Fajr's turn
+  /// that is nearest.
   (String, DateTime)? _nextPrayer(Masjid masjid) {
-    final entries = [
+    final entries = <(String, String)>[
       (S.fajr, masjid.prayerTimes.fajr),
       (S.dhuhr, masjid.prayerTimes.dhuhr),
       (S.asr, masjid.prayerTimes.asr),
       (S.maghrib, masjid.prayerTimes.maghrib),
       (S.isha, masjid.prayerTimes.isha),
     ];
-    for (final entry in entries) {
-      final dt = _parseTimeToday(entry.$2);
-      if (dt != null && dt.isAfter(_now)) return (entry.$1, dt);
+
+    (String, DateTime)? best;
+    for (final (String label, String timeStr) in entries) {
+      final DateTime? today = _parseTimeToday(timeStr);
+      if (today == null) continue;
+
+      // Today if it is still to come, otherwise the same time tomorrow.
+      final DateTime when = today.isAfter(_now)
+          ? today
+          : today.add(const Duration(days: 1));
+
+      if (best == null || when.isBefore(best.$2)) {
+        best = (label, when);
+      }
     }
-    final fajrToday = _parseTimeToday(masjid.prayerTimes.fajr);
-    if (fajrToday != null) {
-      return (S.fajr, fajrToday.add(const Duration(days: 1)));
-    }
-    return null;
+    return best;
   }
 
   void _showHijriInfo() {
@@ -276,36 +299,57 @@ class _HomeScreenState extends State<HomeScreen>
                               style: AppText.rowTitle.copyWith(
                                   fontSize: 15, color: AppColors.warningFg),
                             ),
-                            const SizedBox(height: 3),
-                            if (_hasExactAlarmPermission == false)
-                              _FixRow(
-                                label:
-                                    '"Alarms & reminders" is off for this app.',
-                                onFix: () async {
-                                  await NotificationService
-                                      .openExactAlarmSettings();
-                                  final g = await NotificationService
-                                      .hasExactAlarmPermission();
-                                  if (mounted) {
-                                    setState(
-                                        () => _hasExactAlarmPermission = g);
-                                  }
-                                },
+                            const SizedBox(height: 2),
+                            Text(
+                              _hasExactAlarmPermission == false &&
+                                      _hasBatteryExemption == false
+                                  ? 'Two settings still need your permission.'
+                                  : _hasBatteryExemption == false
+                                      ? 'Battery saver can freeze the app and stop alarms.'
+                                      : '"Alarms & reminders" is off for this app.',
+                              style: AppText.caption.copyWith(
+                                  fontSize: 12.5, color: AppColors.warningFg),
+                            ),
+                            const SizedBox(height: 4),
+                            // One button to the full wizard, rather than a
+                            // separate Fix per line. The inline buttons sent
+                            // people to individual system screens with no
+                            // explanation of what they were looking at; the
+                            // wizard walks all four in order and shows which
+                            // are done.
+                            TextButton(
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => SetupWizardScreen(
+                                      onFinished: () =>
+                                          Navigator.of(context).pop(),
+                                    ),
+                                  ),
+                                );
+                                final g = await NotificationService
+                                    .hasExactAlarmPermission();
+                                final e = await NotificationService
+                                    .hasBatteryExemption();
+                                if (mounted) {
+                                  setState(() {
+                                    _hasExactAlarmPermission = g;
+                                    _hasBatteryExemption = e;
+                                  });
+                                }
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.warningFg,
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                               ),
-                            if (_hasBatteryExemption == false)
-                              _FixRow(
-                                label:
-                                    'Battery saver can freeze the app and stop alarms.',
-                                onFix: () async {
-                                  await NotificationService
-                                      .requestIgnoreBatteryOptimizations();
-                                  final e = await NotificationService
-                                      .hasBatteryExemption();
-                                  if (mounted) {
-                                    setState(() => _hasBatteryExemption = e);
-                                  }
-                                },
-                              ),
+                              child: Text('Fix this now',
+                                  style: AppText.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.warningFg)),
+                            ),
                           ],
                         ),
                       ),
@@ -622,10 +666,18 @@ class _HomeScreenState extends State<HomeScreen>
       return SkyPhase.night;
     }
 
-    if (_now.isBefore(fajr)) return SkyPhase.night;
-    if (_now.isBefore(dhuhr)) return SkyPhase.morning;
-    if (_now.isBefore(asr)) return SkyPhase.midday;
-    if (_now.isBefore(isha)) return SkyPhase.evening;
+    // The boundaries are SORTED before use. This chain of isBefore checks only
+    // makes sense on times in chronological order, and the same assumption is
+    // what made the next-prayer logic pick Fajr over an earlier Asr. Sorting
+    // means out-of-order data gives a sensible sky instead of a nonsensical
+    // one — it cannot make the phase meaningful if the times are wrong, but it
+    // stops the app contradicting itself.
+    final List<DateTime> bounds = <DateTime>[fajr, dhuhr, asr, isha]..sort();
+
+    if (_now.isBefore(bounds[0])) return SkyPhase.night;
+    if (_now.isBefore(bounds[1])) return SkyPhase.morning;
+    if (_now.isBefore(bounds[2])) return SkyPhase.midday;
+    if (_now.isBefore(bounds[3])) return SkyPhase.evening;
     return SkyPhase.night;
   }
 
@@ -815,41 +867,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FixRow extends StatelessWidget {
-  const _FixRow({required this.label, required this.onFix});
-
-  final String label;
-  final VoidCallback onFix;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 3),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: AppText.caption
-                  .copyWith(fontSize: 12.5, color: AppColors.warningFg),
-            ),
-          ),
-          TextButton(
-            onPressed: onFix,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.warningFg,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Fix'),
           ),
         ],
       ),

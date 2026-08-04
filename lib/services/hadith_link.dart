@@ -4,6 +4,7 @@ import '../models/hadith.dart';
 import '../screens/hadith_single_screen.dart';
 import '../theme/app_theme.dart';
 import 'hadith_repository.dart';
+import 'quran_local_data_service.dart';
 
 /// A citation: a book and a hadith number, nothing more.
 ///
@@ -34,11 +35,19 @@ class HadithLink {
   ///
   /// Async and potentially slow — the collections are large — so it shows a
   /// blocking spinner. Doing it silently would look like a dead tap.
+  /// [language] defaults to the reader's stored preference — Urdu unless they
+  /// have chosen otherwise. Hardcoding English here meant a citation opened in
+  /// a different language from the rest of the app.
   static Future<void> open(
     BuildContext context,
     HadithRef ref, {
-    HadithLanguage language = HadithLanguage.english,
+    HadithLanguage? language,
   }) async {
+    final HadithLanguage lang = language ??
+        (await QuranLocalDataService.getHadithUrdu()
+            ? HadithLanguage.urdu
+            : HadithLanguage.english);
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -48,7 +57,7 @@ class HadithLink {
     HadithCollection? collection;
     String? error;
     try {
-      collection = await HadithRepository.loadCollection(ref.book, language);
+      collection = await HadithRepository.loadCollection(ref.book, lang);
     } catch (e) {
       error = e.toString();
     }
@@ -87,7 +96,7 @@ class HadithLink {
           hadithNumber: ref.number,
           bookKey: ref.book.fileKey,
           bookName: ref.book.displayName,
-          language: language == HadithLanguage.english ? 'eng' : 'urd',
+          language: lang == HadithLanguage.english ? 'eng' : 'urd',
         ),
       ),
     );
