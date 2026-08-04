@@ -30,7 +30,21 @@ dependencies:
   shared_preferences: ^2.3.2
   # Reads hadith and Qur'an TRANSLATIONS aloud. Never Arabic - see the comment
   # at the top of lib/services/tts_service.dart.
-  flutter_tts: ^4.0.2
+  #
+  # PINNED TO 3.x ON PURPOSE. DO NOT BUMP TO 4.x.
+  #
+  # flutter_tts 4.x rewrote the Android side in Kotlin and is built against
+  # Kotlin 2.2 and compileSdk 36. This project is on Kotlin 1.9 and compileSdk
+  # 34, so 4.x fails to compile with hundreds of "incompatible metadata
+  # version" errors before it reaches any of our code.
+  #
+  # 3.x implements the Android side in JAVA, so it has no Kotlin version
+  # requirement at all and builds against compileSdk 34 without complaint. The
+  # Dart API this app uses is identical in both.
+  #
+  # ^3.8.5 allows 3.x updates but stops before 4.0.0. Writing ^4.0.2 is what
+  # broke the build - pub resolved it to 4.2.5.
+  flutter_tts: ^3.8.5
   flutter_compass: ^0.7.0
   flutter_overlay_window: ^0.4.5
   hijri: ^3.0.0
