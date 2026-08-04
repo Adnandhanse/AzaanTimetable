@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../data/ibadat_content.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
@@ -7,6 +9,8 @@ import 'pillar_detail_screen.dart';
 class PrayersHomeScreen extends StatelessWidget {
   const PrayersHomeScreen({super.key});
 
+  /// 'guide' is null for pillars with no step-by-step content yet, and the card
+  /// says so rather than opening an empty page.
   static List<Map<String, dynamic>> get _pillars => [
         {
           'title': S.shahada,
@@ -23,6 +27,7 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'نماز کا صحیح طریقہ اور اس کی اہمیت پر احادیث۔'
               : 'The correct way to pray, and hadith on the importance of Namaz.',
           'icon': Icons.mosque_outlined,
+          'guide': IbadatContent.namaz,
         },
         {
           'title': S.roza,
@@ -60,81 +65,90 @@ class PrayersHomeScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: [
           SectionRule(label: S.fivePillars, trailingDiamond: true),
-          const SizedBox(height: 4),
-          for (int i = 0; i < pillars.length; i++)
-            _PillarRow(
-              pillar: pillars[i],
-              index: i + 1,
-              showDivider: i > 0,
+          const SizedBox(height: 14),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: pillars.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              // Room for the medallion, two lines of title and two of
+              // subtitle. The Hadith grid clipped at 0.80 — no reason to
+              // relearn that here.
+              childAspectRatio: 0.82,
             ),
+            itemBuilder: (context, i) => _PillarCard(pillar: pillars[i]),
+          ),
         ],
       ),
     );
   }
 }
 
-class _PillarRow extends StatelessWidget {
-  const _PillarRow({
-    required this.pillar,
-    required this.index,
-    required this.showDivider,
-  });
+class _PillarCard extends StatelessWidget {
+  const _PillarCard({required this.pillar});
 
   final Map<String, dynamic> pillar;
-  final int index;
-  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PillarDetailScreen(
-            title: pillar['title'] as String,
-            description: pillar['description'] as String,
+    final IbadatGuide? guide = pillar['guide'] as IbadatGuide?;
+
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PillarDetailScreen(
+              title: pillar['title'] as String,
+              description: pillar['description'] as String,
+              guide: guide,
+            ),
           ),
         ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          border: showDivider
-              ? const Border(top: BorderSide(color: AppColors.goldRuleFaint))
-              : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Medallion(icon: pillar['icon'] as IconData, size: 38),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    pillar['title'] as String,
-                    style: AppText.rowTitle
-                        .copyWith(fontSize: 18, color: AppColors.text),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    pillar['subtitle'] as String,
-                    style: AppText.caption.copyWith(color: AppColors.emerald),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    pillar['description'] as String,
-                    style: AppText.caption.copyWith(color: AppColors.textMuted),
-                  ),
-                ],
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.goldRule),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Medallion(icon: pillar['icon'] as IconData, size: 40),
+              const SizedBox(height: 12),
+              Text(
+                pillar['title'] as String,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    AppText.rowTitle.copyWith(fontSize: 17, color: AppColors.text),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 8, left: 6),
-              child: Icon(Icons.chevron_right,
-                  size: 18, color: AppColors.chevron),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                pillar['subtitle'] as String,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.caption.copyWith(color: AppColors.emerald),
+              ),
+              const SizedBox(height: 8),
+              Container(width: 22, height: 1, color: AppColors.goldRule),
+              const SizedBox(height: 8),
+              Text(
+                guide == null ? 'Coming soon' : 'Step by step',
+                style: AppText.caption.copyWith(
+                  color: guide == null ? AppColors.textFaint : AppColors.gold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

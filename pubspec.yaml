@@ -28,6 +28,9 @@ dependencies:
   flutter_timezone: ^3.0.0
   flutter_foreground_task: ^8.13.0
   shared_preferences: ^2.3.2
+  # Reads hadith and Qur'an TRANSLATIONS aloud. Never Arabic - see the comment
+  # at the top of lib/services/tts_service.dart.
+  flutter_tts: ^4.0.2
   flutter_compass: ^0.7.0
   flutter_overlay_window: ^0.4.5
   hijri: ^3.0.0

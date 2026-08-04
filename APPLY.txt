@@ -1,72 +1,88 @@
-v20 - 7 files, from v17
-=======================
+v27 - 8 files  (includes v26 Ibadat work)
+=========================================
 
-You are on v17. These seven bring you fully up to date (v18 + v19 + v20).
-Copy all seven - they are interdependent.
+  pubspec.yaml                              adds flutter_tts
+  lib/models/hadith.dart                    drops blank hadith at source
+  lib/services/tts_service.dart        NEW  translations only, never Arabic
+  lib/screens/hadith_list_screen.dart       collapsible cards, TTS, landing fix
+  lib/services/hadith_link.dart        NEW  (v26) tap a citation, open it
+  lib/data/ibadat_content.dart         NEW  (v26) namaz steps, draft
+  lib/screens/pillar_detail_screen.dart     (v26) step-by-step screen
+  lib/screens/prayers_home_screen.dart      (v26) two-up grid
 
-  lib/services/alarm_event_log.dart          NEW
-  lib/screens/setup_wizard_screen.dart       NEW
-  lib/main.dart
-  lib/screens/alarm_health_screen.dart
-  lib/services/notification_service.dart
-  lib/services/foreground_alarm_service.dart
-  lib/services/foreground_alarm_manager.dart
-
-No pubspec change. No workflow change. No new package.
-
-=====================================================================
-YOUR LOG SETTLED IT
-=====================================================================
-51 unbroken heartbeats, 21:28 to 22:19, one every minute, no gaps.
-  -> the service is alive and healthy. Samsung is NOT freezing it.
-
-  21:31:30  test alarm armed  default sound + exactAllowWhileIdle
-  21:32:05  service tick
-  21:33:05  service tick
-  -> armed without error, app provably awake through the firing moment,
-     nothing arrived. Same again with alarmClock at 22:18:46.
-
-CONCLUSION: zonedSchedule does not deliver on this device. Not with
-exactAllowWhileIdle, not with alarmClock. It arms, reports success, and the
-alarm never arrives. Meanwhile _plugin.show() from the service works perfectly
-- your instant test proved that, and the heartbeats prove the service runs.
-
-I have spent six versions trying to fix the path that does not work on your
-phone, while the path that does work was running flawlessly the whole time.
+NEW DEPENDENCY: flutter_tts ^4.0.2. Run flutter pub get / let CI do it.
+No manifest changes needed.
 
 =====================================================================
-WHAT v20 CHANGES
+1. BLANK HADITH - IT IS THE DATA, AND NOW THEY ARE GONE
 =====================================================================
-THE TEST NOW RUNS DOWN BOTH PATHS.
-"Test both paths in 60 seconds" queues one test on the background service and
-one on the OS scheduler. The log records which arrived:
+I checked. Sahih Muslim has 203 numbered entries with NO CONTENT AT ALL - not
+in English, not in Urdu, and not in Arabic either. I verified against
+ara_muslim.json: of the 203 blank English entries, ZERO have Arabic text. They
+are empty placeholders in the dataset. Bukhari has 9.
 
-    "FIRED test by service"   -> the service path works. This is the one that
-                                 carries your prayers.
-    (nothing)                 -> the OS scheduler again delivered nothing.
+Filtered out where the collection is built, so nothing downstream ever sees
+them - lists, chapter counts, hadith number ranges and search all become
+correct for free. Filtering in the UI instead would have left the counts lying.
 
-That single line tells you which mechanism your app can rely on.
-
-The service test is delivered by the same 20-second poll that fires prayers,
-so it tests the real path rather than a parallel one.
-
-=====================================================================
-WHAT THIS MEANS FOR YOUR APP
-=====================================================================
-If the service test fires and the OS one does not - which your log strongly
-predicts - then your prayer alarms are ALREADY being delivered by the service,
-and have been all along. The 8:20 Maghrib that worked was the service. The
-8:24 that did not was the service running on stale times, which v16 fixed.
-
-The practical consequence: the foreground service must stay alive. That is
-what the setup wizard's step 4 is for, and why the heartbeat log matters - a
-gap in it is the only thing that can silence your alarms now.
+Hadith numbers will now SKIP in those chapters. That is honest: the data does
+not contain them. Blank cards were worse.
 
 =====================================================================
-DO THIS
+2. HADITH CARDS NOW COLLAPSE
 =====================================================================
-1. Apply all seven files. Rebuild. Install.
-2. Complete the setup wizard (new on first launch).
-3. Alarm health > "Test both paths in 60 seconds". Lock the phone.
-4. Send me the log. I want to see which line appears.
-5. Then set a prayer 3 minutes ahead and let it run for real.
+Collapsed: the number badges, its grade if it has one, and the first three
+lines of the translation. Tap for the full Arabic and full translation.
+
+The preview is the opening of the real text, truncated - NOT a summary.
+Paraphrasing a hadith to fit a card is not something an app should do.
+
+Where there is no translation, the preview shows the Arabic instead, and the
+expanded view says plainly that no translation exists in the offline dataset.
+
+=====================================================================
+3. WHY NUMBER SEARCH WAS NOT LANDING - AND WHY IT WORKS NOW
+=====================================================================
+The landing code jumps to an estimated offset, then refines with
+ensureVisible. The estimate assumed cards of roughly equal height.
+
+With every card rendering its full text, heights ranged from about 200 pixels
+to several thousand. The estimate could be off by tens of screens, the target
+was never built, ensureVisible had nothing to work with, and you landed
+somewhere arbitrary.
+
+Collapsed cards are near-uniform, so the estimate is now close, and there are
+two refinement passes rather than one - the second is needed because the target
+expands and changes height after the first.
+
+The searched hadith also opens ALREADY EXPANDED. Landing on a collapsed card
+would have made you tap again to see the thing you searched for.
+
+=====================================================================
+4. TTS FOR TRANSLATIONS - ENGLISH AND URDU
+=====================================================================
+"Listen to translation" on each expanded hadith. Follows the language you have
+selected: English text reads in en-US, Urdu in ur-PK.
+
+NEVER ARABIC. The service takes a language from a fixed list of two and Arabic
+is not on it. Android's TTS mispronounces Arabic badly - wrong vowels, harakat
+ignored - and a phone mispronouncing the words of the Prophet inside a worship
+app is a religious problem, not a quality one. Your Qur'an recitation uses a
+real qari for that reason. The button is labelled "Listen to translation" so
+nobody assumes otherwise.
+
+URDU IS OFTEN NOT INSTALLED. Google's TTS supports it but many handsets ship
+without the voice data. The app checks first, and if it is missing it says so
+and tells the user where to add it, rather than offering a button that
+silently does nothing. Speech rate is slowed to 0.45 - hadith translations are
+long sentences full of unfamiliar names.
+
+=====================================================================
+TEST
+=====================================================================
+1. Sahih Muslim, Introduction - no more blank cards.
+2. Search 101 in a book, tap "GO TO HADITH 101" - it should land ON it,
+   expanded, gold outline.
+3. Expand any hadith, tap Listen to translation.
+4. Switch to Urdu and try again - it will either speak or tell you Urdu speech
+   is not installed.

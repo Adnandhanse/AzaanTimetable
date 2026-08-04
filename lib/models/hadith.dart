@@ -115,7 +115,25 @@ class HadithCollection {
     }
 
     final hadiths = (json['hadiths'] as List)
-        .map((h) => HadithItem.fromJson(h, arabicText: arabicByNumber[HadithItem._toInt(h['hadithnumber'])] ?? ''))
+        .map((h) => HadithItem.fromJson(h,
+            arabicText:
+                arabicByNumber[HadithItem._toInt(h['hadithnumber'])] ?? ''))
+        // DROP EMPTY ENTRIES.
+        //
+        // The dataset carries numbered placeholders with no content in ANY
+        // language — 203 of them in Sahih Muslim, 196 in the Introduction
+        // alone, blank in English, Urdu and Arabic alike. They were rendering
+        // as empty cards.
+        //
+        // Filtered here, at the point the collection is built, so nothing
+        // downstream ever sees them: lists, chapter counts, number ranges and
+        // search all become correct for free. Filtering in the UI instead
+        // would have left the counts lying.
+        //
+        // Hadith numbers will therefore skip in those chapters. That is honest
+        // — the data does not have them — and far better than blank cards.
+        .where((h) =>
+            h.text.trim().isNotEmpty || h.arabicText.trim().isNotEmpty)
         .toList();
 
     return HadithCollection(
