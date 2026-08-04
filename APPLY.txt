@@ -1,61 +1,75 @@
-v34 - 4 files - URDU CHAPTER NAMES FOR BUKHARI
-==============================================
+v37 - 1 file - NO DAIF CITATIONS
+================================
 
-  assets/hadith/urd_sections.json          all 97 Bukhari chapter titles
-  lib/services/hadith_section_titles.dart
-  lib/services/app_strings.dart
-  lib/screens/hadith_chapters_screen.dart
+  lib/data/ibadat_content.dart
 
-Overwrite all four. Apply AFTER v33. No new package.
+Overwrite it. Nothing else changes.
 
 =====================================================================
-I CHANGED MY POSITION, AND I THINK I WAS WRONG BEFORE
+YOUR RULE, APPLIED - AND IT CAUGHT SOMETHING IN WHAT I ALREADY SHIPPED
 =====================================================================
-I kept refusing to write these, on the same grounds as the hadith citations.
-That was the wrong comparison.
+I graded all 33 citations in the namaz guide against your own data. Six failed:
 
-A citation claims "this hadith is the evidence for this ruling" - a scholarly
-judgement I should not make. A chapter title is a NAVIGATION LABEL, and nearly
-all of them are simply the standard kitab name: "Belief" is كتاب الإيمان, which
-Urdu editions render as کتاب الایمان. That is transliteration, the same thing I
-did for the book names in v33.
+    Abu Dawud 886   Daif (Al-Albani, Muhyi Al-Din, Zubair Ali Zai)
+    Ibn Majah 890   Daif (Al-Albani, Fouad Abd al-Baqi, Zubair Ali Zai)
+    Tirmidhi  261   Daif (Ahmad Shakir, Al-Albani, Zubair Ali Zai)
 
-Getting one wrong produces a confusing menu item, not a misled worshipper. That
-is a completely different bar, and it did not justify leaving every Urdu reader
-with 97 English headings.
+Unanimous, every grader. These were the Ruku and Sajdah tasbihat - the Ibn
+Mas'ud "say it three times" narration, which is the one usually quoted for those
+steps. Under your rule they had to go, and that would have left Ruku and Sajdah
+with no evidence at all.
 
-=====================================================================
-WHAT IS IN THE FILE
-=====================================================================
-All 97 Bukhari chapters, e.g.
+WHY I HAD ONLY DAIF OPTIONS THERE: my original search for those two phrases
+covered the four Sunan and NEVER SEARCHED BUKHARI AND MUSLIM. My own mistake,
+and it is why the weak narration looked like the only candidate.
 
-    Revelation                -> کتاب الوحی
-    Belief                    -> کتاب الایمان
-    Knowledge                 -> کتاب العلم
-    Prayers (Salat)           -> کتاب الصلاۃ
-    Call to Prayers (Adhaan)  -> کتاب الاذان
-    Obligatory Charity (Zakat)-> کتاب الزکاۃ
+Searching properly found:
 
-Cross-checked programmatically against your data: 97 sections in the dataset, 97
-titles supplied, none missing, none invented for a section that does not exist.
+    SAHIH MUSLIM 1814   the Hudhaifah night-prayer narration, which contains
+                        BOTH tasbihat - Subhana Rabbiyal Azeem in ruku and
+                        Subhana Rabbiyal A'la in sujud
 
-THE OTHER FIVE BOOKS ARE STILL EMPTY and fall back to English per entry, so
-Muslim, Abu Dawud, Tirmidhi, Nasa'i and Ibn Majah are unchanged. Say the word
-and I will do those the same way.
+Now cited as:
+    Ruku    Muslim 1814 | Abu Dawud 871 (Sahih) | Nasa'i 1046 (Sahih)
+    Sajdah  Muslim 1814 | Abu Dawud 874 (Sahih) | Nasa'i 1069 (Sahih)
+
+Re-verified: 33 citations, none missing, none empty, NONE containing Daif.
 
 =====================================================================
-IT SAYS IT IS A DRAFT, AND IT SHOULD KEEP SAYING SO
+ONE DECISION I MADE FOR YOU - TELL ME IF IT IS WRONG
 =====================================================================
-The chapter list shows, in Urdu:
+"Only sahih" can mean two things and they give different results.
 
-    "باب کے اردو نام ابتدائی مسودہ ہیں اور کسی عالم نے ان کی تصدیق نہیں کی۔"
-    (Urdu chapter names are a first draft and have not been checked by a
-     scholar.)
+  (a) NOTHING WEAK - Sahih and Hasan both kept, Daif excluded
+  (b) STRICTLY SAHIH - Hasan excluded as well
 
-These are the standard names and I am reasonably confident in them, but
-"reasonably confident" is not the same as verified, and your aalim is already
-lined up. When he signs them off, delete isUnverified from
-hadith_section_titles.dart and the note disappears.
+I APPLIED (a). That is the mainstream reading: hadith scholars class Sahih and
+Hasan both as acceptable for practice, and only Daif is rejected.
 
-Anything he corrects goes straight into urd_sections.json - no code change, and
-per-entry fallback means a partly-corrected file always works.
+If you want (b), three citations would also come out:
+
+    Abu Dawud 722   Sahih from two graders, HASAN from Zubair Ali Zai
+    Tirmidhi  243   Sahih from two, HASAN from Bashar Awad and Zubair Ali Zai
+    Ibn Majah 806   Sahih from three, HASAN from Zubair Ali Zai
+
+Note none of those is weak - graders simply differ on the tier. Removing them
+would cost Takbeer one of five citations and Dua-e-Sana two of three. Say the
+word and I will.
+
+=====================================================================
+BUKHARI AND MUSLIM NEED NO FILTERING
+=====================================================================
+17 of the 33 are from the Sahihayn, which carry no grading in this dataset
+because they are accepted as authentic by their compilers' criteria. Your
+instinct earlier to prefer those two was sound - it makes this whole question
+disappear for those citations.
+
+=====================================================================
+STILL WAITING ON YOU
+=====================================================================
+1. NISAB for the Zakat calculator - gold (~87.5g) or silver (~612g). Changes who
+   owes zakat at all, so it is your aalim's call, not mine.
+2. Whether the ROZA duas stay. The sehri dua is in NONE of the six books, so it
+   will ship with no citation. The iftar dua you gave is Daif in all four
+   gradings; Abu Dawud 2357 is the Hasan alternative and is allowed under rule
+   (a) but not (b).

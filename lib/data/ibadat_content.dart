@@ -68,10 +68,24 @@ class IbadatGuide {
 /// pointing with a finger but concerns a Friday sermon, and Abu Dawud 4857
 /// carries the Sana wording but is about leaving a gathering.
 ///
-/// Every number below was then checked to exist in the dataset. That makes them
-/// accurate citations of a text. It does not make them a verified statement that
-/// this hadith is the evidence for this step — that is a scholarly judgement,
-/// and it is what the aalim is reviewing.
+/// Every number below was then checked to exist in the dataset, AND checked
+/// against the grading data. NOTHING GRADED DAIF IS CITED.
+///
+/// That rule removed the citations usually quoted for the ruku and sujud
+/// tasbihat — the Ibn Mas'ud "say it three times" narration at Abu Dawud 886,
+/// Ibn Majah 890 and Tirmidhi 261, which every grader in this data calls Daif.
+/// The Hudhaifah narration was used instead: Sahih Muslim 1814 carries both
+/// tasbihat, with Abu Dawud 871/874 and Nasa'i 1046/1069 alongside, all graded
+/// Sahih.
+///
+/// Hasan is kept. Sahih and Hasan are both acceptable for practice; only Daif
+/// is excluded. Abu Dawud 722, Tirmidhi 243 and Ibn Majah 806 carry Hasan from
+/// at least one grader and Sahih from others — if a stricter Sahih-only rule is
+/// ever wanted, those three are the ones to revisit.
+///
+/// An accurate citation is still not a verified statement that this hadith is
+/// the EVIDENCE for this step. That remains a scholarly judgement and is what
+/// the aalim is reviewing.
 class IbadatContent {
   IbadatContent._();
 
@@ -167,19 +181,24 @@ class IbadatContent {
             title: 'Ruku',
             arabic: 'سُبْحَانَ رَبِّيَ الْعَظِيمِ',
             translation: 'Glory be to my Lord, the Most Great.',
+            // The Ibn Mas'ud narration (Abu Dawud 886, Ibn Majah 890,
+            // Tirmidhi 261) says "three times" and is the one usually quoted
+            // for this — but every grader in this app's own data calls it
+            // DAIF. Replaced with the Hudhaifah narration, which is in Sahih
+            // Muslim and carries both tasbihat.
             refs: <HadithRef>[
               HadithRef(
+                  book: HadithBook.muslim,
+                  number: 1814,
+                  note: 'Hudhaifah: what he said in ruku and sujud'),
+              HadithRef(
                   book: HadithBook.abudawud,
-                  number: 886,
-                  note: 'Ibn Mas\u2018ud: say it three times when bowing'),
+                  number: 871,
+                  note: 'Hudhaifah: what he said when bowing'),
               HadithRef(
-                  book: HadithBook.ibnmajah,
-                  number: 890,
-                  note: 'Ibn Mas\u2018ud: when anyone of you bows'),
-              HadithRef(
-                  book: HadithBook.tirmidhi,
-                  number: 261,
-                  note: 'Ibn Mas\u2018ud: what to say while bowing'),
+                  book: HadithBook.nasai,
+                  number: 1046,
+                  note: 'Hudhaifah: he bowed and said it'),
             ],
           ),
           IbadatStep(
@@ -208,19 +227,20 @@ class IbadatContent {
             title: 'Sajdah',
             arabic: 'سُبْحَانَ رَبِّيَ الْأَعْلَى',
             translation: 'Glory be to my Lord, the Most High.',
+            // Same substitution as Ruku, for the same reason.
             refs: <HadithRef>[
               HadithRef(
+                  book: HadithBook.muslim,
+                  number: 1814,
+                  note: 'Hudhaifah: what he said in sujud and ruku'),
+              HadithRef(
                   book: HadithBook.abudawud,
-                  number: 886,
-                  note: 'Ibn Mas\u2018ud: say it three times when prostrating'),
+                  number: 874,
+                  note: 'Hudhaifah on his night prayer'),
               HadithRef(
-                  book: HadithBook.ibnmajah,
-                  number: 890,
-                  note: 'Ibn Mas\u2018ud: when anyone of you prostrates'),
-              HadithRef(
-                  book: HadithBook.tirmidhi,
-                  number: 261,
-                  note: 'Ibn Mas\u2018ud: what to say in sujud'),
+                  book: HadithBook.nasai,
+                  number: 1069,
+                  note: 'Hudhaifah: his night prayer with the Prophet'),
             ],
           ),
           IbadatStep(
