@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/app_strings.dart';
+
 import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
 import '../services/tts_service.dart';
@@ -184,13 +186,13 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                   runSpacing: 6,
                   children: [
                     _Badge(
-                      text: 'Hadith ${it.hadithNumber}',
+                      text: '${S.hadithWord} ${it.hadithNumber}',
                       bg: AppColors.emerald.withOpacity(0.1),
                       fg: AppColors.emerald,
                     ),
                     if (it.arabicNumber != null)
                       _Badge(
-                        text: 'Arabic ed. ${it.arabicNumber}',
+                        text: '${S.arabicEdition} ${it.arabicNumber}',
                         bg: AppColors.gold.withOpacity(0.15),
                         fg: const Color(0xFF8A6D1E),
                       ),
@@ -241,7 +243,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                   )
                 else
                   Text(
-                    'No translation available for this hadith in the offline dataset.',
+                    S.noTranslationAvailable,
                     style: AppText.caption.copyWith(color: AppColors.textFaint),
                   ),
                 const SizedBox(height: 14),
@@ -251,7 +253,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                     icon: Icon(_speaking ? Icons.stop : Icons.volume_up_outlined,
                         size: 17),
                     label:
-                        Text(_speaking ? 'Stop' : 'Listen to translation'),
+                        Text(_speaking ? S.stopWord : S.listenToTranslation),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.emerald,
                       side: const BorderSide(color: AppColors.goldRule),
@@ -270,7 +272,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                       child: OutlinedButton.icon(
                         onPressed: _index > 0 ? () => _step(-1) : null,
                         icon: const Icon(Icons.chevron_left, size: 18),
-                        label: const Text('Previous'),
+                        label: Text(S.previousWord),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
                           side: const BorderSide(color: AppColors.goldRule),
@@ -288,7 +290,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                             ? () => _step(1)
                             : null,
                         icon: const Icon(Icons.chevron_right, size: 18),
-                        label: const Text('Next'),
+                        label: Text(S.nextWord),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
                           side: const BorderSide(color: AppColors.goldRule),
@@ -316,7 +318,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.list_alt_outlined, size: 17),
-                    label: Text('Read the whole chapter: ${ch.title}'),
+                    label: Text('${S.readWholeChapter}: ${ch.title}'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.emerald,
                       textStyle: AppText.caption,

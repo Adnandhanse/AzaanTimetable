@@ -76,6 +76,11 @@ class HadithSectionTitles {
     return urdu;
   }
 
+  /// Whether this book's Urdu titles are a first pass that no scholar has
+  /// checked. Drives the "not verified" note, which must stay visible until
+  /// someone qualified signs the titles off.
+  static bool isUnverified(HadithBook book) => overrideCount(book) > 0;
+
   /// How many titles are currently overridden for a book. Used to show an
   /// honest note in the UI rather than pretending the list is translated.
   static int overrideCount(HadithBook book) =>

@@ -1,47 +1,61 @@
-v32 - 3 files - HADITH DEFAULTS TO URDU
-=======================================
+v34 - 4 files - URDU CHAPTER NAMES FOR BUKHARI
+==============================================
 
-  lib/services/quran_local_data_service.dart
-  lib/screens/hadith_home_screen.dart
-  lib/services/hadith_link.dart
+  assets/hadith/urd_sections.json          all 97 Bukhari chapter titles
+  lib/services/hadith_section_titles.dart
+  lib/services/app_strings.dart
+  lib/screens/hadith_chapters_screen.dart
 
-Overwrite all three. Nothing else changes.
-
-=====================================================================
-WHAT CHANGED
-=====================================================================
-Hadith open in Urdu by default instead of English.
-
-The choice is also STORED now. Someone who prefers English switches once and
-keeps it - previously the menu reset to English on every visit, so an Urdu
-reader had to re-select it constantly.
-
-Citations in the Ibadat section follow the same preference. HadithLink had
-English hardcoded, so tapping "Bukhari 735" under a namaz step would have opened
-in English while the rest of the app was in Urdu.
+Overwrite all four. Apply AFTER v33. No new package.
 
 =====================================================================
-URDU COVERAGE - CHECKED, AND ONE BOOK IS THIN
+I CHANGED MY POSITION, AND I THINK I WAS WRONG BEFORE
 =====================================================================
-Counted from your own files, after the blank-entry filter:
+I kept refusing to write these, on the same grounds as the hadith citations.
+That was the wrong comparison.
 
-  Abu Dawud    5274 shown, 5273 have Urdu text   (100%)
-  Ibn Majah    4340 shown, 4329 have Urdu text   (100%)
-  Muslim       7482 shown, 7459 have Urdu text   (100%)
-  Bukhari      7583 shown, 7019 have Urdu text   ( 93%)
-  NASA'I       5683 shown, 3874 have Urdu text   ( 68%)
+A citation claims "this hadith is the evidence for this ruling" - a scholarly
+judgement I should not make. A chapter title is a NAVIGATION LABEL, and nearly
+all of them are simply the standard kitab name: "Belief" is كتاب الإيمان, which
+Urdu editions render as کتاب الایمان. That is transliteration, the same thing I
+did for the book names in v33.
 
-So roughly a third of Sunan an-Nasa'i has Arabic but NO Urdu translation, and
-about 7% of Bukhari. Those hadith are not blank - the Arabic is there - so they
-still appear, showing the Arabic with a plain note that no translation exists in
-the offline dataset. Nothing silently disappears.
-
-If that gap in Nasa'i matters to you, the fix is a better Urdu dataset for that
-book, not code. Worth knowing before users find it.
+Getting one wrong produces a confusing menu item, not a misled worshipper. That
+is a completely different bar, and it did not justify leaving every Urdu reader
+with 97 English headings.
 
 =====================================================================
-ALSO
+WHAT IS IN THE FILE
 =====================================================================
-"Listen to translation" follows the language, so it now speaks Urdu by default.
-Remember Urdu TTS voice data is often not installed on Samsung handsets - the
-app checks and says so rather than doing nothing.
+All 97 Bukhari chapters, e.g.
+
+    Revelation                -> کتاب الوحی
+    Belief                    -> کتاب الایمان
+    Knowledge                 -> کتاب العلم
+    Prayers (Salat)           -> کتاب الصلاۃ
+    Call to Prayers (Adhaan)  -> کتاب الاذان
+    Obligatory Charity (Zakat)-> کتاب الزکاۃ
+
+Cross-checked programmatically against your data: 97 sections in the dataset, 97
+titles supplied, none missing, none invented for a section that does not exist.
+
+THE OTHER FIVE BOOKS ARE STILL EMPTY and fall back to English per entry, so
+Muslim, Abu Dawud, Tirmidhi, Nasa'i and Ibn Majah are unchanged. Say the word
+and I will do those the same way.
+
+=====================================================================
+IT SAYS IT IS A DRAFT, AND IT SHOULD KEEP SAYING SO
+=====================================================================
+The chapter list shows, in Urdu:
+
+    "باب کے اردو نام ابتدائی مسودہ ہیں اور کسی عالم نے ان کی تصدیق نہیں کی۔"
+    (Urdu chapter names are a first draft and have not been checked by a
+     scholar.)
+
+These are the standard names and I am reasonably confident in them, but
+"reasonably confident" is not the same as verified, and your aalim is already
+lined up. When he signs them off, delete isUnverified from
+hadith_section_titles.dart and the note disappears.
+
+Anything he corrects goes straight into urd_sections.json - no code change, and
+per-entry fallback means a partly-corrected file always works.

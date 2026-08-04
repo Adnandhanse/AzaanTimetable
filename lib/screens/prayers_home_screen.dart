@@ -142,7 +142,7 @@ class _PillarCard extends StatelessWidget {
               Container(width: 22, height: 1, color: AppColors.goldRule),
               const SizedBox(height: 8),
               Text(
-                guide == null ? 'Coming soon' : 'Step by step',
+                guide == null ? S.comingSoon : S.stepByStep,
                 style: AppText.caption.copyWith(
                   color: guide == null ? AppColors.textFaint : AppColors.gold,
                 ),

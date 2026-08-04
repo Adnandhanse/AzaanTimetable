@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/app_strings.dart';
+
 import '../data/ibadat_content.dart';
 import '../services/hadith_link.dart';
 import '../theme/app_theme.dart';
@@ -186,7 +188,7 @@ class _StepCard extends StatelessWidget {
             Container(height: 1, color: AppColors.goldRuleFaint),
             const SizedBox(height: 6),
             Text(
-              'EVIDENCE',
+              S.evidence,
               style: AppText.eyebrow
                   .copyWith(letterSpacing: 1.4, color: AppColors.textMuted),
             ),

@@ -20,7 +20,9 @@ class HadithRef {
   /// Optional: why this hadith is cited here.
   final String? note;
 
-  String get label => '${book.displayName} ${number}';
+  /// Follows the app language, so a citation under a namaz step reads in the
+  /// same language as the step it sits beneath.
+  String get label => '${book.localName} $number';
 }
 
 /// Opens a cited hadith in the normal reader.
@@ -95,7 +97,7 @@ class HadithLink {
           collection: collection!,
           hadithNumber: ref.number,
           bookKey: ref.book.fileKey,
-          bookName: ref.book.displayName,
+          bookName: ref.book.localName,
           language: lang == HadithLanguage.english ? 'eng' : 'urd',
         ),
       ),

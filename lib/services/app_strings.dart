@@ -17,6 +17,42 @@ class S {
   static String get masjidAdmin => _t('Masjid Admin', 'مسجد ایڈمن');
   static String get settings => _t('Settings', 'ترتیبات');
 
+  // --- Hadith screens -------------------------------------------------------
+  //
+  // These were hardcoded English in the screens I wrote, so they stayed English
+  // even with the app set to Urdu. That is what made the headers look
+  // half-translated.
+  static String get searchChapterOrNumber =>
+      _t('Chapter name, or a hadith number', 'باب کا نام یا حدیث نمبر');
+  static String get searchHadithText =>
+      _t('Search hadith text', 'حدیث کا متن تلاش کریں');
+  static String get goToHadith => _t('GO TO HADITH', 'حدیث پر جائیں');
+  static String get hadithWord => _t('Hadith', 'حدیث');
+  static String get arabicEdition => _t('Arabic ed.', 'عربی ایڈیشن');
+  static String get totalWord => _t('total', 'کل');
+  static String get tapToReadFull => _t('Tap to read in full', 'مکمل پڑھنے کے لیے دبائیں');
+  static String get collapse => _t('Collapse', 'بند کریں');
+  static String get listenToTranslation =>
+      _t('Listen to translation', 'ترجمہ سنیں');
+  static String get stopWord => _t('Stop', 'روکیں');
+  static String get gradings => _t('GRADINGS', 'درجات');
+  static String get previousWord => _t('Previous', 'پچھلی');
+  static String get nextWord => _t('Next', 'اگلی');
+  static String get readWholeChapter =>
+      _t('Read the whole chapter', 'پورا باب پڑھیں');
+  static String get noTranslationAvailable => _t(
+      'No translation available for this hadith in the offline dataset.',
+      'اس حدیث کا ترجمہ آف لائن ڈیٹا میں موجود نہیں ہے۔');
+  static String get chapterNamesEnglishNote => _t(
+      'Chapter names are shown in English \u2014 the offline hadith dataset does not include Urdu chapter names. The hadith text itself is in Urdu.',
+      'باب کے نام انگریزی میں ہیں \u2014 آف لائن حدیث ڈیٹا میں باب کے اردو نام شامل نہیں۔ حدیث کا متن اردو میں ہے۔');
+  static String get urduTitlesUnverifiedNote => _t(
+      'Urdu chapter names are a first draft and have not been checked by a scholar.',
+      'باب کے اردو نام ابتدائی مسودہ ہیں اور کسی عالم نے ان کی تصدیق نہیں کی۔');
+  static String get stepByStep => _t('Step by step', 'مرحلہ وار');
+  static String get comingSoon => _t('Coming soon', 'جلد آ رہا ہے');
+  static String get evidence => _t('EVIDENCE', 'دلائل');
+
   static String get todaysPrayerTimes => _t("Today's Prayer Times", 'آج کے نماز کے اوقات');
   static String get changeMasjid => _t('Change Masjid', 'مسجد تبدیل کریں');
   static String get getDirections => _t('Get Directions', 'راستہ دکھائیں');

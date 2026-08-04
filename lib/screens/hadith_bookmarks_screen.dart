@@ -39,7 +39,7 @@ class _HadithBookmarksScreenState extends State<HadithBookmarksScreen> {
       try {
         final collection = await HadithRepository.loadCollection(book, language);
         final item = collection.hadiths.firstWhere((h) => h.hadithNumber == hadithNumber);
-        items.add(('${book.displayName} ($lang)', item));
+        items.add(('${book.localName} ($lang)', item));
       } catch (_) {
         // Skip if not found - dataset shouldn't change, but stay safe.
       }

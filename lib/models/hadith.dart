@@ -1,8 +1,36 @@
+import '../services/app_strings.dart';
 import 'dart:convert';
 
 enum HadithBook { bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah }
 
 extension HadithBookInfo on HadithBook {
+  /// The book's name in Urdu script.
+  ///
+  /// These are the standard Urdu renderings of the titles. The titles are Arabic
+  /// proper names, so writing them in Urdu script is transliteration, not
+  /// translation — there is no scholarly judgement involved and nothing to get
+  /// wrong.
+  String get urduName {
+    switch (this) {
+      case HadithBook.bukhari:
+        return 'صحیح بخاری';
+      case HadithBook.muslim:
+        return 'صحیح مسلم';
+      case HadithBook.abudawud:
+        return 'سنن ابو داؤد';
+      case HadithBook.tirmidhi:
+        return 'جامع ترمذی';
+      case HadithBook.nasai:
+        return 'سنن نسائی';
+      case HadithBook.ibnmajah:
+        return 'سنن ابن ماجہ';
+    }
+  }
+
+  /// Whichever name matches the app language. Use this in the UI; use
+  /// [displayName] only where an English identifier is wanted, such as a log.
+  String get localName => S.isUrdu ? urduName : displayName;
+
   String get displayName {
     switch (this) {
       case HadithBook.bukhari:

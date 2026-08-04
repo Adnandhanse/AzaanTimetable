@@ -95,7 +95,7 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
               final meta = _bookMeta[book];
               return _BookCard(
                 number: index + 1,
-                name: book.displayName,
+                name: book.localName,
                 arabicName: meta?.$1 ?? '',
                 volumes: meta?.$2 ?? 0,
                 onTap: () => Navigator.of(context).push(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 import '../services/hadith_repository.dart';
@@ -116,17 +118,23 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
             return displayTitle(c).toLowerCase().contains(q.toLowerCase());
           }).toList();
 
-    final bool urduTitlesMissing = widget.language == HadithLanguage.urdu &&
-        HadithSectionTitles.overrideCount(widget.book) == 0;
+    final bool urdu = widget.language == HadithLanguage.urdu;
+    // No Urdu titles at all for this book yet.
+    final bool urduTitlesMissing =
+        urdu && HadithSectionTitles.overrideCount(widget.book) == 0;
+    // Urdu titles present, but a first pass no scholar has checked. Saying so
+    // is the difference between supplying a translation and claiming one.
+    final bool urduTitlesUnverified =
+        urdu && HadithSectionTitles.isUnverified(widget.book);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.book.displayName),
+        title: Text(widget.book.localName),
         actions: [
           if (_collection != null)
             IconButton(
               icon: const Icon(Icons.search, size: 20),
-              tooltip: 'Search hadith text',
+              tooltip: S.searchHadithText,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => HadithSearchScreen(
@@ -151,7 +159,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                         keyboardType: TextInputType.text,
                         style: AppText.body.copyWith(color: AppColors.text),
                         decoration: InputDecoration(
-                          hintText: 'Chapter name, or a hadith number',
+                          hintText: S.searchChapterOrNumber,
                           hintStyle:
                               AppText.body.copyWith(color: AppColors.textFaint),
                           prefixIcon: const Icon(Icons.search,
@@ -213,7 +221,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                                       collection: _collection!,
                                       hadithNumber: asNumber,
                                       bookKey: widget.book.fileKey,
-                                      bookName: widget.book.displayName,
+                                      bookName: widget.book.localName,
                                       language: _langCode,
                                     ),
                                   ),
@@ -224,7 +232,16 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                         child: Text(
-                          'Chapter names are shown in English \u2014 the offline hadith dataset does not include Urdu chapter names. The hadith text itself is in Urdu.',
+                          S.chapterNamesEnglishNote,
+                          style: AppText.caption
+                              .copyWith(color: AppColors.textMuted),
+                        ),
+                      ),
+                    if (urduTitlesUnverified)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                        child: Text(
+                          S.urduTitlesUnverifiedNote,
                           style: AppText.caption
                               .copyWith(color: AppColors.textMuted),
                         ),
@@ -264,14 +281,14 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                                     : Row(
                                         children: [
                                           Text(
-                                            'Hadith ${r.label}',
+                                            '${S.hadithWord} ${r.label}',
                                             style: AppText.caption.copyWith(
                                               color: AppColors.emerald,
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                           Text(
-                                            '  \u00b7  ${r.count} total',
+                                            '  \u00b7  ${r.count} ${S.totalWord}',
                                             style: AppText.caption.copyWith(
                                                 color: AppColors.textMuted),
                                           ),
@@ -372,7 +389,7 @@ class _DirectHit extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'GO TO HADITH $hadithNumber',
+                      '${S.goToHadith} $hadithNumber',
                       style: AppText.eyebrow
                           .copyWith(letterSpacing: 1.4, color: AppColors.gold),
                     ),

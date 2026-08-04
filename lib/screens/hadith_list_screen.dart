@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/app_strings.dart';
+
 import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
 import '../services/tts_service.dart';
@@ -236,13 +238,13 @@ class _HadithCard extends StatelessWidget {
                           runSpacing: 6,
                           children: [
                             _Badge(
-                              text: 'Hadith ${item.hadithNumber}',
+                              text: '${S.hadithWord} ${item.hadithNumber}',
                               bg: AppColors.emerald.withOpacity(0.1),
                               fg: AppColors.emerald,
                             ),
                             if (item.arabicNumber != null)
                               _Badge(
-                                text: 'Arabic ed. ${item.arabicNumber}',
+                                text: '${S.arabicEdition} ${item.arabicNumber}',
                                 bg: AppColors.gold.withOpacity(0.15),
                                 fg: const Color(0xFF8A6D1E),
                               ),
@@ -301,7 +303,7 @@ class _HadithCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Text('Tap to read in full',
+                        Text(S.tapToReadFull,
                             style: AppText.caption
                                 .copyWith(color: AppColors.gold)),
                         const SizedBox(width: 4),
@@ -342,13 +344,13 @@ class _HadithCard extends StatelessWidget {
                             .copyWith(color: AppColors.text)),
                   ] else
                     Text(
-                      'No translation available for this hadith in the offline dataset.',
+                      S.noTranslationAvailable,
                       style: AppText.caption
                           .copyWith(color: AppColors.textFaint),
                     ),
                   if (item.grades.length > 1) ...[
                     const SizedBox(height: 10),
-                    Text('GRADINGS',
+                    Text(S.gradings,
                         style: AppText.eyebrow.copyWith(
                             letterSpacing: 1.4, color: AppColors.textMuted)),
                     const SizedBox(height: 4),
@@ -370,7 +372,7 @@ class _HadithCard extends StatelessWidget {
                           // reads the Arabic, and the label should not let
                           // anyone assume it does.
                           label:
-                              Text(isSpeaking ? 'Stop' : 'Listen to translation'),
+                              Text(isSpeaking ? S.stopWord : S.listenToTranslation),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.emerald,
                             side: const BorderSide(color: AppColors.goldRule),
@@ -389,7 +391,7 @@ class _HadithCard extends StatelessWidget {
                           padding: const EdgeInsets.all(6),
                           child: Row(
                             children: [
-                              Text('Collapse',
+                              Text(S.collapse,
                                   style: AppText.caption
                                       .copyWith(color: AppColors.textMuted)),
                               const Icon(Icons.expand_less,
