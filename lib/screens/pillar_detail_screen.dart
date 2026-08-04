@@ -137,8 +137,9 @@ class _StepCard extends StatelessWidget {
                         style: AppText.rowTitle
                             .copyWith(fontSize: 17, color: AppColors.text)),
                     const SizedBox(height: 3),
-                    Text(step.instruction,
-                        style: AppText.body.copyWith(color: AppColors.text)),
+                    if (step.method != null)
+                      Text(step.method!,
+                          style: AppText.body.copyWith(color: AppColors.text)),
                   ],
                 ),
               ),
@@ -157,9 +158,29 @@ class _StepCard extends StatelessWidget {
                 style: AppText.arabicVerse.copyWith(color: AppColors.emerald),
               ),
             ),
-            if (step.transliteration != null)
-              Text(step.transliteration!,
-                  style: AppText.caption.copyWith(color: AppColors.textMuted)),
+            if (step.translation != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(step.translation!,
+                  style: AppText.translation.copyWith(color: AppColors.textMid)),
+            ],
+          ],
+
+          // A hadith worth quoting at the step itself, not just cited below it.
+          if (step.keyPoint != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.emerald.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: AppColors.goldRule),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                step.keyPoint!,
+                style: AppText.body.copyWith(
+                    color: AppColors.emerald, fontStyle: FontStyle.italic),
+              ),
+            ),
           ],
 
           if (step.practiceDiffers != null) ...<Widget>[
