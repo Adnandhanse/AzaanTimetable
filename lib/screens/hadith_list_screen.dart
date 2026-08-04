@@ -31,7 +31,6 @@ class HadithListScreen extends StatefulWidget {
 class _HadithListScreenState extends State<HadithListScreen> {
   Set<String> _bookmarks = {};
   final ScrollController _scroll = ScrollController();
-  final GlobalKey _targetKey = GlobalKey();
 
   /// Which hadith are open. Collapsed by default — a chapter of 170 hadith
   /// shown in full is unreadable and unscrollable, and finding anything in it
@@ -53,7 +52,6 @@ class _HadithListScreenState extends State<HadithListScreen> {
     TtsService.onComplete(() {
       if (mounted) setState(() => _speaking = null);
     });
-    if (target != null) _jumpToTarget(target);
   }
 
   @override
@@ -84,43 +82,19 @@ class _HadithListScreenState extends State<HadithListScreen> {
   List<HadithItem> get _hadiths =>
       widget.collection.hadithsInChapter(widget.chapter.number);
 
-  /// Bring the searched hadith into view.
+  /// NO SCROLL-TO-TARGET HERE, DELIBERATELY.
   ///
-  /// Two passes: an estimated jump to get the target built, then ensureVisible
-  /// to land exactly. A single ensureVisible cannot work, because a
-  /// ListView.builder has not created the widget for anything off screen.
+  /// It used to estimate an offset from the item index, jump, then correct with
+  /// Scrollable.ensureVisible. That cannot work: ListView.builder has not built
+  /// anything off screen, so when the estimate misses the target does not exist
+  /// and the correction does nothing. Card heights range from two lines to
+  /// thousands of pixels, so the estimate always misses — searching 789 landed
+  /// on 756.
   ///
-  /// The estimate is reliable now only because cards are COLLAPSED and
-  /// therefore near-uniform in height. When every card rendered its full text,
-  /// heights ranged from 200 to several thousand pixels and no estimate could
-  /// land anywhere near — which is why searching a number used to miss.
-  Future<void> _jumpToTarget(int target) async {
-    final list = _hadiths;
-    final int index = list.indexWhere((h) => h.hadithNumber == target);
-    if (index < 0) return;
-
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || !_scroll.hasClients) return;
-
-    const double collapsedHeight = 132;
-    final double estimate =
-        (index * collapsedHeight).clamp(0.0, _scroll.position.maxScrollExtent);
-    _scroll.jumpTo(estimate);
-
-    // Two refinement passes. The first builds the target; the expanded card
-    // then changes height, so a second pass is needed to settle on it.
-    for (int i = 0; i < 2; i++) {
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-      final ctx = _targetKey.currentContext;
-      if (ctx == null) continue;
-      await Scrollable.ensureVisible(
-        ctx,
-        duration: const Duration(milliseconds: 250),
-        alignment: 0.08,
-      );
-    }
-  }
+  /// Searching a number now opens HadithSingleScreen instead, which needs no
+  /// arithmetic and cannot miss. If the reader arrives here from that screen,
+  /// the hadith is still outlined in gold so it is findable by eye, and the
+  /// list is left where the reader put it rather than twitching to a guess.
 
   Future<void> _speak(HadithItem h) async {
     if (_speaking == h.hadithNumber) {
@@ -175,7 +149,6 @@ class _HadithListScreenState extends State<HadithListScreen> {
                 final bool isTarget =
                     widget.highlightHadithNumber == h.hadithNumber;
                 return _HadithCard(
-                  key: isTarget ? _targetKey : null,
                   item: h,
                   isTarget: isTarget,
                   isExpanded: _expanded.contains(h.hadithNumber),

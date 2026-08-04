@@ -5,6 +5,7 @@ import '../services/hadith_repository.dart';
 import '../services/hadith_section_titles.dart';
 import '../widgets/ornaments.dart';
 import 'hadith_list_screen.dart';
+import 'hadith_single_screen.dart';
 import 'hadith_search_screen.dart';
 
 /// The hadith numbers a chapter covers, and how many it holds.
@@ -201,14 +202,19 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                             : _DirectHit(
                                 hadithNumber: asNumber,
                                 chapterTitle: displayTitle(chapters.first),
+                                // Opens the HADITH, not the chapter it lives
+                                // in. Scrolling a variable-height list to an
+                                // index cannot be done reliably — searching
+                                // 789 landed on 756 — so there is no scrolling
+                                // here to get wrong.
                                 onOpen: () => Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) => HadithListScreen(
+                                    builder: (_) => HadithSingleScreen(
                                       collection: _collection!,
-                                      chapter: chapters.first,
+                                      hadithNumber: asNumber,
                                       bookKey: widget.book.fileKey,
+                                      bookName: widget.book.displayName,
                                       language: _langCode,
-                                      highlightHadithNumber: asNumber,
                                     ),
                                   ),
                                 ),

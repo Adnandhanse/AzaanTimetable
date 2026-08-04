@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/hadith.dart';
-import '../screens/hadith_list_screen.dart';
+import '../screens/hadith_single_screen.dart';
 import '../theme/app_theme.dart';
 import 'hadith_repository.dart';
 
@@ -30,8 +30,7 @@ class HadithRef {
 class HadithLink {
   HadithLink._();
 
-  /// Loads the book, finds which chapter holds [ref], and opens the reader
-  /// scrolled to that hadith with it outlined.
+  /// Loads the book, confirms the hadith exists, and opens it.
   ///
   /// Async and potentially slow — the collections are large — so it shows a
   /// blocking spinner. Doing it silently would look like a dead tap.
@@ -78,24 +77,17 @@ class HadithLink {
       return;
     }
 
-    HadithChapter? chapter;
-    for (final HadithChapter c in collection.chapters) {
-      if (c.number == item.chapterNumber) {
-        chapter = c;
-        break;
-      }
-    }
-    chapter ??= HadithChapter(number: item.chapterNumber, title: 'Chapter ${item.chapterNumber}');
-
     if (!context.mounted) return;
+    // A citation opens THE HADITH. Sending someone to a chapter to go and find
+    // it themselves is barely better than printing the number.
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => HadithListScreen(
+        builder: (_) => HadithSingleScreen(
           collection: collection!,
-          chapter: chapter!,
+          hadithNumber: ref.number,
           bookKey: ref.book.fileKey,
+          bookName: ref.book.displayName,
           language: language == HadithLanguage.english ? 'eng' : 'urd',
-          highlightHadithNumber: ref.number,
         ),
       ),
     );
