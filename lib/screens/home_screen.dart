@@ -505,7 +505,14 @@ class _HomeScreenState extends State<HomeScreen>
             child: Column(
               children: [
                 const DiamondRule(),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
+                // The label went missing when I compacted this block, leaving a
+                // bare time with no indication of what it was.
+                Text(
+                  S.nextPrayer.toUpperCase(),
+                  style: AppText.eyebrow.copyWith(color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 4),
                 if (next == null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
@@ -676,6 +683,111 @@ class _HomeScreenState extends State<HomeScreen>
     if (h == 0 && m == 0) return 'in under a minute';
     if (h == 0) return 'in $m ${m == 1 ? "minute" : "minutes"}';
     return 'in ${h}h ${m}m';
+  }
+
+  Widget _prayerTimesList(Masjid masjid, String? nextLabel) {
+    final rows = <(String, String, String)>[
+      (S.fajr, masjid.prayerTimes.fajr, _arabicPrayerNames['fajr']!),
+      (S.dhuhr, masjid.prayerTimes.dhuhr, _arabicPrayerNames['dhuhr']!),
+      (S.asr, masjid.prayerTimes.asr, _arabicPrayerNames['asr']!),
+      (S.maghrib, masjid.prayerTimes.maghrib, _arabicPrayerNames['maghrib']!),
+      (S.isha, masjid.prayerTimes.isha, _arabicPrayerNames['isha']!),
+      (S.juma, masjid.prayerTimes.juma, _arabicPrayerNames['juma']!),
+    ];
+
+    return Column(
+      children: [
+        for (int i = 0; i < rows.length; i++)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
+            decoration: BoxDecoration(
+              border: i == 0
+                  ? null
+                  : const Border(
+                      top: BorderSide(color: AppColors.goldRuleFaint)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    rows[i].$1.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.eyebrow.copyWith(
+                      letterSpacing: 1.3,
+                      color: rows[i].$1 == nextLabel
+                          ? AppColors.emerald
+                          : AppColors.textMid,
+                    ),
+                  ),
+                ),
+                Text(
+                  rows[i].$3,
+                  style: AppText.arabic.copyWith(
+                    fontSize: 16,
+                    height: 1.2,
+                    color: AppColors.gold,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    rows[i].$2,
+                    textAlign: TextAlign.right,
+                    style: AppText.listTime.copyWith(
+                      fontSize: 17,
+                      color: rows[i].$1 == nextLabel
+                          ? AppColors.emerald
+                          : AppColors.text,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _quickAction(IconData icon, String label, VoidCallback onTap) {
+    // FIXED HEIGHT, and the label on one line.
+    //
+    // These were sized by their content, so "Find Qibla Direction" wrapped to
+    // two lines and grew taller than "Nearby Masjid" beside it — a visibly
+    // lopsided pair. A fixed height makes them match whatever the labels are,
+    // including after translation, where Urdu and English lengths differ again.
+    return SizedBox(
+      height: 86,
+      child: Material(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4),
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppColors.goldRule),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(icon, color: AppColors.gold, size: 22),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.rowTitle
+                      .copyWith(fontSize: 14.5, color: AppColors.text),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _prayerTimesList(Masjid masjid, String? nextLabel) {

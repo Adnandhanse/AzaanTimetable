@@ -63,19 +63,30 @@ class ArtworkHeader extends StatelessWidget {
             child: SkyArtwork(phase: phase, height: artworkHeight),
           ),
 
-          // Top-down scrim. Strongest at the very top where the type sits,
-          // gone by a third of the way down so it never dulls the building.
+          // SOLID BAND, NOT A SUBTLE SCRIM.
+          //
+          // This was a gentle gradient tuned against the night sky. On a bright
+          // photograph — pale marble, golden sunset — white text over it was
+          // invisible. The name, address and directions were rendering the
+          // whole time and simply could not be seen.
+          //
+          // A scrim that works at BOTH ends of the range has to be strong
+          // enough for the brightest case, which means near-opaque at the top.
+          // The picture loses a strip; the text becomes readable. That is the
+          // right trade for text that has to work on every masjid photo, not
+          // just a dark one.
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: <Color>[
+                  Color(0xE6000000),
                   Color(0xB3000000),
-                  Color(0x59000000),
+                  Color(0x40000000),
                   Color(0x00000000),
                 ],
-                stops: <double>[0.0, 0.18, 0.42],
+                stops: <double>[0.0, 0.34, 0.52, 0.68],
               ),
             ),
           ),

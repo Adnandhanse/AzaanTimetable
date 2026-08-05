@@ -1,87 +1,82 @@
-v41 - 4 files
+v42 - 6 files
 =============
 
-  lib/data/ibadat_content.dart            sehri dua removed
-  lib/screens/zakat_calculator_screen.dart totals under each metal
-  lib/widgets/artwork_header.dart          directions on the image
-  lib/screens/home_screen.dart             compacted, duplication removed
+  lib/screens/role_selection_screen.dart    NEW  user or masjid admin
+  lib/screens/splash_screen.dart                 routes through it
+  lib/screens/language_selection_screen.dart     routes through it
+  lib/widgets/artwork_header.dart                scrim fixed
+  lib/screens/home_screen.dart                   label + quick actions
+  lib/screens/quran_home_screen.dart             image no longer cropped
 
-Overwrite all four. Apply AFTER v40. No new package.
-
-=====================================================================
-1. SEHRI DUA REMOVED
-=====================================================================
-Gone. It is in none of the six books and there was nothing to cite.
-
-The step is still there, because sahur itself IS established - it now describes
-the practice and says the niyyah is an intention of the heart, not a fixed
-formula. Cited to Bukhari 1923, "take suhur, there is a blessing in it", which
-is the hadith that actually supports the step.
+Overwrite all six. Apply AFTER v41. No new package.
 
 =====================================================================
-2. ZAKAT TOTALS MOVED UNDER EACH METAL
+1. THE MISSING TEXT ON THE IMAGE - MY BUG
 =====================================================================
-    Gold
-      grams, karat
-      Value 320,833.33          Zakat 2.5%  8,020.83
+Your screenshot shows the photograph with no masjid name, no address, no
+directions button. They were being rendered the entire time. They were white
+text over the brightest part of that picture - pale marble and a golden sunset -
+with only a gentle scrim behind them.
 
-    Silver
-      grams, purity
-      Value 44,955.00           Zakat 2.5%  1,123.88
+I tuned that scrim against the NIGHT sky, where white on dark needs almost
+nothing. On a bright masjid photo it did nothing at all, and the text was white
+on near-white.
 
-    Cash / Savings
-      amount, liabilities
-      Value 100,000.00          Zakat 2.5%  2,500.00
-
-Previously all of it sat in one card at the bottom, so you entered gold grams at
-the top and found the gold value four sections away. Under the inputs, the number
-answers the question at the moment it is asked.
-
-The bottom card is now the summary only - total, less liabilities, net, nisab,
-and the verdict. Repeating the per-holding figures there would have printed the
-same numbers twice, and the second copy is exactly where someone would start
-adding them up by hand. The note about zakat being due on the net total sits with
-the final amount.
-
-A section shows nothing until you enter something in it.
+Fixed: the scrim is now near-opaque at the top and fades out by two thirds down.
+A scrim that has to work at BOTH ends of the range has to be strong enough for
+the brightest case. The picture loses a strip at the top; the text becomes
+readable on every masjid photo instead of only the dark ones. That is the right
+trade.
 
 =====================================================================
-3. GET DIRECTIONS ON THE IMAGE
+2. UPCOMING PRAYER
 =====================================================================
-A translucent pill under the masjid name and address, on the photograph.
+When I compacted this block in v41 I dropped the "NEXT PRAYER" label, leaving a
+bare time with nothing saying what it was. Restored, above the time.
 
-It has to stay readable over a picture whose brightness swings from midday sky to
-near-black, so it is a dark translucent fill with a white hairline rather than
-plain text. Hidden entirely when the masjid has no coordinates, rather than
-opening an empty map.
+The calculation itself was correct - 5:40 Asr at 3:33 really is 2h 6m away.
 
 =====================================================================
-4. MASJID DETAILS BOX REMOVED
+3. QIBLA AND NEARBY MASJID BOXES
 =====================================================================
-Name, address, date and directions are all on the image now, so the card below
-was the same information a second time. Removed, along with the builder for it.
+They were sized by their contents, so "Find Qibla Direction" wrapped onto two
+lines and grew taller than "Nearby Masjid" next to it. Visibly lopsided, exactly
+as in your screenshot.
 
-"View full prayer schedule" stays.
-
-NOTE: the verified / pending-verification badge lived in that card and is now
-gone from Home. It is still on the masjid search screen. Say if you want it back
-somewhere.
+Both are now a fixed 86px with the label centred. They will stay matched
+whatever the labels say, including in Urdu where the lengths differ again.
 
 =====================================================================
-5. NEXT PRAYER MADE SHORTER
+4. QURAN IMAGE CUT OFF
 =====================================================================
-Was: two ornamented rules around a 44pt figure, with the label above and the
-name below, generously spaced - tall enough to push the prayer list below the
-fold.
+The box was a fixed 196px tall with BoxFit.cover. The artwork is 1.702:1; the box
+on a typical phone is about 1.84:1. Cover fills the width, overflows vertically,
+and crops the top and bottom - the lanterns and the base of the stand.
 
-Now: one rule, a 32pt figure, with the prayer name and countdown stacked beside
-it on the same line. Same information, roughly half the height.
+Now wrapped in AspectRatio(1.70), so the box is the same shape as the picture.
+Nothing to crop, nothing letterboxed, and the height follows screen width instead
+of being guessed:
+
+    360dp wide -> 212dp tall     390dp -> 229dp     412dp -> 242dp
 
 =====================================================================
-6. CHANGE MASJID BUTTON REMOVED
+5. NEW - ROLE SELECTION AT FIRST LAUNCH
 =====================================================================
-The floating button is gone. The Nearby masjid quick action opens the same
-search screen and sets the same selection, so it was doing the job twice - and
-the floating button was sitting on top of the last row of prayer times to do it.
+    Language  ->  Role  ->  the app
 
-Changing masjid still works, from Nearby masjid.
+  "I am here to pray"        -> Home. Follow a masjid, azan alarm, Quran,
+                                Hadith, Qibla.
+  "I manage a masjid"        -> Admin login, from where a masjid is registered.
+
+Role is asked AFTER language, so the two choices are not both presented in a
+language the user may not read. Asked once; the saved answer decides where they
+land afterwards.
+
+IT IS NOT A LOCK. Both routes stay reachable - the Masjid Admin tab is still
+there for users, and admins still get the full app. Someone can be both, and a
+mistaken tap here should not shut anyone out of half the app. The screen says so.
+
+Note: the admin route goes to AdminLoginScreen, which is where masjid
+registration is reached from. If you would rather it open the registration form
+directly for a first-time admin, that is a one-line change - tell me which you
+prefer.

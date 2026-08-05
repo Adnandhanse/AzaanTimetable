@@ -145,21 +145,28 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // The artwork carries the القرآن الكريم title itself, so
-                // there is no text title here — it would double up.
+                // ASPECT RATIO, NOT A FIXED HEIGHT.
                 //
-                // The source image was square, which letterboxed white bars
-                // down either side of the band. It is now cropped to 1.70:1 at
-                // build time and drawn with BoxFit.cover, so it fills the width
-                // edge to edge with no empty space.
-                SizedBox(
+                // This was a 196px-tall box with BoxFit.cover. The artwork is
+                // 1.70:1; the box on a typical phone is about 1.84:1. Cover
+                // fills the width and then overflows vertically, so the top and
+                // bottom of the picture were being cut off — the lanterns and
+                // the base of the stand.
+                //
+                // AspectRatio makes the box the same shape as the image, so
+                // cover has nothing left to crop and nothing is letterboxed
+                // either. The height now follows the screen width instead of
+                // being guessed.
+                Container(
                   width: double.infinity,
-                  height: 196,
-                  child: Image.asset(
-                    'assets/images/quran_header.webp',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                    semanticLabel: 'Illustration of the Qur\u2019an on a stand',
+                  color: AppColors.white,
+                  child: AspectRatio(
+                    aspectRatio: 1.70,
+                    child: Image.asset(
+                      'assets/images/quran_header.webp',
+                      fit: BoxFit.cover,
+                      semanticLabel: 'Illustration of the Qur\u2019an on a stand',
+                    ),
                   ),
                 ),
                 Container(height: 1, color: AppColors.goldRule),

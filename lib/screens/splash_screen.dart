@@ -4,6 +4,8 @@ import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
 import 'home_screen.dart';
+import 'admin_login_screen.dart';
+import 'role_selection_screen.dart';
 import 'language_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,9 +38,26 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         // masjid-following just won't persist until this is fixed.
       }
       if (!mounted) return;
-      final nextScreen = AppLanguageController.instance.hasChosenLanguage
-          ? const HomeScreen()
-          : const LanguageSelectionScreen();
+
+      // Language, then role, then the app.
+      //
+      // Role comes AFTER language so the two choices are not both in a language
+      // the user may not read. It is asked only once; after that the saved
+      // answer decides where they land.
+      final Widget nextScreen;
+      if (!AppLanguageController.instance.hasChosenLanguage) {
+        nextScreen = const LanguageSelectionScreen();
+      } else {
+        final String? role = await RoleSelectionScreen.savedRole();
+        if (role == null) {
+          nextScreen = const RoleSelectionScreen();
+        } else if (role == 'admin') {
+          nextScreen = const AdminLoginScreen();
+        } else {
+          nextScreen = const HomeScreen();
+        }
+      }
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => nextScreen),
       );

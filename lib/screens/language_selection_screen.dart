@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/app_language.dart';
-import 'home_screen.dart';
+import 'role_selection_screen.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
   const LanguageSelectionScreen({super.key});
@@ -9,8 +9,10 @@ class LanguageSelectionScreen extends StatelessWidget {
   Future<void> _choose(BuildContext context, AppLanguage language) async {
     await AppLanguageController.instance.setLanguage(language, markChosen: true);
     if (!context.mounted) return;
+    // On to the role question, not straight to Home — otherwise a first-run
+    // user picking a language would skip it entirely and never be asked.
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
     );
   }
 
