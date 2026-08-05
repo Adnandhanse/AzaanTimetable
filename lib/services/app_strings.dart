@@ -49,6 +49,39 @@ class S {
   static String get urduTitlesUnverifiedNote => _t(
       'Urdu chapter names are a first draft and have not been checked by a scholar.',
       'باب کے اردو نام ابتدائی مسودہ ہیں اور کسی عالم نے ان کی تصدیق نہیں کی۔');
+  // --- Zakat calculator ----------------------------------------------------
+  static String get zakatCalculator => _t('Zakat Calculator', 'زکوٰۃ کیلکولیٹر');
+  static String get zakatApplicable =>
+      _t('Zakat Applicable', 'زکوٰۃ لاگو ہوتی ہے');
+  static String get zakatNotApplicable =>
+      _t('Zakat Not Applicable', 'زکوٰۃ لاگو نہیں ہوتی');
+  static String get nisabBasis => _t('Nisab', 'نصاب');
+  static String get silverNisab => _t('Silver Nisab (595g)', 'چاندی کا نصاب (595 گرام)');
+  static String get goldNisab => _t('Gold Nisab (85g)', 'سونے کا نصاب (85 گرام)');
+  static String get goldLabel => _t('Gold', 'سونا');
+  static String get silverLabel => _t('Silver', 'چاندی');
+  static String get cashLabel => _t('Cash / Savings', 'نقد / بچت');
+  static String get liabilitiesLabel => _t('Liabilities / Debts', 'واجبات / قرض');
+  static String get gramsLabel => _t('Grams', 'گرام');
+  static String get purityLabel => _t('Purity', 'خالص پن');
+  static String get karatLabel => _t('Karat', 'قیراط');
+  static String get ratePerGram => _t('Rate per gram', 'فی گرام قیمت');
+  static String get todaysRates => _t("Today's rates", 'آج کی قیمتیں');
+  static String get updateRates => _t('Update rates', 'قیمتیں اپ ڈیٹ کریں');
+  static String get netAssets => _t('Net assets', 'خالص مالیت');
+  static String get nisabValue => _t('Nisab value', 'نصاب کی قیمت');
+  static String get zakatDue => _t('Zakat due (2.5%)', 'واجب زکوٰۃ (2.5%)');
+  static String get ratesNeeded => _t(
+      'Enter today\'s gold and silver rate to begin.',
+      'شروع کرنے کے لیے آج کی سونے اور چاندی کی قیمت درج کریں۔');
+  static String get ratesStale => _t(
+      'These rates are more than a day old. Update them before relying on the result.',
+      'یہ قیمتیں ایک دن سے زیادہ پرانی ہیں۔ نتیجہ استعمال کرنے سے پہلے انہیں اپ ڈیٹ کریں۔');
+  static String get zakatDisclaimer => _t(
+      'This is an estimate based on the figures you entered. For anything uncertain, ask a scholar.',
+      'یہ آپ کے درج کردہ اعداد پر مبنی ایک تخمینہ ہے۔ کسی بھی شک کی صورت میں عالم سے رجوع کریں۔');
+  static String get save => _t('Save', 'محفوظ کریں');
+
   static String get stepByStep => _t('Step by step', 'مرحلہ وار');
   static String get comingSoon => _t('Coming soon', 'جلد آ رہا ہے');
   static String get evidence => _t('EVIDENCE', 'دلائل');

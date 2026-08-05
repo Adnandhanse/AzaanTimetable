@@ -1,75 +1,81 @@
-v37 - 1 file - NO DAIF CITATIONS
+v38 - 5 files - ZAKAT CALCULATOR
 ================================
 
-  lib/data/ibadat_content.dart
+  lib/services/zakat_service.dart          NEW  rates, purity, the maths
+  lib/screens/zakat_calculator_screen.dart NEW  the screen
+  lib/services/app_strings.dart                 English + Urdu labels
+  lib/screens/prayers_home_screen.dart          Zakat card opens the calculator
+  lib/data/ibadat_content.dart                  (v37 - no Daif citations)
 
-Overwrite it. Nothing else changes.
-
-=====================================================================
-YOUR RULE, APPLIED - AND IT CAUGHT SOMETHING IN WHAT I ALREADY SHIPPED
-=====================================================================
-I graded all 33 citations in the namaz guide against your own data. Six failed:
-
-    Abu Dawud 886   Daif (Al-Albani, Muhyi Al-Din, Zubair Ali Zai)
-    Ibn Majah 890   Daif (Al-Albani, Fouad Abd al-Baqi, Zubair Ali Zai)
-    Tirmidhi  261   Daif (Ahmad Shakir, Al-Albani, Zubair Ali Zai)
-
-Unanimous, every grader. These were the Ruku and Sajdah tasbihat - the Ibn
-Mas'ud "say it three times" narration, which is the one usually quoted for those
-steps. Under your rule they had to go, and that would have left Ruku and Sajdah
-with no evidence at all.
-
-WHY I HAD ONLY DAIF OPTIONS THERE: my original search for those two phrases
-covered the four Sunan and NEVER SEARCHED BUKHARI AND MUSLIM. My own mistake,
-and it is why the weak narration looked like the only candidate.
-
-Searching properly found:
-
-    SAHIH MUSLIM 1814   the Hudhaifah night-prayer narration, which contains
-                        BOTH tasbihat - Subhana Rabbiyal Azeem in ruku and
-                        Subhana Rabbiyal A'la in sujud
-
-Now cited as:
-    Ruku    Muslim 1814 | Abu Dawud 871 (Sahih) | Nasa'i 1046 (Sahih)
-    Sajdah  Muslim 1814 | Abu Dawud 874 (Sahih) | Nasa'i 1069 (Sahih)
-
-Re-verified: 33 citations, none missing, none empty, NONE containing Daif.
+Overwrite all five. NO NEW PACKAGE.
 
 =====================================================================
-ONE DECISION I MADE FOR YOU - TELL ME IF IT IS WRONG
+BOTH NISABS, USER SELECTS
 =====================================================================
-"Only sahih" can mean two things and they give different results.
+  Silver Nisab (595g)  |  Gold Nisab (85g)
 
-  (a) NOTHING WEAK - Sahih and Hasan both kept, Daif excluded
-  (b) STRICTLY SAHIH - Hasan excluded as well
+Radio buttons, no default assumption beyond starting on silver. The two are NOT
+equivalent, and the difference is not small. Worked example, verified:
 
-I APPLIED (a). That is the mainstream reading: hadith scholars class Sahih and
-Hasan both as acceptable for practice, and only Daif is rejected.
+  Rates: gold 7000/g (24K), silver 90/g (999)
+  Holdings: 50g of 22K gold, 500g of 999 silver, 100000 cash, 50000 debts
+  Net assets: 415,788
 
-If you want (b), three citations would also come out:
+  SILVER NISAB  threshold  53,550  ->  APPLICABLE, zakat 10,394.71
+  GOLD NISAB    threshold 595,000  ->  NOT APPLICABLE, zakat 0
 
-    Abu Dawud 722   Sahih from two graders, HASAN from Zubair Ali Zai
-    Tirmidhi  243   Sahih from two, HASAN from Bashar Awad and Zubair Ali Zai
-    Ibn Majah 806   Sahih from three, HASAN from Zubair Ali Zai
+Same assets, opposite answer. Which is why this is a radio button and not a
+constant.
 
-Note none of those is weak - graders simply differ on the tier. Removing them
-would cost Takbeer one of five citations and Dua-e-Sana two of three. Say the
-word and I will.
-
-=====================================================================
-BUKHARI AND MUSLIM NEED NO FILTERING
-=====================================================================
-17 of the 33 are from the Sahihayn, which carry no grading in this dataset
-because they are accepted as authentic by their compilers' criteria. Your
-instinct earlier to prefer those two was sound - it makes this whole question
-disappear for those citations.
+Your figures (595g / 85g) are used. Other published figures exist - 612.36g and
+87.48g - and if your aalim wants those, they are two numbers in NisabBasisX.
 
 =====================================================================
-STILL WAITING ON YOU
+TWO CORRECTIONS TO YOUR SPEC
 =====================================================================
-1. NISAB for the Zakat calculator - gold (~87.5g) or silver (~612g). Changes who
-   owes zakat at all, so it is your aalim's call, not mine.
-2. Whether the ROZA duas stay. The sehri dua is in NONE of the six books, so it
-   will ship with no citation. The iftar dua you gave is Daif in all four
-   gradings; Abu Dawud 2357 is the Hasan alternative and is allowed under rule
-   (a) but not (b).
+1. SILVER HAS NO KARAT. Karat is a gold measure. Silver is graded by purity, and
+   a jeweller's receipt says 999, 925 or 900. So:
+       Gold   -> 24K (999) / 22K (916) / 21K (875) / 18K (750)
+       Silver -> 999 (fine) / 925 (sterling) / 900
+
+2. PURITY IS APPLIED TO THE VALUE. 50g of 22K gold is 45.83g of gold, so it is
+   worth 320,833 at a 7000 pure rate, not 350,000. Valuing jewellery at the 24K
+   rate would overstate what is owed by 8%.
+
+=====================================================================
+LIVE RATES - WHY THEY ARE NOT WIRED YET
+=====================================================================
+You asked for a daily live call. I have not shipped one, and I want to be
+straight about why: my environment cannot reach any metals API, so any endpoint
+I wired in would be UNTESTED. Untested network code fails at the worst possible
+moment - while someone is calculating a financial obligation - and it fails
+silently.
+
+So: the user enters today's gold and silver rate once, it is cached with the
+date, and the card shows how old it is. Over a day old and it says so in
+amber. Works offline, no API key, no subscription, no new package.
+
+TO ADD LIVE RATES: implement MetalRateService.fetchLive() to return one gram of
+PURE metal and nothing else changes - the screen already calls it first and
+falls back to the stored rate. KEEP the manual path as the fallback; it is what
+makes the calculator dependable when a provider is down or a key expires.
+
+=====================================================================
+BILINGUAL, AS SPECIFIED
+=====================================================================
+  Zakat Applicable        زکوٰۃ لاگو ہوتی ہے
+  Zakat Not Applicable    زکوٰۃ لاگو نہیں ہوتی
+
+Every label is localised - nisab, gold, silver, cash, liabilities, grams,
+purity, karat, rate per gram, net assets, nisab value, zakat due.
+
+No currency symbol anywhere. The rate the user typed is in their own currency
+and the app has no business guessing which.
+
+=====================================================================
+STILL WAITING ON THE ROZA DUAS
+=====================================================================
+Sehri dua: in NONE of the six books, so it ships with no citation.
+Iftar dua: yours is Daif in all four gradings. Abu Dawud 2357 is the Hasan
+alternative. Tell me which and I will build Shahadah, Roza, Hajj and Umrah in
+one pass.

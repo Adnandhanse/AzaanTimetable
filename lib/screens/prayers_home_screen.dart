@@ -5,6 +5,7 @@ import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'pillar_detail_screen.dart';
+import 'zakat_calculator_screen.dart';
 
 class PrayersHomeScreen extends StatelessWidget {
   const PrayersHomeScreen({super.key});
@@ -44,6 +45,9 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'زکوٰۃ کیلکولیٹر اور زکوٰۃ نہ دینے کے نتائج پر احادیث۔'
               : 'Zakat calculator and hadith on the consequences of not giving Zakat.',
           'icon': Icons.calculate_outlined,
+          // Zakat opens the calculator rather than a step guide — its steps are
+          // arithmetic, not actions.
+          'calculator': true,
         },
         {
           'title': S.hajjUmrah,
@@ -104,11 +108,13 @@ class _PillarCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => PillarDetailScreen(
-              title: pillar['title'] as String,
-              description: pillar['description'] as String,
-              guide: guide,
-            ),
+            builder: (_) => pillar['calculator'] == true
+                ? const ZakatCalculatorScreen()
+                : PillarDetailScreen(
+                    title: pillar['title'] as String,
+                    description: pillar['description'] as String,
+                    guide: guide,
+                  ),
           ),
         ),
         child: Container(
@@ -142,9 +148,15 @@ class _PillarCard extends StatelessWidget {
               Container(width: 22, height: 1, color: AppColors.goldRule),
               const SizedBox(height: 8),
               Text(
-                guide == null ? S.comingSoon : S.stepByStep,
+                pillar['calculator'] == true
+                    ? S.zakatCalculator
+                    : guide == null
+                        ? S.comingSoon
+                        : S.stepByStep,
                 style: AppText.caption.copyWith(
-                  color: guide == null ? AppColors.textFaint : AppColors.gold,
+                  color: guide == null && pillar['calculator'] != true
+                      ? AppColors.textFaint
+                      : AppColors.gold,
                 ),
               ),
             ],
