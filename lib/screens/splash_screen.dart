@@ -45,6 +45,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       // the user may not read. It is asked only once; after that the saved
       // answer decides where they land.
       final Widget nextScreen;
+      bool pushAdminOnTop = false;
       if (!AppLanguageController.instance.hasChosenLanguage) {
         nextScreen = const LanguageSelectionScreen();
       } else {
@@ -52,7 +53,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         if (role == null) {
           nextScreen = const RoleSelectionScreen();
         } else if (role == 'admin') {
-          nextScreen = const AdminLoginScreen();
+          // Home underneath, admin login on top - same reason as in the role
+          // screen: an admin landing directly on a login with nothing beneath it
+          // had no way back except closing the app.
+          nextScreen = const HomeScreen();
+          pushAdminOnTop = true;
         } else {
           nextScreen = const HomeScreen();
         }
@@ -61,6 +66,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => nextScreen),
       );
+      if (pushAdminOnTop) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
+        );
+      }
     });
   }
 

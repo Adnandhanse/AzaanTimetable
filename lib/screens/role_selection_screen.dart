@@ -43,11 +43,26 @@ class RoleSelectionScreen extends StatelessWidget {
   Future<void> _choose(BuildContext context, String role) async {
     await _save(role);
     if (!context.mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            role == 'admin' ? const AdminLoginScreen() : const HomeScreen(),
-      ),
+    final NavigatorState nav = Navigator.of(context);
+
+    if (role == 'admin') {
+      // PUSHED, NOT REPLACED, so back returns HERE.
+      //
+      // This used to pushReplacement, which left nothing beneath the admin
+      // login: pressing back exited the app. Someone who tapped the wrong card
+      // had to kill the app and reopen it to change their mind.
+      //
+      // Pushing keeps this screen underneath, so the login's AppBar gets a real
+      // back arrow and it comes back to the choice.
+      await nav.push(
+        MaterialPageRoute<void>(builder: (_) => const AdminLoginScreen()),
+      );
+      return;
+    }
+
+    nav.pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -109,6 +124,17 @@ class RoleSelectionScreen extends StatelessWidget {
                   : 'You can use both later — this only decides where you start.',
               textAlign: TextAlign.center,
               style: AppText.caption.copyWith(color: AppColors.textFaint),
+            ),
+            const SizedBox(height: 10),
+            // So this screen is not a dead end either. Reachable again from
+            // Settings if someone changes their mind later.
+            TextButton(
+              onPressed: () => _choose(context, 'user'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.textMuted),
+              child: Text(
+                urdu ? 'ابھی چھوڑ دیں' : 'Skip for now',
+                style: AppText.caption.copyWith(color: AppColors.textMuted),
+              ),
             ),
           ],
         ),

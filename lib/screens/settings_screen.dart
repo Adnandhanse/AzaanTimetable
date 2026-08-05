@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
+import 'role_selection_screen.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
 import '../services/app_strings.dart';
@@ -57,6 +58,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),
+          ),
+          const Divider(),
+          // So the role choice is changeable. It is asked once at first launch;
+          // without this, someone who picked wrong could only change it by
+          // reinstalling.
+          ListTile(
+            leading: const Icon(Icons.switch_account_outlined,
+                color: AppColors.emerald),
+            title: Text(S.isUrdu ? 'استعمال کا طریقہ' : 'How you use the app'),
+            subtitle: Text(S.isUrdu
+                ? 'نمازی یا مسجد کا ذمہ دار'
+                : 'Switch between worshipper and masjid admin'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+            ),
           ),
           const Divider(),
           // Put the diagnostics first. When alarms miss, this is the screen

@@ -1,82 +1,46 @@
-v42 - 6 files
-=============
+v44 - 4 files - NO WAY BACK FROM ADMIN
+======================================
 
-  lib/screens/role_selection_screen.dart    NEW  user or masjid admin
-  lib/screens/splash_screen.dart                 routes through it
-  lib/screens/language_selection_screen.dart     routes through it
-  lib/widgets/artwork_header.dart                scrim fixed
-  lib/screens/home_screen.dart                   label + quick actions
-  lib/screens/quran_home_screen.dart             image no longer cropped
+  lib/screens/role_selection_screen.dart
+  lib/screens/splash_screen.dart
+  lib/screens/settings_screen.dart
+  lib/screens/home_screen.dart        (v43 build fix included)
 
-Overwrite all six. Apply AFTER v41. No new package.
+Overwrite all four. Apply AFTER v42. No new package.
 
 =====================================================================
-1. THE MISSING TEXT ON THE IMAGE - MY BUG
+THE BUG
 =====================================================================
-Your screenshot shows the photograph with no masjid name, no address, no
-directions button. They were being rendered the entire time. They were white
-text over the brightest part of that picture - pale marble and a golden sunset -
-with only a gentle scrim behind them.
+Choosing "I manage a masjid" used pushReplacement, which REPLACED the role
+screen with the admin login. Nothing was left beneath it, so back exited the app.
 
-I tuned that scrim against the NIGHT sky, where white on dark needs almost
-nothing. On a bright masjid photo it did nothing at all, and the text was white
-on near-white.
+Anyone who tapped the wrong card had to kill the app and reopen it - and on
+reopening, the saved role sent them straight back to the admin login. A dead end
+they could not get out of without reinstalling.
 
-Fixed: the scrim is now near-opaque at the top and fades out by two thirds down.
-A scrim that has to work at BOTH ends of the range has to be strong enough for
-the brightest case. The picture loses a strip at the top; the text becomes
-readable on every masjid photo instead of only the dark ones. That is the right
-trade.
-
+=====================================================================THREE FIXES
 =====================================================================
-2. UPCOMING PRAYER
-=====================================================================
-When I compacted this block in v41 I dropped the "NEXT PRAYER" label, leaving a
-bare time with nothing saying what it was. Restored, above the time.
+1. THE ADMIN ROUTE IS NOW PUSHED, NOT REPLACED
+   The role screen stays underneath, so the admin login's AppBar shows a real
+   back arrow and back returns to the choice - the page you asked for.
 
-The calculation itself was correct - 5:40 Asr at 3:33 really is 2h 6m away.
+2. A SAVED ADMIN ROLE LANDS ON HOME WITH THE LOGIN ON TOP
+   On later launches the role screen is not in play, so Home becomes the root and
+   the admin login sits above it. Back goes to Home rather than out of the app.
+   Admins still start in the admin flow.
 
-=====================================================================
-3. QIBLA AND NEARBY MASJID BOXES
-=====================================================================
-They were sized by their contents, so "Find Qibla Direction" wrapped onto two
-lines and grew taller than "Nearby Masjid" next to it. Visibly lopsided, exactly
-as in your screenshot.
+3. THE ROLE CHOICE IS CHANGEABLE
+   Settings > "How you use the app" reopens it. Asked once at first launch;
+   without this, picking wrong could only be undone by reinstalling.
 
-Both are now a fixed 86px with the label centred. They will stay matched
-whatever the labels say, including in Urdu where the lengths differ again.
+   Also added "Skip for now" on the role screen itself, so that screen is not a
+   dead end either.
 
 =====================================================================
-4. QURAN IMAGE CUT OFF
+ALSO INCLUDED
 =====================================================================
-The box was a fixed 196px tall with BoxFit.cover. The artwork is 1.702:1; the box
-on a typical phone is about 1.84:1. Cover fills the width, overflows vertically,
-and crops the top and bottom - the lanterns and the base of the stand.
+The v43 build fix - the duplicated _prayerTimesList and _quickAction in
+home_screen.dart.
 
-Now wrapped in AspectRatio(1.70), so the box is the same shape as the picture.
-Nothing to crop, nothing letterboxed, and the height follows screen width instead
-of being guessed:
-
-    360dp wide -> 212dp tall     390dp -> 229dp     412dp -> 242dp
-
-=====================================================================
-5. NEW - ROLE SELECTION AT FIRST LAUNCH
-=====================================================================
-    Language  ->  Role  ->  the app
-
-  "I am here to pray"        -> Home. Follow a masjid, azan alarm, Quran,
-                                Hadith, Qibla.
-  "I manage a masjid"        -> Admin login, from where a masjid is registered.
-
-Role is asked AFTER language, so the two choices are not both presented in a
-language the user may not read. Asked once; the saved answer decides where they
-land afterwards.
-
-IT IS NOT A LOCK. Both routes stay reachable - the Masjid Admin tab is still
-there for users, and admins still get the full app. Someone can be both, and a
-mistaken tap here should not shut anyone out of half the app. The screen says so.
-
-Note: the admin route goes to AdminLoginScreen, which is where masjid
-registration is reached from. If you would rather it open the registration form
-directly for a first-time admin, that is a one-line change - tell me which you
-prefer.
+And the duplicate-declaration scan I promised is now part of what I run before
+packaging. It passes on all 60 Dart files in this build.
