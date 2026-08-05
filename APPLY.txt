@@ -1,81 +1,78 @@
-v38 - 5 files - ZAKAT CALCULATOR
-================================
+v40 - 3 files - ALL SIX GUIDES
+==============================
 
-  lib/services/zakat_service.dart          NEW  rates, purity, the maths
-  lib/screens/zakat_calculator_screen.dart NEW  the screen
-  lib/services/app_strings.dart                 English + Urdu labels
-  lib/screens/prayers_home_screen.dart          Zakat card opens the calculator
-  lib/data/ibadat_content.dart                  (v37 - no Daif citations)
+  lib/data/ibadat_content.dart          Shahadah, Roza, Zakat, Hajj, Umrah added
+  lib/screens/zakat_home_screen.dart    NEW  the Zakat fork
+  lib/screens/prayers_home_screen.dart  six items wired
 
-Overwrite all five. NO NEW PACKAGE.
+Overwrite all three. Apply AFTER v39. No new package.
 
 =====================================================================
-BOTH NISABS, USER SELECTS
+ZAKAT NOW HAS BOTH, AS YOU ASKED
 =====================================================================
-  Silver Nisab (595g)  |  Gold Nisab (85g)
+Tapping Zakat opens a fork:
 
-Radio buttons, no default assumption beyond starting on silver. The two are NOT
-equivalent, and the difference is not small. Worked example, verified:
+    Zakat Calculator   ->  gold, silver, cash, nisab, 2.5%
+    Related Hadith     ->  importance, and the warning for withholding it
 
-  Rates: gold 7000/g (24K), silver 90/g (999)
-  Holdings: 50g of 22K gold, 500g of 999 silver, 100000 cash, 50000 debts
-  Net assets: 415,788
+The card reads "Calculator + hadith" so it is clear before you tap.
 
-  SILVER NISAB  threshold  53,550  ->  APPLICABLE, zakat 10,394.71
-  GOLD NISAB    threshold 595,000  ->  NOT APPLICABLE, zakat 0
-
-Same assets, opposite answer. Which is why this is a radio button and not a
-constant.
-
-Your figures (595g / 85g) are used. Other published figures exist - 612.36g and
-87.48g - and if your aalim wants those, they are two numbers in NisabBasisX.
+Zakat is the only pillar with two halves that do not belong on one screen.
+Forcing it to behave like the others would have meant burying the calculator in
+a hadith list, or dropping someone into a calculator with no explanation of why.
 
 =====================================================================
-TWO CORRECTIONS TO YOUR SPEC
+67 CITATIONS, ALL VERIFIED
 =====================================================================
-1. SILVER HAS NO KARAT. Karat is a gold measure. Silver is graded by purity, and
-   a jeweller's receipt says 999, 925 or 900. So:
-       Gold   -> 24K (999) / 22K (916) / 21K (875) / 18K (750)
-       Silver -> 999 (fine) / 925 (sterling) / 900
+Across all six guides. Every one checked to exist, to have non-empty text, and
+to carry no Daif grading:
 
-2. PURITY IS APPLIED TO THE VALUE. 50g of 22K gold is 45.83g of gold, so it is
-   worth 320,833 at a 7000 pure rate, not 350,000. Valuing jewellery at the 24K
-   rate would overstate what is owed by 8%.
+    Bukhari 25 | Muslim 21 | Abu Dawud 9 | Tirmidhi 4 | Ibn Majah 4 | Nasa'i 4
 
-=====================================================================
-LIVE RATES - WHY THEY ARE NOT WIRED YET
-=====================================================================
-You asked for a daily live call. I have not shipped one, and I want to be
-straight about why: my environment cannot reach any metals API, so any endpoint
-I wired in would be UNTESTED. Untested network code fails at the worst possible
-moment - while someone is calculating a financial obligation - and it fails
-silently.
-
-So: the user enters today's gold and silver rate once, it is cached with the
-date, and the card shows how old it is. Over a day old and it says so in
-amber. Works offline, no API key, no subscription, no new package.
-
-TO ADD LIVE RATES: implement MetalRateService.fetchLive() to return one gram of
-PURE metal and nothing else changes - the screen already calls it first and
-falls back to the stored rate. KEEP the manual path as the fallback; it is what
-makes the calculator dependable when a provider is down or a key expires.
+New ones this round, all graded and passing:
+    Shahadah   Bukhari 8, 4477 | Muslim 111, 136, 257
+    Roza       Bukhari 1894, 1896, 1923, 1957 | Muslim 2549, 2554, 2705
+               Abu Dawud 2357 (Hasan, all four graders)
+    Zakat      Muslim 2290 | Bukhari 8 | Muslim 111
+    Hajj       Bukhari 8, 1521, 1549, 1773, 1820 | Muslim 2811, 3289
+               Tirmidhi 889 | Nasa'i 3016 | Ibn Majah 3015  (all Sahih)
+    Umrah      Bukhari 1773, 1782, 2811 | Muslim 3289 | Tirmidhi 939
 
 =====================================================================
-BILINGUAL, AS SPECIFIED
+THE IFTAR DUA - THE TEXT CHANGED, NOT JUST THE CITATION
 =====================================================================
-  Zakat Applicable        زکوٰۃ لاگو ہوتی ہے
-  Zakat Not Applicable    زکوٰۃ لاگو نہیں ہوتی
+You approved Abu Dawud 2357. That hadith does NOT contain the dua you originally
+supplied. It contains a different one, so I used ITS wording:
 
-Every label is localised - nisab, gold, silver, cash, liabilities, grams,
-purity, karat, rate per gram, net assets, nisab value, zakat due.
+    ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ
+    "Thirst has gone, the arteries are moist, and the reward is sure, if Allah
+     wills."
 
-No currency symbol anywhere. The rate the user typed is in their own currency
-and the app has no business guessing which.
+Putting 2357 beside "Allahumma inni laka sumtu" would have been citing a hadith
+that does not contain those words. If you wanted your original wording kept, say
+so - it ships uncited, like the sehri dua.
 
 =====================================================================
-STILL WAITING ON THE ROZA DUAS
+THE SEHRI DUA SHIPS UNCITED
 =====================================================================
-Sehri dua: in NONE of the six books, so it ships with no citation.
-Iftar dua: yours is Daif in all four gradings. Abu Dawud 2357 is the Hasan
-alternative. Tell me which and I will build Shahadah, Roza, Hajj and Umrah in
-one pass.
+"Wa bisawmi ghadin nawaytu" is in none of the six books - searched all six, zero
+matches. So no Evidence section on that step, per your instruction.
+
+The hadith about the blessing in sahur IS real and appears under "Roze Ki
+Ahmiyat", where it belongs: it establishes taking sahur, not that particular
+wording.
+
+=====================================================================
+UMRAH IS NOT IN THE PILLARS GRID
+=====================================================================
+It has its own section, headed "Also" / "مزید", below the five.
+
+Umrah is not one of the five pillars, and putting a sixth card in a grid headed
+"Five Pillars" would have said it was. Small thing, but it is the kind of small
+thing this app should not get wrong.
+
+=====================================================================
+STILL A DRAFT
+=====================================================================
+Every guide shows the DRAFT banner. Six guides, 67 citations, and the Urdu
+chapter titles are all now ready for your aalim in one pass.

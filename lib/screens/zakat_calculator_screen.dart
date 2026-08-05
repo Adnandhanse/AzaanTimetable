@@ -81,58 +81,135 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
   }
 
   Future<void> _editRates() async {
+    final r = _rates;
     final gold = TextEditingController(
-        text: _rates == null ? '' : _rates!.goldPerGram.toStringAsFixed(2));
+        text: r?.goldEnteredRate?.toStringAsFixed(2) ??
+            r?.goldPerGram.toStringAsFixed(2) ??
+            '');
     final silver = TextEditingController(
-        text: _rates == null ? '' : _rates!.silverPerGram.toStringAsFixed(2));
+        text: r?.silverEnteredRate?.toStringAsFixed(2) ??
+            r?.silverPerGram.toStringAsFixed(2) ??
+            '');
+    GoldKarat karat = r?.goldEnteredKarat ?? GoldKarat.k24;
+    SilverPurity purity = r?.silverEnteredPurity ?? SilverPurity.fine999;
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(S.todaysRates,
-            style: AppText.rowTitle.copyWith(color: AppColors.emerald)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: gold,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                  labelText: '${S.goldLabel} \u2014 24K ${S.ratePerGram}'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          // Live readout of the pure-metal equivalent. A jeweller quotes 22K;
+          // the maths needs 24K. Showing the conversion means the user can see
+          // it is being handled rather than wondering whether to convert first.
+          final double? gq = double.tryParse(gold.text.trim());
+          final double? sq = double.tryParse(silver.text.trim());
+
+          return AlertDialog(
+            title: Text(S.todaysRates,
+                style: AppText.rowTitle.copyWith(color: AppColors.emerald)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${S.goldLabel} \u2014 ${S.ratePerGram}',
+                      style: AppText.eyebrow
+                          .copyWith(color: AppColors.textMuted)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: gold,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (_) => setDialogState(() {}),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<GoldKarat>(
+                    value: karat,
+                    isDense: true,
+                    decoration: InputDecoration(labelText: S.rateIsFor),
+                    items: GoldKarat.values
+                        .map((k) => DropdownMenuItem(
+                            value: k,
+                            child: Text(k.label, style: AppText.body)))
+                        .toList(),
+                    onChanged: (v) => setDialogState(() => karat = v!),
+                  ),
+                  if (gq != null && gq > 0 && karat != GoldKarat.k24)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        '${S.pureEquivalent}: ${_money(MetalRates.toPureGold(gq, karat))} / g (24K)',
+                        style: AppText.caption
+                            .copyWith(color: AppColors.emerald),
+                      ),
+                    ),
+
+                  const SizedBox(height: 18),
+                  Text('${S.silverLabel} \u2014 ${S.ratePerGram}',
+                      style: AppText.eyebrow
+                          .copyWith(color: AppColors.textMuted)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: silver,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (_) => setDialogState(() {}),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<SilverPurity>(
+                    value: purity,
+                    isDense: true,
+                    decoration: InputDecoration(labelText: S.rateIsFor),
+                    items: SilverPurity.values
+                        .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(p.label, style: AppText.body)))
+                        .toList(),
+                    onChanged: (v) => setDialogState(() => purity = v!),
+                  ),
+                  if (sq != null && sq > 0 && purity != SilverPurity.fine999)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        '${S.pureEquivalent}: ${_money(MetalRates.toPureSilver(sq, purity))} / g (999)',
+                        style: AppText.caption
+                            .copyWith(color: AppColors.emerald),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: silver,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                  labelText: '${S.silverLabel} \u2014 999 ${S.ratePerGram}'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel')),
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(S.save)),
-        ],
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: Text(S.save)),
+            ],
+          );
+        },
       ),
     );
 
     if (saved != true) return;
     final g = double.tryParse(gold.text.trim());
-    final s = double.tryParse(silver.text.trim());
-    if (g == null || s == null || g <= 0 || s <= 0) return;
+    final sv = double.tryParse(silver.text.trim());
+    if (g == null || sv == null || g <= 0 || sv <= 0) return;
 
-    final r = MetalRates(
-      goldPerGram: g,
-      silverPerGram: s,
+    final rates = MetalRates(
+      // Normalised to pure on the way in, so every later calculation works off
+      // one consistent basis.
+      goldPerGram: MetalRates.toPureGold(g, karat),
+      silverPerGram: MetalRates.toPureSilver(sv, purity),
       updated: DateTime.now(),
       source: 'manual',
+      goldEnteredRate: g,
+      goldEnteredKarat: karat,
+      silverEnteredRate: sv,
+      silverEnteredPurity: purity,
     );
-    await MetalRateService.save(r);
-    if (mounted) setState(() => _rates = r);
+    await MetalRateService.save(rates);
+    if (mounted) setState(() => _rates = rates);
   }
 
   @override
@@ -314,55 +391,131 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
 
   Widget _resultCard(ZakatResult r) {
     final bool due = r.isApplicable;
-    return Container(
-      decoration: BoxDecoration(
-        color: due ? AppColors.emerald : AppColors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: due ? AppColors.gold : AppColors.goldRule),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            due
-                ? '\u2705 ${S.zakatApplicable}'
-                : '\u274C ${S.zakatNotApplicable}',
-            style: AppText.rowTitle.copyWith(
-                fontSize: 17, color: due ? AppColors.white : AppColors.textMid),
+    return Column(
+      children: [
+        // Breakdown first, on its own light card. It answers "where did that
+        // number come from", which is the question anyone checks before
+        // trusting a figure they are about to act on.
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.goldRule),
           ),
-          const SizedBox(height: 12),
-          _line(S.netAssets, _money(r.netAssets), due),
-          _line(S.nisabValue, _money(r.nisabValue), due),
-          if (due) ...[
-            const SizedBox(height: 8),
-            Container(height: 1, color: AppColors.gold.withOpacity(0.4)),
-            const SizedBox(height: 8),
-            Text(S.zakatDue,
-                style: AppText.eyebrow.copyWith(color: AppColors.goldPale)),
-            Text(_money(r.zakatDue),
-                style: AppText.hero
-                    .copyWith(fontSize: 34, color: AppColors.white)),
-          ],
-        ],
-      ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(S.breakdown,
+                        style: AppText.rowTitle
+                            .copyWith(fontSize: 15, color: AppColors.text)),
+                  ),
+                  Text(S.zakatOnThis,
+                      style: AppText.eyebrow
+                          .copyWith(color: AppColors.textMuted)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _row(S.goldLabel, r.goldValue, r.shareOf(r.goldValue), due),
+              _row(S.silverLabel, r.silverValue, r.shareOf(r.silverValue), due),
+              _row(S.cashLabel, r.cash, r.shareOf(r.cash), due),
+              const SizedBox(height: 6),
+              Container(height: 1, color: AppColors.goldRuleFaint),
+              const SizedBox(height: 6),
+              _row(S.totalAssets, r.grossAssets, null, due, bold: true),
+              if (r.liabilities > 0)
+                _row(S.lessLiabilities, -r.liabilities, null, due),
+              const SizedBox(height: 6),
+              Container(height: 1, color: AppColors.goldRuleFaint),
+              const SizedBox(height: 6),
+              _row(S.netAssets, r.netAssets, null, due, bold: true),
+              _row(S.nisabValue, r.nisabValue, null, due),
+              const SizedBox(height: 10),
+              Text(S.breakdownNote,
+                  style:
+                      AppText.caption.copyWith(color: AppColors.textFaint)),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: due ? AppColors.emerald : AppColors.white,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: due ? AppColors.gold : AppColors.goldRule),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                due
+                    ? '\u2705 ${S.zakatApplicable}'
+                    : '\u274C ${S.zakatNotApplicable}',
+                style: AppText.rowTitle.copyWith(
+                    fontSize: 17,
+                    color: due ? AppColors.white : AppColors.textMid),
+              ),
+              if (due) ...[
+                const SizedBox(height: 10),
+                Text(S.zakatDue,
+                    style:
+                        AppText.eyebrow.copyWith(color: AppColors.goldPale)),
+                Text(_money(r.zakatDue),
+                    style: AppText.hero
+                        .copyWith(fontSize: 34, color: AppColors.white)),
+              ] else ...[
+                const SizedBox(height: 6),
+                Text(
+                  '${S.netAssets} ${_money(r.netAssets)}  \u00b7  ${S.nisabValue} ${_money(r.nisabValue)}',
+                  style:
+                      AppText.caption.copyWith(color: AppColors.textMuted),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _line(String label, String value, bool onEmerald) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
+  /// One breakdown line: label, value, and its 2.5% share when zakat applies.
+  Widget _row(String label, double value, double? share, bool due,
+          {bool bold = false}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 5),
         child: Row(
           children: [
             Expanded(
               child: Text(label,
-                  style: AppText.caption.copyWith(
-                      color: onEmerald
-                          ? AppColors.onEmeraldMuted
-                          : AppColors.textMuted)),
+                  style: bold
+                      ? AppText.body.copyWith(
+                          color: AppColors.text, fontWeight: FontWeight.w600)
+                      : AppText.caption.copyWith(color: AppColors.textMuted)),
             ),
-            Text(value,
-                style: AppText.body.copyWith(
-                    color: onEmerald ? AppColors.white : AppColors.text)),
+            SizedBox(
+              width: 96,
+              child: Text(_money(value),
+                  textAlign: TextAlign.right,
+                  style: bold
+                      ? AppText.body.copyWith(
+                          color: AppColors.text, fontWeight: FontWeight.w600)
+                      : AppText.body.copyWith(color: AppColors.text)),
+            ),
+            SizedBox(
+              width: 84,
+              child: Text(
+                share == null || !due || value <= 0 ? '' : _money(share),
+                textAlign: TextAlign.right,
+                style: AppText.caption.copyWith(color: AppColors.emerald),
+              ),
+            ),
           ],
         ),
       );

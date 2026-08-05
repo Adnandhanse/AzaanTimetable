@@ -346,4 +346,358 @@ class IbadatContent {
       ),
     ],
   );
+
+  // ===========================================================================
+  // SHAHADAH
+  // ===========================================================================
+  static const IbadatGuide shahadah = IbadatGuide(
+    pillar: 'Shahadah',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Shahadah Kya Hai?',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Kalima Tayyiba',
+            arabic: 'لَا إِلٰهَ إِلَّا اللّٰهُ مُحَمَّدٌ رَسُولُ اللّٰهِ',
+            translation:
+                'There is no deity worthy of worship except Allah, and Muhammad \u0637 is the Messenger of Allah.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 8,
+                  note: 'Ibn Umar: Islam is built on five'),
+              HadithRef(book: HadithBook.muslim, number: 111,
+                  note: 'Ibn Umar: the five on which Islam is based'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Shahadah Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Islam Ka Pehla Rukn',
+            method: 'Islam ki bunyaad Shahadah par hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 8,
+                  note: 'The first of the five'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Jannat Ki Kunji',
+            method:
+                'Jo ikhlas ke saath Shahadah par mare uske liye Jannat ki basharat hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.muslim, number: 136,
+                  note: 'Uthman: he who dies affirming it'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Tawheed Ka Iqrar',
+            method: 'Allah ko akela mabood maan lena.',
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Shahadah Ke Mukhalif',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Shirk',
+            method: 'Allah ke saath kisi ko shareek karna.',
+            keyPoint:
+                'Poocha gaya: sabse bada gunah kaunsa hai? Farmaya: Allah ke saath shareek thehrana.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 4477,
+                  note: 'Abdullah: the greatest sin in the sight of Allah'),
+              HadithRef(book: HadithBook.muslim, number: 257,
+                  note: 'Abdullah: which sin is the gravest'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // ROZA
+  // ===========================================================================
+  static const IbadatGuide roza = IbadatGuide(
+    pillar: 'Roza',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Roze Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Roza Dhal Hai',
+            method: 'Roza gunahon aur jahannam se bachane wali dhal hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1894,
+                  note: 'Abu Huraira: fasting is a shield'),
+              HadithRef(book: HadithBook.muslim, number: 2705,
+                  note: 'Abu Huraira: fasting is a shield'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Rayyan Ka Darwaza',
+            method: 'Jannat mein rozedaron ke liye khaas darwaza.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1896,
+                  note: 'Sahl: a gate in Paradise called Ar-Rayyan'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Sehri Mein Barkat Hai',
+            method: 'Sehri karna Sunnat hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1923,
+                  note: 'Anas: take suhur, there is a blessing in it'),
+              HadithRef(book: HadithBook.muslim, number: 2549,
+                  note: 'Anas: take the meal before dawn'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Roze Ka Tareeqa',
+        steps: <IbadatStep>[
+          // NO CITATION HERE, DELIBERATELY. This niyyah wording is not in any of
+          // the six books — searched all six for "wa bisawmi ghadin nawaytu",
+          // zero matches. Citing Bukhari or Muslim beside it would imply it
+          // comes from them. The hadith about the blessing in sahur is real and
+          // sits in the section above, where it belongs.
+          IbadatStep(
+            title: 'Sehri',
+            arabic: 'وَبِصَوْمِ غَدٍ نَوَيْتُ مِنْ شَهْرِ رَمَضَانَ',
+            translation: 'I intend to keep the fast for tomorrow in Ramadan.',
+          ),
+          IbadatStep(
+            title: 'Roza Rakhna',
+            method:
+                'Subah Sadiq se Maghrib tak khana, peena aur jima se ruk jana.',
+          ),
+          // The dua here is the one Abu Dawud 2357 ACTUALLY contains. The more
+          // commonly printed "Allahumma inni laka sumtu" appears only at Abu
+          // Dawud 2358, which all four graders call Daif.
+          IbadatStep(
+            title: 'Iftar',
+            arabic:
+                'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
+            translation:
+                'Thirst has gone, the arteries are moist, and the reward is sure, if Allah wills.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.abudawud, number: 2357,
+                  note: 'Ibn Umar: what he said when breaking the fast'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Iftar Mein Jaldi',
+            method: 'Iftar mein jaldi karna behtar hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1957,
+                  note: 'Sahl: people remain on the right path while they hasten it'),
+              HadithRef(book: HadithBook.muslim, number: 2554,
+                  note: 'Sahl b. Sa\u2018d: hastening the breaking of the fast'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // ZAKAT — the hadith side. The calculator is a separate screen.
+  // ===========================================================================
+  static const IbadatGuide zakat = IbadatGuide(
+    pillar: 'Zakat',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Zakat Kya Hai?',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Ta\u2018aruf',
+            method:
+                'Maal ka muqarrar hissa Allah ke hukm se mustahiq logon ko dena.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 8,
+                  note: 'Zakat among the five on which Islam is built'),
+              HadithRef(book: HadithBook.muslim, number: 111,
+                  note: 'The five on which Islam is based'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Zakat Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Islam Ka Teesra Rukn',
+            method: 'Zakat Islam ke paanch arkaan mein se hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 8,
+                  note: 'Ibn Umar: Islam is built on five'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Maal Ko Paak Karti Hai',
+            method: 'Zakat maal ko paak karti hai aur barkat ka sabab hai.',
+          ),
+          IbadatStep(
+            title: 'Gareebon Ka Haq',
+            method: 'Zakat mustahiqeen ka haq hai, ehsan nahi.',
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Zakat Na Dene Par Wa\u2018eed',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Wa\u2018eed',
+            method:
+                'Jisne sona-chandi jama kiya aur uski zakat na di, Qayamat ke din us maal se azab diya jayega.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.muslim, number: 2290,
+                  note: 'Abu Huraira: the owner of gold and silver who does not pay'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // HAJJ
+  // ===========================================================================
+  static const IbadatGuide hajj = IbadatGuide(
+    pillar: 'Hajj',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Hajj Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Hajj Mabroor Ka Badla Jannat',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1773,
+                  note: 'Abu Huraira: hajj mabroor has no reward but Paradise'),
+              HadithRef(book: HadithBook.muslim, number: 3289,
+                  note: 'Abu Huraira: the accepted hajj'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Gunahon Se Paak Ho Kar Lautna',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1521,
+                  note: 'Returns like the day his mother bore him'),
+              HadithRef(book: HadithBook.bukhari, number: 1820,
+                  note: 'Whoever performs hajj to this Kaaba'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Islam Ka Panchwa Rukn',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 8,
+                  note: 'Hajj among the five'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Hajj Ka Tareeqa',
+        steps: <IbadatStep>[
+          IbadatStep(title: 'Ihram',
+              method: 'Ihram bandhna aur mahdood cheezon se ruk jana.'),
+          IbadatStep(
+            title: 'Talbiyah',
+            arabic: 'لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ',
+            translation: 'Here I am, O Allah, here I am.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1549,
+                  note: 'Ibn Umar: the talbiyah of the Messenger of Allah'),
+              HadithRef(book: HadithBook.muslim, number: 2811,
+                  note: 'Ibn Umar: the wording of the talbiyah'),
+            ],
+          ),
+          IbadatStep(title: 'Tawaf', method: 'Kaaba ke saat chakkar.'),
+          IbadatStep(title: 'Sa\u2018i',
+              method: 'Safa aur Marwah ke darmiyan saat chakkar.'),
+          IbadatStep(title: 'Mina', method: '8 Zilhajj ko Mina mein qiyam.'),
+          IbadatStep(
+            title: 'Arafah',
+            method: 'Hajj ka sabse aham rukn — 9 Zilhajj ko Arafah mein wuquf.',
+            keyPoint: '"Hajj Arafah hai."',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.tirmidhi, number: 889,
+                  note: 'Abdur-Rahman b. Ya\u2018mar: hajj is Arafah'),
+              HadithRef(book: HadithBook.nasai, number: 3016,
+                  note: 'Abdur-Rahman b. Ya\u2018mar at Arafat'),
+              HadithRef(book: HadithBook.ibnmajah, number: 3015,
+                  note: 'Abdur-Rahman b. Ya\u2018mar Dili'),
+            ],
+          ),
+          IbadatStep(title: 'Muzdalifah', method: 'Raat Muzdalifah mein guzarna.'),
+          IbadatStep(title: 'Rami', method: 'Jamrat par kankariyan marna.'),
+          IbadatStep(title: 'Qurbani', method: 'Qurbani karna.'),
+          IbadatStep(title: 'Halq / Qasr', method: 'Sar mundwana ya baal katwana.'),
+          IbadatStep(title: 'Tawaf-e-Ziyarah',
+              method: 'Tawaf-e-Ziyarah — Hajj ka rukn.'),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // UMRAH
+  // ===========================================================================
+  static const IbadatGuide umrah = IbadatGuide(
+    pillar: 'Umrah',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Umrah Ka Tareeqa',
+        steps: <IbadatStep>[
+          IbadatStep(title: 'Ihram', method: 'Ihram bandhna.'),
+          IbadatStep(
+            title: 'Talbiyah',
+            arabic: 'لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ',
+            translation: 'Here I am, O Allah, here I am.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1549,
+                  note: 'Ibn Umar: the talbiyah'),
+              HadithRef(book: HadithBook.muslim, number: 2811,
+                  note: 'Ibn Umar: the wording of the talbiyah'),
+            ],
+          ),
+          IbadatStep(title: 'Tawaf', method: 'Kaaba ke saat chakkar.'),
+          IbadatStep(title: 'Sa\u2018i',
+              method: 'Safa aur Marwah ke darmiyan saat chakkar.'),
+          IbadatStep(title: 'Halq / Qasr', method: 'Baal katwana.'),
+        ],
+      ),
+      IbadatSection(
+        title: 'Umrah Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Ek Umrah Se Doosre Umrah Tak Kaffarah',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1773,
+                  note: 'Abu Huraira: umrah is an expiation for what is between'),
+              HadithRef(book: HadithBook.muslim, number: 3289,
+                  note: 'Abu Huraira: from one umrah to the next'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Ramadan Mein Umrah',
+            method: 'Ramadan mein Umrah ka ajar Hajj ke barabar bataya gaya.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1782,
+                  note: 'Ibn Abbas: what the Prophet said to Umm Sinan'),
+              HadithRef(book: HadithBook.tirmidhi, number: 939,
+                  note: 'Umm Ma\u2018qil: umrah in Ramadan is equal to hajj'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }

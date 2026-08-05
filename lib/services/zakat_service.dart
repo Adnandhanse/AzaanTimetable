@@ -24,36 +24,82 @@ class MetalRates {
     required this.silverPerGram,
     required this.updated,
     required this.source,
+    this.goldEnteredRate,
+    this.goldEnteredKarat,
+    this.silverEnteredRate,
+    this.silverEnteredPurity,
   });
 
-  /// Price of ONE GRAM of pure (24k / 999) metal.
+  /// Price of ONE GRAM OF PURE metal — 24K gold, 999 silver. Everything is
+  /// computed from this, so it is stored normalised.
   final double goldPerGram;
   final double silverPerGram;
 
+  /// What the user actually typed, and which karat/purity they typed it for.
+  ///
+  /// Kept so the dialog can show their own number back to them. Jewellers in
+  /// India quote 22K, so asking only for a 24K rate forces people to do a
+  /// conversion in their head before they can even start — and a mistake there
+  /// silently changes the zakat.
+  final double? goldEnteredRate;
+  final GoldKarat? goldEnteredKarat;
+  final double? silverEnteredRate;
+  final SilverPurity? silverEnteredPurity;
+
   final DateTime updated;
 
-  /// 'manual' or 'live'. Shown to the user, because they should know whether
-  /// the number came from them or from a server.
+  /// 'manual' or 'live'.
   final String source;
 
   bool get isStale => DateTime.now().difference(updated).inHours >= 24;
-
   int get ageInDays => DateTime.now().difference(updated).inDays;
+
+  /// Normalises a quoted rate to a pure-metal rate.
+  ///
+  /// A 22K gram is 0.9167 of a pure gram, so a 22K quote of 6400 implies a pure
+  /// rate of 6400 / 0.9167 = 6981.8. Dividing, not multiplying — getting this
+  /// backwards would understate gold by about 8%.
+  static double toPureGold(double quoted, GoldKarat karat) =>
+      quoted / karat.purity;
+
+  static double toPureSilver(double quoted, SilverPurity purity) =>
+      quoted / purity.purity;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'gold': goldPerGram,
         'silver': silverPerGram,
         'updated': updated.millisecondsSinceEpoch,
         'source': source,
+        'goldEntered': goldEnteredRate,
+        'goldKarat': goldEnteredKarat?.index,
+        'silverEntered': silverEnteredRate,
+        'silverPurity': silverEnteredPurity?.index,
       };
 
   static MetalRates? fromJson(Map<String, dynamic> j) {
     try {
+      // The extra fields are optional so a rate cached by an earlier build,
+      // which only stored the pure values, still loads instead of being thrown
+      // away and silently asking the user to re-enter.
+      GoldKarat? k;
+      final ki = j['goldKarat'];
+      if (ki is int && ki >= 0 && ki < GoldKarat.values.length) {
+        k = GoldKarat.values[ki];
+      }
+      SilverPurity? sp;
+      final si = j['silverPurity'];
+      if (si is int && si >= 0 && si < SilverPurity.values.length) {
+        sp = SilverPurity.values[si];
+      }
       return MetalRates(
         goldPerGram: (j['gold'] as num).toDouble(),
         silverPerGram: (j['silver'] as num).toDouble(),
         updated: DateTime.fromMillisecondsSinceEpoch(j['updated'] as int),
         source: j['source'] as String? ?? 'manual',
+        goldEnteredRate: (j['goldEntered'] as num?)?.toDouble(),
+        goldEnteredKarat: k,
+        silverEnteredRate: (j['silverEntered'] as num?)?.toDouble(),
+        silverEnteredPurity: sp,
       );
     } catch (_) {
       return null;
@@ -192,6 +238,15 @@ class ZakatResult {
 
   /// 2.5% of net assets, or zero when below nisab.
   final double zakatDue;
+
+  double get grossAssets => goldValue + silverValue + cash;
+
+  /// 2.5% of one component, shown as a breakdown.
+  ///
+  /// The obligation is on the NET TOTAL, not on each holding separately — these
+  /// figures are for seeing where the amount comes from, and they only add up to
+  /// [zakatDue] when there are no liabilities. The screen says so.
+  double shareOf(double component) => isApplicable ? component * 0.025 : 0;
 }
 
 class ZakatCalculator {

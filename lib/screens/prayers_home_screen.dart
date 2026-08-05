@@ -5,7 +5,7 @@ import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'pillar_detail_screen.dart';
-import 'zakat_calculator_screen.dart';
+import 'zakat_home_screen.dart';
 
 class PrayersHomeScreen extends StatelessWidget {
   const PrayersHomeScreen({super.key});
@@ -20,6 +20,7 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'شہادت کی اہمیت بیان کرنے والی احادیث۔'
               : 'Hadith explaining the value and meaning of Shahada.',
           'icon': Icons.star_border,
+          'guide': IbadatContent.shahadah,
         },
         {
           'title': S.namaz,
@@ -37,6 +38,7 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'روزے کی دعائیں، اہمیت اور فضیلت پر احادیث۔'
               : 'Duas for fasting, its importance and rewards, and related hadith.',
           'icon': Icons.nightlight_outlined,
+          'guide': IbadatContent.roza,
         },
         {
           'title': S.zakat,
@@ -45,9 +47,10 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'زکوٰۃ کیلکولیٹر اور زکوٰۃ نہ دینے کے نتائج پر احادیث۔'
               : 'Zakat calculator and hadith on the consequences of not giving Zakat.',
           'icon': Icons.calculate_outlined,
-          // Zakat opens the calculator rather than a step guide — its steps are
-          // arithmetic, not actions.
-          'calculator': true,
+          // Zakat opens a fork: the calculator, or the hadith. It is the only
+          // pillar with two halves that do not belong on one screen.
+          'zakat': true,
+          'guide': IbadatContent.zakat,
         },
         {
           'title': S.hajjUmrah,
@@ -56,12 +59,28 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'حج اور عمرہ کا صحیح طریقہ اور متعلقہ احادیث۔'
               : 'The correct way to perform Hajj and Umrah, with related hadith.',
           'icon': Icons.flight_takeoff,
+          'guide': IbadatContent.hajj,
+        },
+      ];
+
+  /// Umrah, deliberately outside the pillars list. It is not one of the five,
+  /// and putting it in a grid headed "Five Pillars" would say it is.
+  static List<Map<String, dynamic>> get _also => [
+        {
+          'title': S.isUrdu ? 'عمرہ' : 'Umrah',
+          'subtitle': S.isUrdu ? 'عمرہ کا طریقہ' : 'Step by step',
+          'description': S.isUrdu
+              ? 'عمرہ کا طریقہ اور متعلقہ احادیث۔'
+              : 'How to perform Umrah, with related hadith.',
+          'icon': Icons.travel_explore,
+          'guide': IbadatContent.umrah,
         },
       ];
 
   @override
   Widget build(BuildContext context) {
     final pillars = _pillars;
+    final also = _also;
 
     return Scaffold(
       appBar: AppBar(title: Text(S.prayers)),
@@ -86,6 +105,23 @@ class PrayersHomeScreen extends StatelessWidget {
             ),
             itemBuilder: (context, i) => _PillarCard(pillar: pillars[i]),
           ),
+          const SizedBox(height: 20),
+          SectionRule(
+              label: S.isUrdu ? 'مزید' : 'Also', trailingDiamond: true),
+          const SizedBox(height: 14),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: also.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.82,
+            ),
+            itemBuilder: (context, i) => _PillarCard(pillar: also[i]),
+          ),
         ],
       ),
     );
@@ -108,8 +144,9 @@ class _PillarCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => pillar['calculator'] == true
-                ? const ZakatCalculatorScreen()
+            builder: (_) => pillar['zakat'] == true
+                ? ZakatHomeScreen(
+                    description: pillar['description'] as String)
                 : PillarDetailScreen(
                     title: pillar['title'] as String,
                     description: pillar['description'] as String,
@@ -148,13 +185,13 @@ class _PillarCard extends StatelessWidget {
               Container(width: 22, height: 1, color: AppColors.goldRule),
               const SizedBox(height: 8),
               Text(
-                pillar['calculator'] == true
-                    ? S.zakatCalculator
+                pillar['zakat'] == true
+                    ? (S.isUrdu ? 'کیلکولیٹر + احادیث' : 'Calculator + hadith')
                     : guide == null
                         ? S.comingSoon
                         : S.stepByStep,
                 style: AppText.caption.copyWith(
-                  color: guide == null && pillar['calculator'] != true
+                  color: guide == null && pillar['zakat'] != true
                       ? AppColors.textFaint
                       : AppColors.gold,
                 ),

@@ -81,6 +81,16 @@ class S {
       'This is an estimate based on the figures you entered. For anything uncertain, ask a scholar.',
       'یہ آپ کے درج کردہ اعداد پر مبنی ایک تخمینہ ہے۔ کسی بھی شک کی صورت میں عالم سے رجوع کریں۔');
   static String get save => _t('Save', 'محفوظ کریں');
+  static String get rateIsFor => _t('This rate is for', 'یہ قیمت اس کے لیے ہے');
+  static String get pureEquivalent => _t('Pure equivalent', 'خالص کے برابر');
+  static String get breakdown => _t('Breakdown', 'تفصیل');
+  static String get valueLabel => _t('Value', 'قیمت');
+  static String get zakatOnThis => _t('Zakat 2.5%', 'زکوٰۃ 2.5%');
+  static String get totalAssets => _t('Total assets', 'کل مالیت');
+  static String get lessLiabilities => _t('Less liabilities', 'واجبات منہا');
+  static String get breakdownNote => _t(
+      'Zakat is due on the net total, not on each holding separately. These lines show where the amount comes from.',
+      'زکوٰۃ خالص کل رقم پر واجب ہے، ہر مال پر الگ نہیں۔ یہ سطریں بتاتی ہیں کہ رقم کہاں سے آئی۔');
 
   static String get stepByStep => _t('Step by step', 'مرحلہ وار');
   static String get comingSoon => _t('Coming soon', 'جلد آ رہا ہے');
