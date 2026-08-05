@@ -1,78 +1,87 @@
-v40 - 3 files - ALL SIX GUIDES
-==============================
+v41 - 4 files
+=============
 
-  lib/data/ibadat_content.dart          Shahadah, Roza, Zakat, Hajj, Umrah added
-  lib/screens/zakat_home_screen.dart    NEW  the Zakat fork
-  lib/screens/prayers_home_screen.dart  six items wired
+  lib/data/ibadat_content.dart            sehri dua removed
+  lib/screens/zakat_calculator_screen.dart totals under each metal
+  lib/widgets/artwork_header.dart          directions on the image
+  lib/screens/home_screen.dart             compacted, duplication removed
 
-Overwrite all three. Apply AFTER v39. No new package.
-
-=====================================================================
-ZAKAT NOW HAS BOTH, AS YOU ASKED
-=====================================================================
-Tapping Zakat opens a fork:
-
-    Zakat Calculator   ->  gold, silver, cash, nisab, 2.5%
-    Related Hadith     ->  importance, and the warning for withholding it
-
-The card reads "Calculator + hadith" so it is clear before you tap.
-
-Zakat is the only pillar with two halves that do not belong on one screen.
-Forcing it to behave like the others would have meant burying the calculator in
-a hadith list, or dropping someone into a calculator with no explanation of why.
+Overwrite all four. Apply AFTER v40. No new package.
 
 =====================================================================
-67 CITATIONS, ALL VERIFIED
+1. SEHRI DUA REMOVED
 =====================================================================
-Across all six guides. Every one checked to exist, to have non-empty text, and
-to carry no Daif grading:
+Gone. It is in none of the six books and there was nothing to cite.
 
-    Bukhari 25 | Muslim 21 | Abu Dawud 9 | Tirmidhi 4 | Ibn Majah 4 | Nasa'i 4
-
-New ones this round, all graded and passing:
-    Shahadah   Bukhari 8, 4477 | Muslim 111, 136, 257
-    Roza       Bukhari 1894, 1896, 1923, 1957 | Muslim 2549, 2554, 2705
-               Abu Dawud 2357 (Hasan, all four graders)
-    Zakat      Muslim 2290 | Bukhari 8 | Muslim 111
-    Hajj       Bukhari 8, 1521, 1549, 1773, 1820 | Muslim 2811, 3289
-               Tirmidhi 889 | Nasa'i 3016 | Ibn Majah 3015  (all Sahih)
-    Umrah      Bukhari 1773, 1782, 2811 | Muslim 3289 | Tirmidhi 939
+The step is still there, because sahur itself IS established - it now describes
+the practice and says the niyyah is an intention of the heart, not a fixed
+formula. Cited to Bukhari 1923, "take suhur, there is a blessing in it", which
+is the hadith that actually supports the step.
 
 =====================================================================
-THE IFTAR DUA - THE TEXT CHANGED, NOT JUST THE CITATION
+2. ZAKAT TOTALS MOVED UNDER EACH METAL
 =====================================================================
-You approved Abu Dawud 2357. That hadith does NOT contain the dua you originally
-supplied. It contains a different one, so I used ITS wording:
+    Gold
+      grams, karat
+      Value 320,833.33          Zakat 2.5%  8,020.83
 
-    ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ
-    "Thirst has gone, the arteries are moist, and the reward is sure, if Allah
-     wills."
+    Silver
+      grams, purity
+      Value 44,955.00           Zakat 2.5%  1,123.88
 
-Putting 2357 beside "Allahumma inni laka sumtu" would have been citing a hadith
-that does not contain those words. If you wanted your original wording kept, say
-so - it ships uncited, like the sehri dua.
+    Cash / Savings
+      amount, liabilities
+      Value 100,000.00          Zakat 2.5%  2,500.00
 
-=====================================================================
-THE SEHRI DUA SHIPS UNCITED
-=====================================================================
-"Wa bisawmi ghadin nawaytu" is in none of the six books - searched all six, zero
-matches. So no Evidence section on that step, per your instruction.
+Previously all of it sat in one card at the bottom, so you entered gold grams at
+the top and found the gold value four sections away. Under the inputs, the number
+answers the question at the moment it is asked.
 
-The hadith about the blessing in sahur IS real and appears under "Roze Ki
-Ahmiyat", where it belongs: it establishes taking sahur, not that particular
-wording.
+The bottom card is now the summary only - total, less liabilities, net, nisab,
+and the verdict. Repeating the per-holding figures there would have printed the
+same numbers twice, and the second copy is exactly where someone would start
+adding them up by hand. The note about zakat being due on the net total sits with
+the final amount.
 
-=====================================================================
-UMRAH IS NOT IN THE PILLARS GRID
-=====================================================================
-It has its own section, headed "Also" / "مزید", below the five.
-
-Umrah is not one of the five pillars, and putting a sixth card in a grid headed
-"Five Pillars" would have said it was. Small thing, but it is the kind of small
-thing this app should not get wrong.
+A section shows nothing until you enter something in it.
 
 =====================================================================
-STILL A DRAFT
+3. GET DIRECTIONS ON THE IMAGE
 =====================================================================
-Every guide shows the DRAFT banner. Six guides, 67 citations, and the Urdu
-chapter titles are all now ready for your aalim in one pass.
+A translucent pill under the masjid name and address, on the photograph.
+
+It has to stay readable over a picture whose brightness swings from midday sky to
+near-black, so it is a dark translucent fill with a white hairline rather than
+plain text. Hidden entirely when the masjid has no coordinates, rather than
+opening an empty map.
+
+=====================================================================
+4. MASJID DETAILS BOX REMOVED
+=====================================================================
+Name, address, date and directions are all on the image now, so the card below
+was the same information a second time. Removed, along with the builder for it.
+
+"View full prayer schedule" stays.
+
+NOTE: the verified / pending-verification badge lived in that card and is now
+gone from Home. It is still on the masjid search screen. Say if you want it back
+somewhere.
+
+=====================================================================
+5. NEXT PRAYER MADE SHORTER
+=====================================================================
+Was: two ornamented rules around a 44pt figure, with the label above and the
+name below, generously spaced - tall enough to push the prayer list below the
+fold.
+
+Now: one rule, a 32pt figure, with the prayer name and countdown stacked beside
+it on the same line. Same information, roughly half the height.
+
+=====================================================================
+6. CHANGE MASJID BUTTON REMOVED
+=====================================================================
+The floating button is gone. The Nearby masjid quick action opens the same
+search screen and sets the same selection, so it was doing the job twice - and
+the floating button was sitting on top of the last row of prayer times to do it.
+
+Changing masjid still works, from Nearby masjid.

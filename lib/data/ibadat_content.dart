@@ -460,15 +460,21 @@ class IbadatContent {
       IbadatSection(
         title: 'Roze Ka Tareeqa',
         steps: <IbadatStep>[
-          // NO CITATION HERE, DELIBERATELY. This niyyah wording is not in any of
-          // the six books — searched all six for "wa bisawmi ghadin nawaytu",
-          // zero matches. Citing Bukhari or Muslim beside it would imply it
-          // comes from them. The hadith about the blessing in sahur is real and
-          // sits in the section above, where it belongs.
+          // The "wa bisawmi ghadin nawaytu" niyyah has been REMOVED. It is in
+          // none of the six books — searched all six, zero matches — so there
+          // is nothing to cite and no reason to print it as though there were.
+          //
+          // Sahur itself is established: see "Sehri Mein Barkat Hai" above,
+          // Bukhari 1923 and Muslim 2549. Taking sahur is sunnah; that
+          // particular wording is not from these collections.
           IbadatStep(
             title: 'Sehri',
-            arabic: 'وَبِصَوْمِ غَدٍ نَوَيْتُ مِنْ شَهْرِ رَمَضَانَ',
-            translation: 'I intend to keep the fast for tomorrow in Ramadan.',
+            method:
+                'Subah Sadiq se pehle sehri karna. Niyyat dil ka irada hai — koi makhsoos alfaz zaroori nahi.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1923,
+                  note: 'Anas: take suhur, there is a blessing in it'),
+            ],
           ),
           IbadatStep(
             title: 'Roza Rakhna',

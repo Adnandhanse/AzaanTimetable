@@ -25,6 +25,7 @@ class ArtworkHeader extends StatelessWidget {
     required this.onSettingsTap,
     required this.onMetaTap,
     required this.phase,
+    this.onDirectionsTap,
     this.artworkHeight = 300,
     this.settle = 1.0,
   });
@@ -36,6 +37,10 @@ class ArtworkHeader extends StatelessWidget {
 
   final VoidCallback onSettingsTap;
   final VoidCallback onMetaTap;
+
+  /// Null when the masjid has no coordinates, in which case no button is shown
+  /// rather than one that opens an empty map.
+  final VoidCallback? onDirectionsTap;
 
   /// Which sky to show. Comes from the masjid's prayer times, not the clock.
   final SkyPhase phase;
@@ -123,6 +128,17 @@ class ArtworkHeader extends StatelessWidget {
                               ],
                             ),
                           ),
+                          // Directions live here now, beside the name and
+                          // address they belong to. They used to sit in a card
+                          // further down that repeated all of this.
+                          if (onDirectionsTap != null) ...<Widget>[
+                            const SizedBox(height: 8),
+                            _GlassButton(
+                              icon: Icons.directions_outlined,
+                              label: 'Get directions',
+                              onTap: onDirectionsTap!,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -138,6 +154,53 @@ class ArtworkHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A button that has to stay legible over a photograph whose brightness swings
+/// from midday sky to near-black. A translucent dark fill plus a white hairline
+/// works at both ends; a plain text button does not.
+class _GlassButton extends StatelessWidget {
+  const _GlassButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Material(
+        color: const Color(0x66000000),
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0x59FFFFFF)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(icon, size: 15, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(label,
+                    style: AppText.caption.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

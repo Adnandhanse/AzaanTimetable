@@ -385,23 +385,9 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.emerald,
-        icon: const Icon(Icons.search, color: Colors.white),
-        label: Text(
-          S.changeMasjid,
-          style: const TextStyle(color: Colors.white, fontFamily: AppFonts.sans),
-        ),
-        onPressed: () async {
-          final result = await Navigator.of(context).push<Masjid>(
-            MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
-          );
-          if (result != null) {
-            await UserRepository.setSelectedMasjid(result.id);
-            setState(() => _selectedMasjidId = result.id);
-          }
-        },
-      ),
+      // No "Change Masjid" button. The Nearby masjid quick action already
+      // opens the same search and sets the same selection, and a floating
+      // button was covering the last row of prayer times to do it twice.
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.white,
@@ -492,6 +478,10 @@ class _HomeScreenState extends State<HomeScreen>
                   '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
               phase: _skyPhase(masjid),
               settle: _fade.value,
+              onDirectionsTap:
+                  (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                      ? () => _openDirections(masjid)
+                      : null,
               onSettingsTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
@@ -505,65 +495,59 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+          // Compact. This block was two ornamented rules around a 44pt figure
+          // with generous spacing, which pushed the prayer list below the fold.
+          // One rule, a smaller figure, and the name and countdown on the same
+          // line as before — the information is identical, the height is about
+          // half.
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
             child: Column(
               children: [
                 const DiamondRule(),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 if (next == null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Text(
                       'Prayer times for this masjid haven\u2019t been set yet.',
                       textAlign: TextAlign.center,
                       style: AppText.body.copyWith(color: AppColors.textMuted),
                     ),
                   )
-                else ...[
-                  Text(
-                    S.nextPrayer.toUpperCase(),
-                    style: AppText.eyebrow.copyWith(color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: 2),
-                  // Cross-fades when the minute rolls over, so the number
-                  // changes softly instead of snapping.
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 320),
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                    child: Text(
-                      _clockLabel(next.$2),
-                      key: ValueKey<String>(_clockLabel(next.$2)),
-                      style: AppText.hero.copyWith(color: AppColors.emerald),
-                    ),
-                  ),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: next.$1,
-                          style: const TextStyle(
-                            fontFamily: AppFonts.serif,
-                            fontSize: 19,
-                            color: AppColors.text,
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        _clockLabel(next.$2),
+                        style: AppText.hero
+                            .copyWith(fontSize: 32, color: AppColors.emerald),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            next.$1,
+                            style: const TextStyle(
+                              fontFamily: AppFonts.serif,
+                              fontSize: 17,
+                              color: AppColors.text,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: '  ·  ${_countdownLabel(next.$2)}',
-                          style: const TextStyle(
-                            fontFamily: AppFonts.serif,
-                            fontSize: 15,
-                            color: AppColors.textMuted,
+                          Text(
+                            _countdownLabel(next.$2),
+                            style: AppText.caption
+                                .copyWith(color: AppColors.textMuted),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 const DiamondRule(),
               ],
             ),
@@ -602,15 +586,13 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
           ),
+          // The masjid name, address, date and directions are all on the image
+          // now. A card repeating them under it was the same information twice.
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SectionRule(label: 'This masjid'),
-                const SizedBox(height: 12),
-                _masjidCard(masjid),
-                const SizedBox(height: 14),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.calendar_month_outlined, size: 16),
                   label: Text(S.viewFullPrayerSchedule),
@@ -786,89 +768,6 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _masjidCard(Masjid masjid) {
-    final bool verified = masjid.verificationStatus == 'Verified';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.goldRule),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Medallion(icon: Icons.mosque_outlined, size: 36),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(masjid.name,
-                        style: AppText.rowTitle.copyWith(color: AppColors.text)),
-                    const SizedBox(height: 2),
-                    Text(
-                      masjid.address.isEmpty
-                          ? masjid.city
-                          : '${masjid.address}, ${masjid.city}',
-                      style:
-                          AppText.caption.copyWith(color: AppColors.textMuted),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(height: 1, color: AppColors.goldRuleFaint),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(
-                verified ? Icons.verified_outlined : Icons.hourglass_empty,
-                size: 15,
-                color: verified ? AppColors.emerald : AppColors.gold,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  verified ? S.verified : S.pendingVerification,
-                  style: AppText.caption.copyWith(
-                    color: verified ? AppColors.emerald : AppColors.textMuted,
-                  ),
-                ),
-              ),
-              if (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                InkWell(
-                  onTap: () => _openDirections(masjid),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.directions_outlined,
-                          size: 15, color: AppColors.emerald),
-                      const SizedBox(width: 5),
-                      Text(
-                        S.getDirections,
-                        style: AppText.caption.copyWith(
-                          color: AppColors.emerald,
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.gold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }

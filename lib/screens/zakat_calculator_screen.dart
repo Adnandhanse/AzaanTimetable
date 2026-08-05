@@ -273,6 +273,9 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                       .toList(),
                   onChanged: (v) => setState(() => _karat = v!),
                 ),
+                if (r != null)
+                  _sectionTotal(r.goldValue, r.shareOf(r.goldValue),
+                      due: r.isApplicable),
 
                 const SizedBox(height: 18),
                 SectionRule(label: S.silverLabel, trailingDiamond: true),
@@ -291,6 +294,9 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                       .toList(),
                   onChanged: (v) => setState(() => _silverPurity = v!),
                 ),
+                if (r != null)
+                  _sectionTotal(r.silverValue, r.shareOf(r.silverValue),
+                      due: r.isApplicable),
 
                 const SizedBox(height: 18),
                 SectionRule(label: S.cashLabel, trailingDiamond: true),
@@ -298,6 +304,8 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                 _amountField(_cash, S.cashLabel),
                 const SizedBox(height: 10),
                 _amountField(_liabilities, S.liabilitiesLabel),
+                if (r != null)
+                  _sectionTotal(r.cash, r.shareOf(r.cash), due: r.isApplicable),
 
                 const SizedBox(height: 22),
                 if (r != null) _resultCard(r),
@@ -307,6 +315,53 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                     style: AppText.caption.copyWith(color: AppColors.textFaint)),
               ],
             ),
+    );
+  }
+
+  /// Total and its 2.5% for ONE holding, placed directly under that holding's
+  /// inputs.
+  ///
+  /// Previously every total sat in one card at the bottom, which meant reading
+  /// gold grams at the top and finding the gold value four sections away. Under
+  /// the inputs, the number answers the question at the moment it is asked.
+  Widget _sectionTotal(double value, double? share, {required bool due}) {
+    if (value <= 0) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      decoration: BoxDecoration(
+        color: AppColors.cream,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.goldRuleFaint),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(S.valueLabel,
+                    style: AppText.eyebrow.copyWith(color: AppColors.textMuted)),
+                Text(_money(value),
+                    style: AppText.body.copyWith(
+                        color: AppColors.text, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          if (due && share != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(S.zakatOnThis,
+                    style: AppText.eyebrow.copyWith(color: AppColors.textMuted)),
+                Text(_money(share),
+                    style: AppText.body.copyWith(
+                        color: AppColors.emerald,
+                        fontWeight: FontWeight.w600)),
+              ],
+            ),
+        ],
+      ),
     );
   }
 
@@ -393,9 +448,9 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     final bool due = r.isApplicable;
     return Column(
       children: [
-        // Breakdown first, on its own light card. It answers "where did that
-        // number come from", which is the question anyone checks before
-        // trusting a figure they are about to act on.
+        // Summary only. The per-holding totals now sit under their own inputs,
+        // so repeating them here would say the same thing twice — and the second
+        // copy is where someone would start adding them up by hand.
         Container(
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -406,37 +461,14 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(S.breakdown,
-                        style: AppText.rowTitle
-                            .copyWith(fontSize: 15, color: AppColors.text)),
-                  ),
-                  Text(S.zakatOnThis,
-                      style: AppText.eyebrow
-                          .copyWith(color: AppColors.textMuted)),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _row(S.goldLabel, r.goldValue, r.shareOf(r.goldValue), due),
-              _row(S.silverLabel, r.silverValue, r.shareOf(r.silverValue), due),
-              _row(S.cashLabel, r.cash, r.shareOf(r.cash), due),
-              const SizedBox(height: 6),
-              Container(height: 1, color: AppColors.goldRuleFaint),
-              const SizedBox(height: 6),
-              _row(S.totalAssets, r.grossAssets, null, due, bold: true),
+              _row(S.totalAssets, r.grossAssets, bold: true),
               if (r.liabilities > 0)
-                _row(S.lessLiabilities, -r.liabilities, null, due),
+                _row(S.lessLiabilities, -r.liabilities),
               const SizedBox(height: 6),
               Container(height: 1, color: AppColors.goldRuleFaint),
               const SizedBox(height: 6),
-              _row(S.netAssets, r.netAssets, null, due, bold: true),
-              _row(S.nisabValue, r.nisabValue, null, due),
-              const SizedBox(height: 10),
-              Text(S.breakdownNote,
-                  style:
-                      AppText.caption.copyWith(color: AppColors.textFaint)),
+              _row(S.netAssets, r.netAssets, bold: true),
+              _row(S.nisabValue, r.nisabValue),
             ],
           ),
         ),
@@ -465,18 +497,14 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
               if (due) ...[
                 const SizedBox(height: 10),
                 Text(S.zakatDue,
-                    style:
-                        AppText.eyebrow.copyWith(color: AppColors.goldPale)),
+                    style: AppText.eyebrow.copyWith(color: AppColors.goldPale)),
                 Text(_money(r.zakatDue),
                     style: AppText.hero
                         .copyWith(fontSize: 34, color: AppColors.white)),
-              ] else ...[
-                const SizedBox(height: 6),
-                Text(
-                  '${S.netAssets} ${_money(r.netAssets)}  \u00b7  ${S.nisabValue} ${_money(r.nisabValue)}',
-                  style:
-                      AppText.caption.copyWith(color: AppColors.textMuted),
-                ),
+                const SizedBox(height: 8),
+                Text(S.breakdownNote,
+                    style: AppText.caption
+                        .copyWith(color: AppColors.onEmeraldMuted)),
               ],
             ],
           ),
@@ -485,10 +513,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
     );
   }
 
-  /// One breakdown line: label, value, and its 2.5% share when zakat applies.
-  Widget _row(String label, double value, double? share, bool due,
-          {bool bold = false}) =>
-      Padding(
+  Widget _row(String label, double value, {bool bold = false}) => Padding(
         padding: const EdgeInsets.only(bottom: 5),
         child: Row(
           children: [
@@ -499,23 +524,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           color: AppColors.text, fontWeight: FontWeight.w600)
                       : AppText.caption.copyWith(color: AppColors.textMuted)),
             ),
-            SizedBox(
-              width: 96,
-              child: Text(_money(value),
-                  textAlign: TextAlign.right,
-                  style: bold
-                      ? AppText.body.copyWith(
-                          color: AppColors.text, fontWeight: FontWeight.w600)
-                      : AppText.body.copyWith(color: AppColors.text)),
-            ),
-            SizedBox(
-              width: 84,
-              child: Text(
-                share == null || !due || value <= 0 ? '' : _money(share),
-                textAlign: TextAlign.right,
-                style: AppText.caption.copyWith(color: AppColors.emerald),
-              ),
-            ),
+            Text(_money(value),
+                style: bold
+                    ? AppText.body.copyWith(
+                        color: AppColors.text, fontWeight: FontWeight.w600)
+                    : AppText.body.copyWith(color: AppColors.text)),
           ],
         ),
       );
