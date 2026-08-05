@@ -58,6 +58,16 @@ class Masjid {
   String? customAzanAudioName;
   String? customAzanAudioUrl;
 
+  /// How many devices currently follow this masjid.
+  ///
+  /// A COUNT, not a list. There is no record of WHO follows a masjid anywhere in
+  /// this app — nothing to protect, nothing to declare, and nothing that could
+  /// identify a worshipper from their prayer habits.
+  ///
+  /// Read-only from the app's point of view: maintained by
+  /// FollowerService using atomic increments, never written by hand.
+  int followerCount;
+
   Masjid({
     required this.id,
     required this.name,
@@ -74,6 +84,7 @@ class Masjid {
     this.verificationDocName,
     this.customAzanAudioName,
     this.customAzanAudioUrl,
+    this.followerCount = 0,
   });
 
   Map<String, dynamic> toMap() => {
@@ -95,6 +106,9 @@ class Masjid {
 
   factory Masjid.fromMap(String id, Map<String, dynamic> map) => Masjid(
         id: id,
+        // Absent on every masjid registered before this existed, so it defaults
+        // rather than failing to parse.
+        followerCount: (map['followerCount'] as num?)?.toInt() ?? 0,
         name: map['name'] ?? '',
         city: map['city'] ?? '',
         address: map['address'] ?? '',

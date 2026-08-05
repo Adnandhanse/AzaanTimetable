@@ -6,6 +6,7 @@ import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
 import 'services/notification_service.dart';
 import 'services/app_language.dart';
+import 'services/follower_service.dart';
 import 'theme/app_theme.dart';
 
 /// Lets code outside the widget tree (the notification tap callback) push
@@ -42,6 +43,12 @@ void main() async {
   // updates prayer times; it must never be what decides whether an alarm
   // exists. Failures here are swallowed on purpose — a scheduling problem must
   // not stop the app from opening.
+  // One counter increment per device per day. No user record, no timestamp
+  // against anybody — just "how many devices opened the app today".
+  try {
+    await FollowerService.markActiveToday();
+  } catch (_) {}
+
   // Errors are recorded rather than swallowed. Startup must not be blocked by
   // a scheduling problem, but an alarm app that loses its alarms without
   // leaving a trace is worse than one that crashes — the diagnostics land on

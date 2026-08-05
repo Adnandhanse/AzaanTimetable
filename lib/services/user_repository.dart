@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_service.dart';
+import 'follower_service.dart';
 
 /// Which masjid the user follows.
 ///
@@ -34,6 +35,11 @@ class UserRepository {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_localKey, masjidId);
     } catch (_) {}
+
+    // Follower count. Done HERE rather than at each call site so it cannot be
+    // forgotten by a future caller — every path that changes the selection goes
+    // through this method.
+    await FollowerService.setFollowed(masjidId);
 
     // Then Firestore, best effort. A failure here costs cross-device sync,
     // not the selection itself.
@@ -80,6 +86,7 @@ class UserRepository {
   /// Used when the user deliberately clears their choice. Nothing else should
   /// remove the local copy — that is what caused the original problem.
   static Future<void> clearSelectedMasjid() async {
+    await FollowerService.setFollowed(null);
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_localKey);

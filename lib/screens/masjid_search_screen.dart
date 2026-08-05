@@ -138,7 +138,13 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
                     return ListTile(
                       leading: Icon(Icons.mosque, color: AppColors.emerald),
                       title: Text(masjid.name),
-                      subtitle: Text('${masjid.city} • ${masjid.verificationStatus}$distanceText'),
+                      // Follower count helps someone pick between two masjids
+                      // in the same area, and shows an imam his times are being
+                      // used. Hidden at zero rather than advertising an empty
+                      // number on a newly registered masjid.
+                      subtitle: Text(masjid.followerCount > 0
+                          ? '${masjid.city} • ${masjid.verificationStatus}$distanceText • ${masjid.followerCount} following'
+                          : '${masjid.city} • ${masjid.verificationStatus}$distanceText'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
                         final selected = await Navigator.of(context).push<bool>(

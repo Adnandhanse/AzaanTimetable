@@ -1,88 +1,80 @@
-v45 - 6 files
-=============
+v46 - 6 files - FOLLOWER COUNTS
+===============================
 
-  pubspec.yaml                          declares the duas asset
-  lib/screens/hadith_list_screen.dart   Listen moved to the top
-  lib/screens/home_screen.dart          admin tab hidden from users
-  lib/screens/prayers_home_screen.dart  Duas card added
-  lib/screens/settings_screen.dart      debug rows removed
-  lib/screens/alarm_health_screen.dart  slimmed to what users can act on
+  lib/services/follower_service.dart      NEW
+  lib/models/masjid.dart                  followerCount field
+  lib/services/user_repository.dart       counts on selection change
+  lib/main.dart                           daily active count
+  lib/screens/admin_dashboard_screen.dart shows the count to the imam
+  lib/screens/masjid_search_screen.dart   shows it in the list
 
-Overwrite all six. Apply AFTER v44. No new package.
-
-=====================================================================
-1. LISTEN MOVED ABOVE THE HADITH
-=====================================================================
-A hadith can run several screens, so a control at the bottom meant scrolling
-past the whole thing to start listening - the one thing you want before reading,
-not after.
+Overwrite all six. Apply AFTER v45. No new package.
 
 =====================================================================
-2. ADMIN TAB NOW ADMINS ONLY
+FOLLOWER COUNT
 =====================================================================
-Four tabs for users, five for admins. Read from the role saved at first launch.
+Every masjid document gets a followerCount, maintained by atomic increments.
+Changing masjid decrements the old and increments the new in ONE BATCH, so the
+two cannot drift apart because one write landed and the other did not.
 
-You are right that showing an admin login to someone who just said they are not
-an admin makes the question pointless. Changeable any time from Settings > How
-you use the app.
+Shown in two places:
+  Admin dashboard   "12 followers" under each masjid the admin manages
+  Masjid search     "... • 12 following", hidden at zero so a newly registered
+                    masjid does not advertise an empty number
 
-=====================================================================
-3. SETTINGS CLEANED UP
-=====================================================================
-REMOVED: Send Test Notification Now, Show My Account ID, Check Scheduled Alarms.
-All three were labelled "Debug:" in the UI. Three of eight rows saying "Debug"
-tells a user this is unfinished software.
-
-ALARM HEALTH SLIMMED. Removed: the 60-second and instant test buttons, the event
-log and its Copy button, the "Last scheduling run" panel, "Re-arm alarms now",
-the list of scheduled alarms, and the azan-sound and alarm-clock toggles.
-
-Those toggles were the ones I most wanted gone: they let a user break their own
-alarms by flipping a setting whose consequences they cannot judge.
-
-WHAT REMAINS is what someone can act on - which permissions are missing, a Fix
-button for each, whether the background service is running, and the
-manufacturer-specific steps for the one thing no app can set for them.
-
-The service code behind all of it is untouched, so anything can be restored by
-putting the widget back.
-
-ONE THING I WOULD ARGUE FOR KEEPING, though I removed it as asked: the
-60-second test. Users of prayer apps genuinely want to confirm alarms work on
-their own phone rather than trusting it until they miss Fajr. Say the word and I
-will put that one back on its own.
+The count is hooked into UserRepository.setSelectedMasjid rather than each call
+site, so no future caller can forget it.
 
 =====================================================================
-4. DUAS - IT WAS ALREADY BUILT, AND BROKEN
+DAILY ACTIVE COUNT - AND WHY IT IS NOT A PER-USER LAST LOGIN
 =====================================================================
-DuaHomeScreen, DuaDetailScreen, DuaRepository and the Dua model all already
-existed in your codebase. But:
+One document per date: stats/daily_2026-08-05 with activeDevices, incremented
+once per device per day.
 
-    - NOTHING navigated to any of them
-    - assets/duas/duas_en.json WAS NEVER DECLARED in pubspec.yaml
+You asked to save each user's last login. I have not, and I think that is the
+right call for two reasons.
 
-So the feature was unreachable, and would have thrown on
-rootBundle.loadString the moment anything did reach it.
+FIRST, IT CANNOT DO WHAT YOU WANTED IT FOR. You said the purpose was to follow
+up with people who stopped opening the app. Your users are anonymous Firebase
+accounts - no name, no phone, no email. There is nobody to contact. A per-user
+timestamp would tell you someone disappeared and leave you unable to do anything
+about it. Making follow-up possible means collecting contact details, which is
+the signup wall we agreed against.
 
-Both fixed. The asset is declared and a Duas card now sits in the Ibadat tab,
-beside Umrah in the "Also" section - neither is a pillar.
+SECOND, THE COUNT ANSWERS THE REAL QUESTION WITHOUT THE COST. "How many people
+use the app daily" is a number. A counter gives you daily and monthly actives,
+retention trends, and the effect of a release - with no user records at all.
 
-Your data: 132 chapters from Hisn al-Muslim, each with Arabic, English
-translation, a repeat count, and an audio URL.
+WHAT IS DELIBERATELY NOT STORED ANYWHERE:
+  no names, phones or emails for worshippers
+  no device identifiers
+  no list of who follows which masjid
+  no per-user last-seen timestamp
+
+Nothing here can identify anyone, and nothing here could reveal an individual's
+prayer habits if the database leaked. That keeps you clear of consent, purpose
+limitation, deletion-on-request and breach notification for this data.
 
 =====================================================================
-URDU DUAS - YOU ASKED, AND THE ANSWER IS NO
+THE TRADEOFF, STATED PLAINLY
 =====================================================================
-duas_en.json has ARABIC_TEXT and TRANSLATED_TEXT. The translation is ENGLISH
-ONLY. There is no Urdu field, and no Urdu file in the project.
+COUNTS DRIFT. A reinstall counts as a new follower, because the app keeps
+nothing that would recognise a returning device. Treat the numbers as
+indicative, not exact. Making them exact would mean identifying devices, which
+is a bad trade for a prayer app.
 
-So with the app set to Urdu, dua translations will still read in English. Options:
+Offline changes are skipped rather than retried, on purpose - a missed increment
+costs one off a count, a double increment inflates it permanently.
 
-  1. Leave English, and let TTS read it - already wired for hadith
-  2. Source an Urdu Hisn al-Muslim dataset. They exist; check the licence before
-     bundling one, same as with the hadith data
-  3. Have the 132 chapters translated - that is a real translation job, not a
-     transliteration like the chapter titles, and not something I should invent
+=====================================================================
+FIRESTORE RULES - YOU MUST UPDATE THESE
+=====================================================================
+Two things need permission:
+  masjids/{id}   increment of followerCount by any signed-in user
+  stats/{doc}    create and increment by any signed-in user
 
-I would not machine-translate duas. Unlike a menu label, a wrong dua translation
-misleads someone in worship.
+If your rules do not allow them, both writes fail silently - by design, so
+analytics can never stop the app working. You would see counts stay at zero.
+
+STILL OUTSTANDING: you collect admin phone numbers, so a privacy policy is
+required before Play Store submission regardless of any of the above.
