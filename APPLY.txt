@@ -1,46 +1,88 @@
-v44 - 4 files - NO WAY BACK FROM ADMIN
-======================================
+v45 - 6 files
+=============
 
-  lib/screens/role_selection_screen.dart
-  lib/screens/splash_screen.dart
-  lib/screens/settings_screen.dart
-  lib/screens/home_screen.dart        (v43 build fix included)
+  pubspec.yaml                          declares the duas asset
+  lib/screens/hadith_list_screen.dart   Listen moved to the top
+  lib/screens/home_screen.dart          admin tab hidden from users
+  lib/screens/prayers_home_screen.dart  Duas card added
+  lib/screens/settings_screen.dart      debug rows removed
+  lib/screens/alarm_health_screen.dart  slimmed to what users can act on
 
-Overwrite all four. Apply AFTER v42. No new package.
-
-=====================================================================
-THE BUG
-=====================================================================
-Choosing "I manage a masjid" used pushReplacement, which REPLACED the role
-screen with the admin login. Nothing was left beneath it, so back exited the app.
-
-Anyone who tapped the wrong card had to kill the app and reopen it - and on
-reopening, the saved role sent them straight back to the admin login. A dead end
-they could not get out of without reinstalling.
-
-=====================================================================THREE FIXES
-=====================================================================
-1. THE ADMIN ROUTE IS NOW PUSHED, NOT REPLACED
-   The role screen stays underneath, so the admin login's AppBar shows a real
-   back arrow and back returns to the choice - the page you asked for.
-
-2. A SAVED ADMIN ROLE LANDS ON HOME WITH THE LOGIN ON TOP
-   On later launches the role screen is not in play, so Home becomes the root and
-   the admin login sits above it. Back goes to Home rather than out of the app.
-   Admins still start in the admin flow.
-
-3. THE ROLE CHOICE IS CHANGEABLE
-   Settings > "How you use the app" reopens it. Asked once at first launch;
-   without this, picking wrong could only be undone by reinstalling.
-
-   Also added "Skip for now" on the role screen itself, so that screen is not a
-   dead end either.
+Overwrite all six. Apply AFTER v44. No new package.
 
 =====================================================================
-ALSO INCLUDED
+1. LISTEN MOVED ABOVE THE HADITH
 =====================================================================
-The v43 build fix - the duplicated _prayerTimesList and _quickAction in
-home_screen.dart.
+A hadith can run several screens, so a control at the bottom meant scrolling
+past the whole thing to start listening - the one thing you want before reading,
+not after.
 
-And the duplicate-declaration scan I promised is now part of what I run before
-packaging. It passes on all 60 Dart files in this build.
+=====================================================================
+2. ADMIN TAB NOW ADMINS ONLY
+=====================================================================
+Four tabs for users, five for admins. Read from the role saved at first launch.
+
+You are right that showing an admin login to someone who just said they are not
+an admin makes the question pointless. Changeable any time from Settings > How
+you use the app.
+
+=====================================================================
+3. SETTINGS CLEANED UP
+=====================================================================
+REMOVED: Send Test Notification Now, Show My Account ID, Check Scheduled Alarms.
+All three were labelled "Debug:" in the UI. Three of eight rows saying "Debug"
+tells a user this is unfinished software.
+
+ALARM HEALTH SLIMMED. Removed: the 60-second and instant test buttons, the event
+log and its Copy button, the "Last scheduling run" panel, "Re-arm alarms now",
+the list of scheduled alarms, and the azan-sound and alarm-clock toggles.
+
+Those toggles were the ones I most wanted gone: they let a user break their own
+alarms by flipping a setting whose consequences they cannot judge.
+
+WHAT REMAINS is what someone can act on - which permissions are missing, a Fix
+button for each, whether the background service is running, and the
+manufacturer-specific steps for the one thing no app can set for them.
+
+The service code behind all of it is untouched, so anything can be restored by
+putting the widget back.
+
+ONE THING I WOULD ARGUE FOR KEEPING, though I removed it as asked: the
+60-second test. Users of prayer apps genuinely want to confirm alarms work on
+their own phone rather than trusting it until they miss Fajr. Say the word and I
+will put that one back on its own.
+
+=====================================================================
+4. DUAS - IT WAS ALREADY BUILT, AND BROKEN
+=====================================================================
+DuaHomeScreen, DuaDetailScreen, DuaRepository and the Dua model all already
+existed in your codebase. But:
+
+    - NOTHING navigated to any of them
+    - assets/duas/duas_en.json WAS NEVER DECLARED in pubspec.yaml
+
+So the feature was unreachable, and would have thrown on
+rootBundle.loadString the moment anything did reach it.
+
+Both fixed. The asset is declared and a Duas card now sits in the Ibadat tab,
+beside Umrah in the "Also" section - neither is a pillar.
+
+Your data: 132 chapters from Hisn al-Muslim, each with Arabic, English
+translation, a repeat count, and an audio URL.
+
+=====================================================================
+URDU DUAS - YOU ASKED, AND THE ANSWER IS NO
+=====================================================================
+duas_en.json has ARABIC_TEXT and TRANSLATED_TEXT. The translation is ENGLISH
+ONLY. There is no Urdu field, and no Urdu file in the project.
+
+So with the app set to Urdu, dua translations will still read in English. Options:
+
+  1. Leave English, and let TTS read it - already wired for hadith
+  2. Source an Urdu Hisn al-Muslim dataset. They exist; check the licence before
+     bundling one, same as with the hadith data
+  3. Have the 132 chapters translated - that is a real translation job, not a
+     transliteration like the chapter titles, and not something I should invent
+
+I would not machine-translate duas. Unlike a menu label, a wrong dua translation
+misleads someone in worship.

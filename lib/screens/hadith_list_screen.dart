@@ -322,6 +322,38 @@ class _HadithCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ABOVE THE TEXT, not below it.
+                  //
+                  // A hadith can run for several screens, so a control at the
+                  // bottom meant scrolling past the whole thing to start
+                  // listening — the one thing you want before reading, not
+                  // after.
+                  if (item.text.trim().isNotEmpty) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: onSpeak,
+                        icon: Icon(
+                            isSpeaking ? Icons.stop : Icons.volume_up_outlined,
+                            size: 16),
+                        // Says "translation" on purpose. It never reads the
+                        // Arabic and the label should not suggest it does.
+                        label: Text(
+                            isSpeaking ? S.stopWord : S.listenToTranslation),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.emerald,
+                          side: const BorderSide(color: AppColors.goldRule),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          minimumSize: Size.zero,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4)),
+                          textStyle: AppText.caption,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                   if (item.arabicText.trim().isNotEmpty) ...[
                     Container(height: 1, color: AppColors.goldRuleFaint),
                     const SizedBox(height: 10),
@@ -362,28 +394,6 @@ class _HadithCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      if (item.text.trim().isNotEmpty)
-                        OutlinedButton.icon(
-                          onPressed: onSpeak,
-                          icon: Icon(
-                              isSpeaking ? Icons.stop : Icons.volume_up_outlined,
-                              size: 16),
-                          // Says "translation" on purpose. The button never
-                          // reads the Arabic, and the label should not let
-                          // anyone assume it does.
-                          label:
-                              Text(isSpeaking ? S.stopWord : S.listenToTranslation),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.emerald,
-                            side: const BorderSide(color: AppColors.goldRule),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
-                            minimumSize: Size.zero,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4)),
-                            textStyle: AppText.caption,
-                          ),
-                        ),
                       const Spacer(),
                       InkWell(
                         onTap: onToggle,

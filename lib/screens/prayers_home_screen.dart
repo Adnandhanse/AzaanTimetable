@@ -5,6 +5,7 @@ import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'pillar_detail_screen.dart';
+import 'dua_home_screen.dart';
 import 'zakat_home_screen.dart';
 
 class PrayersHomeScreen extends StatelessWidget {
@@ -75,6 +76,17 @@ class PrayersHomeScreen extends StatelessWidget {
           'icon': Icons.travel_explore,
           'guide': IbadatContent.umrah,
         },
+        {
+          'title': S.isUrdu ? 'دعائیں' : 'Duas',
+          'subtitle': S.isUrdu ? 'روزمرہ کی دعائیں' : 'Everyday supplications',
+          'description': S.isUrdu
+              ? 'حصن المسلم سے 132 باب، عربی اور ترجمے کے ساتھ۔'
+              : '132 chapters from Hisn al-Muslim, with Arabic and translation.',
+          'icon': Icons.volunteer_activism_outlined,
+          // Opens the duas library, which already existed in the codebase but
+          // nothing navigated to and whose asset was never declared.
+          'duas': true,
+        },
       ];
 
   @override
@@ -144,10 +156,12 @@ class _PillarCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => pillar['zakat'] == true
-                ? ZakatHomeScreen(
-                    description: pillar['description'] as String)
-                : PillarDetailScreen(
+            builder: (_) => pillar['duas'] == true
+                ? const DuaHomeScreen()
+                : pillar['zakat'] == true
+                    ? ZakatHomeScreen(
+                        description: pillar['description'] as String)
+                    : PillarDetailScreen(
                     title: pillar['title'] as String,
                     description: pillar['description'] as String,
                     guide: guide,
@@ -187,11 +201,15 @@ class _PillarCard extends StatelessWidget {
               Text(
                 pillar['zakat'] == true
                     ? (S.isUrdu ? 'کیلکولیٹر + احادیث' : 'Calculator + hadith')
-                    : guide == null
-                        ? S.comingSoon
-                        : S.stepByStep,
+                    : pillar['duas'] == true
+                        ? (S.isUrdu ? '132 باب' : '132 chapters')
+                        : guide == null
+                            ? S.comingSoon
+                            : S.stepByStep,
                 style: AppText.caption.copyWith(
-                  color: guide == null && pillar['zakat'] != true
+                  color: guide == null &&
+                          pillar['zakat'] != true &&
+                          pillar['duas'] != true
                       ? AppColors.textFaint
                       : AppColors.gold,
                 ),

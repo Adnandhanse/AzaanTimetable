@@ -69,6 +69,11 @@ flutter:
     # the CI workflow, where Android needs it to serve as a notification
     # channel sound. Both copies are the same file - replace both to change it.
     - assets/audio/azan.mp3
+    # 132 dua chapters from Hisn al-Muslim, with Arabic and English. This was
+    # NEVER DECLARED, so DuaRepository would have thrown on rootBundle.loadString
+    # the first time anything opened the duas screen — which nothing did, because
+    # nothing navigated to it either.
+    - assets/duas/duas_en.json
     - assets/images/nabawi_header.webp
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp

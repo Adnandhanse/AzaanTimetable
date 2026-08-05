@@ -15,6 +15,7 @@ import '../widgets/sky_artwork.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
+import 'role_selection_screen.dart';
 import 'setup_wizard_screen.dart';
 import 'quran_home_screen.dart';
 import 'hadith_home_screen.dart';
@@ -57,6 +58,14 @@ class _HomeScreenState extends State<HomeScreen>
   bool _exactAlarmWarningDismissed = false;
   bool? _hasExactAlarmPermission;
   bool? _hasBatteryExemption;
+
+  /// True only when the user said they manage a masjid.
+  ///
+  /// The Masjid Admin tab used to be shown to everyone. Having asked whether
+  /// someone runs a masjid, showing them an admin login anyway makes the
+  /// question pointless — and for the overwhelming majority it is a permanent
+  /// tab they will never open.
+  bool _isAdmin = false;
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
 
@@ -76,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Re-check the alarms whenever the app comes back to the foreground.
     WidgetsBinding.instance.addObserver(this);
     _loadSelectedMasjid();
+    _loadRole();
     _repairAlarmsIfNeeded();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
@@ -132,6 +142,12 @@ class _HomeScreenState extends State<HomeScreen>
         SnackBar(content: Text('Could not load your followed masjid: $e')),
       );
     }
+  }
+
+  Future<void> _loadRole() async {
+    final role = await RoleSelectionScreen.savedRole();
+    if (!mounted) return;
+    setState(() => _isAdmin = role == 'admin');
   }
 
   Future<void> _openDirections(Masjid masjid) async {
@@ -412,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen>
             } else if (index == 3) {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const PrayersHomeScreen()));
-            } else if (index == 4) {
+            } else if (index == 4 && _isAdmin) {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminLoginScreen()));
             }
@@ -430,9 +446,15 @@ class _HomeScreenState extends State<HomeScreen>
             BottomNavigationBarItem(
                 icon: const Icon(Icons.explore_outlined, size: 20),
                 label: S.prayers),
-            BottomNavigationBarItem(
-                icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
-                label: S.masjidAdmin),
+            // Admins only. Four tabs for everyone else.
+            //
+            // The role question is asked at first launch; showing an admin
+            // login to someone who said they are not an admin makes the question
+            // pointless. Changeable any time from Settings.
+            if (_isAdmin)
+              BottomNavigationBarItem(
+                  icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
+                  label: S.masjidAdmin),
           ],
         ),
       ),

@@ -4,7 +4,6 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
 import 'role_selection_screen.dart';
-import '../services/auth_service.dart';
 import '../services/app_language.dart';
 import '../services/app_strings.dart';
 
@@ -107,58 +106,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Important: needed for alarms to fire reliably'),
             onTap: () => NotificationService.requestIgnoreBatteryOptimizations(),
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.notifications_active, color: Colors.grey),
-            title: const Text('Send Test Notification Now'),
-            subtitle: const Text('Debug: checks if notifications work at all on this phone'),
-            onTap: () async {
-              await NotificationService.showTestNotificationNow();
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Test notification sent - check your notification shade now.')),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.fingerprint, color: Colors.grey),
-            title: const Text('Show My Account ID'),
-            subtitle: const Text('Debug: check if this changes after a phone restart'),
-            onTap: () {
-              final uid = AuthService.currentUser?.uid ?? 'Not signed in';
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Account ID'),
-                  content: SelectableText(uid),
-                  actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close'))],
-                ),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.bug_report, color: Colors.grey),
-            title: const Text('Check Scheduled Alarms'),
-            subtitle: const Text('Debug: see what alarms are currently set'),
-            onTap: () async {
-              final pending = await NotificationService.getPendingAlarms();
-              if (!context.mounted) return;
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Scheduled Alarms'),
-                  content: SingleChildScrollView(
-                    child: Text(pending.isEmpty ? 'Nothing is currently scheduled.' : pending.join('\n')),
-                  ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close')),
-                  ],
-                ),
-              );
-            },
-          ),
+          // The three debug entries that lived here are gone: Send Test
+          // Notification Now, Show My Account ID, and Check Scheduled Alarms.
+          //
+          // They existed to diagnose the alarm problem, which is fixed. Leaving
+          // them in ships a settings screen where three of eight rows are
+          // labelled "Debug:" — which tells a user this is unfinished software.
+          // Everything they did is still available in Alarm health.
         ],
       ),
     );

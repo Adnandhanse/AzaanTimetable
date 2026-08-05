@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/services.dart';
-
-import '../services/alarm_event_log.dart';
 import '../services/foreground_alarm_manager.dart';
 import '../services/notification_service.dart';
-import '../services/foreground_alarm_manager.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'setup_wizard_screen.dart';
@@ -30,13 +26,6 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   List<String> _pending = <String>[];
   bool? _serviceRunning;
   bool _loading = true;
-  bool _testArmed = false;
-  Map<String, dynamic>? _diag;
-  String? _testResult;
-  bool _useAzan = true;
-  bool _useAlarmClock = false;
-  List<AlarmLogEntry> _log = <AlarmLogEntry>[];
-  bool _showHeartbeats = false;
 
   @override
   void initState() {
@@ -48,10 +37,6 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
     setState(() => _loading = true);
     final health = await NotificationService.alarmHealth();
     final pending = await NotificationService.getPendingAlarms();
-    final diag = await NotificationService.lastDiagnostics();
-    final useAzan = await NotificationService.useAzanSound();
-    final useAc = await NotificationService.useAlarmClockMode();
-    final log = await AlarmEventLog.read();
     bool? running;
     try {
       running = await ForegroundAlarmManager.isRunning();
@@ -63,10 +48,6 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
       _health = health;
       _pending = pending;
       _serviceRunning = running;
-      _diag = diag;
-      _useAzan = useAzan;
-      _useAlarmClock = useAc;
-      _log = log;
       _loading = false;
     });
   }
@@ -85,77 +66,11 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
   /// Queues the test on the polling service AND the OS scheduler, so the log
   /// shows which one delivered. On this project's test device only one of them
   /// ever does.
-  Future<void> _runBothTests() async {
-    await ForegroundAlarmManager.queueServiceTest();
-    final tier = await NotificationService.scheduleTestAlarm();
-    if (!mounted) return;
-    setState(() {
-      _testArmed = true;
-      _testResult = tier == null ? 'OS scheduler refused' : tier;
-    });
-    await _refresh();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Two tests queued for 60 seconds: one via the background service, one via the OS scheduler. Lock the phone. The log will show which arrived.'),
-        duration: Duration(seconds: 6),
-      ),
-    );
-  }
 
-  Future<void> _runTest() async {
-    final tier = await NotificationService.scheduleTestAlarm();
-    if (!mounted) return;
-    setState(() {
-      _testArmed = tier != null;
-      _testResult = tier;
-    });
-    await _refresh();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(tier == null
-            // This is the useful case. If every tier is refused, the phone is
-            // blocking scheduling outright and no amount of app code fixes it.
-            ? 'The system REFUSED to schedule an alarm. Check the permissions above, then the Autostart steps.'
-            : 'Test alarm set for 60 seconds ($tier). Lock the phone and wait — do not swipe the app away.'),
-        duration: const Duration(seconds: 6),
-      ),
-    );
-  }
 
-  Future<void> _showNow() async {
-    await NotificationService.showNotificationNow();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Posted now. If nothing appeared, the problem is the notification channel, not the alarm.'),
-        duration: Duration(seconds: 6),
-      ),
-    );
-  }
 
-  Future<void> _toggleSound(bool value) async {
-    await NotificationService.setUseAzanSound(value);
-    await NotificationService.scheduleFromCache();
-    await _refresh();
-  }
 
-  Future<void> _toggleAlarmClock(bool value) async {
-    await NotificationService.setUseAlarmClockMode(value);
-    await NotificationService.scheduleFromCache();
-    await _refresh();
-  }
 
-  Future<void> _rearm() async {
-    await NotificationService.scheduleFromCache();
-    await _refresh();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Alarms re-armed.')));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,290 +162,26 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                   onFix: null,
                 ),
 
-                const SizedBox(height: 22),
-                const SectionRule(label: 'Test it on this phone'),
-                const SizedBox(height: 10),
-                Text(
-                  'Queues two tests 60 seconds out — one through the background service, one through the OS scheduler. Lock the phone and wait. The event log records which one actually arrived, which is the thing worth knowing.',
-                  style: AppText.caption.copyWith(color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 10),
-
-                // Start here. This bypasses AlarmManager completely, so it
-                // separates "the channel is broken" from "scheduling is
-                // broken" — two problems that look identical from outside and
-                // need entirely different fixes.
-                OutlinedButton.icon(
-                  onPressed: _showNow,
-                  icon: const Icon(Icons.notifications_active_outlined, size: 17),
-                  label: const Text('Show a notification RIGHT NOW'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.emerald,
-                    side: const BorderSide(color: AppColors.gold),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                    textStyle: AppText.body,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'If nothing appears, the alarm is not the problem — the notification channel is.',
-                  style: AppText.caption.copyWith(color: AppColors.textMuted),
-                ),
-
-                const SizedBox(height: 14),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.goldRule),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Azan as the notification sound',
-                                style: AppText.body
-                                    .copyWith(color: AppColors.text)),
-                            Text(
-                              'OFF by default. The azan still plays on the ringing screen either way \u2014 this only changes the notification\u2019s own sound, and it can stop alarms firing on some builds. Turn it on only after alarms are working.',
-                              style: AppText.caption
-                                  .copyWith(color: AppColors.textMuted),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _useAzan,
-                        activeColor: AppColors.emerald,
-                        onChanged: _toggleSound,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.goldRule),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Alarm-clock scheduling',
-                                style: AppText.body
-                                    .copyWith(color: AppColors.text)),
-                            Text(
-                              'Stronger on paper, but some phones accept it and never deliver. Leave OFF unless alarms are late.',
-                              style: AppText.caption
-                                  .copyWith(color: AppColors.textMuted),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _useAlarmClock,
-                        activeColor: AppColors.emerald,
-                        onChanged: _toggleAlarmClock,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _runBothTests,
-                        icon: const Icon(Icons.alarm, size: 17),
-                        label: const Text('Test both paths in 60 seconds'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.emerald,
-                          side: const BorderSide(color: AppColors.gold),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4)),
-                          textStyle: AppText.body,
-                        ),
-                      ),
-                    ),
-                    if (_testArmed) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        tooltip: 'Cancel test',
-                        onPressed: () async {
-                          await NotificationService.cancelTestAlarm();
-                          if (mounted) setState(() => _testArmed = false);
-                        },
-                      ),
-                    ],
-                  ],
-                ),
-
-                const SizedBox(height: 22),
-                const SectionRule(label: 'Last scheduling run'),
-                const SizedBox(height: 8),
-                if (_diag == null)
-                  Text('Nothing recorded yet.',
-                      style:
-                          AppText.caption.copyWith(color: AppColors.textMuted))
-                else ...[
-                  _DiagLine('Result', '${_diag!['result']}'),
-                  _DiagLine('Alarms armed', '${_diag!['scheduled']}'),
-                  _DiagLine('Method used', '${_diag!['mode'] ?? '-'}'),
-                  if ((_diag!['failed'] as List?)?.isNotEmpty ?? false)
-                    _DiagLine('FAILED', (_diag!['failed'] as List).join(', '),
-                        bad: true),
-                  if ((_diag!['next'] as List?)?.isNotEmpty ?? false) ...[
-                    const SizedBox(height: 6),
-                    // Setting a time that has already passed today is not a
-                    // bug, but it looks exactly like one. Saying "tomorrow"
-                    // out loud removes the confusion.
-                    for (final n in (_diag!['next'] as List))
-                      _DiagLine('', '$n'),
-                  ],
-                ],
-                if (_testResult != null) ...[
-                  const SizedBox(height: 6),
-                  _DiagLine('Last test', _testResult!),
-                ],
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: _rearm,
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label: const Text('Re-arm alarms now'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.emerald,
-                    side: const BorderSide(color: AppColors.goldRule),
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                    textStyle: AppText.body,
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-                const SectionRule(label: 'Currently scheduled'),
-                const SizedBox(height: 8),
-                if (_pending.isEmpty)
-                  Text(
-                    'Nothing is scheduled. Open the Prayer Time tab once with a masjid selected.',
-                    style: AppText.caption.copyWith(color: AppColors.textMuted),
-                  )
-                else
-                  for (final String p in _pending)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(p,
-                          style: AppText.caption
-                              .copyWith(color: AppColors.textMuted)),
-                    ),
-
-                const SizedBox(height: 22),
-                Row(
-                  children: [
-                    const Expanded(child: SectionRule(label: 'Event log')),
-                    TextButton(
-                      onPressed: () async {
-                        await Clipboard.setData(
-                            ClipboardData(text: await AlarmEventLog.asText()));
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Log copied.')),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.emerald,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('Copy'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'What the alarm system actually did, kept across restarts. When a prayer is missed, this says whether it was armed, whether the service was running, and whether anything fired.',
-                  style: AppText.caption.copyWith(color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text('Show service heartbeats',
-                          style: AppText.caption
-                              .copyWith(color: AppColors.textMuted)),
-                    ),
-                    Switch(
-                      value: _showHeartbeats,
-                      activeColor: AppColors.emerald,
-                      onChanged: (v) => setState(() => _showHeartbeats = v),
-                    ),
-                  ],
-                ),
-                if (_log.isEmpty)
-                  Text('Nothing logged yet.',
-                      style:
-                          AppText.caption.copyWith(color: AppColors.textFaint))
-                else
-                  for (final AlarmLogEntry e in _log
-                      .where((e) => _showHeartbeats || !e.isHeartbeat)
-                      .take(60))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 92,
-                            child: Text(e.stamp,
-                                style: AppText.caption.copyWith(
-                                    fontSize: 11, color: AppColors.textFaint)),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  e.event,
-                                  style: AppText.caption.copyWith(
-                                    color: e.event.contains('FAILED') ||
-                                            e.event.contains('MISSING') ||
-                                            e.event.contains('REFUSED')
-                                        ? const Color(0xFFB3261E)
-                                        : e.event.startsWith('FIRED')
-                                            ? AppColors.emerald
-                                            : AppColors.text,
-                                    fontWeight: e.event.startsWith('FIRED')
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                  ),
-                                ),
-                                if (e.detail != null)
-                                  Text(e.detail!,
-                                      style: AppText.caption.copyWith(
-                                          fontSize: 11,
-                                          color: AppColors.textMuted)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
+                // REMOVED, NOW THAT THE ALARM PROBLEM IS SOLVED:
+                //   - the 60-second and instant test buttons
+                //   - the event log with its Copy button
+                //   - the "Last scheduling run" diagnostics panel
+                //   - "Re-arm alarms now"
+                //   - the azan-sound and alarm-clock scheduling toggles
+                //   - the list of currently scheduled alarms
+                //
+                // Every one of those was built to find out why alarms were not
+                // firing. They did their job. Shipping them leaves a screen that
+                // reads like an engineer's console, and the toggles in
+                // particular let a user break their own alarms by flipping a
+                // setting whose consequences they cannot judge.
+                //
+                // What remains is what a user can act on: which permissions are
+                // missing, a button that fixes each, and the manufacturer steps
+                // for the one thing no app can set for them.
+                //
+                // The code behind them is untouched, so any of it can be
+                // restored by putting the widgets back.
                 const SizedBox(height: 22),
                 const SectionRule(label: 'If alarms still miss'),
                 const SizedBox(height: 10),
@@ -689,36 +340,3 @@ class _OemTile extends StatelessWidget {
   }
 }
 
-class _DiagLine extends StatelessWidget {
-  const _DiagLine(this.label, this.value, {this.bad = false});
-
-  final String label;
-  final String value;
-  final bool bad;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(label,
-                style: AppText.caption.copyWith(color: AppColors.textMuted)),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: AppText.caption.copyWith(
-                color: bad ? const Color(0xFFB3261E) : AppColors.text,
-                fontWeight: bad ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
