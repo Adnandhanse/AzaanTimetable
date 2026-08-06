@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/app_strings.dart';
+import '../data/sajdah_verses.dart';
 import '../widgets/mushaf_view.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
@@ -267,6 +269,50 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                           '${surah.number}.${verse.number}',
                           style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald),
                         ),
+                        // Sajdah marker. Red dot and label, beside the verse
+                        // number, so it is visible while scrolling rather than
+                        // only once you have read to the end of the ayah.
+                        if (SajdahVerses.isSajdah(surah.number, verse.number))
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Tooltip(
+                              message:
+                                  SajdahVerses.noteFor(surah.number, verse.number) ??
+                                      'Sajdah at-tilawah',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFB3261E),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    S.isUrdu ? 'سجدہ' : 'Sajdah',
+                                    style: AppText.caption.copyWith(
+                                      color: const Color(0xFFB3261E),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  // An asterisk where the schools differ, so a
+                                  // reader of either one is not told their
+                                  // position is the only position.
+                                  if (SajdahVerses.noteFor(
+                                          surah.number, verse.number) !=
+                                      null)
+                                    Text(
+                                      ' *',
+                                      style: AppText.caption.copyWith(
+                                          color: const Color(0xFFB3261E)),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         const Spacer(),
                         IconButton(
                           icon: Icon(isPlaying ? Icons.stop_circle : Icons.play_circle_outline, color: AppColors.emerald),

@@ -66,6 +66,14 @@ class _HomeScreenState extends State<HomeScreen>
   /// question pointless — and for the overwhelming majority it is a permanent
   /// tab they will never open.
   bool _isAdmin = false;
+
+  /// Drives the header parallax.
+  ///
+  /// Depth on a phone comes from things moving at different rates, not from
+  /// perspective transforms. A photograph that drifts slower than the text over
+  /// it reads as being further away, and costs nothing in legibility or battery
+  /// — which literal 3D on a reading screen would.
+  final ScrollController _scroll = ScrollController();
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
 
@@ -122,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _scroll.dispose();
     _clockTimer.cancel();
     _intro.dispose();
     super.dispose();
@@ -486,12 +495,27 @@ class _HomeScreenState extends State<HomeScreen>
     final next = _nextPrayer(masjid);
 
     return SingleChildScrollView(
+      controller: _scroll,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AnimatedBuilder(
-            animation: _intro,
-            builder: (context, _) => ArtworkHeader(
+          // The photograph drifts at 40% of scroll speed and eases fractionally
+          // wider, so it sits behind the content rather than being pinned to
+          // it. Clipped, so the slower drift never opens a gap at the bottom.
+          ClipRect(
+            child: AnimatedBuilder(
+              animation: Listenable.merge(<Listenable>[_intro, _scroll]),
+              builder: (context, child) {
+                final double o =
+                    _scroll.hasClients ? _scroll.offset.clamp(0.0, 400.0) : 0.0;
+                return Transform.translate(
+                  offset: Offset(0, o * 0.4),
+                  child: Transform.scale(scale: 1 + o / 3000, child: child),
+                );
+              },
+              child: AnimatedBuilder(
+                animation: _intro,
+                builder: (context, _) => ArtworkHeader(
               masjidName: masjid.name,
               // Address on the first line, date on the second. Two lines beat
               // one long dotted string once the address is in there — most
@@ -508,6 +532,8 @@ class _HomeScreenState extends State<HomeScreen>
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
               onMetaTap: _showHijriInfo,
+                ),
+              ),
             ),
           ),
           FadeTransition(
@@ -522,8 +548,37 @@ class _HomeScreenState extends State<HomeScreen>
           // One rule, a smaller figure, and the name and countdown on the same
           // line as before — the information is identical, the height is about
           // half.
+          // The content sits on a sheet that OVERLAPS the photograph by 18px and
+          // casts a soft shadow onto it. One object in front of another, which
+          // is what depth actually looks like — no perspective, no tilt, and
+          // nothing that makes Arabic text harder to read.
+          Transform.translate(
+            offset: const Offset(0, -18),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.ivory,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                boxShadow: <BoxShadow>[
+                  // Two shadows, not one: a tight dark one for the contact edge
+                  // and a wide soft one for the ambient lift. A single shadow
+                  // reads as a sticker.
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 10,
+                    offset: Offset(0, -3),
+                  ),
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 28,
+                    offset: Offset(0, -10),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Column(
               children: [
                 const DiamondRule(),
@@ -641,6 +696,10 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(height: 90),
               ],
+            ),
+          ),
+                ],
+              ),
             ),
           ),
                 ],
@@ -770,46 +829,79 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _quickAction(IconData icon, String label, VoidCallback onTap) {
-    // FIXED HEIGHT, and the label on one line.
-    //
-    // These were sized by their content, so "Find Qibla Direction" wrapped to
-    // two lines and grew taller than "Nearby Masjid" beside it — a visibly
-    // lopsided pair. A fixed height makes them match whatever the labels are,
-    // including after translation, where Urdu and English lengths differ again.
-    return SizedBox(
-      height: 86,
-      child: Material(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(4),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(4),
-          onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: AppColors.goldRule),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(icon, color: AppColors.gold, size: 22),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.rowTitle
-                      .copyWith(fontSize: 14.5, color: AppColors.text),
-                ),
-              ],
-            ),
+  Widget _quickAction(IconData icon, String label, VoidCallback onTap) =>
+      _PressCard(icon: icon, label: label, onTap: onTap);
+
+}
+
+/// A card that sinks when pressed.
+///
+/// Depth you can feel rather than only see: on touch it drops to 96% and its
+/// shadow tightens, as though pushed toward the page. It is the one place a
+/// transform genuinely helps — it is feedback, it lasts 90ms, and no text has to
+/// stay readable through it.
+class _PressCard extends StatefulWidget {
+  const _PressCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_PressCard> createState() => _PressCardState();
+}
+
+class _PressCardState extends State<_PressCard> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 90),
+          height: 86,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.goldRule),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: const Color(0x1A000000),
+                blurRadius: _down ? 3 : 9,
+                offset: Offset(0, _down ? 1 : 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(widget.icon, color: AppColors.gold, size: 22),
+              const SizedBox(height: 8),
+              Text(
+                widget.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.rowTitle
+                    .copyWith(fontSize: 14.5, color: AppColors.text),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-
 }
