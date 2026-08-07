@@ -446,7 +446,6 @@ class IbadatContent {
           ),
         ],
       ),
-    ],
       IbadatSection(
         title: 'Azkar Baad Namaz',
         steps: <IbadatStep>[
@@ -544,6 +543,7 @@ class IbadatContent {
           ),
         ],
       ),
+    ],
   );
 
   // ===========================================================================

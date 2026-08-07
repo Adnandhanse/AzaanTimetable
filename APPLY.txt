@@ -1,70 +1,55 @@
-v53 - 6 files
-=============
+v58 - 5 files - BUILD FIX + JAMAT TIMES
+=======================================
 
-  lib/data/daily_hadith.dart          Urdu + short quotes
-  lib/widgets/daily_hadith_card.dart  translucent, compact
-  lib/screens/splash_screen.dart      video fills the screen
-  lib/screens/home_screen.dart        announcement restyled
-  lib/widgets/mushaf_view.dart        page bar and bookmark moved to the top
-  lib/screens/quran_home_screen.dart  divider lines removed
+  lib/data/ibadat_content.dart            THE BUILD FIX
+  lib/models/masjid.dart                  jamat fields
+  lib/screens/update_prayer_times_screen.dart  admin can set them
+  lib/screens/home_screen.dart            two columns
+  lib/services/app_strings.dart           Azan / Jamat labels
 
-Overwrite all six. Apply AFTER v52. No new package.
-
-=====================================================================
-1. SPLASH VIDEO NOW FILLS THE SCREEN
-=====================================================================
-It was BoxFit.contain, which fits a whole 16:9 clip inside a 9:20 phone and
-leaves two large green bands - exactly your screenshot.
-
-Now BoxFit.cover: scales until both dimensions are filled, cropping the sides.
-
-WORTH KNOWING: this only looks right because the Kaaba is centred in your clip.
-A video with anything important near the left or right edge would lose it. If
-you swap the clip later and it looks wrong, that is why.
+Overwrite all five. Apply AFTER v57. No new package.
 
 =====================================================================
-2. DAILY HADITH - TRANSLUCENT, SHORT, AND BILINGUAL
+THE BUILD ERROR - MY SPLICE, AGAIN
 =====================================================================
-TRANSLUCENT: 92% opacity, so the app stays visible behind it. The first version
-was a tall opaque card that covered the home screen and read as an interruption
-rather than something laid on top.
+    Too many positional arguments: 0 allowed, but 1 found
 
-SHORT: the saying only, chain of narrators removed. Two or three lines. Nobody
-reads a paragraph on a card that appeared uninvited.
+When I inserted the Azkar section I closed the namaz guide's sections list
+BEFORE it rather than after, so the new IbadatSection landed outside the list
+and Dart read it as a positional argument to IbadatGuide().
 
-To be precise about what that means: the text is still VERBATIM from your data -
-the quoted words, with the isnad dropped. Nothing paraphrased, nothing shortened
-mid-sentence. Where a hadith has several clauses, one complete clause is shown
-and "Read in full" gives the rest. Bukhari 6136 is the one that applies to: the
-card shows the clause about speech, the full hadith also covers neighbours and
-guests.
-
-URDU: yes. Every one of the ten is in your urd_*.json files, so the card follows
-the app language - Urdu text, right-aligned, RTL, with an Urdu theme word
-(نیت، رحم، اخلاق...). English otherwise. Your Urdu translations, not mine.
+Moved the closing bracket. I also added a structural check for all eight guides
+- sections and steps counted, and a scan for a section following a closed list -
+which now runs before I package. All eight pass.
 
 =====================================================================
-3. ANNOUNCEMENT NO LONGER LOOKS LIKE A BOX ON THE PAGE
+JAMAT TIMES
 =====================================================================
-It was a bordered white card on an ivory background - a box stuck on top,
-exactly as you said.
+ADMIN: each prayer is now one row with two taps - Azan and Jamat side by side.
+Not two separate lists: an admin setting Isha thinks "azan 7:40, jamat 8:00" as
+one decision, and two lists would mean scrolling between them and mismatching a
+pair.
 
-Now a soft gold wash with a single accent bar down the leading edge and no
-outline, so it reads as part of the page that happens to be highlighted. One
-strong vertical line draws the eye without drawing a rectangle.
+Jamat shows "Optional" rather than "Not set", so it is clear that leaving it
+blank is allowed.
 
-Also dropped the repeated masjid name from each strip - you are already looking
-at that masjid's home screen.
+USER: the prayer list gains a second column, with AZAN and JAMAT headings.
 
-=====================================================================
-4. QURAN - PAGE BAR AND BOOKMARK MOVED TO THE TOP
-=====================================================================
-The page number, ayah range and the Save/bookmark control were UNDER the text.
-On a full page of Arabic that put them below the fold: you had to read to the
-end before you could see where you were or save your place. Both are now at the
-top, where the eye starts.
+  FAJR    الفجر     5:12    5:30
+  DHUHR   الظهر    12:40    1:00
 
-DIVIDER LINES REMOVED, three of them - the two on the Qur'an home screen and the
-one under the page bar. The artwork already ends on a hard edge, the tab bar has
-its own indicator, and the page is a bordered card. Every one of those rules was
-drawn between two things that were already separated.
+Azan is in the lighter weight because it is what the alarm fires on; JAMAT is in
+the stronger one because it is what people plan around. A prayer with no jamat
+set shows a dash so the column stays aligned.
+
+THE HEADINGS AND THE SECOND COLUMN ONLY APPEAR IF THE MASJID HAS SET AT LEAST
+ONE JAMAT TIME. Every masjid registered before today has none, and would
+otherwise show an empty column under a heading, looking broken.
+
+NO NOTIFICATIONS ON JAMAT, as you asked. I checked: nothing in
+notification_service, foreground_alarm_service, foreground_alarm_manager or
+prayer_schedule_cache reads these fields. Alarms still fire on the azan only.
+
+MIGRATION IS AUTOMATIC. Missing jamat fields read as empty, so existing masjids
+keep working untouched and simply do not show the column until their admin fills
+it in.

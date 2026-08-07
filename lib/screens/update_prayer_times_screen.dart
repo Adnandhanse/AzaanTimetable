@@ -22,6 +22,14 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
   late String _isha;
   late String _juma;
 
+  // Jamat times, empty when the masjid has not set one.
+  late String _fajrJ;
+  late String _dhuhrJ;
+  late String _asrJ;
+  late String _maghribJ;
+  late String _ishaJ;
+  late String _jumaJ;
+
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
   bool _isSaving = false;
@@ -40,6 +48,12 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     _maghrib = t.maghrib;
     _isha = t.isha;
     _juma = t.juma;
+    _fajrJ = t.fajrJamat;
+    _dhuhrJ = t.dhuhrJamat;
+    _asrJ = t.asrJamat;
+    _maghribJ = t.maghribJamat;
+    _ishaJ = t.ishaJamat;
+    _jumaJ = t.jumaJamat;
     _audioName = widget.masjid.customAzanAudioName;
     _audioUrl = widget.masjid.customAzanAudioUrl;
   }
@@ -96,7 +110,12 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
 
   Future<void> _saveTimes() async {
     setState(() => _isSaving = true);
-    final times = PrayerTimes(fajr: _fajr, dhuhr: _dhuhr, asr: _asr, maghrib: _maghrib, isha: _isha, juma: _juma);
+    final times = PrayerTimes(
+      fajr: _fajr, dhuhr: _dhuhr, asr: _asr,
+      maghrib: _maghrib, isha: _isha, juma: _juma,
+      fajrJamat: _fajrJ, dhuhrJamat: _dhuhrJ, asrJamat: _asrJ,
+      maghribJamat: _maghribJ, ishaJamat: _ishaJ, jumaJamat: _jumaJ,
+    );
     try {
       await MasjidRepository.updatePrayerTimes(widget.masjid.id, times);
       if (!mounted) return;
@@ -187,12 +206,16 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
           const Text('Prayer Times', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const Text('Tap any prayer to set its time', style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 8),
-          _timeTile('Fajr', _fajr, (v) => _fajr = v),
-          _timeTile('Dhuhr', _dhuhr, (v) => _dhuhr = v),
-          _timeTile('Asr', _asr, (v) => _asr = v),
-          _timeTile('Maghrib', _maghrib, (v) => _maghrib = v),
-          _timeTile('Isha', _isha, (v) => _isha = v),
-          _timeTile('Juma (Friday)', _juma, (v) => _juma = v),
+          // Azan and jamat side by side on one row per prayer, rather than two
+          // separate lists. An admin setting Isha thinks about both together —
+          // "azan 7:40, jamat 8:00" — and two lists would mean scrolling
+          // between them and mismatching a pair.
+          _timeRow('Fajr', _fajr, (v) => _fajr = v, _fajrJ, (v) => _fajrJ = v),
+          _timeRow('Dhuhr', _dhuhr, (v) => _dhuhr = v, _dhuhrJ, (v) => _dhuhrJ = v),
+          _timeRow('Asr', _asr, (v) => _asr = v, _asrJ, (v) => _asrJ = v),
+          _timeRow('Maghrib', _maghrib, (v) => _maghrib = v, _maghribJ, (v) => _maghribJ = v),
+          _timeRow('Isha', _isha, (v) => _isha = v, _ishaJ, (v) => _ishaJ = v),
+          _timeRow('Juma (Friday)', _juma, (v) => _juma = v, _jumaJ, (v) => _jumaJ = v),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -237,28 +260,75 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     );
   }
 
-  Widget _timeTile(String label, String value, void Function(String) onPicked) {
+  /// One prayer: its azan time and, beside it, its jamat time.
+  Widget _timeRow(String label, String azan, void Function(String) onAzan,
+      String jamat, void Function(String) onJamat) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              value.trim() == '--:--' || value.trim().isEmpty ? 'Not set' : value,
-              style: TextStyle(
-                fontSize: 16,
-                color: value.trim() == '--:--' || value.trim().isEmpty ? Colors.grey : const Color(0xFF1F5E4A),
-                fontWeight: FontWeight.bold,
-              ),
+            Text(label,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 15)),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(child: _timeChip('Azan', azan, onAzan, required: true)),
+                const SizedBox(width: 10),
+                Expanded(
+                    child: _timeChip('Jamat', jamat, onJamat, required: false)),
+              ],
             ),
-            const SizedBox(width: 6),
-            const Icon(Icons.access_time, color: Color(0xFF1F5E4A)),
           ],
         ),
-        onTap: () => _pickTime(value, onPicked),
       ),
     );
   }
+
+  Widget _timeChip(String caption, String value, void Function(String) onPicked,
+      {required bool required}) {
+    final bool empty = value.trim() == '--:--' || value.trim().isEmpty;
+    return InkWell(
+      onTap: () => _pickTime(value, onPicked),
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+              color: empty ? Colors.grey.shade300 : const Color(0xFF1F5E4A)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(caption,
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                const Spacer(),
+                Icon(Icons.access_time,
+                    size: 14, color: Colors.grey.shade500),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              // "Optional" rather than "Not set" for jamat, so an admin can see
+              // at a glance that leaving it blank is allowed and nothing is
+              // missing.
+              empty ? (required ? 'Not set' : 'Optional') : value,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: empty ? Colors.grey : const Color(0xFF1F5E4A),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

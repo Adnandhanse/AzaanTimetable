@@ -1,3 +1,19 @@
+/// Azan times, and optionally the jamat times that follow them.
+///
+/// WHY JAMAT IS A SEPARATE, OPTIONAL SET
+///
+/// The azan is when the time enters; the jamat is when the congregation stands.
+/// The gap between them is a decision each masjid makes, and it is the time
+/// people actually plan around — "Isha jamat at 8:45" is what gets said, not
+/// the azan time.
+///
+/// Optional because every masjid already registered has azan times and no jamat
+/// times. A missing jamat must degrade to showing nothing rather than showing
+/// "--:--" against every prayer, or every existing masjid would suddenly look
+/// broken.
+///
+/// ALARMS STILL FIRE ON THE AZAN, not the jamat. Nothing in the notification
+/// code reads these fields.
 class PrayerTimes {
   String fajr;
   String dhuhr;
@@ -6,6 +22,14 @@ class PrayerTimes {
   String isha;
   String juma;
 
+  /// Jamat times. Empty string means the masjid has not set one.
+  String fajrJamat;
+  String dhuhrJamat;
+  String asrJamat;
+  String maghribJamat;
+  String ishaJamat;
+  String jumaJamat;
+
   PrayerTimes({
     required this.fajr,
     required this.dhuhr,
@@ -13,7 +37,22 @@ class PrayerTimes {
     required this.maghrib,
     required this.isha,
     required this.juma,
+    this.fajrJamat = '',
+    this.dhuhrJamat = '',
+    this.asrJamat = '',
+    this.maghribJamat = '',
+    this.ishaJamat = '',
+    this.jumaJamat = '',
   });
+
+  bool get hasAnyJamat => <String>[
+        fajrJamat,
+        dhuhrJamat,
+        asrJamat,
+        maghribJamat,
+        ishaJamat,
+        jumaJamat,
+      ].any((t) => t.trim().isNotEmpty);
 
   Map<String, dynamic> toMap() => {
         'fajr': fajr,
@@ -22,6 +61,12 @@ class PrayerTimes {
         'maghrib': maghrib,
         'isha': isha,
         'juma': juma,
+        'fajrJamat': fajrJamat,
+        'dhuhrJamat': dhuhrJamat,
+        'asrJamat': asrJamat,
+        'maghribJamat': maghribJamat,
+        'ishaJamat': ishaJamat,
+        'jumaJamat': jumaJamat,
       };
 
   factory PrayerTimes.fromMap(Map<String, dynamic> map) => PrayerTimes(
@@ -31,6 +76,15 @@ class PrayerTimes {
         maghrib: map['maghrib'] ?? '--:--',
         isha: map['isha'] ?? '--:--',
         juma: map['juma'] ?? '--:--',
+        // Default to EMPTY, not '--:--'. Absent means "not set", and the UI
+        // shows nothing rather than a placeholder against every prayer of every
+        // masjid registered before this existed.
+        fajrJamat: map['fajrJamat'] ?? '',
+        dhuhrJamat: map['dhuhrJamat'] ?? '',
+        asrJamat: map['asrJamat'] ?? '',
+        maghribJamat: map['maghribJamat'] ?? '',
+        ishaJamat: map['ishaJamat'] ?? '',
+        jumaJamat: map['jumaJamat'] ?? '',
       );
 }
 

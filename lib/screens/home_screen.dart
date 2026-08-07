@@ -819,17 +819,47 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _prayerTimesList(Masjid masjid, String? nextLabel) {
-    final rows = <(String, String, String)>[
-      (S.fajr, masjid.prayerTimes.fajr, _arabicPrayerNames['fajr']!),
-      (S.dhuhr, masjid.prayerTimes.dhuhr, _arabicPrayerNames['dhuhr']!),
-      (S.asr, masjid.prayerTimes.asr, _arabicPrayerNames['asr']!),
-      (S.maghrib, masjid.prayerTimes.maghrib, _arabicPrayerNames['maghrib']!),
-      (S.isha, masjid.prayerTimes.isha, _arabicPrayerNames['isha']!),
-      (S.juma, masjid.prayerTimes.juma, _arabicPrayerNames['juma']!),
+    final t = masjid.prayerTimes;
+    // label, azan, arabic, jamat
+    final rows = <(String, String, String, String)>[
+      (S.fajr, t.fajr, _arabicPrayerNames['fajr']!, t.fajrJamat),
+      (S.dhuhr, t.dhuhr, _arabicPrayerNames['dhuhr']!, t.dhuhrJamat),
+      (S.asr, t.asr, _arabicPrayerNames['asr']!, t.asrJamat),
+      (S.maghrib, t.maghrib, _arabicPrayerNames['maghrib']!, t.maghribJamat),
+      (S.isha, t.isha, _arabicPrayerNames['isha']!, t.ishaJamat),
+      (S.juma, t.juma, _arabicPrayerNames['juma']!, t.jumaJamat),
     ];
+
+    // Column headings only when this masjid actually publishes jamat times.
+    // Without them the right-hand column is unlabelled; with them on a masjid
+    // that has none, they would head an empty column.
+    final bool showJamat = t.hasAnyJamat;
 
     return Column(
       children: [
+        if (showJamat)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4, right: 2),
+            child: Row(
+              children: [
+                const Spacer(),
+                SizedBox(
+                  width: 66,
+                  child: Text(S.azanLabel.toUpperCase(),
+                      textAlign: TextAlign.right,
+                      style: AppText.eyebrow
+                          .copyWith(fontSize: 9.5, color: AppColors.textFaint)),
+                ),
+                SizedBox(
+                  width: 66,
+                  child: Text(S.jamatLabel.toUpperCase(),
+                      textAlign: TextAlign.right,
+                      style: AppText.eyebrow
+                          .copyWith(fontSize: 9.5, color: AppColors.gold)),
+                ),
+              ],
+            ),
+          ),
         for (int i = 0; i < rows.length; i++)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
@@ -862,18 +892,55 @@ class _HomeScreenState extends State<HomeScreen>
                     color: AppColors.gold,
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    rows[i].$2,
-                    textAlign: TextAlign.right,
-                    style: AppText.listTime.copyWith(
-                      fontSize: 17,
-                      color: rows[i].$1 == nextLabel
-                          ? AppColors.emerald
-                          : AppColors.text,
+                if (!showJamat)
+                  Expanded(
+                    child: Text(
+                      rows[i].$2,
+                      textAlign: TextAlign.right,
+                      style: AppText.listTime.copyWith(
+                        fontSize: 17,
+                        color: rows[i].$1 == nextLabel
+                            ? AppColors.emerald
+                            : AppColors.text,
+                      ),
+                    ),
+                  )
+                else ...[
+                  const Spacer(),
+                  // Azan is what the alarm fires on, so it stays in the primary
+                  // weight. Jamat is what people plan around, so it is the one
+                  // in gold.
+                  SizedBox(
+                    width: 66,
+                    child: Text(
+                      rows[i].$2,
+                      textAlign: TextAlign.right,
+                      style: AppText.listTime.copyWith(
+                        fontSize: 15.5,
+                        color: rows[i].$1 == nextLabel
+                            ? AppColors.emerald
+                            : AppColors.textMid,
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(
+                    width: 66,
+                    child: Text(
+                      // A dash, not a blank, so the column stays aligned when
+                      // one prayer has no jamat set.
+                      rows[i].$4.trim().isEmpty ? '\u2014' : rows[i].$4,
+                      textAlign: TextAlign.right,
+                      style: AppText.listTime.copyWith(
+                        fontSize: 17,
+                        color: rows[i].$4.trim().isEmpty
+                            ? AppColors.textFaint
+                            : (rows[i].$1 == nextLabel
+                                ? AppColors.emerald
+                                : AppColors.text),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

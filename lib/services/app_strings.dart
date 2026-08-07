@@ -92,6 +92,8 @@ class S {
       'Zakat is due on the net total, not on each holding separately. These lines show where the amount comes from.',
       'زکوٰۃ خالص کل رقم پر واجب ہے، ہر مال پر الگ نہیں۔ یہ سطریں بتاتی ہیں کہ رقم کہاں سے آئی۔');
 
+  static String get azanLabel => _t('Azan', 'اذان');
+  static String get jamatLabel => _t('Jamat', 'جماعت');
   static String get stepByStep => _t('Step by step', 'مرحلہ وار');
   static String get comingSoon => _t('Coming soon', 'جلد آ رہا ہے');
   static String get evidence => _t('EVIDENCE', 'دلائل');
