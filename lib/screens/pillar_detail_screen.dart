@@ -158,10 +158,25 @@ class _StepCard extends StatelessWidget {
                 style: AppText.arabicVerse.copyWith(color: AppColors.emerald),
               ),
             ),
-            if (step.translation != null) ...<Widget>[
+            // Urdu when the app is in Urdu, falling back to English if that
+            // step has no Urdu yet.
+            if (step.translation != null || step.translationUr != null) ...<Widget>[
               const SizedBox(height: 8),
-              Text(step.translation!,
-                  style: AppText.translation.copyWith(color: AppColors.textMid)),
+              Builder(builder: (context) {
+                final bool urdu = S.isUrdu && step.translationUr != null;
+                return Directionality(
+                  textDirection: urdu ? TextDirection.rtl : TextDirection.ltr,
+                  child: Text(
+                    urdu ? step.translationUr! : (step.translation ?? ''),
+                    textAlign: urdu ? TextAlign.right : TextAlign.left,
+                    style: urdu
+                        ? AppText.translation.copyWith(
+                            fontSize: 16, height: 1.9, color: AppColors.textMid)
+                        : AppText.translation
+                            .copyWith(color: AppColors.textMid),
+                  ),
+                );
+              }),
             ],
           ],
 

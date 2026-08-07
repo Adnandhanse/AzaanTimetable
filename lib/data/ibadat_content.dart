@@ -8,6 +8,7 @@ class IbadatStep {
     this.method,
     this.arabic,
     this.translation,
+    this.translationUr,
     this.keyPoint,
     this.refs = const <HadithRef>[],
     this.practiceDiffers,
@@ -21,8 +22,14 @@ class IbadatStep {
   /// What is said at this step.
   final String? arabic;
 
-  /// Meaning of [arabic] in English.
+  /// Meaning of [arabic] in English, and in Urdu.
+  ///
+  /// Urdu was missing entirely: an Urdu reader saw Arabic and then an English
+  /// translation, which is the wrong way round for most of this app's users.
+  /// Where translationUr is null the English is shown, so partial coverage
+  /// degrades sensibly instead of leaving a blank.
   final String? translation;
+  final String? translationUr;
 
   /// A short hadith worth quoting at this step in its own right.
   final String? keyPoint;
@@ -155,10 +162,25 @@ class IbadatContent {
         steps: <IbadatStep>[
           IbadatStep(
             title: 'Surah Al-Fatihah',
+            // ALL SEVEN VERSES, verbatim from the app's own quran_en.json.
+            // It was the first two lines with an ellipsis, which is no use to
+            // anyone actually trying to recite.
             arabic:
-                'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\nالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+                'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ\n'
+                'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ\n'
+                'ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ\n'
+                'مَٰلِكِ يَوۡمِ ٱلدِّينِ\n'
+                'إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ\n'
+                'ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ\n'
+                'صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ',
             translation:
-                'In the Name of Allah, the Most Gracious, the Most Merciful. All praise is due to Allah, Lord of the worlds...',
+                'In the name of Allah, the Entirely Merciful, the Especially Merciful. '
+                'All praise is due to Allah, Lord of the worlds. '
+                'The Entirely Merciful, the Especially Merciful. '
+                'Sovereign of the Day of Recompense. '
+                'It is You we worship and You we ask for help. '
+                'Guide us to the straight path \u2014 '
+                'the path of those upon whom You have bestowed favour, not of those who have evoked Your anger, nor of those who are astray.',
             keyPoint:
                 '"There is no prayer for the one who does not recite Surah Al-Fatihah."',
             refs: <HadithRef>[
@@ -170,6 +192,33 @@ class IbadatContent {
                   book: HadithBook.muslim,
                   number: 874,
                   note: 'Ubada b. as-Samit: he who does not recite it'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Fatihah Ke Baad',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Ameen',
+            method:
+                'Surah Fatihah khatam hone par "Ameen" kaha jata hai. Imam ke Ameen kehne par muqtadi bhi Ameen kahein.',
+            arabic: 'آمِينَ',
+            translation: 'Ameen \u2014 accept it.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 780,
+                  note: 'Say Amin when the imam says it'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Qira\u2018at',
+            method:
+                'Pehli do rakaton mein Surah Fatihah ke baad koi aur surah ya chand aayaat padhi jati hain. Aakhri rakaton mein sirf Surah Fatihah.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 776,
+                  note: 'Al-Fatiha followed by another surah in the first two rak\u2018at'),
+              HadithRef(book: HadithBook.bukhari, number: 762,
+                  note: 'Abu Qatada: what was recited in Zuhr and Asr'),
             ],
           ),
         ],
@@ -265,9 +314,22 @@ class IbadatContent {
         steps: <IbadatStep>[
           IbadatStep(
             title: 'Tashahhud',
-            arabic: 'التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ...',
+            // Complete, from the Arabic of Bukhari 831 — the hadith cited
+            // below it. Two verbatim fragments joined: the hadith carries the
+            // narrator's aside "for when you say that, it reaches every
+            // righteous servant in the heavens and the earth" between them,
+            // which is a comment on the tashahhud rather than part of it. Both
+            // fragments were checked to appear verbatim in the source.
+            arabic:
+                'التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، '
+                'السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، '
+                'السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، '
+                'أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
             translation:
-                'All compliments, prayers and pure words are due to Allah...',
+                'All compliments, prayers and pure words are due to Allah. '
+                'Peace be upon you, O Prophet, and the mercy of Allah and His blessings. '
+                'Peace be upon us and upon the righteous servants of Allah. '
+                'I bear witness that there is no deity except Allah, and I bear witness that Muhammad is His servant and His Messenger.',
             refs: <HadithRef>[
               HadithRef(
                   book: HadithBook.bukhari,
@@ -304,10 +366,17 @@ class IbadatContent {
           ),
           IbadatStep(
             title: 'Durood Ibrahim',
+            // Complete, verbatim from the Arabic of Bukhari 3370.
             arabic:
-                'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ...',
+                'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، '
+                'كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ. '
+                'اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، '
+                'كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',
             translation:
-                'O Allah, send blessings upon Muhammad and the family of Muhammad...',
+                'O Allah, send blessings upon Muhammad and upon the family of Muhammad, '
+                'as You sent blessings upon Ibrahim and upon the family of Ibrahim; You are Praiseworthy, Glorious. '
+                'O Allah, bless Muhammad and the family of Muhammad, '
+                'as You blessed Ibrahim and the family of Ibrahim; You are Praiseworthy, Glorious.',
             refs: <HadithRef>[
               HadithRef(
                   book: HadithBook.bukhari,
@@ -321,6 +390,39 @@ class IbadatContent {
                   book: HadithBook.muslim,
                   number: 908,
                   note: 'Ka\u2018b b. Ujrah: the words taught'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Dua-e-Masura',
+            method:
+                'Durood ke baad, salam se pehle yeh dua padhi jati hai. Nabi \u0637 ne Abu Bakr Siddiq \u0631\u0636\u064A \u0627\u0644\u0644\u0647 \u0639\u0646\u0647 ko yehi dua sikhayi thi jab unhon ne namaz mein padhne ke liye dua maangi.',
+            // The Arabic of Bukhari 834, WITH ONE CORRECTION.
+            //
+            // The dataset's Arabic for this hadith contains two U+FFFD
+            // replacement characters where the word وَ should be — a genuine
+            // encoding fault in the source file, not a reading difference. The
+            // English transliteration in the same record reads "Wala
+            // yaghfiru", which identifies the missing word beyond doubt.
+            //
+            // The correction is CONFIRMED AGAINST A PARALLEL NARRATION: the
+            // same dua appears at Bukhari 6326, where the source is not
+            // corrupted, and the reconstructed text matches it verbatim. So
+            // nothing here was written from memory — the damaged word was
+            // recovered from your own data, from a different copy of the same
+            // hadith.
+            arabic:
+                'اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي ظُلْمًا كَثِيرًا وَلَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ، '
+                'فَاغْفِرْ لِي مَغْفِرَةً مِنْ عِنْدِكَ، وَارْحَمْنِي إِنَّكَ أَنْتَ الْغَفُورُ الرَّحِيمُ',
+            translation:
+                'O Allah, I have wronged myself greatly, and none forgives sins except You. '
+                'So grant me forgiveness from Yourself and have mercy on me \u2014 You are the Forgiving, the Merciful.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 834,
+                  note: 'Abu Bakr: teach me a supplication for my prayer'),
+              HadithRef(book: HadithBook.bukhari, number: 6326,
+                  note: 'The same, in the Book of Invocations'),
+              HadithRef(book: HadithBook.muslim, number: 6869,
+                  note: 'Abu Bakr: a supplication to recite in prayer'),
             ],
           ),
           IbadatStep(
@@ -345,6 +447,103 @@ class IbadatContent {
         ],
       ),
     ],
+      IbadatSection(
+        title: 'Azkar Baad Namaz',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Istighfar aur Allahumma Antas-Salam',
+            method:
+                'Salam ke baad teen martaba "Astaghfirullah" kaha jata hai, phir yeh dua.',
+            arabic:
+                'أَسْتَغْفِرُ اللَّهَ \u00D7\u0663\n'
+                'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ ذَا الْجَلَالِ وَالْإِكْرَامِ',
+            translation:
+                'I seek Allah\u2019s forgiveness (three times). O Allah, You are Peace and from You is peace. Blessed are You, O Possessor of Majesty and Honour.',
+            translationUr:
+                'میں اللہ سے مغفرت مانگتا ہوں (تین بار)۔ اے اللہ! تو سلامتی والا ہے اور تجھی سے سلامتی ہے۔ تو بابرکت ہے، اے جلال اور عزت والے۔',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.muslim, number: 1334,
+                  note: 'Thawban: he sought forgiveness three times, then said this'),
+              HadithRef(book: HadithBook.nasai, number: 1337,
+                  note: 'Thawban: what he said on finishing the prayer'),
+            ],
+          ),
+          IbadatStep(
+            title: 'La Ilaha Illallah Wahdahu',
+            method: 'Har farz namaz ke baad Nabi \u0637 yeh padha karte the.',
+            arabic:
+                'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ. '
+                'اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ',
+            translation:
+                'There is no deity but Allah alone, with no partner. His is the dominion and His is the praise, and He is able to do all things. '
+                'O Allah, none can withhold what You give, and none can give what You withhold, and no wealth or majesty can benefit anyone against You.',
+            translationUr:
+                'اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے، اس کا کوئی شریک نہیں۔ اسی کی بادشاہی ہے اور اسی کے لیے تمام تعریف ہے، اور وہ ہر چیز پر قادر ہے۔ '
+                'اے اللہ! جو تو دے اسے کوئی روکنے والا نہیں، اور جو تو روک لے اسے کوئی دینے والا نہیں، اور کسی مالدار کو اس کی دولت تیرے مقابلے میں نفع نہیں دے سکتی۔',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 844,
+                  note: 'Al-Mughira: what he said after every obligatory prayer'),
+              HadithRef(book: HadithBook.bukhari, number: 6330,
+                  note: 'The same, at the end of every prayer'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Tasbeeh-e-Fatimi',
+            method:
+                'Har namaz ke baad 33 martaba SubhanAllah, 33 martaba Alhamdulillah aur 33 martaba Allahu Akbar.',
+            arabic:
+                'سُبْحَانَ اللَّهِ \u00D7\u0663\u0663\n'
+                'الْحَمْدُ لِلَّهِ \u00D7\u0663\u0663\n'
+                'اللَّهُ أَكْبَرُ \u00D7\u0663\u0663',
+            translation:
+                'Glory be to Allah (33 times). All praise is due to Allah (33 times). Allah is the Greatest (33 times).',
+            translationUr:
+                'اللہ پاک ہے (33 بار)۔ تمام تعریف اللہ کے لیے ہے (33 بار)۔ اللہ سب سے بڑا ہے (33 بار)۔',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 843,
+                  note: 'The poor emigrants: tasbih after every prayer'),
+              HadithRef(book: HadithBook.muslim, number: 1347,
+                  note: 'Abu Huraira: thirty-three times each'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Ayat-ul-Kursi',
+            method: 'Surah Al-Baqarah, aayat 255.',
+            // NO HADITH CITED HERE, AND THAT IS DELIBERATE.
+            //
+            // The verse itself is Qur'an and beyond question. What could not be
+            // cited is the narration about reciting it AFTER EVERY PRAYER: every
+            // version of it in this app's data — Tirmidhi 2878, Tirmidhi 2879
+            // and Ibn Majah 3549 — is graded DAIF by every grader.
+            //
+            // The narration usually quoted for this practice is in Nasa'i's
+            // Amal al-Yawm wal-Laylah, which is not one of the six books and is
+            // not in this dataset. So under the no-Daif rule there is nothing
+            // here to cite, and rather than cite something weak the step simply
+            // does not claim a hadith.
+            arabic:
+                'ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ ٱلۡحَيُّ ٱلۡقَيُّومُۚ لَا تَأۡخُذُهُۥ سِنَةٞ وَلَا نَوۡمٞۚ '
+                'لَّهُۥ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۗ مَن ذَا ٱلَّذِي يَشۡفَعُ عِندَهُۥٓ إِلَّا بِإِذۡنِهِۦۚ '
+                'يَعۡلَمُ مَا بَيۡنَ أَيۡدِيهِمۡ وَمَا خَلۡفَهُمۡۖ وَلَا يُحِيطُونَ بِشَيۡءٖ مِّنۡ عِلۡمِهِۦٓ إِلَّا بِمَا شَآءَۚ '
+                'وَسِعَ كُرۡسِيُّهُ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضَۖ وَلَا يَـُٔودُهُۥ حِفۡظُهُمَاۚ وَهُوَ ٱلۡعَلِيُّ ٱلۡعَظِيمُ',
+            translation:
+                'Allah \u2014 there is no deity except Him, the Ever-Living, the Sustainer of all existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
+            translationUr:
+                'اللہ، وہ زندہ جاوید ہستی، جو تمام کائنات کو سنبھالے ہوئے ہے، اُس کے سوا کوئی خدا نہیں ہے۔ وہ نہ سوتا ہے اور نہ اُسے اونگھ لگتی ہے۔ زمین اور آسمانوں میں جو کچھ ہے، اُسی کا ہے۔ کون ہے جو اُس کی جناب میں اُس کی اجازت کے بغیر سفارش کر سکے؟ جو کچھ بندوں کے سامنے ہے اسے بھی وہ جانتا ہے اور جو کچھ اُن سے اوجھل ہے، اس سے بھی وہ واقف ہے۔ اُس کی حکومت آسمانوں اور زمین پر چھائی ہوئی ہے اور اُن کی نگہبانی اس کے لیے کوئی تھکا دینے والا کام نہیں ہے۔ بس وہی ایک بزرگ و برتر ذات ہے۔',
+          ),
+          IbadatStep(
+            title: 'Mu\u2018awwidhat',
+            method:
+                'Surah Al-Ikhlas, Al-Falaq aur An-Nas. Nabi \u0637 ne har namaz ke baad inhein padhne ka hukm diya.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.abudawud, number: 1523,
+                  note: 'Uqbah b. Amir: commanded to recite them after every prayer'),
+              HadithRef(book: HadithBook.nasai, number: 1336,
+                  note: 'Uqbah b. Amr: recite the Mu\u2018awwidhat after every prayer'),
+            ],
+          ),
+        ],
+      ),
   );
 
   // ===========================================================================
@@ -700,6 +899,178 @@ class IbadatContent {
                   note: 'Ibn Abbas: what the Prophet said to Umm Sinan'),
               HadithRef(book: HadithBook.tirmidhi, number: 939,
                   note: 'Umm Ma\u2018qil: umrah in Ramadan is equal to hajj'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // NAMAZ-E-JANAZA
+  // ===========================================================================
+  static const IbadatGuide janaza = IbadatGuide(
+    pillar: 'Namaz-e-Janaza',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Janaze Ki Ahmiyat',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Ajar',
+            method:
+                'Jo janaze mein shareek ho aur namaz-e-janaza padhe uske liye ek qirat ajar hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1325,
+                  note: 'Abu Huraira: a qirat for whoever prays over it'),
+            ],
+          ),
+        ],
+      ),
+      IbadatSection(
+        title: 'Janaze Ka Tareeqa',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Saf Bandi Aur Niyyat',
+            method:
+                'Janaza saamne rakh kar imam ke peeche safein banayi jati hain. Namaz-e-janaza mein na ruku hai na sajdah — poori namaz khade ho kar chaar takbeeron mein hoti hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1245,
+                  note: 'Najashi: he lined them up and said four takbirs'),
+              HadithRef(book: HadithBook.muslim, number: 2204,
+                  note: 'Abu Huraira: four takbirs over the Negus'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Pehli Takbeer',
+            method:
+                'Haath uthakar "Allahu Akbar" kahein, phir haath baandh kar Sana padhein.',
+            arabic: 'اللّٰهُ أَكْبَرُ',
+            translation: 'Allah is the Greatest.',
+            practiceDiffers:
+                'Pehli takbeer ke baad kya padha jaye — Hanafi mazhab mein Sana, aur Shafi\u2018i mazhab mein Surah Al-Fatihah. Yeh ikhtilaf mashhoor hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1318,
+                  note: 'He went forward and they lined up; four takbirs'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Doosri Takbeer',
+            method: 'Doosri takbeer ke baad Durood Ibrahim padhein.',
+            // Same complete Durood as in the namaz guide, from Bukhari 3370.
+            arabic:
+                'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، '
+                'كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ. '
+                'اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ، '
+                'كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ، إِنَّكَ حَمِيدٌ مَجِيدٌ',
+            translation:
+                'O Allah, send blessings upon Muhammad and upon the family of Muhammad, '
+                'as You sent blessings upon Ibrahim and upon the family of Ibrahim; You are Praiseworthy, Glorious. '
+                'O Allah, bless Muhammad and the family of Muhammad, '
+                'as You blessed Ibrahim and the family of Ibrahim; You are Praiseworthy, Glorious.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 3370,
+                  note: 'Ka\u2018b b. Ujrah: how to invoke blessings'),
+              HadithRef(book: HadithBook.muslim, number: 908,
+                  note: 'The words taught for sending blessings'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Teesri Takbeer',
+            method: 'Teesri takbeer ke baad mayyit ke liye dua ki jati hai.',
+            // Complete, verbatim from the Arabic of Nasa'i 1986.
+            arabic:
+                'اللَّهُمَّ اغْفِرْ لِحَيِّنَا وَمَيِّتِنَا وَشَاهِدِنَا وَغَائِبِنَا '
+                'وَذَكَرِنَا وَأُنْثَانَا وَصَغِيرِنَا وَكَبِيرِنَا',
+            translation:
+                'O Allah, forgive our living and our dead, those present among us and those absent, '
+                'our males and our females, our young and our old.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.nasai, number: 1986,
+                  note: 'What he said in the funeral prayer'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Chauthi Takbeer Aur Salam',
+            method:
+                'Chauthi takbeer ke baad thodi der thehar kar dono taraf salam pher dein.',
+            arabic: 'السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ',
+            translation: 'Peace and mercy of Allah be upon you.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 1333,
+                  note: 'Four takbirs, then the prayer was complete'),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  // ===========================================================================
+  // NAMAZ-E-EIDAIN
+  // ===========================================================================
+  static const IbadatGuide eidain = IbadatGuide(
+    pillar: 'Namaz-e-Eidain',
+    reviewed: false,
+    sections: <IbadatSection>[
+      IbadatSection(
+        title: 'Eid Ki Namaz Ka Tareeqa',
+        steps: <IbadatStep>[
+          IbadatStep(
+            title: 'Eidgah Jana',
+            method:
+                'Eid ki namaz ke liye Eidgah ya khule maidan mein jana Sunnat hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 351,
+                  note: 'Umm Atiyya: going out to the musalla on the two Eids'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Na Azan Na Iqamat',
+            method:
+                'Eid ki namaz ke liye na azan hai na iqamat — seedhe namaz shuru ki jati hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.muslim, number: 2049,
+                  note: 'Ibn Abbas and Jabir: there was no adhan for the two Eids'),
+              HadithRef(book: HadithBook.muslim, number: 2050,
+                  note: 'Ata: no adhan on Eid al-Fitr'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Do Rakat',
+            method:
+                'Eid ki namaz do rakat hai. Nabi \u0637 ne is se pehle ya baad koi namaz nahi padhi.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 964,
+                  note: 'Ibn Abbas: two rak\u2018at, none before or after'),
+              HadithRef(book: HadithBook.bukhari, number: 989,
+                  note: 'Ibn Abbas: two rak\u2018at on the day of Eid al-Fitr'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Zaid Takbeerein',
+            method:
+                'Dono rakaton mein zaid takbeerein kahi jati hain, har takbeer par haath uthaye jate hain.',
+            practiceDiffers:
+                'Takbeeron ki tadaad mein ikhtilaf hai. Hanafi mazhab: pehli rakat mein qira\u2018at se pehle 3, doosri mein qira\u2018at ke baad 3. Shafi\u2018i mazhab: pehli mein 7, doosri mein 5 — jaisa in ahadees mein aaya hai.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.ibnmajah, number: 1279,
+                  note: 'Seven in the first rak\u2018ah and five in the second'),
+              HadithRef(book: HadithBook.tirmidhi, number: 536,
+                  note: 'Seven before the recitation, five in the last'),
+            ],
+          ),
+          IbadatStep(
+            title: 'Khutba Namaz Ke Baad',
+            method:
+                'Juma ke bar-aks Eid ka khutba namaz ke BAAD hota hai, pehle nahi.',
+            refs: <HadithRef>[
+              HadithRef(book: HadithBook.bukhari, number: 962,
+                  note: 'Ibn Abbas: all of them prayed before the khutba'),
+              HadithRef(book: HadithBook.bukhari, number: 963,
+                  note: 'Ibn Umar: the two Eid prayers before the sermon'),
+              HadithRef(book: HadithBook.muslim, number: 2052,
+                  note: 'The Eid prayers were before the sermon'),
             ],
           ),
         ],

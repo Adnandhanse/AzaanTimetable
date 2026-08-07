@@ -77,12 +77,30 @@ class PrayersHomeScreen extends StatelessWidget {
           'guide': IbadatContent.umrah,
         },
         {
+          'title': S.isUrdu ? 'نمازِ جنازہ' : 'Namaz-e-Janaza',
+          'subtitle': S.isUrdu ? 'جنازے کا طریقہ' : 'The funeral prayer',
+          'description': S.isUrdu
+              ? 'نمازِ جنازہ کا طریقہ اور متعلقہ احادیث۔'
+              : 'How the funeral prayer is offered, with related hadith.',
+          'icon': Icons.volunteer_activism,
+          'guide': IbadatContent.janaza,
+        },
+        {
+          'title': S.isUrdu ? 'نمازِ عیدین' : 'Namaz-e-Eidain',
+          'subtitle': S.isUrdu ? 'عید کی نماز' : 'The two Eid prayers',
+          'description': S.isUrdu
+              ? 'عید الفطر اور عید الاضحیٰ کی نماز کا طریقہ۔'
+              : 'How the Eid al-Fitr and Eid al-Adha prayers are offered.',
+          'icon': Icons.celebration_outlined,
+          'guide': IbadatContent.eidain,
+        },
+        {
           'title': S.isUrdu ? 'دعائیں' : 'Duas',
           'subtitle': S.isUrdu ? 'روزمرہ کی دعائیں' : 'Everyday supplications',
           'description': S.isUrdu
               ? 'حصن المسلم سے 132 باب، عربی اور ترجمے کے ساتھ۔'
               : '132 chapters from Hisn al-Muslim, with Arabic and translation.',
-          'icon': Icons.volunteer_activism_outlined,
+          'icon': Icons.menu_book_outlined,
           // Opens the duas library, which already existed in the codebase but
           // nothing navigated to and whose asset was never declared.
           'duas': true,
