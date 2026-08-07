@@ -77,6 +77,16 @@ class _HomeScreenState extends State<HomeScreen>
   /// it reads as being further away, and costs nothing in legibility or battery
   /// — which literal 3D on a reading screen would.
   final ScrollController _scroll = ScrollController();
+
+  /// One icon per prayer, in the same order as the rows.
+  static const List<IconData> _prayerIcons = <IconData>[
+    Icons.wb_twilight,        // Fajr
+    Icons.wb_sunny_outlined,  // Dhuhr
+    Icons.wb_sunny,           // Asr
+    Icons.wb_twilight,        // Maghrib
+    Icons.nightlight_round,   // Isha
+    Icons.groups_outlined,    // Juma
+  ];
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
 
@@ -864,12 +874,21 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         for (int i = 0; i < rows.length; i++)
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
+            padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
             decoration: BoxDecoration(
-              border: i == 0
-                  ? null
-                  : const Border(
-                      top: BorderSide(color: AppColors.goldRuleFaint)),
+              // The next prayer gets a tinted row and a green edge, so it is
+              // findable at a glance without reading any of the times.
+              color: rows[i].$1 == nextLabel
+                  ? AppColors.emerald.withOpacity(0.06)
+                  : null,
+              borderRadius: BorderRadius.circular(6),
+              border: rows[i].$1 == nextLabel
+                  ? const Border(
+                      left: BorderSide(color: AppColors.emerald, width: 3))
+                  : (i == 0
+                      ? null
+                      : const Border(
+                          top: BorderSide(color: AppColors.goldRuleFaint))),
             ),
             // EVERYTHING IS FLEX NOW, no fixed pixel widths.
             //
@@ -882,6 +901,27 @@ class _HomeScreenState extends State<HomeScreen>
             // scales with the screen instead of assuming one.
             child: Row(
               children: [
+                // A circular icon per prayer, tinted emerald for the next one.
+                // It gives the eye something to land on and makes the row read
+                // as a list of moments in a day rather than a table of numbers.
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: rows[i].$1 == nextLabel
+                        ? AppColors.emerald
+                        : AppColors.gold.withOpacity(0.10),
+                  ),
+                  child: Icon(
+                    _prayerIcons[i],
+                    size: 18,
+                    color: rows[i].$1 == nextLabel
+                        ? Colors.white
+                        : AppColors.gold,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   flex: 4,
                   child: Text(
@@ -978,55 +1018,143 @@ class _HomeScreenState extends State<HomeScreen>
 
         _notifyNewAnnouncements(list, masjid.name);
 
+        final Announcement first = list.first;
+
         return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          child: Material(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => _showAnnouncements(list, masjid.name),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.goldRule),
+                ),
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                child: Row(
+                  children: <Widget>[
+                    // Icon in a soft gold disc, the way a notification looks
+                    // anywhere else. It reads as an alert rather than as
+                    // decoration.
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.gold.withOpacity(0.12),
+                      ),
+                      child: const Icon(Icons.campaign_outlined,
+                          size: 20, color: AppColors.gold),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            S.isUrdu ? 'اہم اعلان' : 'Important Announcement',
+                            style: AppText.rowTitle
+                                .copyWith(fontSize: 15, color: AppColors.text),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            first.message,
+                            // ONE LINE ONLY. A preview that runs to three lines
+                            // is not a preview, and the whole point of "read
+                            // more" is that the home screen stays a home
+                            // screen.
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.caption
+                                .copyWith(color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(S.isUrdu ? 'مزید' : 'Read More',
+                            style: AppText.caption.copyWith(
+                                color: AppColors.gold,
+                                fontWeight: FontWeight.w600)),
+                        const Icon(Icons.chevron_right,
+                            size: 16, color: AppColors.gold),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// The full text, and any older announcements still running.
+  ///
+  /// A bottom sheet rather than a page: an announcement is a short read, and
+  /// pushing a whole screen for two sentences makes it feel heavier than it is.
+  void _showAnnouncements(List<Announcement> list, String masjidName) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.ivory,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 16, 22, 24),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              for (final Announcement a in list)
-                // NO CARD, NO FILL, NO BORDER BOX.
-                //
-                // Two attempts at this were both boxes: a bordered white card,
-                // then a gold-tinted strip with an accent bar. Both still read
-                // as a panel dropped onto the page, because that is what any
-                // filled rectangle reads as on a flat ivory layout.
-                //
-                // This is a line of text with a small icon between two
-                // hairlines — the same hairlines the prayer list uses. It sits
-                // IN the page rather than ON it.
-                Container(
-                  margin: const EdgeInsets.only(bottom: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: AppColors.goldRuleFaint),
-                      bottom: BorderSide(color: AppColors.goldRuleFaint),
+              Row(
+                children: <Widget>[
+                  const Icon(Icons.campaign_outlined,
+                      size: 19, color: AppColors.gold),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      S.isUrdu ? 'اہم اعلان' : 'Important Announcement',
+                      style: AppText.rowTitle
+                          .copyWith(fontSize: 17, color: AppColors.text),
                     ),
                   ),
-                  child: Row(
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    color: AppColors.textMuted,
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  ),
+                ],
+              ),
+              Text(masjidName,
+                  style: AppText.caption.copyWith(color: AppColors.textMuted)),
+              const SizedBox(height: 14),
+              for (final Announcement a in list)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.only(top: 1),
-                        child: Icon(Icons.campaign_outlined,
-                            size: 15, color: AppColors.gold),
-                      ),
-                      const SizedBox(width: 9),
-                      Expanded(
-                        child: Text(
-                          a.message,
-                          style: AppText.caption.copyWith(
-                              fontSize: 13.5,
-                              height: 1.45,
-                              color: AppColors.textMid),
-                        ),
-                      ),
+                      Text(a.message,
+                          style: AppText.body
+                              .copyWith(color: AppColors.text, height: 1.5)),
+                      const SizedBox(height: 6),
+                      Container(
+                          width: 34, height: 1, color: AppColors.goldRule),
                     ],
                   ),
                 ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

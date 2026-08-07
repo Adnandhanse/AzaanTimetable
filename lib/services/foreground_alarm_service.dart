@@ -135,6 +135,24 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         continue;
       }
 
+      // AND THE REVERSE: no Dhuhr alarm on a Friday.
+      //
+      // Juma REPLACES Dhuhr, it does not accompany it. Both were firing every
+      // Friday — two azans within minutes of each other, and the Dhuhr one for
+      // a prayer nobody is praying.
+      //
+      // Only suppressed when the masjid has actually set a Juma time. If Juma
+      // is blank, Dhuhr must still fire or Friday would have no midday alarm at
+      // all.
+      if (label.toLowerCase() == 'dhuhr' && now.weekday == DateTime.friday) {
+        final String juma = (times.entries
+                .firstWhere((e) => e.key.toLowerCase().contains('juma'),
+                    orElse: () => const MapEntry<String, dynamic>('', ''))
+                .value as String?) ??
+            '';
+        if (juma.trim().isNotEmpty && _parseTime(juma) != null) continue;
+      }
+
       final scheduledMinutes = parsed.$1 * 60 + parsed.$2;
       final nowMinutes = now.hour * 60 + now.minute;
       // Allow a small window (the scheduled minute or the one right after)

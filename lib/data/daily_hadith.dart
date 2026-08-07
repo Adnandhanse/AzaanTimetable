@@ -25,6 +25,7 @@ class DailyHadith {
     required this.number,
     required this.text,
     required this.textUr,
+    required this.arabic,
     required this.theme,
     required this.themeUr,
   });
@@ -46,6 +47,12 @@ class DailyHadith {
   final String text;
   final String textUr;
 
+  /// The saying in Arabic, verbatim from ara_*.json.
+  ///
+  /// A daily hadith card with no Arabic on it was the wrong shape for this app —
+  /// every other screen leads with the Arabic and puts the translation beneath.
+  final String arabic;
+
   /// A word for what it is about, shown above the text.
   final String theme;
   final String themeUr;
@@ -56,6 +63,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 1,
       theme: 'Intention', themeUr: 'نیت',
+      arabic:
+          'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
       text:
           'The reward of deeds depends upon the intentions, and every person will get the reward according to what he has intended.',
       textUr:
@@ -64,6 +73,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.muslim, number: 170,
       theme: 'Brotherhood', themeUr: 'بھائی چارہ',
+      arabic:
+          'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ',
       text:
           'None amongst you believes truly until he loves for his brother that which he loves for himself.',
       textUr:
@@ -72,6 +83,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 6114,
       theme: 'Self-control', themeUr: 'ضبطِ نفس',
+      arabic:
+          'لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ',
       text:
           'The strong is not the one who overcomes the people by his strength, but the strong is the one who controls himself while in anger.',
       textUr:
@@ -80,12 +93,16 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 6116,
       theme: 'Anger', themeUr: 'غصہ',
+      arabic:
+          'لَا تَغْضَبْ',
       text: 'Do not become angry and furious.',
       textUr: 'غصہ نہ ہوا کر۔',
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 6125,
       theme: 'Gentleness', themeUr: 'نرمی',
+      arabic:
+          'يَسِّرُوا وَلَا تُعَسِّرُوا، وَسَكِّنُوا وَلَا تُنَفِّرُوا',
       text:
           'Make things easy for the people, and do not make it difficult for them.',
       textUr: 'آسانی پیدا کرو، تنگی نہ پیدا کرو۔',
@@ -93,6 +110,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 6136,
       theme: 'Speech', themeUr: 'گفتگو',
+      arabic:
+          'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',
       text:
           'Whoever believes in Allah and the Last Day should speak what is good or keep silent.',
       textUr:
@@ -101,6 +120,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 1922,
       theme: 'Mercy', themeUr: 'رحم',
+      arabic:
+          'مَنْ لَا يَرْحَمُ النَّاسَ لَا يَرْحَمُهُ اللَّهُ',
       text:
           'Whoever does not show mercy to the people, Allah will not show mercy to him.',
       textUr:
@@ -109,6 +130,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 1162,
       theme: 'Character', themeUr: 'اخلاق',
+      arabic:
+          'أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا',
       text:
           'The most complete of the believers in faith is the one with the best character among them.',
       textUr:
@@ -117,12 +140,16 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.ibnmajah, number: 1978,
       theme: 'Family', themeUr: 'اہلِ خانہ',
+      arabic:
+          'خِيَارُكُمْ خِيَارُكُمْ لِنِسَائِهِمْ',
       text: 'The best of you are those who are best to their womenfolk.',
       textUr: 'سب سے بہتر وہ لوگ ہیں جو اپنی عورتوں کے لیے بہتر ہوں۔',
     ),
     DailyHadith(
       book: HadithBook.abudawud, number: 4811,
       theme: 'Gratitude', themeUr: 'شکر',
+      arabic:
+          'لَا يَشْكُرُ اللَّهَ مَنْ لَا يَشْكُرُ النَّاسَ',
       text: 'He who does not thank the people is not thankful to Allah.',
       textUr: 'جو لوگوں کا شکر ادا نہیں کرتا اللہ کا شکر ادا نہیں کرتا۔',
     ),

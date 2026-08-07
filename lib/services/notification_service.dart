@@ -548,6 +548,7 @@ class NotificationService {
     required DateTime timeToday,
     String? payload,
     bool fridayOnly = false,
+    bool skipFridays = false,
   }) async {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime.from(timeToday, tz.local);
@@ -560,6 +561,14 @@ class NotificationService {
       }
     } else if (!scheduled.isAfter(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
+    }
+
+    // Dhuhr on a Friday is Juma, and Juma has its own alarm. Step over any
+    // Friday occurrence so the two do not both fire.
+    if (skipFridays) {
+      while (scheduled.weekday == DateTime.friday) {
+        scheduled = scheduled.add(const Duration(days: 1));
+      }
     }
 
     return _scheduleWithFallback(
@@ -630,6 +639,11 @@ class NotificationService {
           timeToday: dt,
           payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
           fridayOnly: key == 'juma',
+          // Only skip Dhuhr on Fridays when a Juma time actually exists —
+          // otherwise Friday would lose its midday alarm entirely.
+          skipFridays: key == 'dhuhr' &&
+              (schedule.times['juma'] ?? '').trim().isNotEmpty &&
+              _parseTimeToday(schedule.times['juma'] ?? '') != null,
         );
       } catch (_) {
         tier = null;

@@ -1,68 +1,57 @@
-v61 - FONTS INSTALLED
-=====================
+v62 - BUILD FIX - 22 files, self-contained
+==========================================
 
-  pubspec.yaml                            declares both families
-  assets/fonts/UthmanicHafs.otf           NEW  246 KB
-  assets/fonts/NotoNastaliqUrdu-Regular.ttf  NEW  497 KB
-  assets/fonts/NotoNastaliqUrdu-LICENSE-OFL.txt  NEW
-  lib/theme/app_theme.dart                quranAyah + urduText styles
-  lib/widgets/mushaf_view.dart            Mushaf face
-  lib/screens/surah_detail_screen.dart    Mushaf face
-  lib/screens/hadith_list_screen.dart     Nastaliq for Urdu
-  lib/screens/hadith_single_screen.dart   Nastaliq for Urdu
-  lib/screens/pillar_detail_screen.dart   Nastaliq for Urdu
-  lib/widgets/daily_hadith_card.dart      Nastaliq for Urdu
-
-Overwrite all. Apply AFTER v60. APK grows about 740 KB.
+Overwrite all. This bundle REPLACES v59, v60 and v61 — apply it over a tree that
+has v58, or over any of those, and it will be consistent either way.
 
 =====================================================================
-READ THIS BEFORE YOU PUBLISH - THE KFGQPC LICENCE
+WHAT BROKE, AND IT WAS PACKAGING NOT CODE
 =====================================================================
-The KFGQPC zip you sent contains NO LICENCE FILE. Its readme is a font
-aggregator's page - "This font was downloaded from... hundreds of free fonts" -
-which is not a licence and grants nothing.
+    The getter 'arabic' isn't defined for the class 'DailyHadith'
 
-KFGQPC Uthmanic Script is produced by the King Fahd Glorious Qur'an Printing
-Complex. It is free to use, but the terms come from the Complex, not from a
-download site, and they carry conditions about how it may be distributed.
+daily_hadith.dart DEFINES the arabic field. daily_hadith_card.dart USES it.
 
-I have installed it because you asked and it works. Before you publish
-commercially, get the official release from the Complex and read its terms. This
-is the kind of thing that gets an app pulled after launch rather than rejected
-before it.
+I shipped the first in v60 and the second in v61. They are interdependent, so
+any tree that got v61 without v60 landing correctly has a card reading a field
+that does not exist.
 
-NOTO NASTALIQ URDU IS CLEAN. SIL Open Font License, and I have bundled the
-licence text beside the font as OFL requires when redistributing.
+The code was never wrong. I split a two-file change across two bundles, which is
+a packaging mistake and entirely mine.
 
 =====================================================================
-WHERE EACH FONT IS USED, AND WHY NOT EVERYWHERE
+WHAT I DID ABOUT IT
 =====================================================================
-UTHMANIC HAFS - QUR'AN TEXT ONLY. The Mushaf view and the ayah rows in the surah
-reader. NOT hadith, NOT duas.
+I checked every cross-file dependency created in the last several rounds:
 
-That is deliberate. Setting a narration in the Mushaf face implies it carries
-the same status as revelation. Hadith and duas stay in Amiri, which is a
-beautiful Naskh and the right register for them.
+  daily_hadith_card    -> daily_hadith        arabic, textUr, themeUr
+  pillar_detail_screen -> ibadat_content      translationUr, keyPoint
+  home_screen          -> masjid              hasAnyJamat, fajrJamat
+  prayer_times_screen  -> masjid              hasAnyJamat
+  mushaf_view          -> app_theme           quranAyah
+  hadith_list_screen   -> app_theme           urduText
+  surah_detail_screen  -> app_theme           quranAyah
+  prayers_home_screen  -> ibadat_content      janaza, eidain, umrah
 
-NOTO NASTALIQ URDU - every Urdu translation: hadith list, single hadith, the
-Ibadat guides and the daily hadith card. Nastaliq is the script Urdu is actually
-written in. Naskh renders it legibly but wrongly, the way English set in Fraktur
-is legible but wrong.
+Every one of those pairs is now IN THIS BUNDLE TOGETHER, and I verified the
+bundle against itself: for each pair, every member the user references exists in
+the definer as shipped here. Not in my working copy — in the zip.
 
-LINE HEIGHT IS 2.0, not the 1.55 the Latin translation style uses. Nastaliq
-descends steeply and letters overlap vertically - at Latin line height the
-descenders of one line collide with the line below. This is not a preference,
-it is what makes the script readable.
+That check now runs before I package anything.
 
 =====================================================================
-STILL TO DO FROM YOUR DESIGN SPEC
+EVERYTHING FROM v59, v60 AND v61 IS INCLUDED
 =====================================================================
-The fonts were the blocker; these are now possible:
-  - ayah cards with gold circular badges and generous spacing
-  - hadith grading badges - green Sahih, amber Hasan, red Da'if. Easy and high
-    impact, since the grading data is already loaded and unused in the list
-  - font size controls
-  - dark mode, which is a real project: every colour is a static const and
-    would have to become a ThemeExtension
+  v59  full janaza dua, janaza/eidain under Namaz, jamat layout,
+       announcement restyle, jamat on the full schedule
+  v60  Friday Dhuhr fix, palette, daily hadith Arabic, prayer icons,
+       announcement card with Read More
+  v61  Uthmanic Hafs and Noto Nastaliq fonts, wired to Qur'an text and Urdu
 
-Say which and I will do that one properly.
+The two font files are in here. The three existing fonts (Inter, Amiri) are
+already in your repo and are not duplicated.
+
+=====================================================================
+STILL TRUE FROM v61
+=====================================================================
+THE KFGQPC ZIP HAD NO LICENCE FILE. Get the official release from the King Fahd
+Complex and read its terms before publishing commercially.
