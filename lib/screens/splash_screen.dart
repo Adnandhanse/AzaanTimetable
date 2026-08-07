@@ -122,14 +122,16 @@ class _SplashScreenState extends State<SplashScreen> {
             // background rather than showing an error. Startup must never be
             // blocked by decoration.
             if (_video != null && _video!.value.isInitialized)
-              // FILLS THE SCREEN, cropping the sides.
+              // Fills the screen.
               //
-              // It was BoxFit.contain, which fitted the whole 16:9 frame inside
-              // a 9:20 phone and left two large green bands. Cover scales until
-              // both dimensions are filled, so the sides of a wide clip are cut
-              // — acceptable here because the Kaaba is centred, which is the
-              // only reason this works. A clip with anything important at the
-              // edges would need contain and would letterbox again.
+              // The clip is now PORTRAIT (478x850), which is why this works
+              // properly. The previous landscape clip lost about 75% of its
+              // width to the crop — everything but a narrow centre strip. This
+              // one loses under 20%, so the framing survives.
+              //
+              // The video is 5 seconds and the splash lasts 3, so it is cut
+              // short rather than looping. That is fine, and better than a
+              // visible restart mid-splash.
               SizedBox.expand(
                 child: FittedBox(
                   fit: BoxFit.cover,

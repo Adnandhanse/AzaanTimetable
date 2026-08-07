@@ -1,96 +1,35 @@
-v63 - 29 files, self-contained
-==============================
+v64 - 2 files - NEW SPLASH VIDEO
+================================
 
-Overwrite all. REPLACES v59 through v62 — apply over v58 or over any later
-bundle and you end up consistent either way.
+  assets/video/intro.mp4        replaced
+  lib/screens/splash_screen.dart  comment only
 
-=====================================================================
-1. PRAYER ROWS - THE TIMES WERE TRUNCATING
-=====================================================================
-Your screenshot showed "12:30 …" and "11:30 …". Four columns — name, Arabic,
-azan, jamat — do not fit on a 360dp screen.
-
-THE ARABIC NAME IS NOW DROPPED WHEN JAMAT IS SHOWN. A cut-off prayer time is
-worse than a missing decorative name, and the Arabic stays for every masjid that
-has no jamat times, so nothing is lost there.
-
-Also: "PM" is lowercased and the columns rebalanced to 3 : 4 : 4. Checked at
-360dp — "12:40 pm" needs about 74dp and now has 91dp. Nothing truncates.
+Overwrite both. Apply AFTER v63. No code change of substance — the player
+settings were already right.
 
 =====================================================================
-2. ANNOUNCEMENT MOVED TO THE BANNER
+THIS CLIP IS A MUCH BETTER FIT, AND HERE IS WHY
 =====================================================================
-The card is gone. There is now a megaphone icon with a count badge beneath the
-settings icon; tapping it opens the same bottom sheet.
+The old one was LANDSCAPE, 848x478. Filling a portrait phone with it meant
+cropping about 75% OF ITS WIDTH — you were seeing a narrow centre strip and
+nothing else. It only looked acceptable because the Kaaba happened to be dead
+centre.
 
-The card sat between the banner and the prayer times — the busiest place on the
-screen — and pushed the prayer list down on every launch whether or not there
-was anything to read.
+The new one is PORTRAIT, 478x850. On the same phones the crop is under 20%, so
+the framing you shot survives.
 
-The icon only appears when an announcement exists.
-
-=====================================================================
-3. URDU FONT IN THE QUR'AN - THE REAL CAUSE
-=====================================================================
-SurahDetailScreen was never told which translation it had been given. It just
-rendered whatever text it received in the Latin style, so Urdu came out in the
-wrong face — exactly what your second screenshot shows.
-
-Rather than thread a language parameter through five screens, the style is now
-chosen FROM THE TEXT: AppText.translationFor() checks whether the string is in
-Arabic script and returns Nastaliq or Latin accordingly. That cannot fall out of
-step with what is actually on screen, which is precisely how this broke.
-
-Applied in the surah reader and the juz reader. Arabic ayat already use the
-Uthmanic face.
+  old  848x478  ->  S22 Ultra: 74% of the width cropped
+  new  478x850  ->  S22 Ultra: 17% of the width cropped
 
 =====================================================================
-4. ADMIN STAYS LOGGED IN
+TWO THINGS TO KNOW
 =====================================================================
-The number is saved on the device and checked against Firestore on launch. If
-the masjid still lists that number, the dashboard opens directly.
+IT IS 5 SECONDS AND THE SPLASH LASTS 3. The video gets cut off rather than
+looping, which is better than a visible restart mid-splash. If you want the
+whole clip seen, the splash delay in splash_screen.dart is one number — but a
+5-second wait before the app opens is a long time every single launch, and I
+would leave it at 3.
 
-If it no longer does — an admin removed, a masjid deleted — the saved number is
-discarded rather than failing on every launch.
-
-A LOGOUT BUTTON WAS REQUIRED AND IS NOW ON THE DASHBOARD. Without it, a shared
-phone or a change of caretaker would leave the previous admin signed in forever.
-That was not in your list, but persistent login without a way out is a trap.
-
-=====================================================================
-5. HANAFI 3-TAKBEER REMOVED FROM EID
-=====================================================================
-The step now states seven and five plainly, matching the hadith cited beneath
-it. The comparison note is gone.
-
-=====================================================================
-7. HIJRI CALENDAR
-=====================================================================
-A month view with the Gregorian day under each Hijri date, Fridays outlined,
-today filled. Month arrows step through.
-
-Reached by TAPPING THE DATE ON THE BANNER — which previously opened an alert
-telling you today's Hijri date, directly below the banner already showing it.
-Also in Settings.
-
-Built by walking real Gregorian days and asking each its Hijri date, rather than
-iterating Hijri days: months are 29 or 30 depending on the year, and this cannot
-produce a day that does not exist.
-
-It says plainly that the dates are calculated and local moon sighting may differ
-by a day. That is the single most common complaint about any Hijri calendar in
-an app.
-
-=====================================================================
-8. LAST UPDATED PER MASJID
-=====================================================================
-Every prayer-time save stamps timesUpdatedAt from the SERVER clock, not the
-device — a phone with the wrong date would otherwise record a masjid as updated
-in 2019.
-
-The admin dashboard shows "Updated 3 days ago" / "Updated 2 months ago" /
-"Times never updated", in grey under a month, amber past a month, red past three.
-Prayer times drift with the seasons, so a masjid untouched since spring is a real
-problem, not a cosmetic one.
-
-That is also the field you would query to find stale masjids to chase.
+APK GROWS ABOUT 516 KB more than before. The clip is 953 KB against the old
+437 KB. Still muted, still falls back to the plain background if it will not
+play.
