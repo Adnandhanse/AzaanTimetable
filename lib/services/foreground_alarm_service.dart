@@ -59,7 +59,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     // last-checked time, so we can visually confirm this loop is really
     // running, without needing device logs.
     await FlutterForegroundTask.updateService(
-      notificationTitle: 'Masjid Namaz Alarm is active',
+      notificationTitle: 'Islam Connect is active',
       notificationText: 'Last checked: ${timestamp.hour.toString().padLeft(2, '0')}:'
           '${timestamp.minute.toString().padLeft(2, '0')}:'
           '${timestamp.second.toString().padLeft(2, '0')}',
@@ -274,7 +274,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Future<void> _setServiceNotice(String text) async {
     try {
       await FlutterForegroundTask.updateService(
-        notificationTitle: 'Masjid Namaz Alarm is active',
+        notificationTitle: 'Islam Connect is active',
         notificationText: text,
       );
     } catch (_) {}

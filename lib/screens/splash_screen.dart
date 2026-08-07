@@ -1,5 +1,5 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/app_language.dart';
@@ -15,16 +15,13 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _SplashScreenState extends State<SplashScreen> {
+  VideoPlayerController? _video;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    )..repeat();
+    _initVideo();
 
     Future.delayed(const Duration(seconds: 3), () async {
       // No OTP for regular users - sign in anonymously (free, instant) so
@@ -74,9 +71,26 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     });
   }
 
+  Future<void> _initVideo() async {
+    try {
+      final c = VideoPlayerController.asset('assets/video/intro.mp4');
+      await c.initialize();
+      await c.setVolume(0);
+      await c.setLooping(true);
+      await c.play();
+      if (!mounted) {
+        await c.dispose();
+        return;
+      }
+      setState(() => _video = c);
+    } catch (_) {
+      // Falls back to the plain background. Never blocks startup.
+    }
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    _video?.dispose();
     super.dispose();
   }
 
@@ -96,56 +110,33 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: Stack(
           alignment: Alignment.center,
           children: [
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return SizedBox(
-                  width: 260,
-                  height: 260,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 70,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1A),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: AppColors.gold, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.gold.withOpacity(0.4),
-                              blurRadius: 20,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Container(width: 40, height: 6, color: AppColors.gold),
-                        ),
-                      ),
-                      ...List.generate(8, (i) {
-                        final baseAngle = (2 * pi / 8) * i;
-                        final angle = baseAngle + (_controller.value * 2 * pi);
-                        const radius = 110.0;
-                        final dx = radius * cos(angle);
-                        final dy = radius * sin(angle) * 0.55;
-                        return Transform.translate(
-                          offset: Offset(dx, dy),
-                          child: _Pilgrim(scale: 0.7 + 0.3 * ((dy + 60) / 120)),
-                        );
-                      }),
-                    ],
-                  ),
-                );
-              },
-            ),
+            // The supplied tawaf clip, replacing the drawn animation.
+            //
+            // MUTED, ALWAYS. It has an audio track, and a prayer app that makes
+            // noise the instant it opens is a prayer app people close in a
+            // mosque. Looped, because it is 2.4 seconds and startup can take
+            // longer than that on a cold start.
+            //
+            // If the video fails for any reason — codec, decoder busy, a device
+            // that cannot play it — the screen falls back to the plain emerald
+            // background rather than showing an error. Startup must never be
+            // blocked by decoration.
+            if (_video != null && _video!.value.isInitialized)
+              FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: _video!.value.size.width,
+                  height: _video!.value.size.height,
+                  child: VideoPlayer(_video!),
+                ),
+              ),
+
             const Positioned(
               bottom: 90,
               child: Column(
                 children: [
                   Text(
-                    'Masjid Namaz Alarm',
+                    'Islam Connect',
                     style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                   ),
                   SizedBox(height: 6),
@@ -164,40 +155,4 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 }
 
-class _Pilgrim extends StatelessWidget {
-  final double scale;
-  const _Pilgrim({required this.scale});
 
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: 0.55 + 0.45 * scale,
-      child: Transform.scale(
-        scale: scale,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFF5E9D3), shape: BoxShape.circle)),
-            const SizedBox(height: 1),
-            ClipPath(clipper: _RobeClipper(), child: Container(width: 16, height: 20, color: Colors.white)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RobeClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    path.moveTo(size.width / 2, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}

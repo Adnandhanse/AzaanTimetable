@@ -6,10 +6,13 @@ import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
 import '../services/notification_service.dart';
+import '../services/announcement_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/foreground_alarm_manager.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
+import '../widgets/daily_hadith_card.dart';
 import '../widgets/artwork_header.dart';
 import '../widgets/sky_artwork.dart';
 import 'masjid_search_screen.dart';
@@ -95,6 +98,13 @@ class _HomeScreenState extends State<HomeScreen>
     _loadSelectedMasjid();
     _loadRole();
     _repairAlarmsIfNeeded();
+
+    // After the first frame, so the card appears over a drawn home screen
+    // rather than over an empty one — and so a slow Firestore read cannot delay
+    // it. Shows once a day; the check is inside.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) DailyHadithCard.maybeShow(context);
+    });
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _now = DateTime.now());
     });
@@ -582,6 +592,11 @@ class _HomeScreenState extends State<HomeScreen>
           // One rule, a smaller figure, and the name and countdown on the same
           // line as before — the information is identical, the height is about
           // half.
+          // Announcements from the followed masjid, directly under the header
+          // where they cannot be missed. Above the prayer times on purpose: a
+          // change of Juma timing matters more than the times it changes.
+          _announcements(masjid),
+
           // The content sits on a sheet that OVERLAPS the photograph by 18px and
           // casts a soft shadow onto it. One object in front of another, which
           // is what depth actually looks like — no perspective, no tilt, and
@@ -781,6 +796,9 @@ class _HomeScreenState extends State<HomeScreen>
     if (_now.isBefore(bounds[0])) return SkyPhase.night;
     if (_now.isBefore(bounds[1])) return SkyPhase.morning;
     if (_now.isBefore(bounds[2])) return SkyPhase.midday;
+    // Evening runs from asr to isha, which is several hours. Maghrib is the
+    // sunset itself, so the golden treatment belongs to the stretch around it
+    // rather than to the whole afternoon.
     if (_now.isBefore(bounds[3])) return SkyPhase.evening;
     return SkyPhase.night;
   }
@@ -861,6 +879,87 @@ class _HomeScreenState extends State<HomeScreen>
           ),
       ],
     );
+  }
+
+  Widget _announcements(Masjid masjid) {
+    return StreamBuilder<List<Announcement>>(
+      stream: AnnouncementRepository.streamActive(masjid.id, masjid.name),
+      builder: (context, snap) {
+        final list = snap.data ?? const <Announcement>[];
+        if (list.isEmpty) return const SizedBox.shrink();
+
+        // Notify once per announcement, the first time this device sees it.
+        _notifyNewAnnouncements(list, masjid.name);
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          child: Column(
+            children: <Widget>[
+              for (final Announcement a in list)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.gold, width: 1.4),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Padding(
+                        padding: EdgeInsets.only(top: 1),
+                        child: Icon(Icons.campaign_outlined,
+                            size: 18, color: AppColors.gold),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(masjid.name,
+                                style: AppText.eyebrow
+                                    .copyWith(color: AppColors.textMuted)),
+                            const SizedBox(height: 3),
+                            Text(a.message,
+                                style: AppText.body
+                                    .copyWith(color: AppColors.text)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Raises a local notification the first time this device sees an
+  /// announcement, and never again for the same one.
+  ///
+  /// Seen ids are kept on the device. Storing them server-side would mean a
+  /// per-user read record, which is exactly the kind of thing this app has
+  /// avoided everywhere else.
+  Future<void> _notifyNewAnnouncements(
+      List<Announcement> list, String masjidName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final seen = prefs.getStringList('seen_announcements') ?? <String>[];
+      final fresh = list.where((a) => !seen.contains(a.id)).toList();
+      if (fresh.isEmpty) return;
+
+      for (final Announcement a in fresh) {
+        await NotificationService.showAnnouncement(masjidName, a.message);
+        seen.add(a.id);
+      }
+      // Bounded, so it cannot grow forever on a device that follows an active
+      // masjid for years.
+      if (seen.length > 200) seen.removeRange(0, seen.length - 200);
+      await prefs.setStringList('seen_announcements', seen);
+    } catch (_) {}
   }
 
   Widget _quickAction(IconData icon, String label, VoidCallback onTap) =>

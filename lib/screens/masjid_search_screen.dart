@@ -123,12 +123,39 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
                           m.city.toLowerCase().contains(_query.toLowerCase()))
                       .toList();
                 }
+                // WITHIN 7 km, nearest first.
+                //
+                // Only applied when browsing. A TYPED SEARCH IS NOT FILTERED BY
+                // DISTANCE — someone searching by name is usually looking for a
+                // specific masjid, often one they are travelling to, and hiding
+                // it because it is 9 km away would look like the app does not
+                // have it.
+                //
+                // Also skipped when there is no location fix, since with no
+                // position every masjid would be filtered out and the list
+                // would come back empty for no visible reason.
+                final bool nearbyOnly = _userPosition != null && _query.isEmpty;
                 if (_userPosition != null) {
+                  if (nearbyOnly) {
+                    all = all.where((m) => _distanceKm(m) <= 7.0).toList();
+                  }
                   all.sort((a, b) => _distanceKm(a).compareTo(_distanceKm(b)));
                 }
 
                 if (all.isEmpty) {
-                  return const Center(child: Text('No masjids found'));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(28),
+                      child: Text(
+                        nearbyOnly
+                            // Says WHY the list is empty and what to do, rather
+                            // than implying no masjid exists anywhere.
+                            ? 'No masjids registered within 7 km. Search by name to look further afield.'
+                            : 'No masjids found',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
                 }
                 return ListView.builder(
                   itemCount: all.length,
@@ -138,13 +165,14 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
                     return ListTile(
                       leading: Icon(Icons.mosque, color: AppColors.emerald),
                       title: Text(masjid.name),
-                      // Follower count helps someone pick between two masjids
-                      // in the same area, and shows an imam his times are being
-                      // used. Hidden at zero rather than advertising an empty
-                      // number on a newly registered masjid.
-                      subtitle: Text(masjid.followerCount > 0
-                          ? '${masjid.city} • ${masjid.verificationStatus}$distanceText • ${masjid.followerCount} following'
-                          : '${masjid.city} • ${masjid.verificationStatus}$distanceText'),
+                      // NO FOLLOWER COUNT HERE.
+                      //
+                      // It is the imam's number, not a public one. On a search
+                      // list it turns choosing a masjid into a popularity
+                      // contest, and quietly tells people which masjids are
+                      // poorly attended. It stays on the admin dashboard.
+                      subtitle: Text(
+                          '${masjid.city} • ${masjid.verificationStatus}$distanceText'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
                         final selected = await Navigator.of(context).push<bool>(

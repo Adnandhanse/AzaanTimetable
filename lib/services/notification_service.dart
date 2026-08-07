@@ -146,6 +146,38 @@ class NotificationService {
     } catch (_) {}
   }
 
+  /// A masjid announcement. Its own channel, at default importance.
+  ///
+  /// NOT the alarm channel. An announcement is not a call to prayer: it must
+  /// not play the azan, must not wake the screen, and must not arrive at alarm
+  /// volume. Sharing the channel would also let someone who mutes
+  /// announcements mute their Fajr alarm with them.
+  static const String channelIdAnnounce = 'masjid_announcements_v1';
+
+  static Future<void> showAnnouncement(String masjidName, String message) async {
+    await init();
+    try {
+      await _plugin.show(
+        // Time-based id so several announcements can sit in the shade together
+        // rather than replacing one another.
+        DateTime.now().millisecondsSinceEpoch.remainder(100000) + 1000,
+        masjidName,
+        message,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelIdAnnounce,
+            'Masjid announcements',
+            channelDescription: 'Notices from the masjid you follow',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            styleInformation: BigTextStyleInformation(''),
+          ),
+        ),
+        payload: 'announcement',
+      );
+    } catch (_) {}
+  }
+
   static Future<void> _createChannels() async {
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();

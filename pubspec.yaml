@@ -1,5 +1,5 @@
 name: masjid_alarm_app
-description: "Masjid Namaz Alarm App - prayer time alerts from your selected masjid."
+description: "Islam Connect - prayer times, azan alarm, Qur'an, Hadith and duas."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -45,6 +45,13 @@ dependencies:
   # ^3.8.5 allows 3.x updates but stops before 4.0.0. Writing ^4.0.2 is what
   # broke the build - pub resolved it to 4.2.5.
   flutter_tts: ^3.8.5
+  # Splash video. RANGE-PINNED TO 2.8.x ON PURPOSE.
+  #
+  # flutter_tts taught this the hard way: a caret range let pub resolve to a
+  # major version built against Kotlin 2.2 and compileSdk 36, and the build died
+  # with hundreds of errors inside the plugin. 2.9+ raises its Android SDK
+  # requirement; this project compiles against 34.
+  video_player: '>=2.8.0 <2.9.0'
   flutter_compass: ^0.7.0
   flutter_overlay_window: ^0.4.5
   hijri: ^3.0.0
@@ -74,6 +81,7 @@ flutter:
     # the first time anything opened the duas screen — which nothing did, because
     # nothing navigated to it either.
     - assets/duas/duas_en.json
+    - assets/video/intro.mp4
     - assets/images/nabawi_header.webp
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp

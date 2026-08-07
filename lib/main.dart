@@ -147,7 +147,7 @@ class MasjidAlarmApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp(
           navigatorKey: navigatorKey,
-          title: 'Masjid Namaz Alarm',
+          title: 'Islam Connect',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(),
           home: needsSetup

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'announcement_admin_screen.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import 'update_prayer_times_screen.dart';
@@ -63,7 +64,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ],
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  // Two things an admin does: change the times, and tell people
+                  // something. Both reachable from the row rather than one
+                  // being buried behind the other.
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.campaign_outlined, size: 20),
+                        color: AppColors.gold,
+                        tooltip: 'Announcements',
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  AnnouncementAdminScreen(masjid: masjid)),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => UpdatePrayerTimesScreen(masjid: masjid)),

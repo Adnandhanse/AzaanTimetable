@@ -91,7 +91,7 @@ class ForegroundAlarmManager {
     try {
       if (!isRunning) {
         await FlutterForegroundTask.startService(
-          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationTitle: 'Islam Connect is active',
           notificationText: 'Watching prayer times for $masjidName',
           // The only stop control that is ALWAYS reachable. The ringing
           // screen's button only exists if Android launched that screen,
@@ -104,7 +104,7 @@ class ForegroundAlarmManager {
         );
       } else {
         await FlutterForegroundTask.updateService(
-          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationTitle: 'Islam Connect is active',
           notificationText: 'Watching prayer times for $masjidName',
         );
       }
@@ -134,7 +134,7 @@ class ForegroundAlarmManager {
     try {
       if (!isRunning) {
         await FlutterForegroundTask.startService(
-          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationTitle: 'Islam Connect is active',
           notificationText: 'Watching prayer times for ${masjid.name}',
           notificationButtons: [
             const NotificationButton(id: 'stop_azan', text: 'Stop azan'),
@@ -143,7 +143,7 @@ class ForegroundAlarmManager {
         );
       } else {
         await FlutterForegroundTask.updateService(
-          notificationTitle: 'Masjid Namaz Alarm is active',
+          notificationTitle: 'Islam Connect is active',
           notificationText: 'Watching prayer times for ${masjid.name}',
         );
       }

@@ -106,12 +106,25 @@ class _SkyArtworkState extends State<SkyArtwork>
   /// How strongly to tint the photograph, per phase. Evening is lightest
   /// because the source image is already this colour; night is heaviest
   /// because it has to turn day into night.
+  /// STRENGTHENED. The mechanism was already here — a colour wash, a sun glow,
+  /// stars and a crescent at night — but at 0.16 for evening and 0.26 for
+  /// morning it was too faint to notice, so the header looked the same all day
+  /// and read as a static photograph.
+  ///
+  /// Morning and evening are now clearly warm and clearly different from each
+  /// other: morning pale gold, evening deep amber. Midday is cool and bright.
+  /// Night stays strongest, because a photograph taken in daylight has to be
+  /// pushed a long way before it reads as dark.
+  ///
+  /// These are the highest values that keep white overlay text legible against
+  /// the scrim. Beyond about 0.5 in daylight the picture starts to look tinted
+  /// rather than lit.
   static const Map<SkyPhase, (Color, Color, double)> _wash =
       <SkyPhase, (Color, Color, double)>{
-    SkyPhase.morning: (Color(0xFFFFC98A), Color(0xFFFFE9C9), 0.26),
-    SkyPhase.midday: (Color(0xFF9CC6E8), Color(0xFFE6F2FA), 0.30),
-    SkyPhase.evening: (Color(0xFFF0A25A), Color(0xFFFFD9A0), 0.16),
-    SkyPhase.night: (Color(0xFF0B1630), Color(0xFF24365C), 0.62),
+    SkyPhase.morning: (Color(0xFFFFD79A), Color(0xFFFFF1D8), 0.42),
+    SkyPhase.midday: (Color(0xFF7FB6E0), Color(0xFFDCEEFB), 0.46),
+    SkyPhase.evening: (Color(0xFFE8823A), Color(0xFFFFC98A), 0.48),
+    SkyPhase.night: (Color(0xFF060E22), Color(0xFF1B2A4E), 0.74),
   };
 
   @override

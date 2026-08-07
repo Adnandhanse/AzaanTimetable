@@ -256,13 +256,13 @@ class _OemGuide {
 /// pulled into the build just to read a device string.
 const List<_OemGuide> _oemGuides = <_OemGuide>[
   _OemGuide('Xiaomi, Redmi, POCO', <String>[
-    'Settings > Apps > Manage apps > Masjid Namaz Alarm',
+    'Settings > Apps > Manage apps > Islam Connect',
     'Turn ON Autostart',
     'Battery saver > No restrictions',
     'In Recents, pull the app card down and tap the lock icon',
   ]),
   _OemGuide('Realme, OPPO', <String>[
-    'Settings > Apps > App management > Masjid Namaz Alarm',
+    'Settings > Apps > App management > Islam Connect',
     'Turn ON Allow auto launch',
     'Battery usage > Allow background activity',
     'Settings > Battery > turn OFF Sleep standby optimisation',
@@ -273,7 +273,7 @@ const List<_OemGuide> _oemGuides = <_OemGuide>[
     'Settings > Apps > Autostart > enable for this app',
   ]),
   _OemGuide('Samsung', <String>[
-    'Settings > Apps > Masjid Namaz Alarm > Battery',
+    'Settings > Apps > Islam Connect > Battery',
     'Set to Unrestricted',
     'Settings > Battery > Background usage limits',
     'Make sure the app is NOT in "Sleeping" or "Deep sleeping" apps',
@@ -283,7 +283,7 @@ const List<_OemGuide> _oemGuides = <_OemGuide>[
     'Settings > Apps > Auto-launch > enable',
   ]),
   _OemGuide('Stock Android, Motorola, Nokia, Pixel', <String>[
-    'Settings > Apps > Masjid Namaz Alarm > Battery > Unrestricted',
+    'Settings > Apps > Islam Connect > Battery > Unrestricted',
     'Usually nothing else is needed on these phones',
   ]),
 ];

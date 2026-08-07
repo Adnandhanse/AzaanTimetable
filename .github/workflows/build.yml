@@ -223,7 +223,7 @@ jobs:
 
       - name: Set proper app display name
         run: |
-          sed -i 's/android:label="[^"]*"/android:label="Masjid Namaz Alarm"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:label="[^"]*"/android:label="Islam Connect"/' android/app/src/main/AndroidManifest.xml
           echo "--- confirming app label ---"
           grep "android:label" android/app/src/main/AndroidManifest.xml
 

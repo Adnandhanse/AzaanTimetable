@@ -9,7 +9,7 @@ class S {
   static String _t(String en, String ur) => AppLanguageController.instance.isUrdu ? ur : en;
   static bool get isUrdu => AppLanguageController.instance.isUrdu;
 
-  static String get appTitle => _t('Masjid Namaz Alarm', 'مسجد نماز الارم');
+  static String get appTitle => _t('Islam Connect', 'اسلام کنیکٹ');
   static String get prayerTime => _t('Prayer Time', 'نماز کا وقت');
   static String get quran => _t('Quran', 'قرآن');
   static String get hadith => _t('Hadith', 'حدیث');
