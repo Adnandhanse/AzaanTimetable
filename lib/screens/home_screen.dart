@@ -839,23 +839,25 @@ class _HomeScreenState extends State<HomeScreen>
       children: [
         if (showJamat)
           Padding(
-            padding: const EdgeInsets.only(bottom: 4, right: 2),
+            padding: const EdgeInsets.only(bottom: 6),
             child: Row(
               children: [
                 const Spacer(),
-                SizedBox(
-                  width: 66,
+                // Headings sized with the same flex as the columns below, so
+                // they cannot drift out of alignment on a narrow screen.
+                Expanded(
+                  flex: 3,
                   child: Text(S.azanLabel.toUpperCase(),
                       textAlign: TextAlign.right,
-                      style: AppText.eyebrow
-                          .copyWith(fontSize: 9.5, color: AppColors.textFaint)),
+                      style: AppText.eyebrow.copyWith(
+                          fontSize: 9, letterSpacing: 1, color: AppColors.textFaint)),
                 ),
-                SizedBox(
-                  width: 66,
+                Expanded(
+                  flex: 3,
                   child: Text(S.jamatLabel.toUpperCase(),
                       textAlign: TextAlign.right,
-                      style: AppText.eyebrow
-                          .copyWith(fontSize: 9.5, color: AppColors.gold)),
+                      style: AppText.eyebrow.copyWith(
+                          fontSize: 9, letterSpacing: 1, color: AppColors.gold)),
                 ),
               ],
             ),
@@ -869,31 +871,50 @@ class _HomeScreenState extends State<HomeScreen>
                   : const Border(
                       top: BorderSide(color: AppColors.goldRuleFaint)),
             ),
+            // EVERYTHING IS FLEX NOW, no fixed pixel widths.
+            //
+            // The previous version used two 66px boxes plus a Spacer plus an
+            // Expanded label plus the Arabic. On a 360dp screen that left the
+            // name and the Arabic fighting over what was left, and the whole
+            // row looked cramped and misaligned.
+            //
+            // Now the row is 4 : 2 : 3 : 3 — name, Arabic, azan, jamat — so it
+            // scales with the screen instead of assuming one.
             child: Row(
               children: [
                 Expanded(
+                  flex: 4,
                   child: Text(
                     rows[i].$1.toUpperCase(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppText.eyebrow.copyWith(
-                      letterSpacing: 1.3,
+                      // Slightly tighter tracking when two time columns have to
+                      // fit alongside.
+                      letterSpacing: showJamat ? 0.8 : 1.3,
                       color: rows[i].$1 == nextLabel
                           ? AppColors.emerald
                           : AppColors.textMid,
                     ),
                   ),
                 ),
-                Text(
-                  rows[i].$3,
-                  style: AppText.arabic.copyWith(
-                    fontSize: 16,
-                    height: 1.2,
-                    color: AppColors.gold,
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    rows[i].$3,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    style: AppText.arabic.copyWith(
+                      fontSize: showJamat ? 14 : 16,
+                      height: 1.2,
+                      color: AppColors.gold,
+                    ),
                   ),
                 ),
                 if (!showJamat)
                   Expanded(
+                    flex: 6,
                     child: Text(
                       rows[i].$2,
                       textAlign: TextAlign.right,
@@ -906,32 +927,32 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                 else ...[
-                  const Spacer(),
-                  // Azan is what the alarm fires on, so it stays in the primary
-                  // weight. Jamat is what people plan around, so it is the one
-                  // in gold.
-                  SizedBox(
-                    width: 66,
+                  Expanded(
+                    flex: 3,
                     child: Text(
                       rows[i].$2,
                       textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppText.listTime.copyWith(
-                        fontSize: 15.5,
+                        fontSize: 14.5,
                         color: rows[i].$1 == nextLabel
                             ? AppColors.emerald
-                            : AppColors.textMid,
+                            : AppColors.textMuted,
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 66,
+                  // Jamat in the stronger weight: the azan is what the alarm
+                  // fires on, but the jamat is the time people plan around.
+                  Expanded(
+                    flex: 3,
                     child: Text(
-                      // A dash, not a blank, so the column stays aligned when
-                      // one prayer has no jamat set.
                       rows[i].$4.trim().isEmpty ? '\u2014' : rows[i].$4,
                       textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppText.listTime.copyWith(
-                        fontSize: 17,
+                        fontSize: 16.5,
                         color: rows[i].$4.trim().isEmpty
                             ? AppColors.textFaint
                             : (rows[i].$1 == nextLabel
@@ -955,48 +976,48 @@ class _HomeScreenState extends State<HomeScreen>
         final list = snap.data ?? const <Announcement>[];
         if (list.isEmpty) return const SizedBox.shrink();
 
-        // Notify once per announcement, the first time this device sees it.
         _notifyNewAnnouncements(list, masjid.name);
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
           child: Column(
             children: <Widget>[
               for (final Announcement a in list)
-                // A TINTED STRIP, not a boxed card.
+                // NO CARD, NO FILL, NO BORDER BOX.
                 //
-                // The first version was a bordered white card sitting on an
-                // ivory background — a box on top of the page, which is exactly
-                // how you described it. Now it is a soft gold wash with a single
-                // accent bar down the leading edge and no outline, so it reads
-                // as part of the page that happens to be highlighted.
+                // Two attempts at this were both boxes: a bordered white card,
+                // then a gold-tinted strip with an accent bar. Both still read
+                // as a panel dropped onto the page, because that is what any
+                // filled rectangle reads as on a flat ivory layout.
                 //
-                // The accent bar rather than a full border because one strong
-                // vertical line draws the eye without drawing a rectangle.
+                // This is a line of text with a small icon between two
+                // hairlines — the same hairlines the prayer list uses. It sits
+                // IN the page rather than ON it.
                 Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(4),
-                    border: const Border(
-                      left: BorderSide(color: AppColors.gold, width: 3),
+                  margin: const EdgeInsets.only(bottom: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: AppColors.goldRuleFaint),
+                      bottom: BorderSide(color: AppColors.goldRuleFaint),
                     ),
                   ),
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Padding(
-                        padding: EdgeInsets.only(top: 2),
+                        padding: EdgeInsets.only(top: 1),
                         child: Icon(Icons.campaign_outlined,
-                            size: 16, color: AppColors.gold),
+                            size: 15, color: AppColors.gold),
                       ),
                       const SizedBox(width: 9),
                       Expanded(
                         child: Text(
                           a.message,
-                          style: AppText.body.copyWith(
-                              color: AppColors.text, height: 1.4),
+                          style: AppText.caption.copyWith(
+                              fontSize: 13.5,
+                              height: 1.45,
+                              color: AppColors.textMid),
                         ),
                       ),
                     ],
@@ -1009,12 +1030,10 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  /// Raises a local notification the first time this device sees an
-  /// announcement, and never again for the same one.
+  /// Notifies once per announcement, the first time this device sees it.
   ///
-  /// Seen ids are kept on the device. Storing them server-side would mean a
-  /// per-user read record, which is exactly the kind of thing this app has
-  /// avoided everywhere else.
+  /// Seen ids live on the device. Storing them server-side would mean a
+  /// per-user read record, which is what this app has avoided everywhere else.
   Future<void> _notifyNewAnnouncements(
       List<Announcement> list, String masjidName) async {
     try {
@@ -1022,13 +1041,10 @@ class _HomeScreenState extends State<HomeScreen>
       final seen = prefs.getStringList('seen_announcements') ?? <String>[];
       final fresh = list.where((a) => !seen.contains(a.id)).toList();
       if (fresh.isEmpty) return;
-
       for (final Announcement a in fresh) {
         await NotificationService.showAnnouncement(masjidName, a.message);
         seen.add(a.id);
       }
-      // Bounded, so it cannot grow forever on a device that follows an active
-      // masjid for years.
       if (seen.length > 200) seen.removeRange(0, seen.length - 200);
       await prefs.setStringList('seen_announcements', seen);
     } catch (_) {}

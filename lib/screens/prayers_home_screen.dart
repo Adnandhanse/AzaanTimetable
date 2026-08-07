@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../widgets/ornaments.dart';
 import 'pillar_detail_screen.dart';
 import 'dua_home_screen.dart';
+import 'namaz_home_screen.dart';
 import 'zakat_home_screen.dart';
 
 class PrayersHomeScreen extends StatelessWidget {
@@ -30,6 +31,9 @@ class PrayersHomeScreen extends StatelessWidget {
               ? 'نماز کا صحیح طریقہ اور اس کی اہمیت پر احادیث۔'
               : 'The correct way to pray, and hadith on the importance of Namaz.',
           'icon': Icons.mosque_outlined,
+          // Opens a fork: the prayer itself, janaza, and eidain. All three are
+          // prayers, so they belong under Namaz rather than beside Umrah.
+          'namaz': true,
           'guide': IbadatContent.namaz,
         },
         {
@@ -75,24 +79,6 @@ class PrayersHomeScreen extends StatelessWidget {
               : 'How to perform Umrah, with related hadith.',
           'icon': Icons.travel_explore,
           'guide': IbadatContent.umrah,
-        },
-        {
-          'title': S.isUrdu ? 'نمازِ جنازہ' : 'Namaz-e-Janaza',
-          'subtitle': S.isUrdu ? 'جنازے کا طریقہ' : 'The funeral prayer',
-          'description': S.isUrdu
-              ? 'نمازِ جنازہ کا طریقہ اور متعلقہ احادیث۔'
-              : 'How the funeral prayer is offered, with related hadith.',
-          'icon': Icons.volunteer_activism,
-          'guide': IbadatContent.janaza,
-        },
-        {
-          'title': S.isUrdu ? 'نمازِ عیدین' : 'Namaz-e-Eidain',
-          'subtitle': S.isUrdu ? 'عید کی نماز' : 'The two Eid prayers',
-          'description': S.isUrdu
-              ? 'عید الفطر اور عید الاضحیٰ کی نماز کا طریقہ۔'
-              : 'How the Eid al-Fitr and Eid al-Adha prayers are offered.',
-          'icon': Icons.celebration_outlined,
-          'guide': IbadatContent.eidain,
         },
         {
           'title': S.isUrdu ? 'دعائیں' : 'Duas',
@@ -174,12 +160,15 @@ class _PillarCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => pillar['duas'] == true
-                ? const DuaHomeScreen()
-                : pillar['zakat'] == true
-                    ? ZakatHomeScreen(
-                        description: pillar['description'] as String)
-                    : PillarDetailScreen(
+            builder: (_) => pillar['namaz'] == true
+                ? NamazHomeScreen(
+                    description: pillar['description'] as String)
+                : pillar['duas'] == true
+                    ? const DuaHomeScreen()
+                    : pillar['zakat'] == true
+                        ? ZakatHomeScreen(
+                            description: pillar['description'] as String)
+                        : PillarDetailScreen(
                     title: pillar['title'] as String,
                     description: pillar['description'] as String,
                     guide: guide,
@@ -217,13 +206,15 @@ class _PillarCard extends StatelessWidget {
               Container(width: 22, height: 1, color: AppColors.goldRule),
               const SizedBox(height: 8),
               Text(
-                pillar['zakat'] == true
-                    ? (S.isUrdu ? 'کیلکولیٹر + احادیث' : 'Calculator + hadith')
-                    : pillar['duas'] == true
-                        ? (S.isUrdu ? '132 باب' : '132 chapters')
-                        : guide == null
-                            ? S.comingSoon
-                            : S.stepByStep,
+                pillar['namaz'] == true
+                    ? (S.isUrdu ? 'طریقہ، جنازہ، عیدین' : 'Tareeqa, Janaza, Eidain')
+                    : pillar['zakat'] == true
+                        ? (S.isUrdu ? 'کیلکولیٹر + احادیث' : 'Calculator + hadith')
+                        : pillar['duas'] == true
+                            ? (S.isUrdu ? '132 باب' : '132 chapters')
+                            : guide == null
+                                ? S.comingSoon
+                                : S.stepByStep,
                 style: AppText.caption.copyWith(
                   color: guide == null &&
                           pillar['zakat'] != true &&

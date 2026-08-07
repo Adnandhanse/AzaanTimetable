@@ -976,18 +976,52 @@ class IbadatContent {
             ],
           ),
           IbadatStep(
-            title: 'Teesri Takbeer',
-            method: 'Teesri takbeer ke baad mayyit ke liye dua ki jati hai.',
-            // Complete, verbatim from the Arabic of Nasa'i 1986.
+            title: 'Teesri Takbeer \u2014 Mayyit Ke Liye Dua',
+            method:
+                'Teesri takbeer ke baad mayyit ke liye dua ki jati hai. Yeh mukammal dua Sahih Muslim mein aayi hai.',
+            // THE FULL DUA, verbatim from the Arabic of Muslim 2232.
+            //
+            // The guide previously carried only the short general dua
+            // ("forgive our living and our dead"), which is a real narration
+            // but is not the dua FOR THE DECEASED. Someone leading a janaza
+            // would have found the guide stopped exactly where they needed it.
+            //
+            // NOTE THE أَوْ NEAR THE END, not وَ. The source reads "the
+            // punishment of the grave OR the punishment of the Fire" — the
+            // narrator was unsure which the Prophet ﷺ said. Many printed
+            // versions render it as "and", combining the two. I have kept the
+            // source's wording; smoothing it to "and" would be me correcting a
+            // narration to read better.
             arabic:
-                'اللَّهُمَّ اغْفِرْ لِحَيِّنَا وَمَيِّتِنَا وَشَاهِدِنَا وَغَائِبِنَا '
-                'وَذَكَرِنَا وَأُنْثَانَا وَصَغِيرِنَا وَكَبِيرِنَا',
+                'اللَّهُمَّ اغْفِرْ لَهُ وَارْحَمْهُ وَعَافِهِ وَاعْفُ عَنْهُ، '
+                'وَأَكْرِمْ نُزُلَهُ وَوَسِّعْ مُدْخَلَهُ، '
+                'وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ، '
+                'وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ، '
+                'وَأَبْدِلْهُ دَارًا خَيْرًا مِنْ دَارِهِ وَأَهْلًا خَيْرًا مِنْ أَهْلِهِ وَزَوْجًا خَيْرًا مِنْ زَوْجِهِ، '
+                'وَأَدْخِلْهُ الْجَنَّةَ وَأَعِذْهُ مِنْ عَذَابِ الْقَبْرِ أَوْ مِنْ عَذَابِ النَّارِ',
             translation:
-                'O Allah, forgive our living and our dead, those present among us and those absent, '
-                'our males and our females, our young and our old.',
+                'O Allah, forgive him, have mercy on him, give him peace and absolve him. '
+                'Receive him with honour and make his grave spacious. '
+                'Wash him with water, snow and hail. '
+                'Cleanse him of his faults as a white garment is cleansed of dirt. '
+                'Give him an abode better than his abode, a family better than his family, and a spouse better than his spouse. '
+                'Admit him to the Garden and protect him from the punishment of the grave, or the punishment of the Fire.',
+            translationUr:
+                'اے اللہ! اسے بخش دے، اس پر رحم فرما، اسے عافیت دے اور اس سے درگزر فرما۔ '
+                'اس کی مہمانی عزت والی بنا اور اس کی قبر کشادہ فرما۔ '
+                'اسے پانی، برف اور اولوں سے دھو دے۔ '
+                'اور اسے گناہوں سے یوں پاک کر دے جیسے سفید کپڑا میل سے پاک کیا جاتا ہے۔ '
+                'اسے اس کے گھر سے بہتر گھر، اس کے اہل سے بہتر اہل اور اس کے جوڑے سے بہتر جوڑا عطا فرما۔ '
+                'اسے جنت میں داخل فرما اور قبر کے عذاب یا آگ کے عذاب سے بچا۔',
+            practiceDiffers:
+                'Yeh dua mard mayyit ke liye hai. Aurat ke liye zameer badal jate hain \u2014 لَهَا، وَارْحَمْهَا. Bacche ke liye alag dua hai.',
             refs: <HadithRef>[
+              HadithRef(book: HadithBook.muslim, number: 2232,
+                  note: 'Awf b. Malik: the dua he memorised at a funeral'),
+              HadithRef(book: HadithBook.muslim, number: 2233,
+                  note: 'The same dua, second narration'),
               HadithRef(book: HadithBook.nasai, number: 1986,
-                  note: 'What he said in the funeral prayer'),
+                  note: 'The shorter general dua for the living and the dead'),
             ],
           ),
           IbadatStep(
