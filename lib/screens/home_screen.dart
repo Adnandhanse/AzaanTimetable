@@ -18,6 +18,7 @@ import '../widgets/sky_artwork.dart';
 import 'masjid_search_screen.dart';
 import 'prayer_times_screen.dart';
 import 'settings_screen.dart';
+import 'hijri_calendar_screen.dart';
 import 'role_selection_screen.dart';
 import 'setup_wizard_screen.dart';
 import 'quran_home_screen.dart';
@@ -70,6 +71,12 @@ class _HomeScreenState extends State<HomeScreen>
   /// tab they will never open.
   bool _isAdmin = false;
 
+  /// Live announcements for the followed masjid. Held in state rather than
+  /// rendered inline, because the banner icon needs the count and the sheet
+  /// needs the list.
+  List<Announcement> _announcementList = const <Announcement>[];
+  StreamSubscription<List<Announcement>>? _announcementSub;
+
   /// Drives the header parallax.
   ///
   /// Depth on a phone comes from things moving at different rates, not from
@@ -79,6 +86,17 @@ class _HomeScreenState extends State<HomeScreen>
   final ScrollController _scroll = ScrollController();
 
   /// One icon per prayer, in the same order as the rows.
+  /// Splits "5:40 PM" into ("5:40 pm", "") — lowercased meridiem, single space.
+  ///
+  /// Uppercase "PM" in the same weight as the digits takes as much width as an
+  /// extra digit and reads as loudly. Lowering it buys back the room that made
+  /// the times truncate.
+  static (String, String) _splitTime(String t) {
+    final parts = t.trim().split(RegExp(r'\s+'));
+    if (parts.length < 2) return (t.trim(), '');
+    return ('${parts[0]} ${parts[1].toLowerCase()}', '');
+  }
+
   static const List<IconData> _prayerIcons = <IconData>[
     Icons.wb_twilight,        // Fajr
     Icons.wb_sunny_outlined,  // Dhuhr
@@ -150,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _announcementSub?.cancel();
     _scroll.dispose();
     _clockTimer.cancel();
     _intro.dispose();
@@ -172,6 +191,20 @@ class _HomeScreenState extends State<HomeScreen>
       );
     }
   }
+
+  void _watchAnnouncements(String masjidId, String masjidName) {
+    if (_watchedMasjidId == masjidId) return;
+    _watchedMasjidId = masjidId;
+    _announcementSub?.cancel();
+    _announcementSub =
+        AnnouncementRepository.streamActive(masjidId, masjidName).listen((list) {
+      if (!mounted) return;
+      setState(() => _announcementList = list);
+      _notifyNewAnnouncements(list, masjidName);
+    });
+  }
+
+  String? _watchedMasjidId;
 
   Future<void> _loadRole() async {
     final role = await RoleSelectionScreen.savedRole();
@@ -285,25 +318,15 @@ class _HomeScreenState extends State<HomeScreen>
     return best;
   }
 
+  /// Tapping the date opens the calendar.
+  ///
+  /// It used to open an alert dialog stating today's Hijri date — which the
+  /// banner was already showing directly above the thing you tapped. Now it
+  /// answers the questions a date makes you ask: when is the 15th, how far away
+  /// is Ramadan.
   void _showHijriInfo() {
-    final hijri = HijriCalendar.now();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: Text('Islamic Date',
-            style: AppText.rowTitle.copyWith(color: AppColors.emerald)),
-        content: Text(
-          '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH\n\nFull calendar view is coming soon.',
-          style: AppText.body,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const HijriCalendarScreen()),
     );
   }
 
@@ -547,6 +570,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildIlluminatedHome(Masjid masjid, HijriCalendar hijri) {
     final next = _nextPrayer(masjid);
+    // Start listening once we know which masjid is followed.
+    _watchAnnouncements(masjid.id, masjid.name);
 
     return SingleChildScrollView(
       controller: _scroll,
@@ -582,6 +607,10 @@ class _HomeScreenState extends State<HomeScreen>
                   (masjid.latitude != 0.0 || masjid.longitude != 0.0)
                       ? () => _openDirections(masjid)
                       : null,
+              announcementCount: _announcementList.length,
+              onAnnouncementsTap: _announcementList.isEmpty
+                  ? null
+                  : () => _showAnnouncements(_announcementList, masjid.name),
               onSettingsTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
@@ -602,10 +631,15 @@ class _HomeScreenState extends State<HomeScreen>
           // One rule, a smaller figure, and the name and countdown on the same
           // line as before — the information is identical, the height is about
           // half.
-          // Announcements from the followed masjid, directly under the header
-          // where they cannot be missed. Above the prayer times on purpose: a
-          // change of Juma timing matters more than the times it changes.
-          _announcements(masjid),
+          // NO ANNOUNCEMENT CARD HERE ANY MORE.
+          //
+          // It was a full-width card between the banner and the prayer times —
+          // the busiest possible place to put anything, and it pushed the
+          // prayer list down the screen on every launch whether or not there
+          // was anything worth reading.
+          //
+          // It is now an icon with a count under the settings button on the
+          // banner, which is where a notification belongs.
 
           // The content sits on a sheet that OVERLAPS the photograph by 18px and
           // casts a soft shadow onto it. One object in front of another, which
@@ -923,7 +957,10 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  flex: 4,
+                  // 3, not 4. The longest label is "JUMA (FRIDAY)" and it can
+                  // ellipsize; a truncated TIME cannot be guessed from what is
+                  // left of it.
+                  flex: showJamat ? 3 : 4,
                   child: Text(
                     rows[i].$1.toUpperCase(),
                     maxLines: 1,
@@ -938,21 +975,26 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    rows[i].$3,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    style: AppText.arabic.copyWith(
-                      fontSize: showJamat ? 14 : 16,
-                      height: 1.2,
-                      color: AppColors.gold,
+                // THE ARABIC NAME IS DROPPED WHEN JAMAT IS SHOWN.
+                //
+                // Four columns — name, Arabic, azan, jamat — do not fit on a
+                // 360dp screen, and the result was "12:30 …" with the time
+                // itself truncated. A cut-off prayer time is worse than no
+                // Arabic name.
+                //
+                // The Arabic stays whenever there is only one time column, so
+                // masjids without jamat times lose nothing.
+                if (!showJamat) ...[
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      rows[i].$3,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: AppText.arabic.copyWith(
+                          fontSize: 16, height: 1.2, color: AppColors.gold),
                     ),
                   ),
-                ),
-                if (!showJamat)
                   Expanded(
                     flex: 6,
                     child: Text(
@@ -965,34 +1007,38 @@ class _HomeScreenState extends State<HomeScreen>
                             : AppColors.text,
                       ),
                     ),
-                  )
-                else ...[
+                  ),
+                ] else ...[
                   Expanded(
-                    flex: 3,
+                    flex: 4,
                     child: Text(
-                      rows[i].$2,
+                      // "5:40 PM" becomes "5:40 pm" at a smaller size — the
+                      // meridiem is needed but does not need to compete with
+                      // the digits.
+                      _splitTime(rows[i].$2).$1,
                       textAlign: TextAlign.right,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.visible,
                       style: AppText.listTime.copyWith(
-                        fontSize: 14.5,
+                        fontSize: 15,
                         color: rows[i].$1 == nextLabel
                             ? AppColors.emerald
                             : AppColors.textMuted,
                       ),
                     ),
                   ),
-                  // Jamat in the stronger weight: the azan is what the alarm
-                  // fires on, but the jamat is the time people plan around.
+                  const SizedBox(width: 6),
                   Expanded(
-                    flex: 3,
+                    flex: 4,
                     child: Text(
-                      rows[i].$4.trim().isEmpty ? '\u2014' : rows[i].$4,
+                      rows[i].$4.trim().isEmpty
+                          ? '\u2014'
+                          : _splitTime(rows[i].$4).$1,
                       textAlign: TextAlign.right,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.visible,
                       style: AppText.listTime.copyWith(
-                        fontSize: 16.5,
+                        fontSize: 16,
                         color: rows[i].$4.trim().isEmpty
                             ? AppColors.textFaint
                             : (rows[i].$1 == nextLabel
@@ -1009,92 +1055,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _announcements(Masjid masjid) {
-    return StreamBuilder<List<Announcement>>(
-      stream: AnnouncementRepository.streamActive(masjid.id, masjid.name),
-      builder: (context, snap) {
-        final list = snap.data ?? const <Announcement>[];
-        if (list.isEmpty) return const SizedBox.shrink();
-
-        _notifyNewAnnouncements(list, masjid.name);
-
-        final Announcement first = list.first;
-
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-          child: Material(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => _showAnnouncements(list, masjid.name),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.goldRule),
-                ),
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                child: Row(
-                  children: <Widget>[
-                    // Icon in a soft gold disc, the way a notification looks
-                    // anywhere else. It reads as an alert rather than as
-                    // decoration.
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.gold.withOpacity(0.12),
-                      ),
-                      child: const Icon(Icons.campaign_outlined,
-                          size: 20, color: AppColors.gold),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            S.isUrdu ? 'اہم اعلان' : 'Important Announcement',
-                            style: AppText.rowTitle
-                                .copyWith(fontSize: 15, color: AppColors.text),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            first.message,
-                            // ONE LINE ONLY. A preview that runs to three lines
-                            // is not a preview, and the whole point of "read
-                            // more" is that the home screen stays a home
-                            // screen.
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.caption
-                                .copyWith(color: AppColors.textMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(S.isUrdu ? 'مزید' : 'Read More',
-                            style: AppText.caption.copyWith(
-                                color: AppColors.gold,
-                                fontWeight: FontWeight.w600)),
-                        const Icon(Icons.chevron_right,
-                            size: 16, color: AppColors.gold),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   /// The full text, and any older announcements still running.
   ///

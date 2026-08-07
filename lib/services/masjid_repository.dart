@@ -73,8 +73,20 @@ class MasjidRepository {
     return docRef.id;
   }
 
+  /// Updates the times and stamps WHEN.
+  ///
+  /// Written with the SERVER's clock, not the device's. A phone with the wrong
+  /// date would otherwise record a masjid as last updated in 2019, and you
+  /// would have no way to tell that from a masjid that genuinely has not been
+  /// touched since.
+  ///
+  /// Useful for exactly the thing you asked about: seeing which masjids have
+  /// gone stale and need chasing.
   static Future<void> updatePrayerTimes(String id, PrayerTimes times) async {
-    await _collection.doc(id).update({'prayerTimes': times.toMap()});
+    await _collection.doc(id).update({
+      'prayerTimes': times.toMap(),
+      'timesUpdatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   static Future<void> updateVerificationStatus(String id, String status) async {

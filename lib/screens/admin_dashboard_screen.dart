@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'announcement_admin_screen.dart';
 import '../models/masjid.dart';
@@ -14,11 +16,71 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  static String _updatedLabel(DateTime? t) {
+    if (t == null) return 'Times never updated';
+    final d = DateTime.now().difference(t);
+    if (d.inMinutes < 60) return 'Updated just now';
+    if (d.inHours < 24) return 'Updated ${d.inHours}h ago';
+    if (d.inDays == 1) return 'Updated yesterday';
+    if (d.inDays < 30) return 'Updated ${d.inDays} days ago';
+    final months = d.inDays ~/ 30;
+    return 'Updated $months month${months == 1 ? '' : 's'} ago';
+  }
+
+  /// Amber past a month, red past three. Prayer times drift with the seasons,
+  /// so "not touched since spring" is a real problem rather than a cosmetic one.
+  static Color _staleColour(DateTime? t) {
+    if (t == null) return const Color(0xFFB3261E);
+    final days = DateTime.now().difference(t).inDays;
+    if (days >= 90) return const Color(0xFFB3261E);
+    if (days >= 30) return AppColors.gold;
+    return AppColors.textMuted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Prayer Time Dashboard'),
+        actions: [
+          // REQUIRED, now that the session persists.
+          //
+          // Without this an admin could never sign out — and on a shared phone,
+          // or when a masjid changes who manages it, the previous admin would
+          // stay signed in forever.
+          IconButton(
+            icon: const Icon(Icons.logout, size: 20),
+            tooltip: 'Log out',
+            onPressed: () async {
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Log out?'),
+                  content: const Text(
+                      'You will need to enter your mobile number again to manage this masjid.'),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Cancel')),
+                    TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text('Log out')),
+                  ],
+                ),
+              );
+              if (ok != true) return;
+              try {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('admin_mobile');
+              } catch (_) {}
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<List<Masjid>>(
         stream: MasjidRepository.streamByAdminMobile(widget.adminMobile),
@@ -47,6 +109,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('${masjid.city} • ${masjid.verificationStatus}'),
+                      const SizedBox(height: 2),
+                      // How long since the times were touched. The number an
+                      // admin needs to see is not "when did I last log in" but
+                      // "are my times still right" — and a masjid whose times
+                      // were last edited in Ramadan is the one to chase.
+                      Row(
+                        children: [
+                          Icon(Icons.update,
+                              size: 14,
+                              color: _staleColour(masjid.timesUpdatedAt)),
+                          const SizedBox(width: 5),
+                          Text(
+                            _updatedLabel(masjid.timesUpdatedAt),
+                            style: AppText.caption.copyWith(
+                                color: _staleColour(masjid.timesUpdatedAt)),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 2),
                       Row(
                         children: [

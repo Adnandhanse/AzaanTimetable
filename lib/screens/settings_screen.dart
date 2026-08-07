@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
+import 'hijri_calendar_screen.dart';
 import 'role_selection_screen.dart';
 import '../services/app_language.dart';
 import '../services/app_strings.dart';
@@ -57,6 +58,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Vibrate along with notification'),
             value: vibrateEnabled,
             onChanged: (v) => setState(() => vibrateEnabled = v),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.calendar_month_outlined,
+                color: AppColors.emerald),
+            title: Text(S.isUrdu ? 'اسلامی کیلنڈر' : 'Hijri calendar'),
+            subtitle: Text(S.isUrdu
+                ? 'اسلامی اور عیسوی تاریخیں ساتھ ساتھ'
+                : 'Hijri and Gregorian dates side by side'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+            ),
           ),
           const Divider(),
           // So the role choice is changeable. It is asked once at first launch;

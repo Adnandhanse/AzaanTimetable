@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'register_masjid_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'super_admin_login_screen.dart';
@@ -16,6 +17,50 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isChecking = false;
 
+  /// Set while checking for a saved session, so the login form does not flash
+  /// up for a second before being replaced by the dashboard.
+  bool _restoring = true;
+
+  static const _key = 'admin_mobile';
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSession();
+  }
+
+  /// STAY LOGGED IN.
+  ///
+  /// The number was being asked for on every single launch, even though the app
+  /// already knew it. An imam updating his times twice a day was typing his
+  /// mobile number twice a day for no reason.
+  ///
+  /// The number is stored on this device only, and cleared on logout. It is not
+  /// a credential — this screen is a lookup, not authentication — so nothing
+  /// secret is being kept.
+  Future<void> _restoreSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_key);
+      if (saved != null && saved.trim().isNotEmpty) {
+        // Confirm the masjid still exists and this number still administers it,
+        // so a removed admin is not let straight back in.
+        final matches =
+            await MasjidRepository.streamByAdminMobile(saved).first;
+        if (matches.isNotEmpty && mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+                builder: (_) => AdminDashboardScreen(adminMobile: saved)),
+          );
+          return;
+        }
+        // No longer an admin — forget it rather than failing on every launch.
+        await prefs.remove(_key);
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _restoring = false);
+  }
+
   // Note: this is a simple mobile-number lookup against Firestore, not a
   // full Firebase Auth login for admins yet. Good enough for now since
   // only someone who registered the masjid would know this number, but
@@ -30,6 +75,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     setState(() => _isChecking = false);
 
     if (matches.isNotEmpty) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_key, _mobileController.text.trim());
+      } catch (_) {}
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => AdminDashboardScreen(adminMobile: _mobileController.text)),
       );
@@ -42,6 +92,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_restoring) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masjid Admin Login'),

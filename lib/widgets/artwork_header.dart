@@ -26,6 +26,8 @@ class ArtworkHeader extends StatelessWidget {
     required this.onMetaTap,
     required this.phase,
     this.onDirectionsTap,
+    this.onAnnouncementsTap,
+    this.announcementCount = 0,
     this.artworkHeight = 300,
     this.settle = 1.0,
   });
@@ -41,6 +43,12 @@ class ArtworkHeader extends StatelessWidget {
   /// Null when the masjid has no coordinates, in which case no button is shown
   /// rather than one that opens an empty map.
   final VoidCallback? onDirectionsTap;
+
+  /// Announcements, reached from the banner rather than from a card in the
+  /// page. Null or zero count hides the icon — an announcements button that
+  /// opens an empty list is worse than no button.
+  final VoidCallback? onAnnouncementsTap;
+  final int announcementCount;
 
   /// Which sky to show. Comes from the masjid's prayer times, not the clock.
   final SkyPhase phase;
@@ -154,11 +162,58 @@ class ArtworkHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined,
-                        color: Colors.white, size: 21),
-                    tooltip: 'Settings',
-                    onPressed: onSettingsTap,
+                  // Settings on top, announcements beneath it. Stacked rather
+                  // than side by side so the name and address keep their full
+                  // width — they are the reason the banner exists.
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined,
+                            color: Colors.white, size: 21),
+                        tooltip: 'Settings',
+                        onPressed: onSettingsTap,
+                      ),
+                      if (onAnnouncementsTap != null && announcementCount > 0)
+                        IconButton(
+                          tooltip: 'Announcements',
+                          onPressed: onAnnouncementsTap,
+                          icon: Stack(
+                            clipBehavior: Clip.none,
+                            children: <Widget>[
+                              const Icon(Icons.campaign_outlined,
+                                  color: Colors.white, size: 21),
+                              // A count badge, because an icon alone gives no
+                              // reason to tap it. This is the only thing left
+                              // on Home telling you an announcement exists.
+                              Positioned(
+                                right: -4,
+                                top: -3,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.gold,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                      minWidth: 15, minHeight: 15),
+                                  child: Text(
+                                    '$announcementCount',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      height: 1.3,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),

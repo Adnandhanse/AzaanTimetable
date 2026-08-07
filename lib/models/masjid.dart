@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 /// Azan times, and optionally the jamat times that follow them.
 ///
 /// WHY JAMAT IS A SEPARATE, OPTIONAL SET
@@ -112,6 +113,12 @@ class Masjid {
   String? customAzanAudioName;
   String? customAzanAudioUrl;
 
+  /// When the prayer times were last changed, from the SERVER clock.
+  ///
+  /// Null for every masjid registered before this existed, and for any that has
+  /// never had its times edited — which is itself the useful signal.
+  DateTime? timesUpdatedAt;
+
   /// How many devices currently follow this masjid.
   ///
   /// A COUNT, not a list. There is no record of WHO follows a masjid anywhere in
@@ -139,6 +146,7 @@ class Masjid {
     this.customAzanAudioName,
     this.customAzanAudioUrl,
     this.followerCount = 0,
+    this.timesUpdatedAt,
   });
 
   Map<String, dynamic> toMap() => {
@@ -163,6 +171,9 @@ class Masjid {
         // Absent on every masjid registered before this existed, so it defaults
         // rather than failing to parse.
         followerCount: (map['followerCount'] as num?)?.toInt() ?? 0,
+        timesUpdatedAt: map['timesUpdatedAt'] is Timestamp
+            ? (map['timesUpdatedAt'] as Timestamp).toDate()
+            : null,
         name: map['name'] ?? '',
         city: map['city'] ?? '',
         address: map['address'] ?? '',

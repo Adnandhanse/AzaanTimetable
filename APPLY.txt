@@ -1,57 +1,96 @@
-v62 - BUILD FIX - 22 files, self-contained
-==========================================
+v63 - 29 files, self-contained
+==============================
 
-Overwrite all. This bundle REPLACES v59, v60 and v61 — apply it over a tree that
-has v58, or over any of those, and it will be consistent either way.
-
-=====================================================================
-WHAT BROKE, AND IT WAS PACKAGING NOT CODE
-=====================================================================
-    The getter 'arabic' isn't defined for the class 'DailyHadith'
-
-daily_hadith.dart DEFINES the arabic field. daily_hadith_card.dart USES it.
-
-I shipped the first in v60 and the second in v61. They are interdependent, so
-any tree that got v61 without v60 landing correctly has a card reading a field
-that does not exist.
-
-The code was never wrong. I split a two-file change across two bundles, which is
-a packaging mistake and entirely mine.
+Overwrite all. REPLACES v59 through v62 — apply over v58 or over any later
+bundle and you end up consistent either way.
 
 =====================================================================
-WHAT I DID ABOUT IT
+1. PRAYER ROWS - THE TIMES WERE TRUNCATING
 =====================================================================
-I checked every cross-file dependency created in the last several rounds:
+Your screenshot showed "12:30 …" and "11:30 …". Four columns — name, Arabic,
+azan, jamat — do not fit on a 360dp screen.
 
-  daily_hadith_card    -> daily_hadith        arabic, textUr, themeUr
-  pillar_detail_screen -> ibadat_content      translationUr, keyPoint
-  home_screen          -> masjid              hasAnyJamat, fajrJamat
-  prayer_times_screen  -> masjid              hasAnyJamat
-  mushaf_view          -> app_theme           quranAyah
-  hadith_list_screen   -> app_theme           urduText
-  surah_detail_screen  -> app_theme           quranAyah
-  prayers_home_screen  -> ibadat_content      janaza, eidain, umrah
+THE ARABIC NAME IS NOW DROPPED WHEN JAMAT IS SHOWN. A cut-off prayer time is
+worse than a missing decorative name, and the Arabic stays for every masjid that
+has no jamat times, so nothing is lost there.
 
-Every one of those pairs is now IN THIS BUNDLE TOGETHER, and I verified the
-bundle against itself: for each pair, every member the user references exists in
-the definer as shipped here. Not in my working copy — in the zip.
-
-That check now runs before I package anything.
+Also: "PM" is lowercased and the columns rebalanced to 3 : 4 : 4. Checked at
+360dp — "12:40 pm" needs about 74dp and now has 91dp. Nothing truncates.
 
 =====================================================================
-EVERYTHING FROM v59, v60 AND v61 IS INCLUDED
+2. ANNOUNCEMENT MOVED TO THE BANNER
 =====================================================================
-  v59  full janaza dua, janaza/eidain under Namaz, jamat layout,
-       announcement restyle, jamat on the full schedule
-  v60  Friday Dhuhr fix, palette, daily hadith Arabic, prayer icons,
-       announcement card with Read More
-  v61  Uthmanic Hafs and Noto Nastaliq fonts, wired to Qur'an text and Urdu
+The card is gone. There is now a megaphone icon with a count badge beneath the
+settings icon; tapping it opens the same bottom sheet.
 
-The two font files are in here. The three existing fonts (Inter, Amiri) are
-already in your repo and are not duplicated.
+The card sat between the banner and the prayer times — the busiest place on the
+screen — and pushed the prayer list down on every launch whether or not there
+was anything to read.
+
+The icon only appears when an announcement exists.
 
 =====================================================================
-STILL TRUE FROM v61
+3. URDU FONT IN THE QUR'AN - THE REAL CAUSE
 =====================================================================
-THE KFGQPC ZIP HAD NO LICENCE FILE. Get the official release from the King Fahd
-Complex and read its terms before publishing commercially.
+SurahDetailScreen was never told which translation it had been given. It just
+rendered whatever text it received in the Latin style, so Urdu came out in the
+wrong face — exactly what your second screenshot shows.
+
+Rather than thread a language parameter through five screens, the style is now
+chosen FROM THE TEXT: AppText.translationFor() checks whether the string is in
+Arabic script and returns Nastaliq or Latin accordingly. That cannot fall out of
+step with what is actually on screen, which is precisely how this broke.
+
+Applied in the surah reader and the juz reader. Arabic ayat already use the
+Uthmanic face.
+
+=====================================================================
+4. ADMIN STAYS LOGGED IN
+=====================================================================
+The number is saved on the device and checked against Firestore on launch. If
+the masjid still lists that number, the dashboard opens directly.
+
+If it no longer does — an admin removed, a masjid deleted — the saved number is
+discarded rather than failing on every launch.
+
+A LOGOUT BUTTON WAS REQUIRED AND IS NOW ON THE DASHBOARD. Without it, a shared
+phone or a change of caretaker would leave the previous admin signed in forever.
+That was not in your list, but persistent login without a way out is a trap.
+
+=====================================================================
+5. HANAFI 3-TAKBEER REMOVED FROM EID
+=====================================================================
+The step now states seven and five plainly, matching the hadith cited beneath
+it. The comparison note is gone.
+
+=====================================================================
+7. HIJRI CALENDAR
+=====================================================================
+A month view with the Gregorian day under each Hijri date, Fridays outlined,
+today filled. Month arrows step through.
+
+Reached by TAPPING THE DATE ON THE BANNER — which previously opened an alert
+telling you today's Hijri date, directly below the banner already showing it.
+Also in Settings.
+
+Built by walking real Gregorian days and asking each its Hijri date, rather than
+iterating Hijri days: months are 29 or 30 depending on the year, and this cannot
+produce a day that does not exist.
+
+It says plainly that the dates are calculated and local moon sighting may differ
+by a day. That is the single most common complaint about any Hijri calendar in
+an app.
+
+=====================================================================
+8. LAST UPDATED PER MASJID
+=====================================================================
+Every prayer-time save stamps timesUpdatedAt from the SERVER clock, not the
+device — a phone with the wrong date would otherwise record a masjid as updated
+in 2019.
+
+The admin dashboard shows "Updated 3 days ago" / "Updated 2 months ago" /
+"Times never updated", in grey under a month, amber past a month, red past three.
+Prayer times drift with the seasons, so a masjid untouched since spring is a real
+problem, not a cosmetic one.
+
+That is also the field you would query to find stale masjids to chase.

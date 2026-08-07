@@ -1084,9 +1084,9 @@ class IbadatContent {
           IbadatStep(
             title: 'Zaid Takbeerein',
             method:
-                'Dono rakaton mein zaid takbeerein kahi jati hain, har takbeer par haath uthaye jate hain.',
-            practiceDiffers:
-                'Takbeeron ki tadaad mein ikhtilaf hai. Hanafi mazhab: pehli rakat mein qira\u2018at se pehle 3, doosri mein qira\u2018at ke baad 3. Shafi\u2018i mazhab: pehli mein 7, doosri mein 5 — jaisa in ahadees mein aaya hai.',
+                'Pehli rakat mein qira\u2018at se pehle saat takbeerein, aur '
+                'doosri rakat mein paanch \u2014 jaisa in ahadees mein aaya hai. '
+                'Har takbeer par haath uthaye jate hain.',
             refs: <HadithRef>[
               HadithRef(book: HadithBook.ibnmajah, number: 1279,
                   note: 'Seven in the first rak\u2018ah and five in the second'),

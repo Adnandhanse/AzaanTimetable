@@ -246,11 +246,20 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                             const SizedBox(height: 8),
                             Container(height: 1, color: AppColors.goldRuleFaint),
                             const SizedBox(height: 8),
-                            Text(
-                              verse.translation,
-                              style: AppText.translation
-                                  .copyWith(color: AppColors.text),
-                            ),
+                            Builder(builder: (context) {
+                              final st =
+                                  AppText.translationFor(verse.translation);
+                              final urdu = st == AppText.urduText;
+                              return Text(
+                                verse.translation,
+                                textDirection: urdu
+                                    ? TextDirection.rtl
+                                    : TextDirection.ltr,
+                                textAlign:
+                                    urdu ? TextAlign.right : TextAlign.left,
+                                style: st.copyWith(color: AppColors.text),
+                              );
+                            }),
                           ],
                         ),
                       ),

@@ -159,6 +159,31 @@ class AppText {
   /// 18sp with 2.0 line height. Nastaliq needs the room — at the 1.55 the Latin
   /// translation style uses, the descenders of one line collide with the line
   /// below and it becomes genuinely hard to read.
+  /// Picks the right face for a translation by looking at the text itself.
+  ///
+  /// Urdu is written in Arabic script; English is not. Detecting that is more
+  /// reliable than threading a language parameter through every screen, and it
+  /// cannot fall out of step with what is actually being displayed — which is
+  /// exactly what happened in the Qur'an reader, where the screen never knew
+  /// which translation it had been given.
+  ///
+  /// Devanagari (Hindi) falls through to the Latin style, which renders it
+  /// correctly with the system font.
+  static TextStyle translationFor(String text) =>
+      _isArabicScript(text) ? urduText : translation;
+
+  static bool _isArabicScript(String text) {
+    // Sample the first 60 characters rather than scanning a whole ayah: the
+    // script is decided within the first word.
+    final sample = text.length > 60 ? text.substring(0, 60) : text;
+    for (final int c in sample.runes) {
+      if (c >= 0x0600 && c <= 0x06FF) return true; // Arabic block
+      if (c >= 0x0750 && c <= 0x077F) return true; // Arabic Supplement
+      if (c >= 0xFB50 && c <= 0xFDFF) return true; // Presentation Forms-A
+    }
+    return false;
+  }
+
   static const TextStyle urduText = TextStyle(
     fontFamily: AppFonts.urdu,
     fontSize: 18,

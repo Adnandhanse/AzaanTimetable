@@ -397,7 +397,22 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                     const SizedBox(height: 8),
                     const Divider(),
                     const SizedBox(height: 4),
-                    Text(verse.translation, style: AppText.translation.copyWith(color: AppColors.text)),
+                    // Nastaliq for Urdu, Latin otherwise, decided from the text
+                    // itself — this screen is never told which translation it
+                    // was handed.
+                    Text(
+                      verse.translation,
+                      textDirection: AppText.translationFor(verse.translation) ==
+                              AppText.urduText
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                      textAlign: AppText.translationFor(verse.translation) ==
+                              AppText.urduText
+                          ? TextAlign.right
+                          : TextAlign.left,
+                      style: AppText.translationFor(verse.translation)
+                          .copyWith(color: AppColors.text),
+                    ),
                     if (hasNote) ...[
                       const SizedBox(height: 8),
                       Container(
