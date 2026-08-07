@@ -392,7 +392,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       verse.arabicText,
                       textAlign: TextAlign.right,
                       textDirection: TextDirection.rtl,
-                      style: AppText.arabicVerse.copyWith(color: AppColors.text),
+                      style: AppText.quranAyah.copyWith(color: AppColors.text),
                     ),
                     const SizedBox(height: 8),
                     const Divider(),

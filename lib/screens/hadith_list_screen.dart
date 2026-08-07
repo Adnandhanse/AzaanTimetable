@@ -152,6 +152,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
                     widget.highlightHadithNumber == h.hadithNumber;
                 return _HadithCard(
                   item: h,
+                  isUrduText: widget.language == 'urd',
                   isTarget: isTarget,
                   isExpanded: _expanded.contains(h.hadithNumber),
                   isBookmarked: _isBookmarked(h.hadithNumber),
@@ -174,6 +175,7 @@ class _HadithCard extends StatelessWidget {
   const _HadithCard({
     super.key,
     required this.item,
+    required this.isUrduText,
     required this.isTarget,
     required this.isExpanded,
     required this.isBookmarked,
@@ -184,6 +186,11 @@ class _HadithCard extends StatelessWidget {
   });
 
   final HadithItem item;
+
+  /// Whether the translation being displayed is Urdu, so it can be set in
+  /// Nastaliq and laid out right-to-left.
+  final bool isUrduText;
+
   final bool isTarget;
   final bool isExpanded;
   final bool isBookmarked;
@@ -296,8 +303,11 @@ class _HadithCard extends StatelessWidget {
                                 fontSize: 17,
                                 height: 1.6,
                                 color: AppColors.text)
-                            : AppText.translation
-                                .copyWith(color: AppColors.textMid),
+                            : (isUrduText
+                                ? AppText.urduText
+                                    .copyWith(fontSize: 16, color: AppColors.textMid)
+                                : AppText.translation
+                                    .copyWith(color: AppColors.textMid)),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -371,9 +381,21 @@ class _HadithCard extends StatelessWidget {
                   if (item.text.trim().isNotEmpty) ...[
                     Container(height: 1, color: AppColors.goldRuleFaint),
                     const SizedBox(height: 10),
-                    Text(item.text,
-                        style: AppText.translation
-                            .copyWith(color: AppColors.text)),
+                    // Nastaliq when the translation being shown is Urdu. Naskh
+                    // renders Urdu legibly but wrongly — the way English set in
+                    // Fraktur is legible but wrong.
+                    Text(
+                      item.text,
+                      textDirection: isUrduText
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                      textAlign:
+                          isUrduText ? TextAlign.right : TextAlign.left,
+                      style: isUrduText
+                          ? AppText.urduText.copyWith(color: AppColors.text)
+                          : AppText.translation
+                              .copyWith(color: AppColors.text),
+                    ),
                   ] else
                     Text(
                       S.noTranslationAvailable,

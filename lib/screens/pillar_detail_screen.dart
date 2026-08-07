@@ -170,8 +170,7 @@ class _StepCard extends StatelessWidget {
                     urdu ? step.translationUr! : (step.translation ?? ''),
                     textAlign: urdu ? TextAlign.right : TextAlign.left,
                     style: urdu
-                        ? AppText.translation.copyWith(
-                            fontSize: 16, height: 1.9, color: AppColors.textMid)
+                        ? AppText.urduText.copyWith(color: AppColors.textMid)
                         : AppText.translation
                             .copyWith(color: AppColors.textMid),
                   ),

@@ -82,6 +82,7 @@ flutter:
     # nothing navigated to it either.
     - assets/duas/duas_en.json
     - assets/video/intro.mp4
+    - assets/fonts/NotoNastaliqUrdu-LICENSE-OFL.txt
     - assets/images/nabawi_header.webp
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp
@@ -118,6 +119,21 @@ flutter:
         - asset: assets/fonts/Amiri-Regular.ttf
         - asset: assets/fonts/Amiri-Bold.ttf
           weight: 700
+    # The Madani Mushaf face. Used for QUR'AN TEXT ONLY.
+    #
+    # LICENCE WARNING: the package this came from carries no licence file — its
+    # readme is a font-aggregator page. KFGQPC fonts are produced by the King
+    # Fahd Glorious Qur'an Printing Complex and are free to use, but their terms
+    # come from the Complex, not from a download site. Get the official release
+    # and read its terms before publishing commercially.
+    - family: UthmanicHafs
+      fonts:
+        - asset: assets/fonts/UthmanicHafs.otf
+    # Urdu. SIL Open Font License — licence text bundled beside it, which OFL
+    # requires when redistributing.
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf
     # OPTIONAL UPGRADE — the display face.
     #
     # The UI currently uses Android's built-in 'serif' (see AppFonts.serif in

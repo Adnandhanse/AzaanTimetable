@@ -76,7 +76,7 @@ class _DailyHadithDialog extends StatelessWidget {
           // uninvited.
           Container(
             decoration: BoxDecoration(
-              color: AppColors.ivory.withOpacity(0.92),
+              color: AppColors.ivory.withOpacity(0.96),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.gold.withOpacity(0.7)),
               boxShadow: const <BoxShadow>[
@@ -86,7 +86,7 @@ class _DailyHadithDialog extends StatelessWidget {
                     offset: Offset(0, 10)),
               ],
             ),
-            padding: const EdgeInsets.fromLTRB(18, 12, 10, 16),
+            padding: const EdgeInsets.fromLTRB(20, 12, 12, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,14 +113,37 @@ class _DailyHadithDialog extends StatelessWidget {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: 8, bottom: 4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(theme,
                           style: AppText.rowTitle.copyWith(
                               fontSize: 15, color: AppColors.emerald)),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
+
+                      // ARABIC FIRST, then the translation beneath it.
+                      //
+                      // Every other screen in this app leads with the Arabic.
+                      // A daily card that showed only an English sentence was
+                      // the odd one out, and looked like a fortune cookie
+                      // rather than a hadith.
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Text(
+                          hadith.arabic,
+                          textAlign: TextAlign.right,
+                          style: AppText.arabicVerse.copyWith(
+                              fontSize: 20, height: 1.95, color: AppColors.text),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // A short gold rule between the two, rather than a full
+                      // divider: it separates them without cutting the card in
+                      // half.
+                      Container(width: 38, height: 1, color: AppColors.gold),
+                      const SizedBox(height: 12),
+
                       Directionality(
                         textDirection:
                             urdu ? TextDirection.rtl : TextDirection.ltr,
@@ -128,14 +151,13 @@ class _DailyHadithDialog extends StatelessWidget {
                           body,
                           textAlign: urdu ? TextAlign.right : TextAlign.left,
                           style: urdu
-                              ? AppText.translation.copyWith(
-                                  fontSize: 16, height: 1.9,
-                                  color: AppColors.text)
+                              ? AppText.urduText
+                                  .copyWith(color: AppColors.textMid)
                               : AppText.translation
-                                  .copyWith(color: AppColors.text),
+                                  .copyWith(color: AppColors.textMid),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 14),
                       Row(
                         children: <Widget>[
                           Expanded(

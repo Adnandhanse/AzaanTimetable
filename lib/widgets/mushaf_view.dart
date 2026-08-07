@@ -203,7 +203,9 @@ class _MushafViewState extends State<MushafView> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle style = AppText.arabicVerse.copyWith(
+    // THE MUSHAF FACE, not the general Arabic one. This is Qur'an, and it
+    // should look like the printed Mushaf people already read from.
+    final TextStyle style = AppText.quranAyah.copyWith(
       fontSize: widget.fontSize,
       height: 2.05,
       color: AppColors.text,

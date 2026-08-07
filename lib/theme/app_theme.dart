@@ -8,22 +8,23 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color ivory = Color(0xFFFBF8F1); // page background
+  // Palette set to the exact values specified.
+  static const Color ivory = Color(0xFFFAF7F0); // page background
   static const Color white = Color(0xFFFFFFFF); // cards, headers, nav bar
 
   /// Sits between white and ivory. Used for Material 3 surface containers —
   /// menus, bottom sheets, anything layered over the page — so they read as
   /// slightly recessed rather than picking up the seed-derived blue-green.
   static const Color cream = Color(0xFFF4EFE3);
-  static const Color emerald = Color(0xFF14503E); // primary
+  static const Color emerald = Color(0xFF0F5E3A); // primary
   static const Color emeraldTint = Color(0xFF2C6653); // ring track on emerald
-  static const Color gold = Color(0xFFC9A227); // accent, ornament
-  static const Color goldRule = Color(0xFFE3D5B0); // hairline borders
+  static const Color gold = Color(0xFFC79A2E); // accent, ornament
+  static const Color goldRule = Color(0xFFE8DFC9); // hairline borders
   static const Color goldRuleFaint = Color(0xFFEFE7D3); // list separators
   static const Color goldPale = Color(0xFFD9C27E); // labels on emerald
-  static const Color text = Color(0xFF2B322E);
+  static const Color text = Color(0xFF1B1B1B);
   static const Color textMid = Color(0xFF5C6560);
-  static const Color textMuted = Color(0xFF9A8F7D);
+  static const Color textMuted = Color(0xFF6B6B6B);
   static const Color textFaint = Color(0xFFB5AC98);
   static const Color chevron = Color(0xFFC0B79F);
   static const Color navInactive = Color(0xFFA9A192);
@@ -49,6 +50,23 @@ class AppFonts {
   /// assets/fonts/, uncomment the Cormorant block in pubspec.yaml, and change
   /// this one line to 'Cormorant'. Nothing else in the app needs touching.
   static const String serif = 'serif';
+
+  /// QUR'AN TEXT ONLY — the KFGQPC Madani Mushaf face.
+  ///
+  /// Kept separate from [arabic] deliberately. Qur'an should be set in the
+  /// Mushaf face people recognise from print; hadith and duas should not,
+  /// because setting a narration in the Mushaf face implies it carries the
+  /// same status as revelation.
+  static const String quran = 'UthmanicHafs';
+
+  /// Urdu. Nastaliq is the script Urdu is actually written in — Naskh renders
+  /// it legibly but wrongly, the way English set in Fraktur is legible but
+  /// wrong.
+  ///
+  /// It needs far more line height than Latin or Naskh: the script descends
+  /// steeply and letters overlap vertically, so 1.8 is a floor, not a
+  /// preference.
+  static const String urdu = 'NotoNastaliqUrdu';
 
   /// Already bundled — Inter-Variable.ttf.
   static const String sans = 'Inter';
@@ -126,6 +144,24 @@ class AppText {
   static const TextStyle arabicVerse = TextStyle(
     fontFamily: AppFonts.arabic,
     fontSize: 23,
+    height: 2.0,
+  );
+
+  /// A Qur'an ayah, in the Mushaf face.
+  static const TextStyle quranAyah = TextStyle(
+    fontFamily: AppFonts.quran,
+    fontSize: 30,
+    height: 2.0,
+  );
+
+  /// Urdu translation.
+  ///
+  /// 18sp with 2.0 line height. Nastaliq needs the room — at the 1.55 the Latin
+  /// translation style uses, the descenders of one line collide with the line
+  /// below and it becomes genuinely hard to read.
+  static const TextStyle urduText = TextStyle(
+    fontFamily: AppFonts.urdu,
+    fontSize: 18,
     height: 2.0,
   );
 

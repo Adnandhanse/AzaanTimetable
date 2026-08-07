@@ -1,85 +1,68 @@
-v59 - 5 files
-=============
+v61 - FONTS INSTALLED
+=====================
 
-  lib/data/ibadat_content.dart          full janaza dua
-  lib/screens/namaz_home_screen.dart    NEW  groups the three prayers
-  lib/screens/prayers_home_screen.dart  janaza and eidain moved under Namaz
-  lib/screens/home_screen.dart          jamat layout, announcement restyled
-  lib/screens/prayer_times_screen.dart  jamat added to the full schedule
+  pubspec.yaml                            declares both families
+  assets/fonts/UthmanicHafs.otf           NEW  246 KB
+  assets/fonts/NotoNastaliqUrdu-Regular.ttf  NEW  497 KB
+  assets/fonts/NotoNastaliqUrdu-LICENSE-OFL.txt  NEW
+  lib/theme/app_theme.dart                quranAyah + urduText styles
+  lib/widgets/mushaf_view.dart            Mushaf face
+  lib/screens/surah_detail_screen.dart    Mushaf face
+  lib/screens/hadith_list_screen.dart     Nastaliq for Urdu
+  lib/screens/hadith_single_screen.dart   Nastaliq for Urdu
+  lib/screens/pillar_detail_screen.dart   Nastaliq for Urdu
+  lib/widgets/daily_hadith_card.dart      Nastaliq for Urdu
 
-Overwrite all five. Apply AFTER v58. No new package.
-
-=====================================================================
-1. JAMAT COLUMNS WERE CLUTTERED
-=====================================================================
-I had used two fixed 66px boxes plus a Spacer plus an Expanded label plus the
-Arabic name. On a 360dp screen the name and the Arabic were left fighting over
-whatever remained, and nothing lined up.
-
-Everything is FLEX now, no fixed pixel widths anywhere: 4 : 2 : 3 : 3 for name,
-Arabic, azan, jamat. It scales with the screen instead of assuming one. The
-column headings use the same flex values, so they cannot drift out of alignment
-with the numbers underneath.
-
-The Arabic name also drops from 16 to 14pt and the label tracking tightens when
-two time columns are present — small, but it is the difference between tight and
-cramped.
+Overwrite all. Apply AFTER v60. APK grows about 740 KB.
 
 =====================================================================
-2. ANNOUNCEMENT - THIRD ATTEMPT, AND THIS TIME NOT A BOX
+READ THIS BEFORE YOU PUBLISH - THE KFGQPC LICENCE
 =====================================================================
-The first was a bordered white card. The second was a gold-tinted strip with an
-accent bar. You said both looked like a box stuck on the page, and you were
-right both times — ANY filled rectangle reads as a panel on a flat ivory layout.
+The KFGQPC zip you sent contains NO LICENCE FILE. Its readme is a font
+aggregator's page - "This font was downloaded from... hundreds of free fonts" -
+which is not a licence and grants nothing.
 
-So there is no fill, no border and no card. It is a line of text with a small
-icon between two hairlines, and those hairlines are the same ones the prayer
-list already uses. It sits in the page rather than on it.
+KFGQPC Uthmanic Script is produced by the King Fahd Glorious Qur'an Printing
+Complex. It is free to use, but the terms come from the Complex, not from a
+download site, and they carry conditions about how it may be distributed.
 
-=====================================================================
-3. JANAZA AND EIDAIN MOVED UNDER NAMAZ
-=====================================================================
-They were in "Also" beside Umrah and Duas, as though they were separate acts of
-worship. They are prayers.
+I have installed it because you asked and it works. Before you publish
+commercially, get the official release from the Complex and read its terms. This
+is the kind of thing that gets an app pulled after launch rather than rejected
+before it.
 
-Tapping Namaz now opens a short menu:
-    Namaz Ka Tareeqa    takbeer to salam, with the complete duas
-    Namaz-e-Janaza      four takbirs and the full dua
-    Namaz-e-Eidain      Eid al-Fitr and Eid al-Adha
-
-This also takes the top level back to five pillars plus Umrah and Duas, instead
-of eight cards that made the five pillars harder to pick out.
+NOTO NASTALIQ URDU IS CLEAN. SIL Open Font License, and I have bundled the
+licence text beside the font as OFL requires when redistributing.
 
 =====================================================================
-4. THE FULL JANAZA DUA
+WHERE EACH FONT IS USED, AND WHY NOT EVERYWHERE
 =====================================================================
-The guide had only the SHORT general dua — "forgive our living and our dead" —
-which is a real narration but is not the dua for the deceased. Anyone leading a
-janaza would have found the guide stopped exactly where they needed it.
+UTHMANIC HAFS - QUR'AN TEXT ONLY. The Mushaf view and the ayah rows in the surah
+reader. NOT hadith, NOT duas.
 
-Now the complete dua from SAHIH MUSLIM 2232, with English and Urdu:
-"O Allah, forgive him, have mercy on him... give him an abode better than his
-abode... admit him to the Garden..."
+That is deliberate. Setting a narration in the Mushaf face implies it carries
+the same status as revelation. Hadith and duas stay in Amiri, which is a
+beautiful Naskh and the right register for them.
 
-Verified verbatim against ara_muslim.json — and one detail worth knowing:
+NOTO NASTALIQ URDU - every Urdu translation: hadith list, single hadith, the
+Ibadat guides and the daily hadith card. Nastaliq is the script Urdu is actually
+written in. Naskh renders it legibly but wrongly, the way English set in Fraktur
+is legible but wrong.
 
-THE SOURCE READS أَوْ, NOT وَ. "...from the punishment of the grave OR the
-punishment of the Fire." That is the narrator's uncertainty about which the
-Prophet ﷺ said. I first wrote "and", which is how many printed versions render
-it, and the verbatim check caught it. Kept as أَوْ — smoothing it would be me
-correcting a narration to read better.
-
-Also added a note that the dua is worded for a male deceased and the pronouns
-change for a female.
+LINE HEIGHT IS 2.0, not the 1.55 the Latin translation style uses. Nastaliq
+descends steeply and letters overlap vertically - at Latin line height the
+descenders of one line collide with the line below. This is not a preference,
+it is what makes the script readable.
 
 =====================================================================
-5. FULL PRAYER SCHEDULE NOW SHOWS JAMAT
+STILL TO DO FROM YOUR DESIGN SPEC
 =====================================================================
-It was azan only. Opening "View full prayer schedule" from a home screen that
-already showed both columns gave you LESS information, which makes the fuller
-view look like the lesser one.
+The fonts were the blocker; these are now possible:
+  - ayah cards with gold circular badges and generous spacing
+  - hadith grading badges - green Sahih, amber Hasan, red Da'if. Easy and high
+    impact, since the grading data is already loaded and unused in the list
+  - font size controls
+  - dark mode, which is a real project: every colour is a static const and
+    would have to become a ThemeExtension
 
-Rebuilt with the same flex proportions as the home list, so the two read as one
-table rather than two different ones. It also now states which time the alarm
-uses — with two columns on screen that is a real question, and guessing wrong
-means missing a prayer.
+Say which and I will do that one properly.

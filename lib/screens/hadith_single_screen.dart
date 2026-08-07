@@ -237,9 +237,19 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                       border: Border.all(color: AppColors.goldRule),
                     ),
                     padding: const EdgeInsets.all(16),
-                    child: Text(it.text,
-                        style: AppText.translation
-                            .copyWith(color: AppColors.text)),
+                    child: Builder(builder: (context) {
+                      final bool urdu = widget.language == 'urd';
+                      return Text(
+                        it.text,
+                        textDirection:
+                            urdu ? TextDirection.rtl : TextDirection.ltr,
+                        textAlign: urdu ? TextAlign.right : TextAlign.left,
+                        style: urdu
+                            ? AppText.urduText.copyWith(color: AppColors.text)
+                            : AppText.translation
+                                .copyWith(color: AppColors.text),
+                      );
+                    }),
                   )
                 else
                   Text(
