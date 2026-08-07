@@ -24,91 +24,107 @@ class DailyHadith {
     required this.book,
     required this.number,
     required this.text,
+    required this.textUr,
     required this.theme,
+    required this.themeUr,
   });
 
   final HadithBook book;
   final int number;
 
-  /// Verbatim from the dataset. Not shortened — trimming a hadith to fit a card
-  /// is editing it.
+  /// The saying itself, in English and in Urdu, taken VERBATIM from this app's
+  /// own data — the quoted words of the Prophet with the chain of narrators
+  /// removed.
+  ///
+  /// That is quoting, not rewriting: every character here appears in the
+  /// dataset. Nothing is paraphrased or shortened mid-sentence. Where a hadith
+  /// has several clauses, one complete clause is shown and "Read in full" gives
+  /// the rest.
+  ///
+  /// Urdu comes from urd_*.json, which carries all ten. It follows the app
+  /// language, so an Urdu reader gets Urdu.
   final String text;
+  final String textUr;
 
   /// A word for what it is about, shown above the text.
   final String theme;
+  final String themeUr;
 
   HadithRef get ref => HadithRef(book: book, number: number);
 
   static const List<DailyHadith> all = <DailyHadith>[
     DailyHadith(
-      book: HadithBook.bukhari,
-      number: 1,
-      theme: 'Intention',
+      book: HadithBook.bukhari, number: 1,
+      theme: 'Intention', themeUr: 'نیت',
       text:
-          'Narrated \'Umar bin Al-Khattab: I heard Allah\'s Messenger (\uFDFA) saying, "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended."',
+          'The reward of deeds depends upon the intentions, and every person will get the reward according to what he has intended.',
+      textUr:
+          'تمام اعمال کا دارومدار نیت پر ہے اور ہر عمل کا نتیجہ ہر انسان کو اس کی نیت کے مطابق ہی ملے گا۔',
     ),
     DailyHadith(
-      book: HadithBook.muslim,
-      number: 170,
-      theme: 'Brotherhood',
+      book: HadithBook.muslim, number: 170,
+      theme: 'Brotherhood', themeUr: 'بھائی چارہ',
       text:
-          'It is narrated on the authority of Anas b. Malik that the Prophet (\uFDFA) observed: "None amongst you believes (truly) until he loves for his brother" \u2014 or he said "for his neighbour" \u2014 "that which he loves for himself."',
+          'None amongst you believes truly until he loves for his brother that which he loves for himself.',
+      textUr:
+          'تم میں سے کوئی شخص مومن نہیں ہو سکتا یہاں تک کہ وہ اپنے بھائی کے لیے وہی پسند کرے جو وہ اپنے لیے پسند کرتا ہے۔',
     ),
     DailyHadith(
-      book: HadithBook.bukhari,
-      number: 6114,
-      theme: 'Self-control',
+      book: HadithBook.bukhari, number: 6114,
+      theme: 'Self-control', themeUr: 'ضبطِ نفس',
       text:
-          'Narrated Abu Huraira: Allah\'s Messenger (\uFDFA) said, "The strong is not the one who overcomes the people by his strength, but the strong is the one who controls himself while in anger."',
+          'The strong is not the one who overcomes the people by his strength, but the strong is the one who controls himself while in anger.',
+      textUr:
+          'پہلوان وہ نہیں ہے جو کشتی لڑنے میں غالب ہو جائے بلکہ اصلی پہلوان تو وہ ہے جو غصہ کی حالت میں اپنے آپ پر قابو پائے۔',
     ),
     DailyHadith(
-      book: HadithBook.bukhari,
-      number: 6116,
-      theme: 'Anger',
-      text:
-          'Narrated Abu Huraira: A man said to the Prophet (\uFDFA), "Advise me!" The Prophet (\uFDFA) said, "Do not become angry and furious." The man asked again and again, and the Prophet (\uFDFA) said in each case, "Do not become angry and furious."',
+      book: HadithBook.bukhari, number: 6116,
+      theme: 'Anger', themeUr: 'غصہ',
+      text: 'Do not become angry and furious.',
+      textUr: 'غصہ نہ ہوا کر۔',
     ),
     DailyHadith(
-      book: HadithBook.bukhari,
-      number: 6125,
-      theme: 'Gentleness',
+      book: HadithBook.bukhari, number: 6125,
+      theme: 'Gentleness', themeUr: 'نرمی',
       text:
-          'Narrated Anas bin Malik: The Prophet (\uFDFA) said, "Make things easy for the people, and do not make it difficult for them, and make them calm (with glad tidings) and do not repulse (them)."',
+          'Make things easy for the people, and do not make it difficult for them.',
+      textUr: 'آسانی پیدا کرو، تنگی نہ پیدا کرو۔',
     ),
     DailyHadith(
-      book: HadithBook.bukhari,
-      number: 6136,
-      theme: 'Neighbours and speech',
+      book: HadithBook.bukhari, number: 6136,
+      theme: 'Speech', themeUr: 'گفتگو',
       text:
-          'Narrated Abu Huraira: The Prophet (\uFDFA) said, "Whoever believes in Allah and the Last Day, should not hurt his neighbor; and whoever believes in Allah and the Last Day, should serve his guest generously; and whoever believes in Allah and the Last Day, should speak what is good or keep silent."',
+          'Whoever believes in Allah and the Last Day should speak what is good or keep silent.',
+      textUr:
+          'جو شخص اللہ اور آخرت کے دن پر ایمان رکھتا ہو، اس پر لازم ہے کہ بھلی بات کہے ورنہ چپ رہے۔',
     ),
     DailyHadith(
-      book: HadithBook.tirmidhi,
-      number: 1922,
-      theme: 'Mercy',
+      book: HadithBook.tirmidhi, number: 1922,
+      theme: 'Mercy', themeUr: 'رحم',
       text:
-          'Jarir bin Abdullah narrated that the Messenger of Allah (\uFDFA) said: "Whoever does not show mercy to the people, Allah will not show mercy to him."',
+          'Whoever does not show mercy to the people, Allah will not show mercy to him.',
+      textUr:
+          'جو شخص لوگوں پر مہربانی نہیں کرتا اللہ تعالیٰ اس پر مہربانی نہیں کرے گا۔',
     ),
     DailyHadith(
-      book: HadithBook.tirmidhi,
-      number: 1162,
-      theme: 'Character',
+      book: HadithBook.tirmidhi, number: 1162,
+      theme: 'Character', themeUr: 'اخلاق',
       text:
-          'Abu Hurairah narrated that the Messenger of Allah (\uFDFA) said: "The most complete of the believers in faith is the one with the best character among them. And the best of you are those who are best to your women."',
+          'The most complete of the believers in faith is the one with the best character among them.',
+      textUr:
+          'ایمان میں سب سے کامل مومن وہ ہے جو سب سے بہتر اخلاق والا ہو۔',
     ),
     DailyHadith(
-      book: HadithBook.ibnmajah,
-      number: 1978,
-      theme: 'Family',
-      text:
-          'It was narrated from \'Abdullah bin \'Amr that the Messenger of Allah (\uFDFA) said: "The best of you are those who are best to their womenfolk."',
+      book: HadithBook.ibnmajah, number: 1978,
+      theme: 'Family', themeUr: 'اہلِ خانہ',
+      text: 'The best of you are those who are best to their womenfolk.',
+      textUr: 'سب سے بہتر وہ لوگ ہیں جو اپنی عورتوں کے لیے بہتر ہوں۔',
     ),
     DailyHadith(
-      book: HadithBook.abudawud,
-      number: 4811,
-      theme: 'Gratitude',
-      text:
-          'Narrated Abu Hurayrah: The Prophet (\uFDFA) said: "He who does not thank the people is not thankful to Allah."',
+      book: HadithBook.abudawud, number: 4811,
+      theme: 'Gratitude', themeUr: 'شکر',
+      text: 'He who does not thank the people is not thankful to Allah.',
+      textUr: 'جو لوگوں کا شکر ادا نہیں کرتا اللہ کا شکر ادا نہیں کرتا۔',
     ),
   ];
 

@@ -1,77 +1,70 @@
-v49 - 5 files - BLANK SCREEN FIX + SAJDAH + JUZ
-===============================================
+v53 - 6 files
+=============
 
-  lib/screens/home_screen.dart          THE BLANK SCREEN - apply this first
-  lib/widgets/mushaf_view.dart          sajdah in Arabic-only mode
-  lib/screens/surah_detail_screen.dart  sajdah + juz in the title
-  lib/screens/juz_detail_screen.dart    sajdah
-  lib/data/juz_boundaries.dart          juzForVerse()
+  lib/data/daily_hadith.dart          Urdu + short quotes
+  lib/widgets/daily_hadith_card.dart  translucent, compact
+  lib/screens/splash_screen.dart      video fills the screen
+  lib/screens/home_screen.dart        announcement restyled
+  lib/widgets/mushaf_view.dart        page bar and bookmark moved to the top
+  lib/screens/quran_home_screen.dart  divider lines removed
 
-Overwrite all five. Apply AFTER v48. No new package.
-
-=====================================================================
-2. THE BLANK SCREEN - MY FAULT, AND IT WAS LAUNCH-BLOCKING
-=====================================================================
-You were exactly right. _buildNoMasjidSelected showed a mosque icon and one
-sentence and NOTHING ELSE. No button.
-
-The floating "Change Masjid" button was the only route to the masjid search, and
-I removed it in v41 because the Nearby Masjid quick action does the same thing -
-without checking that the quick action lives INSIDE the home body, which only
-renders once a masjid is already selected.
-
-So a brand-new install had no way to select a masjid. The app was unusable from
-first launch, and every new user would have hit it.
-
-Fixed: a full-width "Nearby Masjid" button in that empty state, which is where
-it belonged all along rather than floating over a list that does not exist yet.
-
-I should have tested the first-run path when I removed that button. Removing a
-control means checking every state that relied on it, and I checked one.
+Overwrite all six. Apply AFTER v52. No new package.
 
 =====================================================================
-1. SAJDAH NOT SHOWING - IT WAS THERE, ON A SCREEN YOU DO NOT USE
+1. SPLASH VIDEO NOW FILLS THE SCREEN
 =====================================================================
-getArabicOnly() defaults to TRUE, so the app opens in Arabic-only mode. I put
-the marker on the TRANSLATED verse rows only - invisible to anyone who never
-switches modes, which is everyone by default.
+It was BoxFit.contain, which fits a whole 16:9 clip inside a 9:20 phone and
+leaves two large green bands - exactly your screenshot.
 
-Now marked in both:
+Now BoxFit.cover: scales until both dimensions are filled, cropping the sides.
 
-  Translation mode   red dot and "Sajdah" beside the verse number
-  Arabic-only mode   a red banner at the top of any page carrying one, naming
-                     the ayah
-
-Arabic-only renders one continuous block of text with no per-verse widgets to
-attach anything to, so the page announces it instead of trying to mark a
-position inside the flow.
-
-Works in the Juz reader too. Sajdah positions are passed as INDICES, not verse
-numbers, because a juz spans surahs and ayah 15 is ambiguous - the same reason
-the bookmark works on indices.
-
-Still shows the asterisk on Sad 38:24 and Al-Hajj 22:77, where the schools
-differ.
+WORTH KNOWING: this only looks right because the Kaaba is centred in your clip.
+A video with anything important near the left or right edge would lose it. If
+you swap the clip later and it looks wrong, that is why.
 
 =====================================================================
-4. JUZ NUMBER ON THE QURAN PAGE
+2. DAILY HADITH - TRANSLUCENT, SHORT, AND BILINGUAL
 =====================================================================
-Under the surah name in the title bar: "2. Al-Baqarah / Juz 1".
+TRANSLUCENT: 92% opacity, so the app stays visible behind it. The first version
+was a tall opaque card that covered the home screen and read as an interruption
+rather than something laid on top.
 
-It TRACKS AS YOU READ. A surah can span several juz - Al-Baqarah covers three -
-so a fixed number would be wrong for most of it.
+SHORT: the saying only, chain of narrators removed. Two or three lines. Nobody
+reads a paragraph on a card that appeared uninvited.
 
-Added juzForVerse() to juz_boundaries.dart, which walks the boundaries backwards
-and returns the last one that has already begun. Verified: every one of the 30
-boundaries maps to its own juz, and spot checks pass - 2:141 is juz 1, 2:142 is
-juz 2, 18:1 is juz 15, 36:1 is juz 22, 78:1 is juz 30.
+To be precise about what that means: the text is still VERBATIM from your data -
+the quoted words, with the isnad dropped. Nothing paraphrased, nothing shortened
+mid-sentence. Where a hadith has several clauses, one complete clause is shown
+and "Read in full" gives the rest. Bukhari 6136 is the one that applies to: the
+card shows the clause about speech, the full hadith also covers neighbours and
+guests.
 
-The visible verse is estimated from scroll position rather than measured. It is
-a label, so being an ayah or two out costs nothing, and measuring every row on
-every frame would cost frames.
+URDU: yes. Every one of the ten is in your urd_*.json files, so the card follows
+the app language - Urdu text, right-aligned, RTL, with an Urdu theme word
+(نیت، رحم، اخلاق...). English otherwise. Your Urdu translations, not mine.
 
 =====================================================================
-3. QURAN FONTS - SEE MY MESSAGE
+3. ANNOUNCEMENT NO LONGER LOOKS LIKE A BOX ON THE PAGE
 =====================================================================
-I cannot download font files here, so I have set out the realistic options with
-their licences. Pick one and I will wire it in with a font switcher.
+It was a bordered white card on an ivory background - a box stuck on top,
+exactly as you said.
+
+Now a soft gold wash with a single accent bar down the leading edge and no
+outline, so it reads as part of the page that happens to be highlighted. One
+strong vertical line draws the eye without drawing a rectangle.
+
+Also dropped the repeated masjid name from each strip - you are already looking
+at that masjid's home screen.
+
+=====================================================================
+4. QURAN - PAGE BAR AND BOOKMARK MOVED TO THE TOP
+=====================================================================
+The page number, ayah range and the Save/bookmark control were UNDER the text.
+On a full page of Arabic that put them below the fold: you had to read to the
+end before you could see where you were or save your place. Both are now at the
+top, where the eye starts.
+
+DIVIDER LINES REMOVED, three of them - the two on the Qur'an home screen and the
+one under the page bar. The artwork already ends on a hard edge, the tab bar has
+its own indicator, and the page is a bordered card. Every one of those rules was
+drawn between two things that were already separated.

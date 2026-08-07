@@ -5,7 +5,6 @@ import '../data/daily_hadith.dart';
 import '../services/app_strings.dart';
 import '../services/hadith_link.dart';
 import '../theme/app_theme.dart';
-import '../widgets/ornaments.dart';
 
 /// The hadith of the day, shown once per day on opening the app.
 ///
@@ -54,98 +53,122 @@ class _DailyHadithDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool urdu = S.isUrdu;
+    // Both languages come from the app's own data. An Urdu reader gets Urdu.
+    final String body = urdu ? hadith.textUr : hadith.text;
+    final String theme = urdu ? hadith.themeUr : hadith.theme;
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 40),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.ivory,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.gold, width: 1.4),
-          boxShadow: const <BoxShadow>[
-            BoxShadow(color: Color(0x40000000), blurRadius: 24, offset: Offset(0, 8)),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Header strip with the X. Red as asked, and deliberately the most
-            // obvious control on the card — the first thing someone looks for
-            // when something appears unbidden is the way out.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 8, 0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      urdu ? 'آج کی حدیث' : 'Hadith of the day',
-                      style: AppText.eyebrow
-                          .copyWith(letterSpacing: 1.6, color: AppColors.gold),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 22),
-                    color: const Color(0xFFB3261E),
-                    tooltip: urdu ? 'بند کریں' : 'Close',
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 26),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // TRANSLUCENT, and small.
+          //
+          // The first version was a tall opaque card that covered the home
+          // screen — it read as an interruption. At 92% opacity the app stays
+          // visible behind it, so it reads as something laid on top of the app
+          // rather than something replacing it.
+          //
+          // Held to the saying itself, two or three lines, with the chain of
+          // narrators removed. Nobody reads a paragraph on a card that appeared
+          // uninvited.
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.ivory.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.gold.withOpacity(0.7)),
+              boxShadow: const <BoxShadow>[
+                BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 26,
+                    offset: Offset(0, 10)),
+              ],
             ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Medallion(icon: Icons.auto_stories_outlined, size: 44),
-                  const SizedBox(height: 14),
-                  Text(
-                    hadith.theme,
-                    style: AppText.rowTitle
-                        .copyWith(fontSize: 17, color: AppColors.emerald),
-                  ),
-                  const SizedBox(height: 12),
-                  const DiamondRule(),
-                  const SizedBox(height: 14),
-                  Text(
-                    hadith.text,
-                    textAlign: TextAlign.center,
-                    style: AppText.translation.copyWith(color: AppColors.text),
-                  ),
-                  const SizedBox(height: 14),
-                  const DiamondRule(),
-                  const SizedBox(height: 10),
-                  Text(
-                    hadith.ref.label,
-                    style: AppText.caption.copyWith(color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: 16),
-                  // Opens the real entry, with its chapter and gradings. The
-                  // card is an invitation to read, not a replacement for it.
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      HadithLink.open(context, hadith.ref);
-                    },
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: Text(urdu ? 'مکمل پڑھیں' : 'Read in full'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.emerald,
-                      side: const BorderSide(color: AppColors.gold),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)),
-                      textStyle: AppText.body,
+            padding: const EdgeInsets.fromLTRB(18, 12, 10, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        urdu ? 'آج کی حدیث' : 'Hadith of the day',
+                        style: AppText.eyebrow.copyWith(
+                            letterSpacing: 1.5, color: AppColors.gold),
+                      ),
                     ),
+                    // The red X, and the largest tap target on the card. The
+                    // first thing anyone looks for when something appears
+                    // unbidden is the way out of it.
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 21),
+                      color: const Color(0xFFB3261E),
+                      visualDensity: VisualDensity.compact,
+                      tooltip: urdu ? 'بند کریں' : 'Close',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(theme,
+                          style: AppText.rowTitle.copyWith(
+                              fontSize: 15, color: AppColors.emerald)),
+                      const SizedBox(height: 8),
+                      Directionality(
+                        textDirection:
+                            urdu ? TextDirection.rtl : TextDirection.ltr,
+                        child: Text(
+                          body,
+                          textAlign: urdu ? TextAlign.right : TextAlign.left,
+                          style: urdu
+                              ? AppText.translation.copyWith(
+                                  fontSize: 16, height: 1.9,
+                                  color: AppColors.text)
+                              : AppText.translation
+                                  .copyWith(color: AppColors.text),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(hadith.ref.label,
+                                style: AppText.caption
+                                    .copyWith(color: AppColors.textMuted)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              HadithLink.open(context, hadith.ref);
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.emerald,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(urdu ? 'مکمل پڑھیں' : 'Read in full',
+                                style: AppText.caption
+                                    .copyWith(color: AppColors.emerald)),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

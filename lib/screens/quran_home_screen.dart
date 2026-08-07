@@ -169,7 +169,9 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                     ),
                   ),
                 ),
-                Container(height: 1, color: AppColors.goldRule),
+                // Rules removed. The artwork already ends on a hard edge and
+                // the tab bar has its own indicator, so these were lines drawn
+                // between things that were already separated.
                 if (_lastRead != null) _buildContinueCard(),
                 Container(
                   color: AppColors.white,
@@ -188,7 +190,6 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                     ],
                   ),
                 ),
-                Container(height: 1, color: AppColors.goldRule),
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,

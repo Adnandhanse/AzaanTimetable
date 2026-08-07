@@ -269,46 +269,17 @@ class _MushafViewState extends State<MushafView> {
 
         return Column(
           children: <Widget>[
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                // Right to left, the way a Mushaf is turned.
-                reverse: true,
-                itemCount: pages.length,
-                onPageChanged: (int i) => setState(() => _page = i),
-                itemBuilder: (BuildContext context, int i) {
-                  final Widget page = Container(
-                    margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: AppColors.goldRule),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: hPad, vertical: vPad),
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text(
-                        pages[i].text,
-                        textAlign: TextAlign.justify,
-                        style: style,
-                      ),
-                    ),
-                  );
-                  return _PageTurn(
-                    controller: _controller,
-                    index: i,
-                    child: page,
-                  );
-                },
-              ),
-            ),
-
-            // Footer: where you are, and the control to save it. Marking from
-            // here is the whole point — in Arabic-only mode there are no verse
-            // rows to put a bookmark icon on.
+            // AT THE TOP, not the bottom.
+            //
+            // Page number and the bookmark used to sit under the text. On a
+            // full page of Arabic that put the control below the fold — you had
+            // to read to the end before you could see where you were or save
+            // your place. Both belong where the eye starts.
+            //
+            // No divider under it: the page itself is a bordered card, so a
+            // rule between them was a second line doing the same job.
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 2, 8, 8),
+              padding: const EdgeInsets.fromLTRB(18, 6, 8, 2),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -347,6 +318,41 @@ class _MushafViewState extends State<MushafView> {
                 ],
               ),
             ),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                // Right to left, the way a Mushaf is turned.
+                reverse: true,
+                itemCount: pages.length,
+                onPageChanged: (int i) => setState(() => _page = i),
+                itemBuilder: (BuildContext context, int i) {
+                  final Widget page = Container(
+                    margin: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.goldRule),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: hPad, vertical: vPad),
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Text(
+                        pages[i].text,
+                        textAlign: TextAlign.justify,
+                        style: style,
+                      ),
+                    ),
+                  );
+                  return _PageTurn(
+                    controller: _controller,
+                    index: i,
+                    child: page,
+                  );
+                },
+              ),
+            ),
+
           ],
         );
       },

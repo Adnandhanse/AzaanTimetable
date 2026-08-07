@@ -122,12 +122,23 @@ class _SplashScreenState extends State<SplashScreen> {
             // background rather than showing an error. Startup must never be
             // blocked by decoration.
             if (_video != null && _video!.value.isInitialized)
-              FittedBox(
-                fit: BoxFit.contain,
-                child: SizedBox(
-                  width: _video!.value.size.width,
-                  height: _video!.value.size.height,
-                  child: VideoPlayer(_video!),
+              // FILLS THE SCREEN, cropping the sides.
+              //
+              // It was BoxFit.contain, which fitted the whole 16:9 frame inside
+              // a 9:20 phone and left two large green bands. Cover scales until
+              // both dimensions are filled, so the sides of a wide clip are cut
+              // — acceptable here because the Kaaba is centred, which is the
+              // only reason this works. A clip with anything important at the
+              // edges would need contain and would letterbox again.
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  clipBehavior: Clip.hardEdge,
+                  child: SizedBox(
+                    width: _video!.value.size.width,
+                    height: _video!.value.size.height,
+                    child: VideoPlayer(_video!),
+                  ),
                 ),
               ),
 

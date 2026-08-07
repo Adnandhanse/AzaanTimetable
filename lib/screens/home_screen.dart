@@ -896,35 +896,40 @@ class _HomeScreenState extends State<HomeScreen>
           child: Column(
             children: <Widget>[
               for (final Announcement a in list)
+                // A TINTED STRIP, not a boxed card.
+                //
+                // The first version was a bordered white card sitting on an
+                // ivory background — a box on top of the page, which is exactly
+                // how you described it. Now it is a soft gold wash with a single
+                // accent bar down the leading edge and no outline, so it reads
+                // as part of the page that happens to be highlighted.
+                //
+                // The accent bar rather than a full border because one strong
+                // vertical line draws the eye without drawing a rectangle.
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.gold.withOpacity(0.10),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.gold, width: 1.4),
+                    border: const Border(
+                      left: BorderSide(color: AppColors.gold, width: 3),
+                    ),
                   ),
-                  padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Padding(
-                        padding: EdgeInsets.only(top: 1),
+                        padding: EdgeInsets.only(top: 2),
                         child: Icon(Icons.campaign_outlined,
-                            size: 18, color: AppColors.gold),
+                            size: 16, color: AppColors.gold),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 9),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(masjid.name,
-                                style: AppText.eyebrow
-                                    .copyWith(color: AppColors.textMuted)),
-                            const SizedBox(height: 3),
-                            Text(a.message,
-                                style: AppText.body
-                                    .copyWith(color: AppColors.text)),
-                          ],
+                        child: Text(
+                          a.message,
+                          style: AppText.body.copyWith(
+                              color: AppColors.text, height: 1.4),
                         ),
                       ),
                     ],
