@@ -46,6 +46,7 @@ class MushafView extends StatefulWidget {
     this.onMarkIndex,
     this.markedIndex,
     this.initialVerseIndex,
+    this.sajdahIndices = const <int>{},
   });
 
   /// Any run of verses — a whole surah, or the span a juz covers.
@@ -69,6 +70,15 @@ class MushafView extends StatefulWidget {
   /// Open on the page holding this verse, for resuming.
   final int? initialVerseIndex;
 
+  /// Indices of verses at which a sajdah is marked.
+  ///
+  /// INDICES, not verse numbers — a juz spans several surahs, so ayah 15 is
+  /// ambiguous, exactly as it was for the bookmark.
+  ///
+  /// The parent works these out because it knows which surah each verse belongs
+  /// to; this widget only ever sees a flat list of verses.
+  final Set<int> sajdahIndices;
+
   @override
   State<MushafView> createState() => _MushafViewState();
 }
@@ -80,6 +90,17 @@ class _MushafViewState extends State<MushafView> {
   // Pagination is cached: recomputing it on every rebuild would re-lay-out the
   // whole surah each time the reader turns a page.
   List<_MushafPage>? _pages;
+
+  /// Sajdah indices falling on page [i].
+  List<int> _sajdahOnPage(int i) {
+    final pages = _pages;
+    if (pages == null || i >= pages.length) return const <int>[];
+    final p = pages[i];
+    return widget.sajdahIndices
+        .where((x) => x >= p.firstIndex && x <= p.lastIndex)
+        .toList()
+      ..sort();
+  }
   bool _jumpedToInitial = false;
   double? _cachedWidth;
   int? _cachedLines;

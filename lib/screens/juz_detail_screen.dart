@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../data/sajdah_verses.dart';
 import '../models/quran.dart';
 import '../data/juz_boundaries.dart';
 import '../widgets/mushaf_view.dart';
@@ -143,6 +144,14 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: items.map((e) => e.$2).toList(),
+              // A juz spans surahs, so each item carries its own surah and the
+              // index is the only unambiguous handle — same reason the bookmark
+              // works on indices.
+              sajdahIndices: <int>{
+                for (int i = 0; i < items.length; i++)
+                  if (SajdahVerses.isSajdah(items[i].$1.number, items[i].$2.number))
+                    i,
+              },
               markedIndex: _marked == null
                   ? null
                   : items.indexWhere((e) =>

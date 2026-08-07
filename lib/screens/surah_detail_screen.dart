@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/app_strings.dart';
 import '../data/sajdah_verses.dart';
+import '../data/juz_boundaries.dart';
 import '../widgets/mushaf_view.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
@@ -34,6 +35,10 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
 
   /// The verse the reader explicitly marked in this surah, if any.
   int? _markedVerse;
+
+  /// Which verse is on screen, so the juz in the title tracks the reading
+  /// position instead of being stuck on the surah's first juz.
+  int _visibleVerse = 1;
 
   /// Throttles the auto-save. Writing to shared_preferences on every scroll
   /// frame would hammer the disk for no benefit.
@@ -68,7 +73,23 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     await QuranLocalDataService.setArabicOnly(arabicOnly);
   }
 
+  /// Rough estimate of which verse is in view, so the juz in the title tracks
+  /// the reading position. Only used for a label, so an item or two out does not
+  /// matter — and it costs nothing compared with measuring every row.
+  void _updateVisibleVerse() {
+    if (!_scroll.hasClients) return;
+    final verses = widget.surah.verses;
+    if (verses.isEmpty) return;
+    final max = _scroll.position.maxScrollExtent;
+    if (max <= 0) return;
+    final frac = (_scroll.offset / max).clamp(0.0, 1.0);
+    final idx = (frac * (verses.length - 1)).round();
+    final v = verses[idx].number;
+    if (v != _visibleVerse) setState(() => _visibleVerse = v);
+  }
+
   void _onScroll() {
+    _updateVisibleVerse();
     final DateTime now = DateTime.now();
     if (now.difference(_lastSave) < const Duration(seconds: 2)) return;
     _lastSave = now;
@@ -191,7 +212,23 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     final surah = widget.surah;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${surah.number}. ${surah.transliteration}'),
+        // Surah on top, juz beneath.
+        //
+        // A surah can span several juz — Al-Baqarah covers three — so a single
+        // fixed number would be wrong for most of it. This shows the juz of the
+        // verse currently in view and updates as you read.
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${surah.number}. ${surah.transliteration}'),
+            Text(
+              '${S.isUrdu ? 'پارہ' : 'Juz'} ${juzForVerse(surah.number, _visibleVerse)}',
+              style: AppText.caption.copyWith(
+                  fontSize: 11.5, color: AppColors.emerald),
+            ),
+          ],
+        ),
         actions: [
           // Two ways to read the same surah. One control, so it is always
           // obvious which mode you are in.
@@ -221,6 +258,13 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: surah.verses,
+              // Worked out here because this screen knows the surah number;
+              // MushafView only sees a flat list of verses.
+              sajdahIndices: <int>{
+                for (int i = 0; i < surah.verses.length; i++)
+                  if (SajdahVerses.isSajdah(surah.number, surah.verses[i].number))
+                    i,
+              },
               markedIndex: _markedVerse == null
                   ? null
                   : surah.verses

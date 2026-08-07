@@ -482,8 +482,42 @@ class _HomeScreenState extends State<HomeScreen>
             Text(
               S.noMasjidSelected,
               textAlign: TextAlign.center,
-              style:
-                  AppText.body.copyWith(fontSize: 14, color: AppColors.textMuted),
+              style: AppText.body
+                  .copyWith(fontSize: 14, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 24),
+            // THE ONLY WAY OUT OF THIS SCREEN.
+            //
+            // This state had no button at all. The floating "Change Masjid"
+            // button used to be the only route to the search, and removing it
+            // left a brand-new user staring at an icon and a sentence with
+            // nothing to tap — the app was unusable from a fresh install.
+            //
+            // The button belongs here, not floating over a list that does not
+            // exist yet.
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.place_outlined, size: 18),
+                label: Text(S.nearbyMasjid),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.emerald,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                  textStyle: AppText.body,
+                ),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<Masjid>(
+                    MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
+                  );
+                  if (result != null) {
+                    await UserRepository.setSelectedMasjid(result.id);
+                    if (mounted) setState(() => _selectedMasjidId = result.id);
+                  }
+                },
+              ),
             ),
           ],
         ),

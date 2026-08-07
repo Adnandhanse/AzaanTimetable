@@ -34,3 +34,16 @@ const List<(int, int, int)> juzBoundaries = [
   (29, 67, 1),
   (30, 78, 1),
 ];
+
+/// Which juz a given verse falls in.
+///
+/// Walks the boundaries backwards and returns the first one that starts at or
+/// before this verse. Backwards because the boundaries are a list of START
+/// points: the juz you are in is the last one that has already begun.
+int juzForVerse(int surah, int ayah) {
+  for (int i = juzBoundaries.length - 1; i >= 0; i--) {
+    final (int juz, int s, int a) = juzBoundaries[i];
+    if (surah > s || (surah == s && ayah >= a)) return juz;
+  }
+  return 1;
+}
