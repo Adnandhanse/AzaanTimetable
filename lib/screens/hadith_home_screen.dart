@@ -88,7 +88,7 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
               // of the card on narrower phones — the content is medallion +
               // two lines of name + Arabic + rule + count, and it does not fit
               // in a shorter box.
-              childAspectRatio: 0.70,
+              childAspectRatio: 0.74,
             ),
             itemBuilder: (context, index) {
               final book = HadithBook.values[index];
@@ -149,94 +149,134 @@ class _BookCard extends StatelessWidget {
   final int volumes;
   final VoidCallback onTap;
 
+  /// A distinct spine colour per book, so the six are recognisable at a glance
+  /// rather than being six identical white rectangles with different words on
+  /// them. Muted, drawn from the palette — this is a bookshelf, not a toy.
+  static const List<Color> _spines = <Color>[
+    Color(0xFF0F5E3A), // Bukhari  — the primary green
+    Color(0xFF14503E), // Muslim
+    Color(0xFF3A5A78), // Abu Dawud
+    Color(0xFF6B4A2F), // Tirmidhi
+    Color(0xFF4A3A5E), // Nasa'i
+    Color(0xFF5E3A3A), // Ibn Majah
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final Color spine = _spines[(number - 1) % _spines.length];
+
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(10),
+      elevation: 0,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: AppColors.goldRule),
+            // The book's own colour bleeding up from the base, so each card
+            // carries some of its spine.
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: <Color>[
+                spine.withOpacity(0.10),
+                AppColors.white,
+              ],
+              stops: const <double>[0.0, 0.55],
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Medallion(label: '$number', size: 38, filled: true),
-              const SizedBox(height: 12),
-              Text(
-                name,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.rowTitle.copyWith(color: AppColors.text),
+            children: <Widget>[
+              // A SPINE ACROSS THE TOP, the way a book faces you on a shelf.
+              // Sixteen pixels of colour does more to distinguish six volumes
+              // than any amount of text styling.
+              Container(
+                height: 6,
+                decoration: BoxDecoration(
+                  color: spine,
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(9)),
+                ),
               ),
-              if (arabicName.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  arabicName,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.arabic.copyWith(
-                    fontSize: 15,
-                    height: 1.4,
-                    color: AppColors.gold,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      // An open book with the volume number on it, rather than a
+                      // bare numbered medallion.
+                      SizedBox(
+                        width: 46,
+                        height: 46,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            Icon(Icons.menu_book_rounded,
+                                size: 42, color: spine.withOpacity(0.16)),
+                            Container(
+                              width: 22,
+                              height: 22,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: spine,
+                              ),
+                              child: Text(
+                                '$number',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (arabicName.isNotEmpty) ...[
+                        Text(
+                          arabicName,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.arabic.copyWith(
+                            fontSize: 17,
+                            height: 1.3,
+                            color: spine,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                      ],
+                      Text(
+                        name,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.rowTitle.copyWith(
+                            fontSize: 13.5, color: AppColors.text),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: spine.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          volumes > 0 ? '$volumes vol' : S.chapters,
+                          style: AppText.caption
+                              .copyWith(fontSize: 10.5, color: spine),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-              const SizedBox(height: 8),
-              Container(width: 22, height: 1, color: AppColors.goldRule),
-              const SizedBox(height: 8),
-              Text(
-                volumes > 0 ? '$volumes volumes' : S.chapters,
-                style: AppText.caption.copyWith(color: AppColors.textMuted),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FooterTile extends StatelessWidget {
-  const _FooterTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: AppColors.goldRule),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 13),
-          child: Column(
-            children: [
-              Icon(icon, size: 19, color: AppColors.gold),
-              const SizedBox(height: 5),
-              Text(
-                label,
-                style:
-                    AppText.rowTitle.copyWith(fontSize: 15, color: AppColors.text),
               ),
             ],
           ),

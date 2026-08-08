@@ -45,17 +45,37 @@ class DailyHadithCard {
   }
 }
 
-class _DailyHadithDialog extends StatelessWidget {
+class _DailyHadithDialog extends StatefulWidget {
   const _DailyHadithDialog({required this.hadith});
 
   final DailyHadith hadith;
 
   @override
+  State<_DailyHadithDialog> createState() => _DailyHadithDialogState();
+}
+
+enum _Script { urdu, roman, english }
+
+class _DailyHadithDialogState extends State<_DailyHadithDialog> {
+  late _Script _script;
+
+  @override
+  void initState() {
+    super.initState();
+    // Starts on whichever matches the app language; the reader can switch.
+    _script = S.isUrdu ? _Script.urdu : _Script.english;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool urdu = S.isUrdu;
-    // Both languages come from the app's own data. An Urdu reader gets Urdu.
-    final String body = urdu ? hadith.textUr : hadith.text;
-    final String theme = urdu ? hadith.themeUr : hadith.theme;
+    final DailyHadith hadith = widget.hadith;
+    final bool urdu = _script == _Script.urdu;
+    final String body = switch (_script) {
+      _Script.urdu => hadith.textUr,
+      _Script.roman => hadith.textHi,
+      _Script.english => hadith.text,
+    };
+    final String theme = S.isUrdu ? hadith.themeUr : hadith.theme;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -157,7 +177,52 @@ class _DailyHadithDialog extends StatelessWidget {
                                   .copyWith(color: AppColors.textMid),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
+                      // Urdu / Roman / English.
+                      //
+                      // Roman Urdu is there because a great many readers speak
+                      // Urdu but read Latin script more easily than Nastaliq.
+                      // It is a transliteration of the Urdu, not a separate
+                      // translation.
+                      Row(
+                        children: <Widget>[
+                          for (final (_Script sc, String label) in const <(_Script, String)>[
+                            (_Script.urdu, 'اردو'),
+                            (_Script.roman, 'Roman'),
+                            (_Script.english, 'English'),
+                          ])
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: GestureDetector(
+                                onTap: () => setState(() => _script = sc),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _script == sc
+                                        ? AppColors.emerald
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: _script == sc
+                                            ? AppColors.emerald
+                                            : AppColors.goldRule),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    style: AppText.caption.copyWith(
+                                      fontSize: 11.5,
+                                      color: _script == sc
+                                          ? Colors.white
+                                          : AppColors.textMuted,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         children: <Widget>[
                           Expanded(

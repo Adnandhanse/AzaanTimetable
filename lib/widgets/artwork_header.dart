@@ -141,9 +141,12 @@ class ArtworkHeader extends StatelessWidget {
                               fontSize: 11,
                               letterSpacing: 1.2,
                               height: 1.45,
-                              color: const Color(0xE6FFFFFF),
+                              // A warm off-white rather than pure white, so it
+                              // sits under the gold name instead of competing
+                              // with it.
+                              color: const Color(0xF2F5EFE2),
                               shadows: const <Shadow>[
-                                Shadow(blurRadius: 6, color: Color(0x59000000)),
+                                Shadow(blurRadius: 6, color: Color(0x73000000)),
                               ],
                             ),
                           ),

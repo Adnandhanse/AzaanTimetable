@@ -1,35 +1,73 @@
-v64 - 2 files - NEW SPLASH VIDEO
-================================
+v66 - 2 code files + 5 logo options
+===================================
 
-  assets/video/intro.mp4        replaced
-  lib/screens/splash_screen.dart  comment only
+  lib/services/foreground_alarm_service.dart   notification now useful
+  lib/services/foreground_alarm_manager.dart   (unchanged, for consistency)
+  logo-options/                                SVG + PNG previews
 
-Overwrite both. Apply AFTER v63. No code change of substance — the player
-settings were already right.
-
-=====================================================================
-THIS CLIP IS A MUCH BETTER FIT, AND HERE IS WHY
-=====================================================================
-The old one was LANDSCAPE, 848x478. Filling a portrait phone with it meant
-cropping about 75% OF ITS WIDTH — you were seeing a narrow centre strip and
-nothing else. It only looked acceptable because the Kaaba happened to be dead
-centre.
-
-The new one is PORTRAIT, 478x850. On the same phones the crop is under 20%, so
-the framing you shot survives.
-
-  old  848x478  ->  S22 Ultra: 74% of the width cropped
-  new  478x850  ->  S22 Ultra: 17% of the width cropped
+Overwrite the two lib files. Apply AFTER v65. No new package.
 
 =====================================================================
-TWO THINGS TO KNOW
+THE "ISLAM CONNECT IS ACTIVE" NOTIFICATION
 =====================================================================
-IT IS 5 SECONDS AND THE SPLASH LASTS 3. The video gets cut off rather than
-looping, which is better than a visible restart mid-splash. If you want the
-whole clip seen, the splash delay in splash_screen.dart is one number — but a
-5-second wait before the app opens is a long time every single launch, and I
-would leave it at 3.
+I CANNOT REMOVE IT. Android does not allow it.
 
-APK GROWS ABOUT 516 KB more than before. The clip is 953 KB against the old
-437 KB. Still muted, still falls back to the plain background if it will not
-play.
+A foreground service MUST show a permanent notification — that is the deal the
+OS makes in exchange for letting an app keep running in the background. There is
+no flag to hide it.
+
+AND THE SERVICE IS WHAT DELIVERS YOUR ALARMS. We established that over about
+fifteen versions: on your phone the OS scheduler arms alarms and never fires
+them, while this polling service works. Removing the service to hide the
+notification would take the app straight back to no alarms at all.
+
+SO I MADE IT WORTH HAVING. It now reads:
+
+    Asr — in 2h 6m
+    5:40 PM
+
+instead of "Islam Connect is active". Updated once a minute — the text only
+changes by the minute, and rewriting it every 20 seconds is three times the work
+for no visible difference.
+
+It follows the same Friday rule as the alarms: Juma counts down only on Friday,
+Dhuhr does not count down on one.
+
+ABOUT THE TIME UNDERNEATH: that is Android's own timestamp on the notification,
+showing when the service started. flutter_foreground_task may expose a showWhen
+flag to hide it — but I could not verify that parameter exists in the version you
+are on, and three of your builds have already failed on unverified plugin APIs. I
+am not guessing again. With the countdown in the text, the timestamp matters much
+less anyway.
+
+If you would rather it just said "Islam Connect" with no countdown, that is a
+one-line change — say so.
+
+=====================================================================
+FIVE LOGO OPTIONS
+=====================================================================
+Open logo-options/ALL_OPTIONS.png. Top row is large, bottom row is the SAME
+logos at 96px — launcher size. That second row is the real test: a logo that
+only works at 512px is not a logo.
+
+  1  MIHRAB + CRESCENT   The arch already used throughout the app, with a
+                         crescent inside. Most tied to the existing design.
+  2  GIRIH STAR          Eight-point star, crescent in the centre. The most
+                         traditionally Islamic, and the most distinctive at
+                         small size.
+  3  KUFIC MONOGRAM      A minaret as the "I", a crescent-like "C". The most
+                         modern and the only one that reads as initials.
+  4  COMPASS ROSE        Qibla and prayer times in one mark. The most literal
+                         about what the app does.
+  5  CRESCENT + BOOK     Prayer and reading — the two halves of the app.
+
+All five use your exact palette: #0F5E3A, #C79A2E, #F0D48A.
+
+They are SVG, so they scale to every launcher density without loss. Tell me which
+one and I will produce the full Android icon set — every mipmap density, the
+adaptive-icon foreground and background layers, and the Play Store 512px listing
+icon.
+
+MY PICK: 2, the girih star. It survives the shrink to 96px best, it does not look
+like any other prayer app, and the eight-point star is unambiguous without being
+a picture of a building.

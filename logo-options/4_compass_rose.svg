@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#0F5E3A"/><stop offset="1" stop-color="#0A4229"/></linearGradient></defs>
+<rect width="1024" height="1024" rx="210" fill="url(#bg)"/>
+
+<circle cx="512" cy="512" r="322" fill="none" stroke="#C79A2E" stroke-width="20"/>
+<circle cx="512" cy="512" r="266" fill="none" stroke="#F0D48A" stroke-width="7" opacity="0.4"/>
+<polygon points="758.0,512.0 512.0,482.0 512.0,542.0" fill="#C79A2E" opacity="1"/>
+<polygon points="619.8,404.2 499.3,499.3 524.7,524.7" fill="#F0D48A" opacity="0.55"/>
+<polygon points="512.0,266.0 482.0,512.0 542.0,512.0" fill="#C79A2E" opacity="1"/>
+<polygon points="404.2,404.2 499.3,524.7 524.7,499.3" fill="#F0D48A" opacity="0.55"/>
+<polygon points="266.0,512.0 512.0,542.0 512.0,482.0" fill="#C79A2E" opacity="1"/>
+<polygon points="404.2,619.8 524.7,524.7 499.3,499.3" fill="#F0D48A" opacity="0.55"/>
+<polygon points="512.0,758.0 542.0,512.0 482.0,512.0" fill="#C79A2E" opacity="1"/>
+<polygon points="619.8,619.8 524.7,499.3 499.3,524.7" fill="#F0D48A" opacity="0.55"/>
+<circle cx="512" cy="512" r="96" fill="#0F5E3A"/>
+<path d="M556 512 a86 86 0 1 1 -50 -79 a67 67 0 1 0 50 79 Z" fill="#F0D48A"/>
+
+</svg>

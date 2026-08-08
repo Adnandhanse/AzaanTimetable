@@ -76,12 +76,40 @@ class MasjidDetailsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             const Text('Prayer Times', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            _row('Fajr', masjid.prayerTimes.fajr),
-            _row('Dhuhr', masjid.prayerTimes.dhuhr),
-            _row('Asr', masjid.prayerTimes.asr),
-            _row('Maghrib', masjid.prayerTimes.maghrib),
-            _row('Isha', masjid.prayerTimes.isha),
-            _row('Juma', masjid.prayerTimes.juma),
+            // AZAN AND JAMAT, matching everywhere else.
+            //
+            // This screen showed azan only. Someone browsing nearby masjids is
+            // choosing between them — and the jamat time is usually the deciding
+            // factor, since that is the one they have to be there for.
+            if (masjid.prayerTimes.hasAnyJamat)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    const Spacer(flex: 4),
+                    Expanded(
+                      flex: 3,
+                      child: Text('AZAN',
+                          textAlign: TextAlign.right,
+                          style: AppText.eyebrow.copyWith(
+                              fontSize: 9, color: AppColors.textFaint)),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text('JAMAT',
+                          textAlign: TextAlign.right,
+                          style: AppText.eyebrow.copyWith(
+                              fontSize: 9, color: AppColors.gold)),
+                    ),
+                  ],
+                ),
+              ),
+            _row('Fajr', masjid.prayerTimes.fajr, masjid.prayerTimes.fajrJamat),
+            _row('Dhuhr', masjid.prayerTimes.dhuhr, masjid.prayerTimes.dhuhrJamat),
+            _row('Asr', masjid.prayerTimes.asr, masjid.prayerTimes.asrJamat),
+            _row('Maghrib', masjid.prayerTimes.maghrib, masjid.prayerTimes.maghribJamat),
+            _row('Isha', masjid.prayerTimes.isha, masjid.prayerTimes.ishaJamat),
+            _row('Juma', masjid.prayerTimes.juma, masjid.prayerTimes.jumaJamat),
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -101,11 +129,33 @@ class MasjidDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _row(String label, String time) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _row(String label, String azan, String jamat) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(label), Text(time, style: const TextStyle(fontWeight: FontWeight.w600))],
+          children: [
+            Expanded(flex: 4, child: Text(label)),
+            Expanded(
+              flex: 3,
+              child: Text(azan,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+            ),
+            if (jamat.trim().isNotEmpty || true)
+              Expanded(
+                flex: 3,
+                child: Text(
+                  jamat.trim().isEmpty ? '\u2014' : jamat,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: jamat.trim().isEmpty
+                        ? AppColors.textFaint
+                        : AppColors.text,
+                  ),
+                ),
+              ),
+          ],
         ),
       );
 }

@@ -25,6 +25,7 @@ class DailyHadith {
     required this.number,
     required this.text,
     required this.textUr,
+    required this.textHi,
     required this.arabic,
     required this.theme,
     required this.themeUr,
@@ -46,6 +47,18 @@ class DailyHadith {
   /// language, so an Urdu reader gets Urdu.
   final String text;
   final String textUr;
+
+  /// Roman Urdu — "Hinglish".
+  ///
+  /// A TRANSLITERATION of the Urdu translation into Latin script, not a new
+  /// translation. Every word is the Urdu one, spelled the way people type Urdu
+  /// in a message. That distinction matters: transliterating is mechanical and
+  /// safe, whereas producing a fresh rendering of a hadith is not something this
+  /// app should generate.
+  ///
+  /// It exists because many readers speak Urdu but read Latin script more
+  /// comfortably than Nastaliq, particularly younger readers.
+  final String textHi;
 
   /// The saying in Arabic, verbatim from ara_*.json.
   ///
@@ -69,6 +82,8 @@ class DailyHadith {
           'The reward of deeds depends upon the intentions, and every person will get the reward according to what he has intended.',
       textUr:
           'تمام اعمال کا دارومدار نیت پر ہے اور ہر عمل کا نتیجہ ہر انسان کو اس کی نیت کے مطابق ہی ملے گا۔',
+      textHi:
+          'Tamam amal ka daromadar niyyat par hai, aur har shakhs ko uski niyyat ke mutabiq hi natija milega.',
     ),
     DailyHadith(
       book: HadithBook.muslim, number: 170,
@@ -79,6 +94,8 @@ class DailyHadith {
           'None amongst you believes truly until he loves for his brother that which he loves for himself.',
       textUr:
           'تم میں سے کوئی شخص مومن نہیں ہو سکتا یہاں تک کہ وہ اپنے بھائی کے لیے وہی پسند کرے جو وہ اپنے لیے پسند کرتا ہے۔',
+      textHi:
+          'Tum mein se koi shakhs momin nahi ho sakta jab tak wo apne bhai ke liye wohi pasand kare jo apne liye pasand karta hai.',
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 6114,
@@ -89,6 +106,8 @@ class DailyHadith {
           'The strong is not the one who overcomes the people by his strength, but the strong is the one who controls himself while in anger.',
       textUr:
           'پہلوان وہ نہیں ہے جو کشتی لڑنے میں غالب ہو جائے بلکہ اصلی پہلوان تو وہ ہے جو غصہ کی حالت میں اپنے آپ پر قابو پائے۔',
+      textHi:
+          'Pehalwan wo nahi jo kushti mein ghalib aa jaye, balki asli pehalwan wo hai jo ghusse ki halat mein apne aap par qaabu paye.',
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 6116,
@@ -97,6 +116,8 @@ class DailyHadith {
           'لَا تَغْضَبْ',
       text: 'Do not become angry and furious.',
       textUr: 'غصہ نہ ہوا کر۔',
+      textHi:
+          'Ghussa na kar.',
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 6125,
@@ -106,6 +127,8 @@ class DailyHadith {
       text:
           'Make things easy for the people, and do not make it difficult for them.',
       textUr: 'آسانی پیدا کرو، تنگی نہ پیدا کرو۔',
+      textHi:
+          'Asani paida karo, tangi na paida karo.',
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 6136,
@@ -116,6 +139,8 @@ class DailyHadith {
           'Whoever believes in Allah and the Last Day should speak what is good or keep silent.',
       textUr:
           'جو شخص اللہ اور آخرت کے دن پر ایمان رکھتا ہو، اس پر لازم ہے کہ بھلی بات کہے ورنہ چپ رہے۔',
+      textHi:
+          'Jo shakhs Allah aur aakhirat ke din par imaan rakhta ho, us par lazim hai ke bhali baat kahe warna chup rahe.',
     ),
     DailyHadith(
       book: HadithBook.tirmidhi, number: 1922,
@@ -126,6 +151,8 @@ class DailyHadith {
           'Whoever does not show mercy to the people, Allah will not show mercy to him.',
       textUr:
           'جو شخص لوگوں پر مہربانی نہیں کرتا اللہ تعالیٰ اس پر مہربانی نہیں کرے گا۔',
+      textHi:
+          'Jo shakhs logon par meherbani nahi karta, Allah Taala us par meherbani nahi karega.',
     ),
     DailyHadith(
       book: HadithBook.tirmidhi, number: 1162,
@@ -136,6 +163,8 @@ class DailyHadith {
           'The most complete of the believers in faith is the one with the best character among them.',
       textUr:
           'ایمان میں سب سے کامل مومن وہ ہے جو سب سے بہتر اخلاق والا ہو۔',
+      textHi:
+          'Imaan mein sab se kaamil momin wo hai jo sab se behtar akhlaq wala ho.',
     ),
     DailyHadith(
       book: HadithBook.ibnmajah, number: 1978,
@@ -144,6 +173,8 @@ class DailyHadith {
           'خِيَارُكُمْ خِيَارُكُمْ لِنِسَائِهِمْ',
       text: 'The best of you are those who are best to their womenfolk.',
       textUr: 'سب سے بہتر وہ لوگ ہیں جو اپنی عورتوں کے لیے بہتر ہوں۔',
+      textHi:
+          'Sab se behtar wo log hain jo apni auraton ke liye behtar hon.',
     ),
     DailyHadith(
       book: HadithBook.abudawud, number: 4811,
@@ -152,6 +183,8 @@ class DailyHadith {
           'لَا يَشْكُرُ اللَّهَ مَنْ لَا يَشْكُرُ النَّاسَ',
       text: 'He who does not thank the people is not thankful to Allah.',
       textUr: 'جو لوگوں کا شکر ادا نہیں کرتا اللہ کا شکر ادا نہیں کرتا۔',
+      textHi:
+          'Jo logon ka shukr ada nahi karta, wo Allah ka shukr ada nahi karta.',
     ),
   ];
 

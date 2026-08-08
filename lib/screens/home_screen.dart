@@ -97,6 +97,28 @@ class _HomeScreenState extends State<HomeScreen>
     return ('${parts[0]} ${parts[1].toLowerCase()}', '');
   }
 
+  /// The Arabic name for a prayer label, for the next-prayer block.
+  static String _arabicFor(String label) {
+    if (label == S.fajr) return _arabicPrayerNames['fajr']!;
+    if (label == S.dhuhr) return _arabicPrayerNames['dhuhr']!;
+    if (label == S.asr) return _arabicPrayerNames['asr']!;
+    if (label == S.maghrib) return _arabicPrayerNames['maghrib']!;
+    if (label == S.isha) return _arabicPrayerNames['isha']!;
+    return _arabicPrayerNames['juma']!;
+  }
+
+  /// The jamat time for a prayer, or empty if this masjid has not set one.
+  static String _jamatFor(Masjid m, String label) {
+    final t = m.prayerTimes;
+    if (label == S.fajr) return t.fajrJamat.trim();
+    if (label == S.dhuhr) return t.dhuhrJamat.trim();
+    if (label == S.asr) return t.asrJamat.trim();
+    if (label == S.maghrib) return t.maghribJamat.trim();
+    if (label == S.isha) return t.ishaJamat.trim();
+    if (label == S.juma) return t.jumaJamat.trim();
+    return '';
+  }
+
   static const List<IconData> _prayerIcons = <IconData>[
     Icons.wb_twilight,        // Fajr
     Icons.wb_sunny_outlined,  // Dhuhr
@@ -707,19 +729,54 @@ class _HomeScreenState extends State<HomeScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            next.$1,
-                            style: const TextStyle(
-                              fontFamily: AppFonts.serif,
-                              fontSize: 17,
-                              color: AppColors.text,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                next.$1,
+                                style: const TextStyle(
+                                  fontFamily: AppFonts.serif,
+                                  fontSize: 17,
+                                  color: AppColors.text,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                _arabicFor(next.$1),
+                                style: AppText.arabic.copyWith(
+                                    fontSize: 15, color: AppColors.gold),
+                              ),
+                            ],
                           ),
                           Text(
                             _countdownLabel(next.$2),
                             style: AppText.caption
                                 .copyWith(color: AppColors.textMuted),
                           ),
+                          // THE JAMAT TIME, if this masjid publishes one.
+                          //
+                          // The block said when the azan is and nothing else —
+                          // but the time someone has to leave the house for is
+                          // the jamat. It was already on screen in the list
+                          // below; putting it here means the block answers the
+                          // whole question.
+                          if (_jamatFor(masjid, next.$1).isNotEmpty) ...[
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                const Icon(Icons.groups_outlined,
+                                    size: 13, color: AppColors.gold),
+                                const SizedBox(width: 5),
+                                Text(
+                                  '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
+                                  style: AppText.caption.copyWith(
+                                      color: AppColors.gold,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ],
@@ -1019,11 +1076,24 @@ class _HomeScreenState extends State<HomeScreen>
                       textAlign: TextAlign.right,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
+                      // SAME SIZE AND SAME COLOUR AS THE JAMAT COLUMN.
+                      //
+                      // Azan was 15sp in muted grey against jamat at 16sp in
+                      // near-black. Two different sizes and two different
+                      // colours in adjacent columns read as misaligned even
+                      // when the baselines match, which is what you were
+                      // seeing.
+                      //
+                      // Both are now 16sp in the same colour, and only the
+                      // WEIGHT differs — jamat semibold, azan regular. That is
+                      // enough to say which matters more without making the
+                      // row look broken.
                       style: AppText.listTime.copyWith(
-                        fontSize: 15,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
                         color: rows[i].$1 == nextLabel
                             ? AppColors.emerald
-                            : AppColors.textMuted,
+                            : AppColors.text,
                       ),
                     ),
                   ),
@@ -1039,6 +1109,7 @@ class _HomeScreenState extends State<HomeScreen>
                       overflow: TextOverflow.visible,
                       style: AppText.listTime.copyWith(
                         fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: rows[i].$4.trim().isEmpty
                             ? AppColors.textFaint
                             : (rows[i].$1 == nextLabel
@@ -1180,7 +1251,7 @@ class _PressCardState extends State<_PressCard> {
         curve: Curves.easeOut,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 90),
-          height: 86,
+          height: 62,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(4),
@@ -1194,18 +1265,23 @@ class _PressCardState extends State<_PressCard> {
             ],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-          child: Column(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(widget.icon, color: AppColors.gold, size: 22),
-              const SizedBox(height: 8),
-              Text(
+              // Icon and label side by side rather than stacked. Stacked, each
+              // button needed 86px of height for two words; in a row they need
+              // 62 and read the same.
+              Icon(widget.icon, color: AppColors.gold, size: 19),
+              const SizedBox(width: 9),
+              Flexible(
+                child: Text(
                 widget.label,
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.rowTitle
-                    .copyWith(fontSize: 14.5, color: AppColors.text),
+                    .copyWith(fontSize: 14, color: AppColors.text),
+              ),
               ),
             ],
           ),

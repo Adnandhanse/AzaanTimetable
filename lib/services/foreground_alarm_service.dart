@@ -106,9 +106,22 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       } catch (_) {}
     }
 
-    // One heartbeat a minute, not one every 20 seconds. Its value is not the
-    // beat itself but the GAP: a hole in these timestamps is the OS having
-    // frozen the service, which is invisible any other way.
+    // THE NOTIFICATION EARNS ITS PLACE.
+    //
+    // Android requires a foreground service to show a permanent notification —
+    // it cannot be hidden, and the service is what actually delivers the alarms
+    // on this phone. So the only honest options were to leave it saying
+    // "Islam Connect is active", which tells the user nothing, or to make it
+    // useful.
+    //
+    // It now shows the next prayer and how long until it. Updated once a minute
+    // rather than every tick: the text only changes by the minute, and
+    // rewriting a notification every 20 seconds is three times the work for no
+    // visible difference.
+    if (now.second < 20) {
+      await _updateNotificationText(times, now);
+    }
+
     if (now.second < 20) {
       await AlarmEventLog.add('service tick',
           detail: 'watching ${times.values.join(', ')}');
@@ -308,6 +321,51 @@ class PrayerAlarmTaskHandler extends TaskHandler {
             <String, dynamic>{'day': todayKey, 'keys': _firedKeys.toList()}),
       );
     } catch (_) {}
+  }
+
+  /// Writes "Asr 5:40 PM · in 2h 6m" onto the service notification.
+  Future<void> _updateNotificationText(
+      Map<String, dynamic> times, DateTime now) async {
+    try {
+      String? bestLabel;
+      DateTime? bestAt;
+
+      for (final entry in times.entries) {
+        final label = entry.key;
+        final value = (entry.value as String?) ?? '';
+        if (value.trim().isEmpty) continue;
+        // Juma only counts down on a Friday, and Dhuhr does not count down on
+        // one — the same rule the alarms follow.
+        final bool isJuma = label.toLowerCase().contains('juma');
+        if (isJuma && now.weekday != DateTime.friday) continue;
+        if (label.toLowerCase() == 'dhuhr' && now.weekday == DateTime.friday) {
+          continue;
+        }
+        final parsed = _parseTime(value);
+        if (parsed == null) continue;
+
+        var at = DateTime(now.year, now.month, now.day, parsed.$1, parsed.$2);
+        if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
+        if (bestAt == null || at.isBefore(bestAt)) {
+          bestAt = at;
+          bestLabel = label;
+        }
+      }
+
+      if (bestLabel == null || bestAt == null) return;
+
+      final d = bestAt.difference(now);
+      final String left = d.inHours > 0
+          ? '${d.inHours}h ${d.inMinutes % 60}m'
+          : '${d.inMinutes}m';
+
+      await FlutterForegroundTask.updateService(
+        notificationTitle: '$bestLabel — in $left',
+        notificationText: times[bestLabel] as String? ?? '',
+      );
+    } catch (_) {
+      // Never let a notification update interfere with the alarm loop.
+    }
   }
 
   Future<void> _checkTestAlarm() async {
