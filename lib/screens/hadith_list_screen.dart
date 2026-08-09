@@ -6,6 +6,7 @@ import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/speed_selector.dart';
 
 class HadithListScreen extends StatefulWidget {
   final HadithCollection collection;
@@ -40,6 +41,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
   final Set<int> _expanded = <int>{};
 
   int? _speaking;
+  double _rate = 0.45;
 
   @override
   void initState() {
@@ -53,6 +55,9 @@ class _HadithListScreenState extends State<HadithListScreen> {
     _loadBookmarks();
     TtsService.onComplete(() {
       if (mounted) setState(() => _speaking = null);
+    });
+    TtsService.speechRate().then((r) {
+      if (mounted) setState(() => _rate = r);
     });
   }
 
@@ -157,6 +162,11 @@ class _HadithListScreenState extends State<HadithListScreen> {
                   isExpanded: _expanded.contains(h.hadithNumber),
                   isBookmarked: _isBookmarked(h.hadithNumber),
                   isSpeaking: _speaking == h.hadithNumber,
+                  rate: _rate,
+                  onRate: (r) async {
+                    await TtsService.setSpeechRate(r);
+                    if (mounted) setState(() => _rate = r);
+                  },
                   onToggle: () => setState(() {
                     if (!_expanded.remove(h.hadithNumber)) {
                       _expanded.add(h.hadithNumber);
@@ -180,6 +190,8 @@ class _HadithCard extends StatelessWidget {
     required this.isExpanded,
     required this.isBookmarked,
     required this.isSpeaking,
+    required this.rate,
+    required this.onRate,
     required this.onToggle,
     required this.onBookmark,
     required this.onSpeak,
@@ -195,6 +207,8 @@ class _HadithCard extends StatelessWidget {
   final bool isExpanded;
   final bool isBookmarked;
   final bool isSpeaking;
+  final double rate;
+  final ValueChanged<double> onRate;
   final VoidCallback onToggle;
   final VoidCallback onBookmark;
   final VoidCallback onSpeak;
@@ -339,9 +353,9 @@ class _HadithCard extends StatelessWidget {
                   // listening — the one thing you want before reading, not
                   // after.
                   if (item.text.trim().isNotEmpty) ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
+                    Row(
+                      children: [
+                      OutlinedButton.icon(
                         onPressed: onSpeak,
                         icon: Icon(
                             isSpeaking ? Icons.stop : Icons.volume_up_outlined,
@@ -361,6 +375,14 @@ class _HadithCard extends StatelessWidget {
                           textStyle: AppText.caption,
                         ),
                       ),
+                      const Spacer(),
+                      SpeedSelector(
+                        options: TtsService.speeds,
+                        value: rate,
+                        onChanged: onRate,
+                        compact: true,
+                      ),
+                      ],
                     ),
                     const SizedBox(height: 10),
                   ],

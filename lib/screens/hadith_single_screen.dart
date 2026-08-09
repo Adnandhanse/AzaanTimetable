@@ -6,6 +6,7 @@ import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/speed_selector.dart';
 import '../widgets/ornaments.dart';
 import 'hadith_list_screen.dart';
 
@@ -51,6 +52,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
   late int _number;
   Set<String> _bookmarks = {};
   bool _speaking = false;
+  double _rate = 0.45;
 
   /// The whole book in number order, so previous/next do not stop at a chapter
   /// boundary.
@@ -65,6 +67,9 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
     _loadBookmarks();
     TtsService.onComplete(() {
       if (mounted) setState(() => _speaking = false);
+    });
+    TtsService.speechRate().then((r) {
+      if (mounted) setState(() => _rate = r);
     });
   }
 
@@ -257,7 +262,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                     style: AppText.caption.copyWith(color: AppColors.textFaint),
                   ),
                 const SizedBox(height: 14),
-                if (it.text.trim().isNotEmpty)
+                if (it.text.trim().isNotEmpty) ...[
                   OutlinedButton.icon(
                     onPressed: _speak,
                     icon: Icon(_speaking ? Icons.stop : Icons.volume_up_outlined,
@@ -273,6 +278,16 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                       textStyle: AppText.body,
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  SpeedSelector(
+                    options: TtsService.speeds,
+                    value: _rate,
+                    onChanged: (r) async {
+                      await TtsService.setSpeechRate(r);
+                      if (mounted) setState(() => _rate = r);
+                    },
+                  ),
+                ],
                 const SizedBox(height: 20),
                 const DiamondRule(),
                 const SizedBox(height: 14),

@@ -35,13 +35,26 @@ class DailyHadithCard {
     if (!context.mounted) return;
     final h = DailyHadith.forDate(now);
 
-    await showDialog<void>(
+    // THE DIALOG RETURNS A REQUEST; THIS CALLER ACTS ON IT.
+    //
+    // "Read in full" used to pop the dialog and then call HadithLink.open with
+    // the DIALOG'S context — which no longer existed by then. HadithLink shows
+    // a blocking spinner on that context, so the spinner went up on a dead
+    // route and never came down: your endless loading.
+    //
+    // Now the dialog pops with the reference it wants opened, and the screen
+    // that opened the dialog — whose context is alive — does the navigating.
+    final HadithRef? wanted = await showDialog<HadithRef>(
       context: context,
       // Dismissible by tapping outside as well as by the X. Something that
       // appears on its own should be easy to get rid of.
       barrierDismissible: true,
       builder: (ctx) => _DailyHadithDialog(hadith: h),
     );
+
+    if (wanted != null && context.mounted) {
+      await HadithLink.open(context, wanted);
+    }
   }
 }
 
@@ -231,10 +244,10 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                                     .copyWith(color: AppColors.textMuted)),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              HadithLink.open(context, hadith.ref);
-                            },
+                            // Returns the reference rather than navigating
+                            // from inside a route that is about to close.
+                            onPressed: () =>
+                                Navigator.of(context).pop(hadith.ref),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.emerald,
                               padding:

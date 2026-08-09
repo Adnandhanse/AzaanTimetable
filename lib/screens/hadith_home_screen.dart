@@ -285,3 +285,45 @@ class _BookCard extends StatelessWidget {
     );
   }
 }
+
+class _FooterTile extends StatelessWidget {
+  const _FooterTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: AppColors.goldRule),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          child: Column(
+            children: [
+              Icon(icon, size: 19, color: AppColors.gold),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                style:
+                    AppText.rowTitle.copyWith(fontSize: 15, color: AppColors.text),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

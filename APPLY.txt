@@ -1,73 +1,59 @@
-v66 - 2 code files + 5 logo options
-===================================
+v67 - 10 files
+==============
 
-  lib/services/foreground_alarm_service.dart   notification now useful
-  lib/services/foreground_alarm_manager.dart   (unchanged, for consistency)
-  logo-options/                                SVG + PNG previews
-
-Overwrite the two lib files. Apply AFTER v65. No new package.
+Overwrite all. Apply AFTER v66. No new package.
 
 =====================================================================
-THE "ISLAM CONNECT IS ACTIVE" NOTIFICATION
+THE BUILD ERROR - MY SPLICE, A NEW FAILURE MODE
 =====================================================================
-I CANNOT REMOVE IT. Android does not allow it.
+    The method '_FooterTile' isn't defined
 
-A foreground service MUST show a permanent notification — that is the deal the
-OS makes in exchange for letting an app keep running in the background. There is
-no flag to hide it.
+When I redesigned the book cards I rebuilt the file as "everything before
+_BookCard.build" + "the new card". _FooterTile was declared AFTER _BookCard, so
+it was silently deleted along with the old code.
 
-AND THE SERVICE IS WHAT DELIVERS YOUR ALARMS. We established that over about
-fifteen versions: on your phone the OS scheduler arms alarms and never fires
-them, while this polling service works. Removing the service to hide the
-notification would take the app straight back to no alarms at all.
+Brackets still balanced. No duplicates. Both my existing checks passed a file
+that was missing an entire class.
 
-SO I MADE IT WORTH HAVING. It now reads:
-
-    Asr — in 2h 6m
-    5:40 PM
-
-instead of "Islam Connect is active". Updated once a minute — the text only
-changes by the minute, and rewriting it every 20 seconds is three times the work
-for no visible difference.
-
-It follows the same Friday rule as the alarms: Juma counts down only on Friday,
-Dhuhr does not count down on one.
-
-ABOUT THE TIME UNDERNEATH: that is Android's own timestamp on the notification,
-showing when the service started. flutter_foreground_task may expose a showWhen
-flag to hide it — but I could not verify that parameter exists in the version you
-are on, and three of your builds have already failed on unverified plugin APIs. I
-am not guessing again. With the countdown in the text, the timestamp matters much
-less anyway.
-
-If you would rather it just said "Islam Connect" with no countdown, that is a
-one-line change — say so.
+ADDED A THIRD CHECK: every _PrivateWidget( referenced in a file must be declared
+in that file or in one it imports. It now runs across all 74 Dart files before I
+package, and it catches deletion — which the other two cannot.
 
 =====================================================================
-FIVE LOGO OPTIONS
+DAILY HADITH "READ MORE" - ENDLESS LOADING
 =====================================================================
-Open logo-options/ALL_OPTIONS.png. Top row is large, bottom row is the SAME
-logos at 96px — launcher size. That second row is the real test: a logo that
-only works at 512px is not a logo.
+A real bug, and a subtle one.
 
-  1  MIHRAB + CRESCENT   The arch already used throughout the app, with a
-                         crescent inside. Most tied to the existing design.
-  2  GIRIH STAR          Eight-point star, crescent in the centre. The most
-                         traditionally Islamic, and the most distinctive at
-                         small size.
-  3  KUFIC MONOGRAM      A minaret as the "I", a crescent-like "C". The most
-                         modern and the only one that reads as initials.
-  4  COMPASS ROSE        Qibla and prayer times in one mark. The most literal
-                         about what the app does.
-  5  CRESCENT + BOOK     Prayer and reading — the two halves of the app.
+The button called Navigator.pop() to close the card, then handed HadithLink the
+DIALOG'S context. By then that route was gone. HadithLink opens a blocking
+spinner on the context it is given — so the spinner went up on a dead route and
+nothing could ever take it down.
 
-All five use your exact palette: #0F5E3A, #C79A2E, #F0D48A.
+Fixed by inverting it: the dialog now POPS WITH the reference it wants opened,
+and the screen that opened the dialog — whose context is alive — does the
+navigating.
 
-They are SVG, so they scale to every launcher density without loss. Tell me which
-one and I will produce the full Android icon set — every mipmap density, the
-adaptive-icon foreground and background layers, and the Play Store 512px listing
-icon.
+=====================================================================
+PLAYBACK SPEED - HADITH AND QUR'AN
+=====================================================================
+Four speeds, 0.75x / 1x / 1.25x / 1.5x, in three places:
 
-MY PICK: 2, the girih star. It survives the shrink to 96px best, it does not look
-like any other prayer app, and the eight-point star is unambiguous without being
-a picture of a building.
+  hadith list        beside "Listen to translation"
+  single hadith      under the listen button
+  Qur'an reader      a bar at the bottom, ONLY while a recitation is playing
+
+ONE WIDGET, NOT TWO. The two features need different numbers underneath — the
+TTS engine takes an absolute rate where 0.45 is normal, audioplayers takes a
+multiplier where 1.0 is normal — but the reader sees the same four labels. Two
+different controls for the same idea is how a small app starts feeling
+inconsistent.
+
+THE TTS RATE IS REMEMBERED across launches and re-applied on every utterance, so
+changing it mid-listen takes effect on the next play rather than the next app
+start. The recitation rate is per-session, because it is set while listening.
+
+CHIPS, NOT A SLIDER. A slider invites fiddling and lands people on rates that are
+unintelligible, and nobody can hear the difference between 1.12x and 1.18x.
+
+The Qur'an bar only appears while audio is playing — permanently visible it would
+be clutter on a reading screen.

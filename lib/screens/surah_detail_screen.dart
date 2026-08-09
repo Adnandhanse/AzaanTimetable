@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../widgets/speed_selector.dart';
 import '../services/app_strings.dart';
 import '../data/sajdah_verses.dart';
 import '../data/juz_boundaries.dart';
@@ -29,6 +30,18 @@ class SurahDetailScreen extends StatefulWidget {
 
 class _SurahDetailScreenState extends State<SurahDetailScreen> {
   final AudioPlayer _player = AudioPlayer();
+
+  /// Recitation speed. Separate scale from the TTS rate — audioplayers takes a
+  /// multiplier where 1.0 is normal, whereas the TTS engine takes an absolute
+  /// rate. Same labels either way, so the reader sees one idea.
+  double _recitationRate = 1.0;
+
+  static const List<(String, double)> _recitationSpeeds = <(String, double)>[
+    ('0.75\u00d7', 0.75),
+    ('1\u00d7', 1.0),
+    ('1.25\u00d7', 1.25),
+    ('1.5\u00d7', 1.5),
+  ];
   final ScrollController _scroll = ScrollController();
   int? _playingVerse;
   final Map<int, String> _notes = {};
@@ -161,6 +174,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     try {
       await _player.stop();
       await _player.play(UrlSource(url));
+      // Applied after play(): setting a rate on a stopped player is ignored by
+      // the platform implementations.
+      try {
+        await _player.setPlaybackRate(_recitationRate);
+      } catch (_) {}
       setState(() => _playingVerse = verseNumber);
       _player.onPlayerComplete.listen((_) {
         if (mounted) setState(() => _playingVerse = null);
@@ -255,6 +273,46 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
         ],
       ),
+      // A speed bar, shown only while something is playing.
+      //
+      // Permanently visible it would be clutter on a reading screen; it is only
+      // meaningful once there is audio to slow down. Appears for the recitation
+      // exactly as it does for the hadith translation.
+      bottomNavigationBar: _playingVerse == null
+          ? null
+          : Container(
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                border: Border(
+                    top: BorderSide(color: AppColors.goldRule)),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    const Icon(Icons.graphic_eq,
+                        size: 17, color: AppColors.emerald),
+                    const SizedBox(width: 8),
+                    Text('Ayah $_playingVerse',
+                        style: AppText.caption
+                            .copyWith(color: AppColors.textMuted)),
+                    const Spacer(),
+                    SpeedSelector(
+                      options: _recitationSpeeds,
+                      value: _recitationRate,
+                      compact: true,
+                      onChanged: (r) async {
+                        setState(() => _recitationRate = r);
+                        try {
+                          await _player.setPlaybackRate(r);
+                        } catch (_) {}
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
       body: _mushafMode
           ? MushafView(
               verses: surah.verses,
