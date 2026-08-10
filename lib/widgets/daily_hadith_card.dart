@@ -75,8 +75,16 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
   @override
   void initState() {
     super.initState();
-    // Starts on whichever matches the app language; the reader can switch.
-    _script = S.isUrdu ? _Script.urdu : _Script.english;
+    // ROMAN BY DEFAULT.
+    //
+    // It used to open on Urdu or English depending on the app language, which
+    // meant an Urdu reader who is more comfortable with Latin script had to
+    // switch every single day.
+    //
+    // Roman is the one script almost everyone here can read: Urdu speakers
+    // because it is their language spelled out, and English readers because
+    // they recognise the letters. The other two are one tap away.
+    _script = _Script.roman;
   }
 
   @override
