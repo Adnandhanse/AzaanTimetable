@@ -1,61 +1,68 @@
-v75 - BUILD FIX + TWO UI FIXES
-==============================
+v77 - THE BOOK GRID, KEPT AND FIXED
+===================================
 
-  assets/icon/app_icon.png             <- THE BUILD FIX
-  assets/icon/app_icon_foreground.png  <- THE BUILD FIX
-  pubspec.yaml                         the config that needs them
-  lib/screens/hadith_home_screen.dart  spine colours on-theme
-  lib/screens/super_admin_login_screen.dart  invisible text fixed
+  lib/screens/hadith_home_screen.dart
 
-Overwrite all. Apply AFTER v74.
+Overwrite it. This REPLACES v76 — the drawn-book-cover version is gone and your
+original medallion design is back. Apply AFTER v76 or straight after v75; either
+way you end up with this.
 
-=====================================================================
-THE BUILD ERROR
-=====================================================================
-    PathNotFoundException: assets/icon/app_icon_foreground.png
-
-The pubspec now asks for an adaptive foreground layer, and that file was not in
-your repo. It WAS in the v72 zip — you have applied the pubspec change without the
-assets/icon/ folder, which is easy to do when a bundle mixes code and binaries.
-
-Both files are here, on their own, so they cannot be missed:
-    app_icon.png             1024x1024 RGB, no alpha  (the launcher icon)
-    app_icon_foreground.png  1024x1024 RGBA           (the adaptive layer)
-
-IF YOU WANT TO KEEP YOUR OWN ILLUSTRATION AS THE ICON INSTEAD, you still need a
-foreground version of it — a transparent PNG with the artwork inside the middle
-66%. Send me your file and I will cut one. But see the size and mask tests in v72
-first; the illustration does not survive 48px.
+See grid_compare.png in this zip: your version on the left, this one on the right.
 
 =====================================================================
-HADITH BOOK SPINES - YOU WERE RIGHT
+THREE THINGS WERE WRONG, AND ONLY ONE OF THEM WAS THE STYLING
 =====================================================================
-I used blue, brown, purple and red. They separated the six books and they were
-wrong: four hues the app uses nowhere else, so the shelf looked like it came from
-a different application.
+1. THE CARDS WERE HALF EMPTY.
+   childAspectRatio was 0.74, giving a 228pt card for about 183pt of content —
+   45pt of dead space across the bottom of every one. That empty band is the
+   single thing that made this screen look unfinished, and it is why the design
+   read as weak rather than minimal.
 
-Now all six are drawn from your palette, varied by DEPTH rather than hue:
+   Now 0.86, which is 197pt. Measured, not guessed: medallion 36 + 10 + a 38pt
+   name block + Arabic 22 + rule + two lines of counts, inside 26pt of padding.
+   14pt spare.
 
-    Bukhari     #0A4229   deepest emerald
-    Muslim      #0F5E3A   primary emerald
-    Abu Dawud   #2C6653   mid emerald
-    Tirmidhi    #4E7C63   sage
-    Nasa'i      #A8842A   deep champagne
-    Ibn Majah   #3A3A38   charcoal
+2. FIVE OF THE SIX NAMES WRAP TO TWO LINES.
+   "Sahih al-Bukhari", "Sunan Abu Dawud", "Jami' at-Tirmidhi", "Sunan an-Nasa'i",
+   "Sunan Ibn Majah" all wrap; only "Sahih Muslim" fits on one. So in that one
+   card the Arabic, the rule and the volume count all sat 18pt higher than in the
+   other five — which is exactly the sort of misalignment you notice without
+   being able to name.
 
-See spines.png in this zip. Six shades of one family still tell six books apart —
-and a shelf of matched bindings is how a real set of volumes looks anyway.
+   The name now occupies a FIXED 38pt block with the text centred inside it. All
+   six cards line up whatever the text does.
+
+3. THE CARDS SAID ALMOST NOTHING.
+   "9 volumes" describes a printed edition somebody else published. It tells you
+   nothing about what is in your hand.
+
+   Added the hadith count, in emerald above the volume line:
+
+       Sahih al-Bukhari    7,580 hadith    9 volumes
+       Sahih Muslim        7,360 hadith    7 volumes
+       Sunan Abu Dawud     5,272 hadith    4 volumes
+       Jami' at-Tirmidhi   3,926 hadith    6 volumes
+       Sunan an-Nasa'i     5,679 hadith    6 volumes
+       Sunan Ibn Majah     4,340 hadith    5 volumes
 
 =====================================================================
-PLATFORM ADMIN LOGIN - INVISIBLE TEXT
+THOSE COUNTS ARE THE APP'S OWN, NOT THE PUBLISHED TOTALS
 =====================================================================
-You diagnosed it correctly: the text was white.
+I counted entries WITH TEXT in your data files, not the nominal totals.
 
-The cause is a collision. That screen has a dark green background, so it set the
-field text to white. But the app-wide inputDecorationTheme sets
-`filled: true, fillColor: white` on every field. So the field was white and the
-text on it was white.
+Sahih Muslim's file holds 7,563 entries but 203 are empty and the app already
+filters them out before display. Printing 7,563 on the card would be a number the
+app itself contradicts the moment somebody scrolls to the end.
 
-Both fields now use dark charcoal text with a muted label, which is correct
-against the white fill. I checked every other screen for the same collision —
-this was the only one.
+Same for the others: Bukhari 7,589 nominal / 7,580 shown, Tirmidhi 3,998 / 3,926,
+Nasa'i 5,765 / 5,679, Ibn Majah 4,343 / 4,340, Abu Dawud 5,274 / 5,272.
+
+If you would rather show the published figures, say so — but then the two numbers
+disagree, and I would not.
+
+=====================================================================
+UNCHANGED
+=====================================================================
+The octagonal medallion, the cream cards, the gold hairline borders, the gold
+Arabic titles, the section rule, the bookmarks tile at the foot, the source line.
+Nothing about the look has been redesigned — it has been made to fit.

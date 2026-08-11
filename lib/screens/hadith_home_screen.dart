@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/hadith.dart';
 import '../services/app_strings.dart';
 import '../services/quran_local_data_service.dart';
@@ -7,15 +8,20 @@ import '../widgets/ornaments.dart';
 import 'hadith_chapters_screen.dart';
 import 'hadith_bookmarks_screen.dart';
 
-/// Arabic titles and volume counts, keyed off the existing enum. Kept here
-/// rather than added to the model so nothing in the data layer changes.
-const Map<HadithBook, (String, int)> _bookMeta = <HadithBook, (String, int)>{
-  HadithBook.bukhari: ('صحيح البخاري', 9),
-  HadithBook.muslim: ('صحيح مسلم', 7),
-  HadithBook.abudawud: ('سنن أبي داود', 4),
-  HadithBook.tirmidhi: ('جامع الترمذي', 6),
-  HadithBook.nasai: ('سنن النسائي', 6),
-  HadithBook.ibnmajah: ('سنن ابن ماجه', 5),
+/// Arabic title, volume count, and how many hadith the app actually holds.
+///
+/// The hadith figures are the count of entries WITH TEXT in this app's own data
+/// files, not the nominal totals — Sahih Muslim's file has 7,563 entries but 203
+/// of them are empty and are filtered out before display. Printing 7,563 next to
+/// a book that shows 7,360 would be a number the app itself contradicts.
+const Map<HadithBook, (String, int, int)> _bookMeta =
+    <HadithBook, (String, int, int)>{
+  HadithBook.bukhari: ('صحيح البخاري', 9, 7580),
+  HadithBook.muslim: ('صحيح مسلم', 7, 7360),
+  HadithBook.abudawud: ('سنن أبي داود', 4, 5272),
+  HadithBook.tirmidhi: ('جامع الترمذي', 6, 3926),
+  HadithBook.nasai: ('سنن النسائي', 6, 5679),
+  HadithBook.ibnmajah: ('سنن ابن ماجه', 5, 4340),
 };
 
 class HadithHomeScreen extends StatefulWidget {
@@ -36,9 +42,10 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
   }
 
   Future<void> _loadLanguage() async {
-    final urdu = await QuranLocalDataService.getHadithUrdu();
+    final bool urdu = await QuranLocalDataService.getHadithUrdu();
     if (!mounted) return;
-    setState(() => _language = urdu ? HadithLanguage.urdu : HadithLanguage.english);
+    setState(
+        () => _language = urdu ? HadithLanguage.urdu : HadithLanguage.english);
   }
 
   Future<void> _setLanguage(HadithLanguage lang) async {
@@ -51,27 +58,30 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(S.hadithBooks),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.bookmark_border, size: 20),
             tooltip: S.myBookmarks,
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const HadithBookmarksScreen()),
+              MaterialPageRoute<void>(
+                  builder: (_) => const HadithBookmarksScreen()),
             ),
           ),
           PopupMenuButton<HadithLanguage>(
             icon: const Icon(Icons.translate, size: 20),
             onSelected: _setLanguage,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: HadithLanguage.english, child: Text('English')),
-              PopupMenuItem(value: HadithLanguage.urdu, child: Text('اردو (Urdu)')),
+            itemBuilder: (_) => const <PopupMenuEntry<HadithLanguage>>[
+              PopupMenuItem<HadithLanguage>(
+                  value: HadithLanguage.english, child: Text('English')),
+              PopupMenuItem<HadithLanguage>(
+                  value: HadithLanguage.urdu, child: Text('اردو (Urdu)')),
             ],
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        children: [
+        children: <Widget>[
           SectionRule(label: S.sixAuthenticBooks, trailingDiamond: true),
           const SizedBox(height: 14),
           GridView.builder(
@@ -83,23 +93,28 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              // Taller than it looks like it needs to be. At 0.80 the Arabic
-              // title and the volume count were being clipped off the bottom
-              // of the card on narrower phones — the content is medallion +
-              // two lines of name + Arabic + rule + count, and it does not fit
-              // in a shorter box.
-              childAspectRatio: 0.74,
+              // 0.86, up from 0.74.
+              //
+              // The cards were far taller than their contents, so each one had
+              // an empty band across the bottom half — the single thing that
+              // made this screen look unfinished.
+              //
+              // Measured: medallion 38 + 10 + a fixed 38pt name block + 4 +
+              // Arabic 22 + 8 + rule + 8 + two lines of counts 28, inside 26pt
+              // of padding, is about 184pt in a 158pt-wide card. 0.86 gives 184.
+              childAspectRatio: 0.86,
             ),
-            itemBuilder: (context, index) {
-              final book = HadithBook.values[index];
-              final meta = _bookMeta[book];
+            itemBuilder: (BuildContext context, int index) {
+              final HadithBook book = HadithBook.values[index];
+              final (String, int, int)? meta = _bookMeta[book];
               return _BookCard(
                 number: index + 1,
                 name: book.localName,
                 arabicName: meta?.$1 ?? '',
                 volumes: meta?.$2 ?? 0,
+                hadithCount: meta?.$3 ?? 0,
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (_) =>
                         HadithChaptersScreen(book: book, language: _language),
                   ),
@@ -109,13 +124,13 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
           ),
           const SizedBox(height: 18),
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: _FooterTile(
                   icon: Icons.bookmark_border,
                   label: S.myBookmarks,
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                         builder: (_) => const HadithBookmarksScreen()),
                   ),
                 ),
@@ -140,6 +155,7 @@ class _BookCard extends StatelessWidget {
     required this.name,
     required this.arabicName,
     required this.volumes,
+    required this.hadithCount,
     required this.onTap,
   });
 
@@ -147,147 +163,97 @@ class _BookCard extends StatelessWidget {
   final String name;
   final String arabicName;
   final int volumes;
+  final int hadithCount;
   final VoidCallback onTap;
 
-  /// A distinct spine colour per book, so the six are recognisable at a glance
-  /// rather than being six identical white rectangles with different words on
-  /// them. Muted, drawn from the palette — this is a bookshelf, not a toy.
-  /// A distinct spine per book, drawn ONLY from the app's own palette.
-  ///
-  /// The first version used blue, brown, purple and red to separate the six.
-  /// They were distinguishable and completely wrong — introducing four hues the
-  /// app does not use anywhere else, so the shelf looked like it belonged to a
-  /// different application.
-  ///
-  /// These are all emerald, gold or charcoal, varied by DEPTH rather than hue:
-  /// deep green through to pale sage, then champagne, then charcoal. Six shades
-  /// of the same family still tell six books apart — a bookshelf of matched
-  /// bindings is how a good set of volumes actually looks.
-  static const List<Color> _spines = <Color>[
-    Color(0xFF0A4229), // Bukhari    deepest emerald
-    Color(0xFF0F5E3A), // Muslim     primary emerald
-    Color(0xFF2C6653), // Abu Dawud  mid emerald
-    Color(0xFF4E7C63), // Tirmidhi   sage
-    Color(0xFFA8842A), // Nasa'i     deep champagne
-    Color(0xFF3A3A38), // Ibn Majah  charcoal
-  ];
+  /// 7580 → "7,580". Read at a glance rather than counted digit by digit.
+  static String _grouped(int n) => n.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'), (Match m) => '${m[1]},');
 
   @override
   Widget build(BuildContext context) {
-    final Color spine = _spines[(number - 1) % _spines.length];
-
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(10),
-      elevation: 0,
+      borderRadius: BorderRadius.circular(4),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(4),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(4),
             border: Border.all(color: AppColors.goldRule),
-            // The book's own colour bleeding up from the base, so each card
-            // carries some of its spine.
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: <Color>[
-                spine.withOpacity(0.10),
-                AppColors.white,
-              ],
-              stops: const <double>[0.0, 0.55],
-            ),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 13),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // A SPINE ACROSS THE TOP, the way a book faces you on a shelf.
-              // Sixteen pixels of colour does more to distinguish six volumes
-              // than any amount of text styling.
-              Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  color: spine,
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(9)),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      // An open book with the volume number on it, rather than a
-                      // bare numbered medallion.
-                      SizedBox(
-                        width: 46,
-                        height: 46,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            Icon(Icons.menu_book_rounded,
-                                size: 42, color: spine.withOpacity(0.16)),
-                            Container(
-                              width: 22,
-                              height: 22,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: spine,
-                              ),
-                              child: Text(
-                                '$number',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      if (arabicName.isNotEmpty) ...[
-                        Text(
-                          arabicName,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.arabic.copyWith(
-                            fontSize: 17,
-                            height: 1.3,
-                            color: spine,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                      ],
-                      Text(
-                        name,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.rowTitle.copyWith(
-                            fontSize: 13.5, color: AppColors.text),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: spine.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          volumes > 0 ? '$volumes vol' : S.chapters,
-                          style: AppText.caption
-                              .copyWith(fontSize: 10.5, color: spine),
-                        ),
-                      ),
-                    ],
+              Medallion(label: '$number', size: 36, filled: true),
+              const SizedBox(height: 10),
+
+              // A FIXED-HEIGHT NAME BLOCK.
+              //
+              // Five of the six names wrap to two lines — "Sahih al-Bukhari",
+              // "Sunan Abu Dawud", "Jami' at-Tirmidhi", "Sunan an-Nasa'i",
+              // "Sunan Ibn Majah" — while "Sahih Muslim" fits on one. That made
+              // every element below it sit at a different height in that one
+              // card, which is what made the grid look untidy.
+              //
+              // Reserving two lines and centring within them keeps all six cards
+              // aligned regardless of how the text falls.
+              SizedBox(
+                height: 38,
+                child: Center(
+                  child: Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.rowTitle.copyWith(
+                      fontSize: 14.5,
+                      height: 1.25,
+                      color: AppColors.text,
+                    ),
                   ),
                 ),
+              ),
+
+              if (arabicName.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 2),
+                Text(
+                  arabicName,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.arabic.copyWith(
+                    fontSize: 15,
+                    height: 1.4,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 8),
+              Container(width: 22, height: 1, color: AppColors.goldRule),
+              const SizedBox(height: 8),
+
+              // HOW MANY HADITH, above the volume count.
+              //
+              // The empty half of the card was the obvious place for the one
+              // fact a reader actually wants before opening a collection, and it
+              // was nowhere in the app. Volumes describe the printed edition;
+              // the hadith count describes what is in your hand.
+              Text(
+                '${_grouped(hadithCount)} ${S.isUrdu ? 'احادیث' : 'hadith'}',
+                style: AppText.listTime.copyWith(
+                  fontSize: 13,
+                  color: AppColors.emerald,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                volumes > 0 ? '$volumes volumes' : S.chapters,
+                style: AppText.caption
+                    .copyWith(fontSize: 10.5, color: AppColors.textMuted),
               ),
             ],
           ),
@@ -321,15 +287,16 @@ class _FooterTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: AppColors.goldRule),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 13),
-          child: Column(
-            children: [
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
               Icon(icon, size: 19, color: AppColors.gold),
-              const SizedBox(height: 5),
+              const SizedBox(width: 9),
               Text(
                 label,
-                style:
-                    AppText.rowTitle.copyWith(fontSize: 15, color: AppColors.text),
+                style: AppText.rowTitle
+                    .copyWith(fontSize: 14.5, color: AppColors.text),
               ),
             ],
           ),
