@@ -60,6 +60,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => setState(() => vibrateEnabled = v),
           ),
           const Divider(),
+          // CREDITS AND LICENCES.
+          //
+          // The KFGQPC font licence grants free use and distribution but
+          // requires its copyright notice to travel with the font. Noto Nastaliq
+          // is OFL, which requires the same. Neither demands a visible screen,
+          // but an app that ships other people's work should say so — and if
+          // anyone ever asks, the answer is already in the app.
+          ListTile(
+            leading: const Icon(Icons.info_outline, color: AppColors.emerald),
+            title: Text(S.isUrdu ? 'ایپ کے بارے میں' : 'About & credits'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => showDialog<void>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: AppColors.white,
+                title: Text('Islam Connect',
+                    style: AppText.rowTitle.copyWith(color: AppColors.emerald)),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Fonts', style: AppText.eyebrow.copyWith(color: AppColors.gold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Qur\u2019an text is set in KFGQPC Uthmanic Script HAFS.\n'
+                        '\u00a9 2010 King Fahd Glorious Quran Printing Complex, '
+                        'Al-Madinah Al-Munawwarah. All rights reserved. '
+                        'Used and distributed under its end-user licence, unmodified.',
+                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Urdu text is set in Noto Nastaliq Urdu, and Arabic '
+                        'elsewhere in Amiri \u2014 both under the SIL Open Font License.',
+                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                      ),
+                      const SizedBox(height: 14),
+                      Text('Text', style: AppText.eyebrow.copyWith(color: AppColors.gold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Hadith collections and dua text from published open '
+                        'datasets. Qur\u2019an translations from public editions.\n\n'
+                        'Prayer times are supplied by each masjid\u2019s own '
+                        'administrators. Hijri dates are calculated and local '
+                        'moon sighting may differ by a day.',
+                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Close')),
+                ],
+              ),
+            ),
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.calendar_month_outlined,
                 color: AppColors.emerald),

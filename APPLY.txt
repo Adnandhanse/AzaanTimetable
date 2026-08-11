@@ -1,59 +1,90 @@
-v67 - 10 files
-==============
+v73 - STEP 4 - CONSOLE ANSWERS + FONT ATTRIBUTION
+=================================================
 
-Overwrite all. Apply AFTER v66. No new package.
+  lib/screens/settings_screen.dart   About & credits
+  play-store/play-console-answers.md Data Safety, content rating, permissions
+  play-store/play-store-listing.md   the listing copy
 
-=====================================================================
-THE BUILD ERROR - MY SPLICE, A NEW FAILURE MODE
-=====================================================================
-    The method '_FooterTile' isn't defined
-
-When I redesigned the book cards I rebuilt the file as "everything before
-_BookCard.build" + "the new card". _FooterTile was declared AFTER _BookCard, so
-it was silently deleted along with the old code.
-
-Brackets still balanced. No duplicates. Both my existing checks passed a file
-that was missing an entire class.
-
-ADDED A THIRD CHECK: every _PrivateWidget( referenced in a file must be declared
-in that file or in one it imports. It now runs across all 74 Dart files before I
-package, and it catches deletion — which the other two cannot.
+Overwrite the lib file. Apply AFTER v72.
 
 =====================================================================
-DAILY HADITH "READ MORE" - ENDLESS LOADING
+THE FONT LICENCE - YOU WERE RIGHT, I WAS WRONG
 =====================================================================
-A real bug, and a subtle one.
+I said twice that the KFGQPC package had no licence. It does. It is embedded in
+the font's own name table, not shipped as a separate file, and I only looked for a
+file. My mistake, and I pressed the point harder than the evidence supported.
 
-The button called Navigator.pop() to close the card, then handed HadithLink the
-DIALOG'S context. By then that route was gone. HadithLink opens a blocking
-spinner on the context it is given — so the spinner went up on a dead route and
-nothing could ever take it down.
+The terms are good for you. Verbatim:
 
-Fixed by inverting it: the dialog now POPS WITH the reference it wants opened,
-and the screen that opened the dialog — whose context is alive — does the
-navigating.
+    "Permission is hereby granted, Free of Cost, to any person obtaining a copy
+     of this Font ... the rights to Use, Copy, Distribute"
+
+No non-commercial restriction. Distribution is explicitly allowed, which is what
+bundling it in an app is.
+
+ONE CONDITION THAT MATTERS: the font may not be "Sold, Modified, Altered,
+Translated, Reverse Engineered, Decompiled". So:
+
+  - Ship the .otf exactly as issued. I verified the file in your repo is
+    BYTE-IDENTICAL to the one you sent — same MD5, 43269f11...
+  - Do not enable font subsetting. Flutter's tree-shaking only touches ICON
+    fonts, not bundled text fonts, so your build is fine as it stands. If anyone
+    ever adds subsetting to shrink the APK, that would breach this licence.
+
+ADDED: Settings -> About & credits, carrying the KFGQPC copyright notice and the
+OFL attributions for Noto Nastaliq and Amiri. The licence requires the notice to
+travel with the font; none of them demand a visible screen, but an app that ships
+other people's work should say so.
 
 =====================================================================
-PLAYBACK SPEED - HADITH AND QUR'AN
+DATA SAFETY - THE ANSWERS, VERIFIED AGAINST THE CODE
 =====================================================================
-Four speeds, 0.75x / 1x / 1.25x / 1.5x, in three places:
+Declare exactly THREE data types:
 
-  hadith list        beside "Listen to translation"
-  single hadith      under the listen button
-  Qur'an reader      a bar at the bottom, ONLY while a recitation is playing
+  Phone number            collected, not shared, stored, OPTIONAL,
+                          purpose: account management
+  Approximate location    collected, not shared, PROCESSED EPHEMERALLY,
+                          optional, purpose: app functionality
+  User-generated content  collected, not shared, optional,
+                          purpose: app functionality
 
-ONE WIDGET, NOT TWO. The two features need different numbers underneath — the
-TTS engine takes an absolute rate where 0.45 is normal, audioplayers takes a
-multiplier where 1.0 is normal — but the reader sees the same four labels. Two
-different controls for the same idea is how a small app starts feeling
-inconsistent.
+And nothing else. I checked each "not collected" claim against the code:
+  - zakat_service.dart makes NO network calls, so "financial info" is genuinely
+    not collected
+  - there is no Crashlytics and no Analytics in pubspec.yaml, so "diagnostics" is
+    genuinely not collected
+  - the follower and daily-active counters are aggregates with no user data, so
+    they need no declaration
 
-THE TTS RATE IS REMEMBERED across launches and re-applied on every utterance, so
-changing it mid-listen takes effect on the next play rather than the next app
-start. The recitation rate is per-session, because it is set while listening.
+THE ONE THAT CATCHES PEOPLE: location must be ticked "processed ephemerally",
+because your app reads the position and compares it on the device without ever
+uploading it. Your privacy policy says exactly that. Those two statements have to
+agree, and they do.
 
-CHIPS, NOT A SLIDER. A slider invites fiddling and lands people on rates that are
-unintelligible, and nobody can hear the difference between 1.12x and 1.18x.
+Your manifest requests both COARSE and FINE location. Declare APPROXIMATE, since
+that is what a 7 km radius and a qibla bearing actually need. If you would rather
+form and manifest match perfectly, say so and I will drop ACCESS_FINE_LOCATION.
 
-The Qur'an bar only appears while audio is playing — permanently visible it would
-be clutter on a reading screen.
+=====================================================================
+TWO THINGS YOU MUST WRITE YOURSELF
+=====================================================================
+1. APP ACCESS. Play asks how a reviewer reaches anything behind a login. You must
+   REGISTER A REAL TEST MASJID and give them its admin mobile number, or the
+   reviewer cannot see the admin area and may reject for incomplete
+   functionality. Wording is in the file.
+
+2. CONTENT RATING - "can users interact?" ANSWER YES. Announcements are content
+   one user shows others. Answering yes with the explanation provided does NOT
+   raise your age rating; being found to have concealed it does real damage.
+   Expected outcome either way: rated 3+.
+
+=====================================================================
+STILL OPEN, AND IT IS A DECISION NOT A TASK
+=====================================================================
+SYSTEM_ALERT_WINDOW, for the full-screen azan overlay. It draws more Play scrutiny
+than anything else you request, and the foreground service now plays the azan and
+posts a full-screen-intent notification by itself.
+
+Test one prayer with the overlay disabled. If the experience is not noticeably
+worse, removing it drops a review risk and a permission. Tell me either way and I
+will act on it.
