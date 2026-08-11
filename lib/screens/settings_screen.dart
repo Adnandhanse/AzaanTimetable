@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
 import 'hijri_calendar_screen.dart';
@@ -164,15 +163,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               MaterialPageRoute(builder: (_) => const AlarmHealthScreen()),
             ),
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.picture_in_picture_alt, color: Colors.orange),
-            title: const Text('Enable Guaranteed Azan Popup'),
-            subtitle: const Text('Important: makes the Azan screen appear even while using your phone'),
-            onTap: () async {
-              await overlay.FlutterOverlayWindow.requestPermission();
-            },
-          ),
+          // "Enable Guaranteed Azan Popup" removed along with the overlay. It
+          // asked for the one permission Google scrutinises hardest, to enable
+          // something that turned out to be unnecessary.
           const Divider(),
           ListTile(
             leading: const Icon(Icons.battery_alert, color: Colors.orange),

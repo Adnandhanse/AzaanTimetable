@@ -80,7 +80,7 @@ jobs:
           }
 
           android {
-              namespace = "com.example.masjid_alarm_app"
+              namespace = "com.islamconnect.app"
               compileSdk = flutter.compileSdkVersion
               ndkVersion = flutter.ndkVersion
 
@@ -95,7 +95,15 @@ jobs:
               }
 
               defaultConfig {
-                  applicationId = "com.example.masjid_alarm_app"
+                  // The published identity of the app. Can never change once live —
+                  // a different applicationId is a different app to Google.
+                  //
+                  // NOT the same as the Dart package name in pubspec.yaml,
+                  // which stays masjid_alarm_app. That one appears in every
+                  // `import 'package:masjid_alarm_app/...'` in the codebase and
+                  // renaming it would touch every file for no benefit; Google
+                  // never sees it.
+                  applicationId = "com.islamconnect.app"
                   minSdk = 23
                   targetSdk = flutter.targetSdkVersion
                   versionCode = flutter.versionCode
@@ -104,10 +112,18 @@ jobs:
 
               signingConfigs {
                   release {
+                      // Credentials come from the environment, NOT from this
+                      // file. They were written here in plain text alongside a
+                      // committed keystore, which means anyone who can read the
+                      // repo can sign builds as you.
+                      //
+                      // Set these as GitHub repository secrets. If they are
+                      // absent the build still works using the old values, so
+                      // nothing breaks before you add them — but do add them.
                       storeFile file("../../android_keystore/release.keystore")
-                      storePassword "masjidalarm123"
-                      keyAlias "masjidalarm"
-                      keyPassword "masjidalarm123"
+                      storePassword System.getenv("KEYSTORE_PASSWORD") ?: "masjidalarm123"
+                      keyAlias System.getenv("KEY_ALIAS") ?: "masjidalarm"
+                      keyPassword System.getenv("KEY_PASSWORD") ?: "masjidalarm123"
                   }
               }
 
@@ -215,8 +231,6 @@ jobs:
           echo "=== flutter_foreground_task's own AndroidManifest.xml ==="
           find "$HOME/.pub-cache" -path "*flutter_foreground_task*/android/src/main/AndroidManifest.xml" -exec cat {} \;
           echo ""
-          echo "=== flutter_overlay_window's own AndroidManifest.xml ==="
-          find "$HOME/.pub-cache" -path "*flutter_overlay_window*/android/src/main/AndroidManifest.xml" -exec cat {} \;
           echo ""
           echo "=== flutter_foreground_task's build.gradle ==="
           find "$HOME/.pub-cache" -path "*flutter_foreground_task*/android/build.gradle" -exec cat {} \;
@@ -229,7 +243,7 @@ jobs:
 
       - name: Add location and notification permissions to AndroidManifest.xml
         run: |
-          sed -i '/<application/i\    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <category android:name="android.intent.category.BROWSABLE" />\n            <data android:scheme="https" />\n        </intent>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="geo" />\n        </intent>\n    </queries>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i\    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <category android:name="android.intent.category.BROWSABLE" />\n            <data android:scheme="https" />\n        </intent>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="geo" />\n        </intent>\n    </queries>' android/app/src/main/AndroidManifest.xml
           echo "--- AndroidManifest.xml permissions ---"
           grep "uses-permission" android/app/src/main/AndroidManifest.xml
 
@@ -273,8 +287,24 @@ jobs:
             -e 's/targetSdkVersion flutter\.targetSdkVersion/targetSdkVersion 34/g' \
             -e 's/targetSdk flutter\.targetSdkVersion/targetSdk 34/g' {} +
 
-      - name: Build APK (release)
+      # BOTH FORMATS, on purpose.
+      #
+      # Play requires an App Bundle (.aab) for new apps — an APK upload is
+      # rejected outright. But an .aab cannot be sideloaded onto a phone, so the
+      # APK stays for testing on your own devices.
+      - name: Build APK (release) — for sideloading and testing
         run: flutter build apk --release
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Build App Bundle (release) — for the Play Store
+        run: flutter build appbundle --release
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Show final merged AndroidManifest.xml
         run: |
@@ -285,5 +315,11 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: masjid-alarm-app-apk
+          name: islam-connect-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: islam-connect-aab
+          path: build/app/outputs/bundle/release/app-release.aab

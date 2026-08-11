@@ -6,7 +6,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'alarm_event_log.dart';
 import 'notification_channels.dart';
-import 'package:flutter_overlay_window/flutter_overlay_window.dart' as overlay;
 
 /// This runs in its own persistent background isolate, kept alive by a
 /// permanent low-priority "service" notification. Instead of relying on
@@ -421,32 +420,21 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   }
 
   Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) async {
-    // Primary path: a real system overlay window that appears on top of
-    // ANY app or even the lock screen - stronger than a notification's
-    // "full screen intent", which Android only auto-launches when the
-    // phone is locked. This guarantees the alert is seen either way.
-    try {
-      final isActive = await overlay.FlutterOverlayWindow.isActive();
-      if (!isActive) {
-        await overlay.FlutterOverlayWindow.showOverlay(
-          height: overlay.WindowSize.matchParent,
-          width: overlay.WindowSize.matchParent,
-          flag: overlay.OverlayFlag.defaultFlag,
-          visibility: overlay.NotificationVisibility.visibilityPublic,
-          positionGravity: overlay.PositionGravity.none,
-        );
-        // Give the overlay a moment to initialize before sending it data.
-        await Future.delayed(const Duration(milliseconds: 400));
-      }
-      await overlay.FlutterOverlayWindow.shareData({
-        'prayer': label,
-        'masjid': masjidName,
-        'audioUrl': audioUrl ?? '',
-      });
-    } catch (_) {
-      // If overlay permission isn't granted, fall through to the
-      // notification below so the user still gets some alert.
-    }
+    // OVERLAY REMOVED.
+    //
+    // This used to open a system overlay window before posting the
+    // notification, on the reasoning that an overlay draws over anything
+    // including the lock screen, whereas a full-screen intent only
+    // auto-launches when locked.
+    //
+    // In practice it earned nothing. Tested on a device with "Appear on top"
+    // switched OFF the whole time: the azan still played and the alert still
+    // arrived, because the service plays the audio itself and the notification
+    // carries a full-screen intent.
+    //
+    // It cost SYSTEM_ALERT_WINDOW — the permission Google scrutinises hardest —
+    // plus a native plugin and a second Flutter entry point, to duplicate
+    // something that already worked.
 
     // Also fire a regular notification as a backup/secondary signal -
     // this still works even if overlay permission was never granted.

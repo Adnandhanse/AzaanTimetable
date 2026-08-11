@@ -1,90 +1,70 @@
-v73 - STEP 4 - CONSOLE ANSWERS + FONT ATTRIBUTION
-=================================================
+v74 - OVERLAY REMOVED
+=====================
 
-  lib/screens/settings_screen.dart   About & credits
-  play-store/play-console-answers.md Data Safety, content rating, permissions
-  play-store/play-store-listing.md   the listing copy
+  .github/workflows/build.yml                 SYSTEM_ALERT_WINDOW gone
+  pubspec.yaml                                flutter_overlay_window gone
+  lib/services/foreground_alarm_service.dart  overlay call gone
+  lib/screens/settings_screen.dart            "Guaranteed Azan Popup" gone
 
-Overwrite the lib file. Apply AFTER v72.
+Overwrite all four. Apply AFTER v73.
 
-=====================================================================
-THE FONT LICENCE - YOU WERE RIGHT, I WAS WRONG
-=====================================================================
-I said twice that the KFGQPC package had no licence. It does. It is embedded in
-the font's own name table, not shipped as a separate file, and I only looked for a
-file. My mistake, and I pressed the point harder than the evidence supported.
-
-The terms are good for you. Verbatim:
-
-    "Permission is hereby granted, Free of Cost, to any person obtaining a copy
-     of this Font ... the rights to Use, Copy, Distribute"
-
-No non-commercial restriction. Distribution is explicitly allowed, which is what
-bundling it in an app is.
-
-ONE CONDITION THAT MATTERS: the font may not be "Sold, Modified, Altered,
-Translated, Reverse Engineered, Decompiled". So:
-
-  - Ship the .otf exactly as issued. I verified the file in your repo is
-    BYTE-IDENTICAL to the one you sent — same MD5, 43269f11...
-  - Do not enable font subsetting. Flutter's tree-shaking only touches ICON
-    fonts, not bundled text fonts, so your build is fine as it stands. If anyone
-    ever adds subsetting to shrink the APK, that would breach this licence.
-
-ADDED: Settings -> About & credits, carrying the KFGQPC copyright notice and the
-OFL attributions for Noto Nastaliq and Amiri. The licence requires the notice to
-travel with the font; none of them demand a visible screen, but an app that ships
-other people's work should say so.
+*** ALSO DELETE lib/overlay_main.dart FROM YOUR REPO. ***
+It is the overlay's separate Flutter entry point and is now dead code. A delta
+zip cannot delete a file for you.
 
 =====================================================================
-DATA SAFETY - THE ANSWERS, VERIFIED AGAINST THE CODE
+YOUR TEST DECIDED THIS
 =====================================================================
-Declare exactly THREE data types:
+"Appear on top" was already off on your phone, and the azan still played and the
+notification still arrived. So the overlay was contributing nothing — the service
+plays the audio itself and the notification carries a full-screen intent.
 
-  Phone number            collected, not shared, stored, OPTIONAL,
-                          purpose: account management
-  Approximate location    collected, not shared, PROCESSED EPHEMERALLY,
-                          optional, purpose: app functionality
-  User-generated content  collected, not shared, optional,
-                          purpose: app functionality
+It was costing:
+  - SYSTEM_ALERT_WINDOW, the permission Google scrutinises hardest
+  - a native plugin, flutter_overlay_window
+  - a second Flutter entry point, overlay_main.dart
+  - APK size
 
-And nothing else. I checked each "not collected" claim against the code:
-  - zakat_service.dart makes NO network calls, so "financial info" is genuinely
-    not collected
-  - there is no Crashlytics and no Analytics in pubspec.yaml, so "diagnostics" is
-    genuinely not collected
-  - the follower and daily-active counters are aggregates with no user data, so
-    they need no declaration
-
-THE ONE THAT CATCHES PEOPLE: location must be ticked "processed ephemerally",
-because your app reads the position and compares it on the device without ever
-uploading it. Your privacy policy says exactly that. Those two statements have to
-agree, and they do.
-
-Your manifest requests both COARSE and FINE location. Declare APPROXIMATE, since
-that is what a 7 km radius and a qibla bearing actually need. If you would rather
-form and manifest match perfectly, say so and I will drop ACCESS_FINE_LOCATION.
+All to duplicate something that already worked. Removed.
 
 =====================================================================
-TWO THINGS YOU MUST WRITE YOURSELF
+WHAT SHIPS NOW - 12 PERMISSIONS, DOWN FROM 13
 =====================================================================
-1. APP ACCESS. Play asks how a reviewer reaches anything behind a login. You must
-   REGISTER A REAL TEST MASJID and give them its admin mobile number, or the
-   reviewer cannot see the admin area and may reject for incomplete
-   functionality. Wording is in the file.
+  ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION
+  POST_NOTIFICATIONS
+  SCHEDULE_EXACT_ALARM, USE_EXACT_ALARM
+  RECEIVE_BOOT_COMPLETED
+  USE_FULL_SCREEN_INTENT
+  REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+  FOREGROUND_SERVICE, FOREGROUND_SERVICE_DATA_SYNC,
+  FOREGROUND_SERVICE_MEDIA_PLAYBACK
+  WAKE_LOCK
 
-2. CONTENT RATING - "can users interact?" ANSWER YES. Announcements are content
-   one user shows others. Answering yes with the explanation provided does NOT
-   raise your age rating; being found to have concealed it does real damage.
-   Expected outcome either way: rated 3+.
+Only ONE now needs a written justification in the Console: SCHEDULE_EXACT_ALARM.
+The wording is in play-console-answers.md. You can ignore the SYSTEM_ALERT_WINDOW
+section of that document entirely.
 
 =====================================================================
-STILL OPEN, AND IT IS A DECISION NOT A TASK
+TEST THIS BEFORE YOU SUBMIT
 =====================================================================
-SYSTEM_ALERT_WINDOW, for the full-screen azan overlay. It draws more Play scrutiny
-than anything else you request, and the foreground service now plays the azan and
-posts a full-screen-intent notification by itself.
+This touched the alarm path, which is the one thing in the app that must not
+break. Verify on a real prayer, not the test button:
 
-Test one prayer with the overlay disabled. If the experience is not noticeably
-worse, removing it drops a review risk and a permission. Tell me either way and I
-will act on it.
+  1. Azan plays at prayer time with the screen LOCKED
+  2. The alert appears and you can stop it WITHOUT unlocking
+  3. Azan plays with the app closed entirely, not just backgrounded
+  4. Still works after a reboot
+
+If any of those now fail, tell me — the overlay comes back and we justify it. But
+your test says they will not.
+
+=====================================================================
+ONE SIDE EFFECT WORTH KNOWING
+=====================================================================
+The removed code was the ONLY thing that showed a full-screen azan screen over
+another app while the phone was UNLOCKED and in use. With it gone, if a prayer
+arrives while you are using WhatsApp you get a heads-up notification rather than a
+takeover screen.
+
+That is standard behaviour for alarm apps and, I would argue, better manners. But
+it is a real change, so judge it yourself during testing.
