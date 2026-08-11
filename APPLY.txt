@@ -1,70 +1,61 @@
-v74 - OVERLAY REMOVED
-=====================
+v75 - BUILD FIX + TWO UI FIXES
+==============================
 
-  .github/workflows/build.yml                 SYSTEM_ALERT_WINDOW gone
-  pubspec.yaml                                flutter_overlay_window gone
-  lib/services/foreground_alarm_service.dart  overlay call gone
-  lib/screens/settings_screen.dart            "Guaranteed Azan Popup" gone
+  assets/icon/app_icon.png             <- THE BUILD FIX
+  assets/icon/app_icon_foreground.png  <- THE BUILD FIX
+  pubspec.yaml                         the config that needs them
+  lib/screens/hadith_home_screen.dart  spine colours on-theme
+  lib/screens/super_admin_login_screen.dart  invisible text fixed
 
-Overwrite all four. Apply AFTER v73.
-
-*** ALSO DELETE lib/overlay_main.dart FROM YOUR REPO. ***
-It is the overlay's separate Flutter entry point and is now dead code. A delta
-zip cannot delete a file for you.
+Overwrite all. Apply AFTER v74.
 
 =====================================================================
-YOUR TEST DECIDED THIS
+THE BUILD ERROR
 =====================================================================
-"Appear on top" was already off on your phone, and the azan still played and the
-notification still arrived. So the overlay was contributing nothing — the service
-plays the audio itself and the notification carries a full-screen intent.
+    PathNotFoundException: assets/icon/app_icon_foreground.png
 
-It was costing:
-  - SYSTEM_ALERT_WINDOW, the permission Google scrutinises hardest
-  - a native plugin, flutter_overlay_window
-  - a second Flutter entry point, overlay_main.dart
-  - APK size
+The pubspec now asks for an adaptive foreground layer, and that file was not in
+your repo. It WAS in the v72 zip — you have applied the pubspec change without the
+assets/icon/ folder, which is easy to do when a bundle mixes code and binaries.
 
-All to duplicate something that already worked. Removed.
+Both files are here, on their own, so they cannot be missed:
+    app_icon.png             1024x1024 RGB, no alpha  (the launcher icon)
+    app_icon_foreground.png  1024x1024 RGBA           (the adaptive layer)
 
-=====================================================================
-WHAT SHIPS NOW - 12 PERMISSIONS, DOWN FROM 13
-=====================================================================
-  ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION
-  POST_NOTIFICATIONS
-  SCHEDULE_EXACT_ALARM, USE_EXACT_ALARM
-  RECEIVE_BOOT_COMPLETED
-  USE_FULL_SCREEN_INTENT
-  REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-  FOREGROUND_SERVICE, FOREGROUND_SERVICE_DATA_SYNC,
-  FOREGROUND_SERVICE_MEDIA_PLAYBACK
-  WAKE_LOCK
-
-Only ONE now needs a written justification in the Console: SCHEDULE_EXACT_ALARM.
-The wording is in play-console-answers.md. You can ignore the SYSTEM_ALERT_WINDOW
-section of that document entirely.
+IF YOU WANT TO KEEP YOUR OWN ILLUSTRATION AS THE ICON INSTEAD, you still need a
+foreground version of it — a transparent PNG with the artwork inside the middle
+66%. Send me your file and I will cut one. But see the size and mask tests in v72
+first; the illustration does not survive 48px.
 
 =====================================================================
-TEST THIS BEFORE YOU SUBMIT
+HADITH BOOK SPINES - YOU WERE RIGHT
 =====================================================================
-This touched the alarm path, which is the one thing in the app that must not
-break. Verify on a real prayer, not the test button:
+I used blue, brown, purple and red. They separated the six books and they were
+wrong: four hues the app uses nowhere else, so the shelf looked like it came from
+a different application.
 
-  1. Azan plays at prayer time with the screen LOCKED
-  2. The alert appears and you can stop it WITHOUT unlocking
-  3. Azan plays with the app closed entirely, not just backgrounded
-  4. Still works after a reboot
+Now all six are drawn from your palette, varied by DEPTH rather than hue:
 
-If any of those now fail, tell me — the overlay comes back and we justify it. But
-your test says they will not.
+    Bukhari     #0A4229   deepest emerald
+    Muslim      #0F5E3A   primary emerald
+    Abu Dawud   #2C6653   mid emerald
+    Tirmidhi    #4E7C63   sage
+    Nasa'i      #A8842A   deep champagne
+    Ibn Majah   #3A3A38   charcoal
+
+See spines.png in this zip. Six shades of one family still tell six books apart —
+and a shelf of matched bindings is how a real set of volumes looks anyway.
 
 =====================================================================
-ONE SIDE EFFECT WORTH KNOWING
+PLATFORM ADMIN LOGIN - INVISIBLE TEXT
 =====================================================================
-The removed code was the ONLY thing that showed a full-screen azan screen over
-another app while the phone was UNLOCKED and in use. With it gone, if a prayer
-arrives while you are using WhatsApp you get a heads-up notification rather than a
-takeover screen.
+You diagnosed it correctly: the text was white.
 
-That is standard behaviour for alarm apps and, I would argue, better manners. But
-it is a real change, so judge it yourself during testing.
+The cause is a collision. That screen has a dark green background, so it set the
+field text to white. But the app-wide inputDecorationTheme sets
+`filled: true, fillColor: white` on every field. So the field was white and the
+text on it was white.
+
+Both fields now use dark charcoal text with a muted label, which is correct
+against the white fill. I checked every other screen for the same collision —
+this was the only one.

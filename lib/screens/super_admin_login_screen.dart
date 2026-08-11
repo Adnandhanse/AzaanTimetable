@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'super_admin_dashboard_screen.dart';
 import '../services/auth_service.dart';
 
@@ -70,10 +71,16 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                 TextFormField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
+                  // DARK TEXT, not white.
+                  //
+                  // The app-wide inputDecorationTheme fills every field with
+                  // white. This screen set the text to white to match its dark
+                  // green background — so what you typed was white on white and
+                  // invisible. The label was too.
+                  style: const TextStyle(color: AppColors.text),
                   decoration: const InputDecoration(
                     labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.white70),
+                    labelStyle: TextStyle(color: AppColors.textMuted),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
@@ -82,10 +89,10 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                 TextFormField(
                   controller: _password,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppColors.text),
                   decoration: const InputDecoration(
                     labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.white70),
+                    labelStyle: TextStyle(color: AppColors.textMuted),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,

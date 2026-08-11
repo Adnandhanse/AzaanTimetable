@@ -152,13 +152,24 @@ class _BookCard extends StatelessWidget {
   /// A distinct spine colour per book, so the six are recognisable at a glance
   /// rather than being six identical white rectangles with different words on
   /// them. Muted, drawn from the palette — this is a bookshelf, not a toy.
+  /// A distinct spine per book, drawn ONLY from the app's own palette.
+  ///
+  /// The first version used blue, brown, purple and red to separate the six.
+  /// They were distinguishable and completely wrong — introducing four hues the
+  /// app does not use anywhere else, so the shelf looked like it belonged to a
+  /// different application.
+  ///
+  /// These are all emerald, gold or charcoal, varied by DEPTH rather than hue:
+  /// deep green through to pale sage, then champagne, then charcoal. Six shades
+  /// of the same family still tell six books apart — a bookshelf of matched
+  /// bindings is how a good set of volumes actually looks.
   static const List<Color> _spines = <Color>[
-    Color(0xFF0F5E3A), // Bukhari  — the primary green
-    Color(0xFF14503E), // Muslim
-    Color(0xFF3A5A78), // Abu Dawud
-    Color(0xFF6B4A2F), // Tirmidhi
-    Color(0xFF4A3A5E), // Nasa'i
-    Color(0xFF5E3A3A), // Ibn Majah
+    Color(0xFF0A4229), // Bukhari    deepest emerald
+    Color(0xFF0F5E3A), // Muslim     primary emerald
+    Color(0xFF2C6653), // Abu Dawud  mid emerald
+    Color(0xFF4E7C63), // Tirmidhi   sage
+    Color(0xFFA8842A), // Nasa'i     deep champagne
+    Color(0xFF3A3A38), // Ibn Majah  charcoal
   ];
 
   @override
