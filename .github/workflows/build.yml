@@ -26,7 +26,29 @@ jobs:
 
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
-        - name: Relocate MainActivity to the com.islamconnect.app package
+
+      - name: Relocate MainActivity to the com.islamconnect.app package
+        # THE CRASH FIX.
+        #
+        # flutter create has no --org flag here (deliberately left unchanged
+        # above — that flag also affects how the tool treats the Dart project
+        # and was not worth risking). Without it, the tool defaults to
+        # com.example, so it generates MainActivity.kt at
+        # android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt
+        # with "package com.example.masjid_alarm_app" inside it.
+        #
+        # applicationId further down this file is set to com.islamconnect.app.
+        # Android's launcher looks for MainActivity at whatever package the
+        # MANIFEST names — which follows applicationId — finds nothing at that
+        # path, and crashes on every single launch with ClassNotFoundException.
+        # This is exactly the crash reported: "Didn't find class
+        # com.islamconnect.app.MainActivity".
+        #
+        # Fixed deterministically: move the generated file to the correct
+        # folder and rewrite its package line to match. Verified below that
+        # the file exists at the expected default path before touching it, so
+        # this fails loudly instead of silently if flutter's default ever
+        # changes.
         run: |
           OLD_PATH="android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt"
           NEW_DIR="android/app/src/main/kotlin/com/islamconnect/app"
@@ -34,6 +56,7 @@ jobs:
 
           if [ ! -f "$OLD_PATH" ]; then
             echo "ERROR: expected generated file not found at $OLD_PATH"
+            echo "flutter create's default output path may have changed. Aborting rather than silently building a broken APK."
             find android/app/src/main/kotlin -name "MainActivity.kt"
             exit 1
           fi
