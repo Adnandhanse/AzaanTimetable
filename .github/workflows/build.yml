@@ -26,6 +26,26 @@ jobs:
 
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
+        - name: Relocate MainActivity to the com.islamconnect.app package
+        run: |
+          OLD_PATH="android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt"
+          NEW_DIR="android/app/src/main/kotlin/com/islamconnect/app"
+          NEW_PATH="$NEW_DIR/MainActivity.kt"
+
+          if [ ! -f "$OLD_PATH" ]; then
+            echo "ERROR: expected generated file not found at $OLD_PATH"
+            find android/app/src/main/kotlin -name "MainActivity.kt"
+            exit 1
+          fi
+
+          mkdir -p "$NEW_DIR"
+          sed 's/^package com\.example\.masjid_alarm_app$/package com.islamconnect.app/' "$OLD_PATH" > "$NEW_PATH"
+          rm -f "$OLD_PATH"
+          rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example/masjid_alarm_app 2>/dev/null || true
+          rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example 2>/dev/null || true
+
+          echo "--- moved MainActivity.kt to: $NEW_PATH ---"
+          cat "$NEW_PATH"
 
       - name: Show actual default applicationId
         run: |
