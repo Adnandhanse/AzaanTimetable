@@ -27,6 +27,52 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
+      - name: Relocate MainActivity to the com.adnandhanse.islamconnect package
+        # THE CRASH FIX.
+        #
+        # flutter create has no --org flag here (deliberately left unchanged
+        # above — that flag also affects how the tool treats the Dart project
+        # and was not worth risking). Without it, the tool defaults to
+        # com.example, so it generates MainActivity.kt at
+        # android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt
+        # with "package com.example.masjid_alarm_app" inside it.
+        #
+        # applicationId further down this file is set to
+        # com.adnandhanse.islamconnect (previously com.islamconnect.app, which
+        # turned out to already be reserved by a different developer's Play
+        # Console attempt — see project notes). Android's launcher looks for
+        # MainActivity at whatever package the MANIFEST names — which follows
+        # applicationId — finds nothing at that path, and crashes on every
+        # single launch with ClassNotFoundException. This is exactly the
+        # crash originally reported, then re-diagnosed after the package
+        # rename: "Didn't find class ...MainActivity".
+        #
+        # Fixed deterministically: move the generated file to the correct
+        # folder and rewrite its package line to match. Verified below that
+        # the file exists at the expected default path before touching it, so
+        # this fails loudly instead of silently if flutter's default ever
+        # changes.
+        run: |
+          OLD_PATH="android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt"
+          NEW_DIR="android/app/src/main/kotlin/com/adnandhanse/islamconnect"
+          NEW_PATH="$NEW_DIR/MainActivity.kt"
+
+          if [ ! -f "$OLD_PATH" ]; then
+            echo "ERROR: expected generated file not found at $OLD_PATH"
+            echo "flutter create's default output path may have changed. Aborting rather than silently building a broken APK."
+            find android/app/src/main/kotlin -name "MainActivity.kt"
+            exit 1
+          fi
+
+          mkdir -p "$NEW_DIR"
+          sed 's/^package com\.example\.masjid_alarm_app$/package com.adnandhanse.islamconnect/' "$OLD_PATH" > "$NEW_PATH"
+          rm -f "$OLD_PATH"
+          rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example/masjid_alarm_app 2>/dev/null || true
+          rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example 2>/dev/null || true
+
+          echo "--- moved MainActivity.kt to: $NEW_PATH ---"
+          cat "$NEW_PATH"
+
       - name: Show actual default applicationId
         run: |
           echo "--- default app/build.gradle applicationId ---"
@@ -80,7 +126,7 @@ jobs:
           }
 
           android {
-              namespace = "com.islamconnect.app"
+              namespace = "com.adnandhanse.islamconnect"
               compileSdk = flutter.compileSdkVersion
               ndkVersion = flutter.ndkVersion
 
@@ -103,7 +149,7 @@ jobs:
                   // `import 'package:masjid_alarm_app/...'` in the codebase and
                   // renaming it would touch every file for no benefit; Google
                   // never sees it.
-                  applicationId = "com.islamconnect.app"
+                  applicationId = "com.adnandhanse.islamconnect"
                   minSdk = 23
                   targetSdk = flutter.targetSdkVersion
                   versionCode = flutter.versionCode
