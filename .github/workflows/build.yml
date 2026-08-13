@@ -27,7 +27,11 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android --project-name masjid_alarm_app .
 
+<<<<<<< HEAD
       - name: Relocate MainActivity to the com.adnandhanse.islamconnect package
+=======
+      - name: Relocate MainActivity to the com.islamconnect.app package
+>>>>>>> a326daa98f374f001c058ef66cb1483a283b2aa7
         # THE CRASH FIX.
         #
         # flutter create has no --org flag here (deliberately left unchanged
@@ -37,6 +41,7 @@ jobs:
         # android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt
         # with "package com.example.masjid_alarm_app" inside it.
         #
+<<<<<<< HEAD
         # applicationId further down this file is set to
         # com.adnandhanse.islamconnect (previously com.islamconnect.app, which
         # turned out to already be reserved by a different developer's Play
@@ -46,6 +51,14 @@ jobs:
         # single launch with ClassNotFoundException. This is exactly the
         # crash originally reported, then re-diagnosed after the package
         # rename: "Didn't find class ...MainActivity".
+=======
+        # applicationId further down this file is set to com.islamconnect.app.
+        # Android's launcher looks for MainActivity at whatever package the
+        # MANIFEST names — which follows applicationId — finds nothing at that
+        # path, and crashes on every single launch with ClassNotFoundException.
+        # This is exactly the crash reported: "Didn't find class
+        # com.islamconnect.app.MainActivity".
+>>>>>>> a326daa98f374f001c058ef66cb1483a283b2aa7
         #
         # Fixed deterministically: move the generated file to the correct
         # folder and rewrite its package line to match. Verified below that
@@ -54,7 +67,11 @@ jobs:
         # changes.
         run: |
           OLD_PATH="android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt"
+<<<<<<< HEAD
           NEW_DIR="android/app/src/main/kotlin/com/adnandhanse/islamconnect"
+=======
+          NEW_DIR="android/app/src/main/kotlin/com/islamconnect/app"
+>>>>>>> a326daa98f374f001c058ef66cb1483a283b2aa7
           NEW_PATH="$NEW_DIR/MainActivity.kt"
 
           if [ ! -f "$OLD_PATH" ]; then
@@ -65,7 +82,11 @@ jobs:
           fi
 
           mkdir -p "$NEW_DIR"
+<<<<<<< HEAD
           sed 's/^package com\.example\.masjid_alarm_app$/package com.adnandhanse.islamconnect/' "$OLD_PATH" > "$NEW_PATH"
+=======
+          sed 's/^package com\.example\.masjid_alarm_app$/package com.islamconnect.app/' "$OLD_PATH" > "$NEW_PATH"
+>>>>>>> a326daa98f374f001c058ef66cb1483a283b2aa7
           rm -f "$OLD_PATH"
           rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example/masjid_alarm_app 2>/dev/null || true
           rmdir --ignore-fail-on-non-empty android/app/src/main/kotlin/com/example 2>/dev/null || true
