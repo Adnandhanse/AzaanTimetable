@@ -31,7 +31,7 @@ jobs:
         # THE CRASH FIX.
         #
         # flutter create has no --org flag here (deliberately left unchanged
-        # above — that flag also affects how the tool treats the Dart project
+        # above - that flag also affects how the tool treats the Dart project
         # and was not worth risking). Without it, the tool defaults to
         # com.example, so it generates MainActivity.kt at
         # android/app/src/main/kotlin/com/example/masjid_alarm_app/MainActivity.kt
@@ -40,9 +40,9 @@ jobs:
         # applicationId further down this file is set to
         # com.adnandhanse.islamconnect (previously com.islamconnect.app, which
         # turned out to already be reserved by a different developer's Play
-        # Console attempt — see project notes). Android's launcher looks for
-        # MainActivity at whatever package the MANIFEST names — which follows
-        # applicationId — finds nothing at that path, and crashes on every
+        # Console attempt - see project notes). Android's launcher looks for
+        # MainActivity at whatever package the MANIFEST names - which follows
+        # applicationId - finds nothing at that path, and crashes on every
         # single launch with ClassNotFoundException. This is exactly the
         # crash originally reported, then re-diagnosed after the package
         # rename: "Didn't find class ...MainActivity".
@@ -127,7 +127,10 @@ jobs:
 
           android {
               namespace = "com.adnandhanse.islamconnect"
-              compileSdk = flutter.compileSdkVersion
+              // Play requires new apps to target API 35 as of 2025. targetSdk
+              // is set to 35 below; compileSdk must be at least as high, so it
+              // is pinned here rather than inherited from flutter.compileSdkVersion.
+              compileSdk = 35
               ndkVersion = flutter.ndkVersion
 
               compileOptions {
@@ -141,7 +144,7 @@ jobs:
               }
 
               defaultConfig {
-                  // The published identity of the app. Can never change once live —
+                  // The published identity of the app. Can never change once live -
                   // a different applicationId is a different app to Google.
                   //
                   // NOT the same as the Dart package name in pubspec.yaml,
@@ -151,7 +154,7 @@ jobs:
                   // never sees it.
                   applicationId = "com.adnandhanse.islamconnect"
                   minSdk = 23
-                  targetSdk = flutter.targetSdkVersion
+                  targetSdk = 35
                   versionCode = flutter.versionCode
                   versionName = flutter.versionName
               }
@@ -165,7 +168,7 @@ jobs:
                       //
                       // Set these as GitHub repository secrets. If they are
                       // absent the build still works using the old values, so
-                      // nothing breaks before you add them — but do add them.
+                      // nothing breaks before you add them - but do add them.
                       storeFile file("../../android_keystore/release.keystore")
                       storePassword System.getenv("KEYSTORE_PASSWORD") ?: "masjidalarm123"
                       keyAlias System.getenv("KEY_ALIAS") ?: "masjidalarm"
@@ -335,17 +338,17 @@ jobs:
 
       # BOTH FORMATS, on purpose.
       #
-      # Play requires an App Bundle (.aab) for new apps — an APK upload is
+      # Play requires an App Bundle (.aab) for new apps - an APK upload is
       # rejected outright. But an .aab cannot be sideloaded onto a phone, so the
       # APK stays for testing on your own devices.
-      - name: Build APK (release) — for sideloading and testing
+      - name: Build APK (release) - for sideloading and testing
         run: flutter build apk --release
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Build App Bundle (release) — for the Play Store
+      - name: Build App Bundle (release) - for the Play Store
         run: flutter build appbundle --release
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
