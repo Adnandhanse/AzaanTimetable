@@ -34,7 +34,7 @@ class _MushafPage {
 /// page-and-line layout table plus the QCF font that table was measured
 /// against. The bundled quran-json has verse text only.
 ///
-/// That distinction matters — people who memorise do it by page position — so
+/// That distinction matters - people who memorise do it by page position - so
 /// this view paginates to the reader's screen and says so, rather than
 /// pretending to be something it is not.
 class MushafView extends StatefulWidget {
@@ -49,7 +49,7 @@ class MushafView extends StatefulWidget {
     this.sajdahIndices = const <int>{},
   });
 
-  /// Any run of verses — a whole surah, or the span a juz covers.
+  /// Any run of verses - a whole surah, or the span a juz covers.
   final List<QuranVerse> verses;
 
   final double fontSize;
@@ -59,7 +59,7 @@ class MushafView extends StatefulWidget {
   final int targetLines;
 
   /// Save the reading position. Receives the INDEX of the first verse on the
-  /// current page, not its number — across a juz the same verse number occurs
+  /// current page, not its number - across a juz the same verse number occurs
   /// in several surahs, so an index is the only unambiguous handle. The parent
   /// resolves it to whatever it needs to store.
   final void Function(int firstVerseIndexOnPage)? onMarkIndex;
@@ -72,7 +72,7 @@ class MushafView extends StatefulWidget {
 
   /// Indices of verses at which a sajdah is marked.
   ///
-  /// INDICES, not verse numbers — a juz spans several surahs, so ayah 15 is
+  /// INDICES, not verse numbers - a juz spans several surahs, so ayah 15 is
   /// ambiguous, exactly as it was for the bookmark.
   ///
   /// The parent works these out because it knows which surah each verse belongs
@@ -122,7 +122,7 @@ class _MushafViewState extends State<MushafView> {
   }
 
   /// The whole run as one flowing string, plus the character offset each verse
-  /// starts at. The offsets are what let a page report which verses it holds —
+  /// starts at. The offsets are what let a page report which verses it holds -
   /// without them, marking a position from this view would be impossible.
   (String, List<int>) _flow() {
     final StringBuffer b = StringBuffer();
@@ -216,7 +216,20 @@ class _MushafViewState extends State<MushafView> {
         const double hPad = 22;
         const double vPad = 18;
         final double maxWidth = c.maxWidth - hPad * 2 - 28; // 28 = card margins
-        final double maxHeight = c.maxHeight - vPad * 2 - 46; // 46 = footer bar
+
+        // Vertical chrome above and around the page, measured rather than
+        // guessed:
+        //   40  the top bar (6 + 2 padding, plus a ~32 TextButton.icon)
+        //   14  the page card's own margins (10 top, 4 bottom)
+        //   10  headroom, so a descender on the last line cannot clip
+        //
+        // This was 46, written when the bar was a slim FOOTER holding plain
+        // text. Moving it to the top and giving it a Save-page button made it
+        // taller, but the reservation was never updated - so pagination
+        // believed it had ~8px more room than it did, packed in one line too
+        // many, and the bottom of the last line was cut off.
+        const double chrome = 40 + 14 + 10;
+        final double maxHeight = c.maxHeight - vPad * 2 - chrome;
 
         final double lineHeight = widget.fontSize * 2.05;
         // Never promise more lines than fit, or the last one clips.
@@ -243,7 +256,7 @@ class _MushafViewState extends State<MushafView> {
         }
 
         // Resume: land on the page holding the saved verse. Done once, after
-        // pagination exists — page numbers are meaningless before that, and
+        // pagination exists - page numbers are meaningless before that, and
         // repeating it would fight the reader every time they turn a page.
         final int? resumeAt = widget.initialVerseIndex;
         if (!_jumpedToInitial && resumeAt != null) {
@@ -274,7 +287,7 @@ class _MushafViewState extends State<MushafView> {
             // AT THE TOP, not the bottom.
             //
             // Page number and the bookmark used to sit under the text. On a
-            // full page of Arabic that put the control below the fold — you had
+            // full page of Arabic that put the control below the fold - you had
             // to read to the end before you could see where you were or save
             // your place. Both belong where the eye starts.
             //
@@ -365,13 +378,13 @@ class _MushafViewState extends State<MushafView> {
 /// Makes a page swing on its spine instead of sliding.
 ///
 /// The leaf rotates about its inner edge with a perspective transform, so it
-/// tips away from you as it leaves and settles flat as it arrives — the motion
+/// tips away from you as it leaves and settles flat as it arrives - the motion
 /// a paper page makes. A shadow deepens across the turning leaf and the spine
 /// edge darkens, which is what sells it as paper rather than a rotating
 /// rectangle.
 ///
-/// A true page CURL — paper bending in an arc, the back of the sheet showing
-/// through — needs a fragment shader deforming a mesh. This is the hinge, not
+/// A true page CURL - paper bending in an arc, the back of the sheet showing
+/// through - needs a fragment shader deforming a mesh. This is the hinge, not
 /// the curl: convincing, and it costs one Transform per page instead of a
 /// custom render pipeline on every frame.
 class _PageTurn extends StatelessWidget {
