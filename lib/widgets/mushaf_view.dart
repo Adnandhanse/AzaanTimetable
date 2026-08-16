@@ -26,9 +26,23 @@ class _MushafPage {
 /// Arabic-only continuous reading, paginated so a whole number of lines fits
 /// each screen and nothing is ever cut in half.
 ///
+<<<<<<< HEAD
 /// This is a screen-sized reading layout, not a fixed Madani Mushaf layout.
 /// A fixed Mushaf requires a page/line layout table measured against the exact
 /// Quran font being used.
+=======
+/// WHAT THIS IS NOT
+///
+/// This is not a Madani Mushaf. A real Mushaf page is a fixed typographic
+/// object: specific words on specific lines of specific pages, in the Uthmani
+/// glyph set, identical in every printed copy. Reproducing it needs a
+/// page-and-line layout table plus the QCF font that table was measured
+/// against. The bundled quran-json has verse text only.
+///
+/// That distinction matters - people who memorise do it by page position - so
+/// this view paginates to the reader's screen and says so, rather than
+/// pretending to be something it is not.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
 class MushafView extends StatefulWidget {
   const MushafView({
     super.key,
@@ -41,13 +55,35 @@ class MushafView extends StatefulWidget {
     this.sajdahIndices = const <int>{},
   });
 
+<<<<<<< HEAD
+=======
+  /// Any run of verses - a whole surah, or the span a juz covers.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
   final List<QuranVerse> verses;
   final double fontSize;
   final int targetLines;
 
+<<<<<<< HEAD
+=======
+  /// Save the reading position. Receives the INDEX of the first verse on the
+  /// current page, not its number - across a juz the same verse number occurs
+  /// in several surahs, so an index is the only unambiguous handle. The parent
+  /// resolves it to whatever it needs to store.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
   final void Function(int firstVerseIndexOnPage)? onMarkIndex;
   final int? markedIndex;
   final int? initialVerseIndex;
+<<<<<<< HEAD
+=======
+
+  /// Indices of verses at which a sajdah is marked.
+  ///
+  /// INDICES, not verse numbers - a juz spans several surahs, so ayah 15 is
+  /// ambiguous, exactly as it was for the bookmark.
+  ///
+  /// The parent works these out because it knows which surah each verse belongs
+  /// to; this widget only ever sees a flat list of verses.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
   final Set<int> sajdahIndices;
 
   @override
@@ -92,6 +128,12 @@ class _MushafViewState extends State<MushafView> {
         .join();
   }
 
+<<<<<<< HEAD
+=======
+  /// The whole run as one flowing string, plus the character offset each verse
+  /// starts at. The offsets are what let a page report which verses it holds -
+  /// without them, marking a position from this view would be impossible.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
   (String, List<int>) _flow() {
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
@@ -217,9 +259,30 @@ class _MushafViewState extends State<MushafView> {
     );
 
     return LayoutBuilder(
+<<<<<<< HEAD
       builder: (BuildContext context, BoxConstraints constraints) {
         const double horizontalPagePadding = 22;
         const double verticalPagePadding = 18;
+=======
+      builder: (BuildContext context, BoxConstraints c) {
+        const double hPad = 22;
+        const double vPad = 18;
+        final double maxWidth = c.maxWidth - hPad * 2 - 28; // 28 = card margins
+
+        // Vertical chrome above and around the page, measured rather than
+        // guessed:
+        //   40  the top bar (6 + 2 padding, plus a ~32 TextButton.icon)
+        //   14  the page card's own margins (10 top, 4 bottom)
+        //   10  headroom, so a descender on the last line cannot clip
+        //
+        // This was 46, written when the bar was a slim FOOTER holding plain
+        // text. Moving it to the top and giving it a Save-page button made it
+        // taller, but the reservation was never updated - so pagination
+        // believed it had ~8px more room than it did, packed in one line too
+        // many, and the bottom of the last line was cut off.
+        const double chrome = 40 + 14 + 10;
+        final double maxHeight = c.maxHeight - vPad * 2 - chrome;
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
 
         // Space outside the actual text card.
         const double pageCardMargins = 14;
@@ -273,7 +336,13 @@ class _MushafViewState extends State<MushafView> {
           );
         }
 
+<<<<<<< HEAD
         // Resume once, after pagination exists.
+=======
+        // Resume: land on the page holding the saved verse. Done once, after
+        // pagination exists - page numbers are meaningless before that, and
+        // repeating it would fight the reader every time they turn a page.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
         final int? resumeAt = widget.initialVerseIndex;
 
         if (!_jumpedToInitial && resumeAt != null) {
@@ -309,6 +378,18 @@ class _MushafViewState extends State<MushafView> {
 
         return Column(
           children: <Widget>[
+<<<<<<< HEAD
+=======
+            // AT THE TOP, not the bottom.
+            //
+            // Page number and the bookmark used to sit under the text. On a
+            // full page of Arabic that put the control below the fold - you had
+            // to read to the end before you could see where you were or save
+            // your place. Both belong where the eye starts.
+            //
+            // No divider under it: the page itself is a bordered card, so a
+            // rule between them was a second line doing the same job.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 18,
@@ -431,8 +512,21 @@ class _MushafViewState extends State<MushafView> {
 
 /// Makes a page swing on its spine instead of sliding.
 ///
+<<<<<<< HEAD
 /// This is a hinge-style page turn rather than a true paper curl. A true curl
 /// would require mesh deformation / shader rendering.
+=======
+/// The leaf rotates about its inner edge with a perspective transform, so it
+/// tips away from you as it leaves and settles flat as it arrives - the motion
+/// a paper page makes. A shadow deepens across the turning leaf and the spine
+/// edge darkens, which is what sells it as paper rather than a rotating
+/// rectangle.
+///
+/// A true page CURL - paper bending in an arc, the back of the sheet showing
+/// through - needs a fragment shader deforming a mesh. This is the hinge, not
+/// the curl: convincing, and it costs one Transform per page instead of a
+/// custom render pipeline on every frame.
+>>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
 class _PageTurn extends StatelessWidget {
   const _PageTurn({
     required this.controller,
