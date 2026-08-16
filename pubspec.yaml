@@ -1,7 +1,7 @@
 name: masjid_alarm_app
 description: "Islam Connect - prayer times, azan alarm, Qur'an, Hadith and duas."
 publish_to: 'none'
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
