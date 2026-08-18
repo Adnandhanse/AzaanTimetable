@@ -26,22 +26,9 @@ class _MushafPage {
 /// Arabic-only continuous reading, paginated so a whole number of lines fits
 /// each screen and nothing is ever cut in half.
 ///
-/// WHAT THIS IS NOT
-///
-/// This is not a Madani Mushaf. A real Mushaf page is a fixed typographic
-/// object: specific words on specific lines of specific pages, in the Uthmani
-/// glyph set, identical in every printed copy. Reproducing it needs a
-/// page-and-line layout table plus the QCF font that table was measured
-/// against. The bundled quran-json has verse text only.
-///
-/// That distinction matters - people who memorise do it by page position - so
-/// this view paginates to the reader's screen and says so, rather than
-/// pretending to be something it is not.
-=======
 /// This is a screen-sized reading layout, not a fixed Madani Mushaf layout.
 /// A fixed Mushaf requires a page/line layout table measured against the exact
 /// Quran font being used.
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
 class MushafView extends StatefulWidget {
   const MushafView({
     super.key,
@@ -55,31 +42,21 @@ class MushafView extends StatefulWidget {
   });
 
   /// Any run of verses - a whole surah, or the span a juz covers.
-=======
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
   final List<QuranVerse> verses;
   final double fontSize;
   final int targetLines;
 
   /// Save the reading position. Receives the INDEX of the first verse on the
-  /// current page, not its number - across a juz the same verse number occurs
-  /// in several surahs, so an index is the only unambiguous handle. The parent
-  /// resolves it to whatever it needs to store.
+  /// current page, not its number.
   final void Function(int firstVerseIndexOnPage)? onMarkIndex;
+
   final int? markedIndex;
   final int? initialVerseIndex;
+
   /// Indices of verses at which a sajdah is marked.
   ///
   /// INDICES, not verse numbers - a juz spans several surahs, so ayah 15 is
   /// ambiguous, exactly as it was for the bookmark.
-  ///
-  /// The parent works these out because it knows which surah each verse belongs
-  /// to; this widget only ever sees a flat list of verses.
-=======
-  final void Function(int firstVerseIndexOnPage)? onMarkIndex;
-  final int? markedIndex;
-  final int? initialVerseIndex;
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
   final Set<int> sajdahIndices;
 
   @override
@@ -88,6 +65,7 @@ class MushafView extends StatefulWidget {
 
 class _MushafViewState extends State<MushafView> {
   final PageController _controller = PageController();
+
   int _page = 0;
 
   List<_MushafPage>? _pages;
@@ -125,10 +103,7 @@ class _MushafViewState extends State<MushafView> {
   }
 
   /// The whole run as one flowing string, plus the character offset each verse
-  /// starts at. The offsets are what let a page report which verses it holds -
-  /// without them, marking a position from this view would be impossible.
-=======
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
+  /// starts at.
   (String, List<int>) _flow() {
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
@@ -166,16 +141,16 @@ class _MushafViewState extends State<MushafView> {
 
   /// Lays out the entire text once and creates page breaks from the actual
   /// Flutter line metrics.
-  ///
-  /// The important clipping fix is that pagination now reserves additional
-  /// vertical safety space for Arabic ascenders, descenders, tashkeel and
-  /// verse-end markers. The page widget also has extra bottom padding.
   List<_MushafPage> _paginate({
     required TextStyle style,
     required double maxWidth,
     required int linesPerPage,
   }) {
     final (String text, List<int> starts) = _flow();
+
+    if (text.isEmpty || starts.isEmpty) {
+      return const <_MushafPage>[];
+    }
 
     final TextPainter textPainter = TextPainter(
       text: TextSpan(
@@ -199,9 +174,8 @@ class _MushafViewState extends State<MushafView> {
       first < lines.length;
       first += linesPerPage
     ) {
-      // Move into the next line with a small safety offset. This is important
-      // for Arabic because tashkeel and Quranic marks can extend beyond the
-      // nominal glyph box.
+      // Small safety offset for Arabic tashkeel, ascenders, descenders and
+      // Quranic marks.
       final double y =
           lines[first].baseline - lines[first].ascent + 6;
 
@@ -257,53 +231,22 @@ class _MushafViewState extends State<MushafView> {
       builder: (BuildContext context, BoxConstraints constraints) {
         const double horizontalPagePadding = 22;
         const double verticalPagePadding = 18;
-        final double maxWidth = constraints.maxWidth - horizontalPagePadding * 2 - 28;
-
-        // Space outside the actual text card.
         const double pageCardMargins = 14;
 
-        // Top information bar + card margins + extra vertical safety.
-        //
-<<<<<<< HEAD
-        // This was 46, written when the bar was a slim FOOTER holding plain
-        // text. Moving it to the top and giving it a Save-page button made it
-        // taller, but the reservation was never updated - so pagination
-        // believed it had ~8px more room than it did, packed in one line too
-        // many, and the bottom of the last line was cut off.
-        const double chrome = 40 + 14 + 10;
-        final double maxHeight = c.maxHeight - vPad * 2 - chrome;
->>>>>>> 28285bc011b8a609bf03663a3018378fbf233918
-
-        // Space outside the actual text card.
-        const double pageCardMargins = 14;
-
-        // Top information bar + card margins + extra vertical safety.
-        //
-        // The previous implementation underestimated the available-height
-        // cost after moving the page information/bookmark bar to the top.
-        // That allowed one extra Arabic line to be paginated and its lower
-        // marks/descenders could then be clipped.
-        const double chrome = 40 + pageCardMargins + 18;
-
-=======
-        // The previous implementation underestimated the available-height
-        // cost after moving the page information/bookmark bar to the top.
-        // That allowed one extra Arabic line to be paginated and its lower
-        // marks/descenders could then be clipped.
-        const double chrome = 40 + pageCardMargins + 18;
-
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
-        final double maxWidth = constraints.maxWidth -
+        final double maxWidth =
+            constraints.maxWidth -
             horizontalPagePadding * 2 -
             28;
 
-        final double maxHeight = constraints.maxHeight -
+        // Top information bar + card margins + extra vertical safety.
+        const double chrome = 40 + pageCardMargins + 18;
+
+        final double maxHeight =
+            constraints.maxHeight -
             verticalPagePadding * 2 -
             chrome;
 
-        // The actual line height used by the Text widget is based on the
-        // font's metrics. Add a small safety allowance so the last line has
-        // room for Arabic marks and verse-end symbols.
+        // Extra safety allowance for Arabic marks and verse-end symbols.
         final double lineHeight =
             widget.fontSize * 2.05 + 3;
 
@@ -334,16 +277,7 @@ class _MushafViewState extends State<MushafView> {
           );
         }
 
-        // This was 46, written when the bar was a slim FOOTER holding plain
-        // text. Moving it to the top and giving it a Save-page button made it
-        // taller, but the reservation was never updated - so pagination
-        // believed it had ~8px more room than it did, packed in one line too
-        // many, and the bottom of the last line was cut off.
-        const double chrome = 40 + pageCardMargins + 18;
-        final double maxHeight = constraints.maxHeight - verticalPagePadding * 2 - chrome;
-=======
         // Resume once, after pagination exists.
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
         final int? resumeAt = widget.initialVerseIndex;
 
         if (!_jumpedToInitial && resumeAt != null) {
@@ -356,12 +290,14 @@ class _MushafViewState extends State<MushafView> {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted && _controller.hasClients) {
                     _controller.jumpToPage(i);
+
                     setState(() {
                       _page = i;
                     });
                   }
                 });
               }
+
               break;
             }
           }
@@ -379,11 +315,7 @@ class _MushafViewState extends State<MushafView> {
 
         return Column(
           children: <Widget>[
-        // Resume: land on the page holding the saved verse. Done once, after
-        // pagination exists - page numbers are meaningless before that, and
-        // repeating it would fight the reader every time they turn a page.
-=======
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
+            // Page information and bookmark control at the top.
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 18,
@@ -439,6 +371,7 @@ class _MushafViewState extends State<MushafView> {
                 ],
               ),
             ),
+
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -468,9 +401,8 @@ class _MushafViewState extends State<MushafView> {
                       ),
                     ),
 
-                    // Extra bottom padding is deliberate. It prevents
-                    // Arabic descenders/tashkeel on the final visible line
-                    // from touching or crossing the card's bottom edge.
+                    // Extra bottom padding prevents Arabic marks and
+                    // descenders from touching the card's bottom edge.
                     padding: const EdgeInsets.fromLTRB(
                       horizontalPagePadding,
                       verticalPagePadding,
@@ -504,21 +436,9 @@ class _MushafViewState extends State<MushafView> {
   }
 }
 
-/// Makes a page swing on its spine instead of sliding.
+/// Hinge-style page turn rather than a true paper curl.
 ///
-            // AT THE TOP, not the bottom.
-            //
-            // Page number and the bookmark used to sit under the text. On a
-            // full page of Arabic that put the control below the fold - you had
-            // to read to the end before you could see where you were or save
-            // your place. Both belong where the eye starts.
-            //
-            // No divider under it: the page itself is a bordered card, so a
-            // rule between them was a second line doing the same job.
-=======
-/// This is a hinge-style page turn rather than a true paper curl. A true curl
-/// would require mesh deformation / shader rendering.
->>>>>>> f43955a16b7db842e16035b985eeafda9a75b278
+/// A true curl would require mesh deformation / shader rendering.
 class _PageTurn extends StatelessWidget {
   const _PageTurn({
     required this.controller,
