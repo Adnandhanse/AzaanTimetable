@@ -61,10 +61,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           // CREDITS AND LICENCES.
           //
-          // The KFGQPC font licence grants free use and distribution but
-          // requires its copyright notice to travel with the font. Noto Nastaliq
-          // is OFL, which requires the same. Neither demands a visible screen,
-          // but an app that ships other people's work should say so — and if
+          // Noto Nastaliq is OFL, which requires its copyright notice to
+          // travel with the font. That doesn't demand a visible screen, but
+          // an app that ships other people's work should say so — and if
           // anyone ever asks, the answer is already in the app.
           ListTile(
             leading: const Icon(Icons.info_outline, color: AppColors.emerald),
@@ -84,10 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text('Fonts', style: AppText.eyebrow.copyWith(color: AppColors.gold)),
                       const SizedBox(height: 4),
                       Text(
-                        'Qur\u2019an text is set in KFGQPC Uthmanic Script HAFS.\n'
-                        '\u00a9 2010 King Fahd Glorious Quran Printing Complex, '
-                        'Al-Madinah Al-Munawwarah. All rights reserved. '
-                        'Used and distributed under its end-user licence, unmodified.',
+                        'Qur\u2019an text is set in PDMS Saleem QuranFont.',
                         style: AppText.caption.copyWith(color: AppColors.textMid),
                       ),
                       const SizedBox(height: 10),

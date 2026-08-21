@@ -51,12 +51,13 @@ class AppFonts {
   /// this one line to 'Cormorant'. Nothing else in the app needs touching.
   static const String serif = 'serif';
 
-  /// QUR'AN TEXT ONLY — the KFGQPC Madani Mushaf face.
+  /// QUR'AN TEXT ONLY — PDMS Saleem QuranFont.
   ///
-  /// Kept separate from [arabic] deliberately. Qur'an should be set in the
-  /// Mushaf face people recognise from print; hadith and duas should not,
-  /// because setting a narration in the Mushaf face implies it carries the
-  /// same status as revelation.
+  /// Kept separate from [arabic] deliberately. Qur'an should be set in a
+  /// dedicated Qur'an face; hadith and duas should not, because setting a
+  /// narration in that face implies it carries the same status as
+  /// revelation. The family name stays 'UthmanicHafs' (see pubspec.yaml) so
+  /// this reference didn't need to change.
   static const String quran = 'UthmanicHafs';
 
   /// Urdu. Nastaliq is the script Urdu is actually written in — Naskh renders

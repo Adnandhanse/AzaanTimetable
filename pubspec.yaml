@@ -129,16 +129,15 @@ flutter:
         - asset: assets/fonts/Amiri-Regular.ttf
         - asset: assets/fonts/Amiri-Bold.ttf
           weight: 700
-    # The Madani Mushaf face. Used for QUR'AN TEXT ONLY.
+    # Used for QUR'AN TEXT ONLY. Family name kept as UthmanicHafs so the
+    # AppFonts.quran reference doesn't need to change elsewhere in the code —
+    # the underlying font is now PDMS Saleem QuranFont, not KFGQPC Uthmanic.
     #
-    # LICENCE WARNING: the package this came from carries no licence file — its
-    # readme is a font-aggregator page. KFGQPC fonts are produced by the King
-    # Fahd Glorious Qur'an Printing Complex and are free to use, but their terms
-    # come from the Complex, not from a download site. Get the official release
-    # and read its terms before publishing commercially.
+    # LICENCE: check the terms that come with this font before publishing
+    # commercially.
     - family: UthmanicHafs
       fonts:
-        - asset: assets/fonts/UthmanicHafs.otf
+        - asset: assets/fonts/pdms-saleem-quranfont.ttf
     # Urdu. SIL Open Font License — licence text bundled beside it, which OFL
     # requires when redistributing.
     - family: NotoNastaliqUrdu
