@@ -35,6 +35,12 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
   /// (surahNumber, verseNumber) saved inside this juz, if any.
   (int, int)? _marked;
 
+  /// Shares the stored font size with the Surah screen - zoom once, and it
+  /// sticks whichever way the reader is browsing.
+  double _fontSize = 26;
+  static const double _minFontSize = 18;
+  static const double _maxFontSize = 40;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +48,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       _marked = (widget.initialSurahNumber!, widget.initialVerse!);
     }
     _loadReadingMode();
+    _loadFontSize();
   }
 
   /// Saves surah AND verse, not just a verse number. A juz spans several
@@ -85,6 +92,20 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
     await QuranLocalDataService.setArabicOnly(arabicOnly);
   }
 
+  Future<void> _loadFontSize() async {
+    final double size = await QuranLocalDataService.getQuranFontSize();
+    if (!mounted) return;
+    setState(() => _fontSize = size);
+  }
+
+  Future<void> _changeFontSize(double delta) async {
+    final double next =
+        (_fontSize + delta).clamp(_minFontSize, _maxFontSize);
+    if (next == _fontSize) return;
+    setState(() => _fontSize = next);
+    await QuranLocalDataService.setQuranFontSize(next);
+  }
+
   /// The (surah, verse) pairs falling inside this juz.
   List<(Surah, QuranVerse)> _items() {
     final int startIndex =
@@ -119,6 +140,22 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       appBar: AppBar(
         title: Text('Juz ${widget.juzNumber}'),
         actions: [
+          if (_mushafMode) ...[
+            IconButton(
+              tooltip: 'Smaller text',
+              icon: const Icon(Icons.zoom_out, size: 20, color: AppColors.emerald),
+              onPressed: _fontSize <= _minFontSize
+                  ? null
+                  : () => _changeFontSize(-2),
+            ),
+            IconButton(
+              tooltip: 'Larger text',
+              icon: const Icon(Icons.zoom_in, size: 20, color: AppColors.emerald),
+              onPressed: _fontSize >= _maxFontSize
+                  ? null
+                  : () => _changeFontSize(2),
+            ),
+          ],
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
@@ -144,6 +181,11 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: items.map((e) => e.$2).toList(),
+              fontSize: _fontSize,
+              // A juz runs across several surahs, so unlike the surah screen
+              // this has to look each index up rather than answer with one
+              // fixed number.
+              surahForIndex: (int index) => items[index].$1.number,
               // A juz spans surahs, so each item carries its own surah and the
               // index is the only unambiguous handle — same reason the bookmark
               // works on indices.

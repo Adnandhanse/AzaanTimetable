@@ -3,6 +3,7 @@ import 'dart:ui' show LineMetrics;
 
 import 'package:flutter/material.dart';
 
+import '../data/ruku_boundaries.dart';
 import '../models/quran.dart';
 import '../theme/app_theme.dart';
 
@@ -39,6 +40,7 @@ class MushafView extends StatefulWidget {
     this.markedIndex,
     this.initialVerseIndex,
     this.sajdahIndices = const <int>{},
+    this.surahForIndex,
   });
 
   /// Any run of verses - a whole surah, or the span a juz covers.
@@ -58,6 +60,15 @@ class MushafView extends StatefulWidget {
   /// INDICES, not verse numbers - a juz spans several surahs, so ayah 15 is
   /// ambiguous, exactly as it was for the bookmark.
   final Set<int> sajdahIndices;
+
+  /// Which surah a given verse index belongs to, for the Ruku indicator.
+  ///
+  /// A surah screen always answers with its own surah number; a juz screen
+  /// answers per-index, since a juz runs across several surahs. Omitted
+  /// entirely, the Ruku indicator just does not show - this is optional
+  /// context, not something MushafView can work out on its own from a flat
+  /// verse list.
+  final int Function(int index)? surahForIndex;
 
   @override
   State<MushafView> createState() => _MushafViewState();
@@ -114,7 +125,10 @@ class _MushafViewState extends State<MushafView> {
       buffer.write(verse.arabicText.trim());
       buffer.write(' \u06DD');
       buffer.write(_arabicDigits(verse.number));
-      buffer.write('  ');
+      // Three spaces, not two - the ayah-end ornament and the next ayah's
+      // opening word need a visible gap between them so a line-wrap landing
+      // right on a verse boundary does not read as one run-together word.
+      buffer.write('   ');
     }
 
     return (buffer.toString(), starts);
@@ -219,6 +233,27 @@ class _MushafViewState extends State<MushafView> {
     return pages;
   }
 
+  /// The y-position (relative to the top of the text block) of the bottom of
+  /// every line in [pageText], laid out exactly as the real Text widget will
+  /// lay it out - same style, same width. Used to draw a ruled line under
+  /// each line of text, matching a printed Mushaf page.
+  List<double> _lineBottoms(
+    String pageText, {
+    required TextStyle style,
+    required double maxWidth,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: pageText, style: style),
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.justify,
+    )..layout(maxWidth: maxWidth);
+
+    return <double>[
+      for (final LineMetrics line in painter.computeLineMetrics())
+        line.baseline + line.descent,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextStyle style = AppText.quranAyah.copyWith(
@@ -313,6 +348,17 @@ class _MushafViewState extends State<MushafView> {
             widget.markedIndex! >= current.firstIndex &&
             widget.markedIndex! <= current.lastIndex;
 
+        // Which Ruku' the top of this page falls in, if the boundary table
+        // covers it. surahForIndex is optional, and the table itself is
+        // partial (see ruku_boundaries.dart) - both are reasons this can
+        // legitimately come back null, in which case the chip just does not
+        // render rather than showing a guess.
+        final int? currentSurah =
+            widget.surahForIndex?.call(current.firstIndex);
+        final (int, int, int?)? ruku = currentSurah == null
+            ? null
+            : rukuAt(currentSurah, current.firstVerse);
+
         return Column(
           children: <Widget>[
             // Page information and bookmark control at the top.
@@ -326,13 +372,34 @@ class _MushafViewState extends State<MushafView> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      'Page ${safePage + 1} of ${pages.length}'
-                      '   \u00B7   Ayah ${current.firstVerse}\u2013${current.lastVerse}'
-                      '   \u00B7   $linesPerPage lines',
-                      style: AppText.caption.copyWith(
-                        color: AppColors.textMuted,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Page ${safePage + 1} of ${pages.length}'
+                          '   \u00B7   Ayah ${current.firstVerse}\u2013${current.lastVerse}'
+                          '   \u00B7   $linesPerPage lines',
+                          style: AppText.caption.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        // Current Ruku', and where it ends if that is known.
+                        // The ع mark is the same symbol Indo-Pak Mushafs use
+                        // in the margin for this.
+                        if (ruku != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              ruku.$3 == null
+                                  ? '\u0639  Ruku\u2019 ${ruku.$1} \u00B7 starts at ayah ${ruku.$2}'
+                                  : '\u0639  Ruku\u2019 ${ruku.$1} \u00B7 ayah ${ruku.$2}\u2013${ruku.$3}',
+                              style: AppText.caption.copyWith(
+                                color: AppColors.emerald,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   if (widget.onMarkIndex != null)
@@ -410,14 +477,37 @@ class _MushafViewState extends State<MushafView> {
                       verticalPagePadding + 8,
                     ),
 
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text(
-                        pages[index].text,
-                        textAlign: TextAlign.justify,
-                        softWrap: true,
-                        style: style,
-                      ),
+                    // Ruled lines under each line of text, printed-Mushaf
+                    // style, drawn from the SAME layout the Text widget below
+                    // will produce (same style, same width) so each rule
+                    // lands under its own line rather than an estimate that
+                    // drifts over a tall page.
+                    child: Stack(
+                      children: <Widget>[
+                        for (final double y in _lineBottoms(
+                          pages[index].text,
+                          style: style,
+                          maxWidth: maxWidth,
+                        ))
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            top: y + 3,
+                            child: Container(
+                              height: 1,
+                              color: AppColors.goldRuleFaint,
+                            ),
+                          ),
+                        Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            pages[index].text,
+                            textAlign: TextAlign.justify,
+                            softWrap: true,
+                            style: style,
+                          ),
+                        ),
+                      ],
                     ),
                   );
 

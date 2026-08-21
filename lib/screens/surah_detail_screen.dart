@@ -57,11 +57,19 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   /// frame would hammer the disk for no benefit.
   DateTime _lastSave = DateTime.fromMillisecondsSinceEpoch(0);
 
+  /// Arabic text size in Mushaf mode. Shared with the Juz screen via
+  /// QuranLocalDataService, so zooming in one place carries over to the
+  /// other. Clamped in [_changeFontSize].
+  double _fontSize = 26;
+  static const double _minFontSize = 18;
+  static const double _maxFontSize = 40;
+
   @override
   void initState() {
     super.initState();
     _markedVerse = widget.initialVerse;
     _loadReadingMode();
+    _loadFontSize();
     _loadNotes();
     _scroll.addListener(_onScroll);
 
@@ -84,6 +92,20 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   Future<void> _setReadingMode(bool arabicOnly) async {
     setState(() => _mushafMode = arabicOnly);
     await QuranLocalDataService.setArabicOnly(arabicOnly);
+  }
+
+  Future<void> _loadFontSize() async {
+    final double size = await QuranLocalDataService.getQuranFontSize();
+    if (!mounted) return;
+    setState(() => _fontSize = size);
+  }
+
+  Future<void> _changeFontSize(double delta) async {
+    final double next =
+        (_fontSize + delta).clamp(_minFontSize, _maxFontSize);
+    if (next == _fontSize) return;
+    setState(() => _fontSize = next);
+    await QuranLocalDataService.setQuranFontSize(next);
   }
 
   /// Rough estimate of which verse is in view, so the juz in the title tracks
@@ -248,6 +270,26 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ],
         ),
         actions: [
+          // Text size. Mushaf mode only - the translation view already has
+          // its own scale via the device's text settings, and a zoom control
+          // there would just be one more thing competing with the two verse
+          // action rows already on that layout.
+          if (_mushafMode) ...[
+            IconButton(
+              tooltip: 'Smaller text',
+              icon: const Icon(Icons.zoom_out, size: 20, color: AppColors.emerald),
+              onPressed: _fontSize <= _minFontSize
+                  ? null
+                  : () => _changeFontSize(-2),
+            ),
+            IconButton(
+              tooltip: 'Larger text',
+              icon: const Icon(Icons.zoom_in, size: 20, color: AppColors.emerald),
+              onPressed: _fontSize >= _maxFontSize
+                  ? null
+                  : () => _changeFontSize(2),
+            ),
+          ],
           // Two ways to read the same surah. One control, so it is always
           // obvious which mode you are in.
           Padding(
@@ -316,6 +358,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       body: _mushafMode
           ? MushafView(
               verses: surah.verses,
+              fontSize: _fontSize,
               // Worked out here because this screen knows the surah number;
               // MushafView only sees a flat list of verses.
               sajdahIndices: <int>{
@@ -323,6 +366,9 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                   if (SajdahVerses.isSajdah(surah.number, surah.verses[i].number))
                     i,
               },
+              // A single surah screen only ever shows one surah, so every
+              // index maps to it.
+              surahForIndex: (_) => surah.number,
               markedIndex: _markedVerse == null
                   ? null
                   : surah.verses
