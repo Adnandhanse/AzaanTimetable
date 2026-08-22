@@ -10,7 +10,7 @@ class DuaDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(category.title),
+        title: Text(category.displayTitle),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -32,7 +32,7 @@ class DuaDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Divider(),
-                  Text(dua.translation.trim(), style: const TextStyle(fontSize: 15)),
+                  Text(dua.displayTranslation.trim(), style: const TextStyle(fontSize: 15)),
                 ],
               ),
             ),

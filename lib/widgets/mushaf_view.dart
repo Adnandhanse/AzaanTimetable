@@ -92,6 +92,55 @@ class _MushafViewState extends State<MushafView> {
     super.dispose();
   }
 
+  /// Matches an ayah-end ornament plus the Arabic-Indic digits after it, so
+  /// it can be rendered in a font other than [AppFonts.quran].
+  ///
+  /// The bundled Quran font's own digit glyphs for 1-9 have a zero advance
+  /// width in the font file itself (checked directly against its metrics) -
+  /// they are built to be positioned via OpenType mark-attachment onto the
+  /// ornament glyph, and whatever is failing to apply that positioning here
+  /// draws them stacked at zero offset instead, on top of whatever comes
+  /// before them. That is the overlap in the screenshots. No amount of extra
+  /// spacing in the surrounding text can fix a zero-width glyph - the space
+  /// characters move, the digit does not. Routing just this marker through
+  /// Amiri (bundled, and confirmed to have normal, non-zero advances for
+  /// these exact codepoints) sidesteps the broken glyphs entirely while
+  /// leaving the Quran font in place for the verse text itself.
+  static final RegExp _ayahMarker = RegExp('\u06DD[\u0660-\u0669]+');
+
+  /// Splits [pageText] into spans, styling ayah-end markers in [markerStyle]
+  /// and everything else in [bodyStyle]. The concatenation of every span's
+  /// text is exactly [pageText] - only the styling differs, so this changes
+  /// nothing about line-breaking versus the plain-string layout already used
+  /// for pagination.
+  List<TextSpan> _spans(
+    String pageText, {
+    required TextStyle bodyStyle,
+    required TextStyle markerStyle,
+  }) {
+    final List<TextSpan> spans = <TextSpan>[];
+    int last = 0;
+
+    for (final RegExpMatch match in _ayahMarker.allMatches(pageText)) {
+      if (match.start > last) {
+        spans.add(
+          TextSpan(
+            text: pageText.substring(last, match.start),
+            style: bodyStyle,
+          ),
+        );
+      }
+      spans.add(TextSpan(text: match.group(0), style: markerStyle));
+      last = match.end;
+    }
+
+    if (last < pageText.length) {
+      spans.add(TextSpan(text: pageText.substring(last), style: bodyStyle));
+    }
+
+    return spans;
+  }
+
   static String _arabicDigits(int n) {
     const List<String> digits = <String>[
       '\u0660',
@@ -157,6 +206,7 @@ class _MushafViewState extends State<MushafView> {
   /// Flutter line metrics.
   List<_MushafPage> _paginate({
     required TextStyle style,
+    required TextStyle markerStyle,
     required double maxWidth,
     required int linesPerPage,
   }) {
@@ -166,10 +216,14 @@ class _MushafViewState extends State<MushafView> {
       return const <_MushafPage>[];
     }
 
+    // Built from the SAME mixed-style spans the page actually renders (see
+    // _spans), not a uniform-style approximation - otherwise the ayah-marker
+    // run's real (smaller, different-font) width wouldn't match what this
+    // layout assumed, and computed line/page breaks could drift from where
+    // Text.rich actually wraps.
     final TextPainter textPainter = TextPainter(
       text: TextSpan(
-        text: text,
-        style: style,
+        children: _spans(text, bodyStyle: style, markerStyle: markerStyle),
       ),
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.justify,
@@ -240,10 +294,13 @@ class _MushafViewState extends State<MushafView> {
   List<double> _lineBottoms(
     String pageText, {
     required TextStyle style,
+    required TextStyle markerStyle,
     required double maxWidth,
   }) {
     final TextPainter painter = TextPainter(
-      text: TextSpan(text: pageText, style: style),
+      text: TextSpan(
+        children: _spans(pageText, bodyStyle: style, markerStyle: markerStyle),
+      ),
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.justify,
     )..layout(maxWidth: maxWidth);
@@ -260,6 +317,16 @@ class _MushafViewState extends State<MushafView> {
       fontSize: widget.fontSize,
       height: 2.05,
       color: AppColors.text,
+    );
+
+    // Ayah-end marker style, shared by pagination, the ruled-line layout,
+    // and the actual rendered text so all three agree on where lines break.
+    // See _ayahMarker for why this needs a different font from the Quran
+    // text around it.
+    final TextStyle markerStyle = style.copyWith(
+      fontFamily: AppFonts.arabic,
+      fontSize: widget.fontSize * 0.62,
+      color: AppColors.gold,
     );
 
     return LayoutBuilder(
@@ -295,6 +362,7 @@ class _MushafViewState extends State<MushafView> {
             _cachedVerseCount != widget.verses.length) {
           _pages = _paginate(
             style: style,
+            markerStyle: markerStyle,
             maxWidth: maxWidth,
             linesPerPage: linesPerPage,
           );
@@ -482,32 +550,47 @@ class _MushafViewState extends State<MushafView> {
                     // will produce (same style, same width) so each rule
                     // lands under its own line rather than an estimate that
                     // drifts over a tall page.
-                    child: Stack(
-                      children: <Widget>[
-                        for (final double y in _lineBottoms(
-                          pages[index].text,
-                          style: style,
-                          maxWidth: maxWidth,
-                        ))
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            top: y + 3,
-                            child: Container(
-                              height: 1,
-                              color: AppColors.goldRuleFaint,
+                    //
+                    // Wrapped in a scroll view: linesPerPage is clamped to a
+                    // floor of 6 so a page never shrinks to nothing, but at
+                    // large zoom that floor can still be taller than the
+                    // card. Rather than clip text at high zoom, this makes
+                    // that case scrollable instead of hidden.
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Stack(
+                        children: <Widget>[
+                          for (final double y in _lineBottoms(
+                            pages[index].text,
+                            style: style,
+                            markerStyle: markerStyle,
+                            maxWidth: maxWidth,
+                          ))
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: y + 3,
+                              child: Container(
+                                height: 1,
+                                color: AppColors.goldRuleFaint,
+                              ),
+                            ),
+                          Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Text.rich(
+                              TextSpan(
+                                children: _spans(
+                                  pages[index].text,
+                                  bodyStyle: style,
+                                  markerStyle: markerStyle,
+                                ),
+                              ),
+                              textAlign: TextAlign.justify,
+                              softWrap: true,
                             ),
                           ),
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Text(
-                            pages[index].text,
-                            textAlign: TextAlign.justify,
-                            softWrap: true,
-                            style: style,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
 

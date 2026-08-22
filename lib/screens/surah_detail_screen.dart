@@ -100,12 +100,14 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     setState(() => _fontSize = size);
   }
 
-  Future<void> _changeFontSize(double delta) async {
-    final double next =
-        (_fontSize + delta).clamp(_minFontSize, _maxFontSize);
-    if (next == _fontSize) return;
-    setState(() => _fontSize = next);
-    await QuranLocalDataService.setQuranFontSize(next);
+  void _previewFontSize(double size) {
+    setState(() => _fontSize = size.clamp(_minFontSize, _maxFontSize));
+  }
+
+  Future<void> _commitFontSize(double size) async {
+    await QuranLocalDataService.setQuranFontSize(
+      size.clamp(_minFontSize, _maxFontSize),
+    );
   }
 
   /// Rough estimate of which verse is in view, so the juz in the title tracks
@@ -270,26 +272,6 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ],
         ),
         actions: [
-          // Text size. Mushaf mode only - the translation view already has
-          // its own scale via the device's text settings, and a zoom control
-          // there would just be one more thing competing with the two verse
-          // action rows already on that layout.
-          if (_mushafMode) ...[
-            IconButton(
-              tooltip: 'Smaller text',
-              icon: const Icon(Icons.zoom_out, size: 20, color: AppColors.emerald),
-              onPressed: _fontSize <= _minFontSize
-                  ? null
-                  : () => _changeFontSize(-2),
-            ),
-            IconButton(
-              tooltip: 'Larger text',
-              icon: const Icon(Icons.zoom_in, size: 20, color: AppColors.emerald),
-              onPressed: _fontSize >= _maxFontSize
-                  ? null
-                  : () => _changeFontSize(2),
-            ),
-          ],
           // Two ways to read the same surah. One control, so it is always
           // obvious which mode you are in.
           Padding(
@@ -314,6 +296,48 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
             ),
           ),
         ],
+        // A slim zoom bar under the title, Mushaf mode only. Sits here
+        // instead of squeezed into actions - a Slider needs room to drag,
+        // and the actions row already carries the mode toggle.
+        bottom: _mushafMode
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(30),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                  child: Row(
+                    children: <Widget>[
+                      const Text('A',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.textMuted)),
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2.5,
+                            activeTrackColor: AppColors.emerald,
+                            inactiveTrackColor: AppColors.goldRuleFaint,
+                            thumbColor: AppColors.emerald,
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 6),
+                            overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 13),
+                          ),
+                          child: Slider(
+                            value: _fontSize,
+                            min: _minFontSize,
+                            max: _maxFontSize,
+                            onChanged: _previewFontSize,
+                            onChangeEnd: _commitFontSize,
+                          ),
+                        ),
+                      ),
+                      const Text('A',
+                          style: TextStyle(
+                              fontSize: 20, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
       // A speed bar, shown only while something is playing.
       //

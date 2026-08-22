@@ -98,12 +98,14 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
     setState(() => _fontSize = size);
   }
 
-  Future<void> _changeFontSize(double delta) async {
-    final double next =
-        (_fontSize + delta).clamp(_minFontSize, _maxFontSize);
-    if (next == _fontSize) return;
-    setState(() => _fontSize = next);
-    await QuranLocalDataService.setQuranFontSize(next);
+  void _previewFontSize(double size) {
+    setState(() => _fontSize = size.clamp(_minFontSize, _maxFontSize));
+  }
+
+  Future<void> _commitFontSize(double size) async {
+    await QuranLocalDataService.setQuranFontSize(
+      size.clamp(_minFontSize, _maxFontSize),
+    );
   }
 
   /// The (surah, verse) pairs falling inside this juz.
@@ -140,22 +142,6 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       appBar: AppBar(
         title: Text('Juz ${widget.juzNumber}'),
         actions: [
-          if (_mushafMode) ...[
-            IconButton(
-              tooltip: 'Smaller text',
-              icon: const Icon(Icons.zoom_out, size: 20, color: AppColors.emerald),
-              onPressed: _fontSize <= _minFontSize
-                  ? null
-                  : () => _changeFontSize(-2),
-            ),
-            IconButton(
-              tooltip: 'Larger text',
-              icon: const Icon(Icons.zoom_in, size: 20, color: AppColors.emerald),
-              onPressed: _fontSize >= _maxFontSize
-                  ? null
-                  : () => _changeFontSize(2),
-            ),
-          ],
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
@@ -177,6 +163,45 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
             ),
           ),
         ],
+        bottom: _mushafMode
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(30),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                  child: Row(
+                    children: <Widget>[
+                      const Text('A',
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.textMuted)),
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2.5,
+                            activeTrackColor: AppColors.emerald,
+                            inactiveTrackColor: AppColors.goldRuleFaint,
+                            thumbColor: AppColors.emerald,
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 6),
+                            overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 13),
+                          ),
+                          child: Slider(
+                            value: _fontSize,
+                            min: _minFontSize,
+                            max: _maxFontSize,
+                            onChanged: _previewFontSize,
+                            onChangeEnd: _commitFontSize,
+                          ),
+                        ),
+                      ),
+                      const Text('A',
+                          style: TextStyle(
+                              fontSize: 20, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
       body: _mushafMode
           ? MushafView(

@@ -31,7 +31,11 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
   Widget build(BuildContext context) {
     final filtered = _categories == null
         ? <DuaCategory>[]
-        : _categories!.where((c) => c.title.toLowerCase().contains(_query.toLowerCase())).toList();
+        : _categories!
+            .where((c) =>
+                c.title.toLowerCase().contains(_query.toLowerCase()) ||
+                (c.titleHinglish?.toLowerCase().contains(_query.toLowerCase()) ?? false))
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +65,7 @@ class _DuaHomeScreenState extends State<DuaHomeScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         child: ListTile(
                           leading: Icon(Icons.favorite_border, color: AppColors.emerald),
-                          title: Text(category.title),
+                          title: Text(category.displayTitle),
                           subtitle: Text('${category.duas.length} dua(s)'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => Navigator.of(context).push(
