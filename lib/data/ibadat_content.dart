@@ -165,14 +165,19 @@ class IbadatContent {
             // ALL SEVEN VERSES, verbatim from the app's own quran_en.json.
             // It was the first two lines with an ellipsis, which is no use to
             // anyone actually trying to recite.
+            //
+            // Each verse now carries its own ayah-end mark and number, and
+            // an extra blank line between verses, instead of running seven
+            // very differently-sized lines together with only a single line
+            // break - which is what actually made this look cluttered.
             arabic:
-                'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ\n'
-                'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ\n'
-                'ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ\n'
-                'مَٰلِكِ يَوۡمِ ٱلدِّينِ\n'
-                'إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ\n'
-                'ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ\n'
-                'صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ',
+                'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0661\n\n'
+                'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ \u06DD\u0662\n\n'
+                'ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0663\n\n'
+                'مَٰلِكِ يَوۡمِ ٱلدِّينِ \u06DD\u0664\n\n'
+                'إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ \u06DD\u0665\n\n'
+                'ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ \u06DD\u0666\n\n'
+                'صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ \u06DD\u0667',
             translation:
                 'In the name of Allah, the Entirely Merciful, the Especially Merciful. '
                 'All praise is due to Allah, Lord of the worlds. '
@@ -944,14 +949,21 @@ class IbadatContent {
           IbadatStep(
             title: 'Pehli Takbeer',
             method:
-                'Haath uthakar "Allahu Akbar" kahein, phir haath baandh kar Sana padhein.',
+                'Haath uthakar "Allahu Akbar" kahein, phir Surah Al-Fatihah padhein '
+                '\u2014 dekhiye "Namaz Ka Tariqa" mein Qiyam ka hissa.',
             arabic: 'اللّٰهُ أَكْبَرُ',
             translation: 'Allah is the Greatest.',
+            // The evidence for Al-Fatihah here specifically (not just that
+            // it belongs in every rak'ah, which Bukhari 756 already covers
+            // in the main namaz guide): a Companion doing exactly this at a
+            // janaza and naming it as the Sunnah.
+            keyPoint:
+                'Talha b. Abdullah b. Awf: "Maine Ibn Abbas (\u0631\u064E\u0636\u0650\u064A \u0627\u0644\u0644\u0651\u064E\u0647 \u0639\u064E\u0646\u0652\u0647\u064F) ke peeche namaz-e-janaza padhi, unhon ne Surah Al-Fatihah padhi aur farmaya: tumhein maloom ho jaye ke yeh Nabi \uFDFA ki Sunnat hai."',
             practiceDiffers:
-                'Pehli takbeer ke baad kya padha jaye — Hanafi mazhab mein Sana, aur Shafi\u2018i mazhab mein Surah Al-Fatihah. Yeh ikhtilaf mashhoor hai.',
+                'Hanafi mazhab mein pehli takbeer ke baad Sana padhi jati hai, Surah Al-Fatihah nahi.',
             refs: <HadithRef>[
-              HadithRef(book: HadithBook.bukhari, number: 1318,
-                  note: 'He went forward and they lined up; four takbirs'),
+              HadithRef(book: HadithBook.bukhari, number: 1335,
+                  note: 'Talha b. Abdullah b. Awf: Ibn Abbas recited Al-Fatiha over a janaza, "so that you would know it is Sunnah"'),
             ],
           ),
           IbadatStep(
