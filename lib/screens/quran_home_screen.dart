@@ -19,6 +19,7 @@ class QuranHomeScreen extends StatefulWidget {
 class _QuranHomeScreenState extends State<QuranHomeScreen>
     with SingleTickerProviderStateMixin {
   QuranLanguage _language = QuranLanguage.english;
+  bool _arabicOnly = true;
   List<Surah>? _surahs;
   String _query = '';
   Set<int> _favourites = {};
@@ -29,7 +30,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _load();
+    _loadPreferences();
     _loadFavourites();
     _loadLastRead();
   }
@@ -101,10 +102,40 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     super.dispose();
   }
 
+  Future<void> _loadPreferences() async {
+    final String code = await QuranLocalDataService.getQuranLanguageCode();
+    final bool arabicOnly = await QuranLocalDataService.getArabicOnly();
+    if (!mounted) return;
+    setState(() {
+      _language = QuranLanguage.fromCode(code);
+      _arabicOnly = arabicOnly;
+    });
+    _load();
+  }
+
   Future<void> _load() async {
     final surahs = await QuranRepository.loadSurahs(_language);
     if (!mounted) return;
     setState(() => _surahs = surahs);
+  }
+
+  /// One control for both the reading-mode default (Arabic only vs a
+  /// translation) and which translation. Both are shared with the Surah and
+  /// Juz reading screens via QuranLocalDataService, so this choice is what
+  /// they open in.
+  Future<void> _selectMode({required bool arabicOnly, QuranLanguage? language}) async {
+    setState(() {
+      _arabicOnly = arabicOnly;
+      if (language != null) {
+        _language = language;
+        _surahs = null;
+      }
+    });
+    await QuranLocalDataService.setArabicOnly(arabicOnly);
+    if (language != null) {
+      await QuranLocalDataService.setQuranLanguageCode(language.code);
+      await _load();
+    }
   }
 
   Future<void> _loadFavourites() async {
@@ -123,23 +154,44 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(S.quran),
-        actions: [
-          PopupMenuButton<QuranLanguage>(
-            icon: const Icon(Icons.translate, size: 20),
-            onSelected: (lang) {
-              setState(() {
-                _language = lang;
-                _surahs = null;
-              });
-              _load();
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: QuranLanguage.english, child: Text('English')),
-              PopupMenuItem(value: QuranLanguage.urdu, child: Text('اردو (Urdu)')),
-              PopupMenuItem(value: QuranLanguage.hindi, child: Text('हिन्दी (Hindi)')),
-            ],
+        // Directly visible, not tucked behind an icon - this used to be a
+        // translate-icon popup menu that gave no hint it was even a language
+        // switcher. Arabic-only is the reading-mode default too, so it gets
+        // a segment of its own alongside the three translations rather than
+        // living as a separate toggle inside each reading screen.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(44),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Row(
+              children: <Widget>[
+                _ModeSegment(
+                  label: 'Arabic',
+                  selected: _arabicOnly,
+                  onTap: () => _selectMode(arabicOnly: true),
+                ),
+                _ModeSegment(
+                  label: 'English',
+                  selected: !_arabicOnly && _language == QuranLanguage.english,
+                  onTap: () => _selectMode(
+                      arabicOnly: false, language: QuranLanguage.english),
+                ),
+                _ModeSegment(
+                  label: '\u0627\u0631\u062F\u0648',
+                  selected: !_arabicOnly && _language == QuranLanguage.urdu,
+                  onTap: () => _selectMode(
+                      arabicOnly: false, language: QuranLanguage.urdu),
+                ),
+                _ModeSegment(
+                  label: '\u0939\u093F\u0928\u094D\u0926\u0940',
+                  selected: !_arabicOnly && _language == QuranLanguage.hindi,
+                  onTap: () => _selectMode(
+                      arabicOnly: false, language: QuranLanguage.hindi),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
       body: _surahs == null
           ? const Center(child: CircularProgressIndicator())
@@ -459,6 +511,57 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
           ),
         );
       },
+    );
+  }
+}
+
+/// One pill of the Arabic/English/Urdu/Hindi bar at the top of the Qur'an
+/// section. A plain private widget rather than Flutter's SegmentedButton -
+/// this needs to hold an Arabic and a Devanagari label at a readable size
+/// across four segments on a phone width, which is easier to get right with
+/// full control over the styling than fighting a pre-built widget's padding.
+class _ModeSegment extends StatelessWidget {
+  const _ModeSegment({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3),
+        child: Material(
+          color: selected ? AppColors.emerald : AppColors.white,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: selected ? AppColors.emerald : AppColors.goldRule,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: AppText.caption.copyWith(
+                  color: selected ? AppColors.white : AppColors.textMuted,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

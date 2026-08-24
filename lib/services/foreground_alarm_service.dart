@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'alarm_event_log.dart';
 import 'notification_channels.dart';
@@ -234,14 +236,40 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     } catch (_) {}
 
     if (audioUrl != null && audioUrl.isNotEmpty) {
+      // Local cache first - see ForegroundAlarmManager._cacheCustomAzan,
+      // which downloads this ahead of time whenever the app has a normal
+      // foreground connection. No network dependency at all if it is there.
       try {
-        // Short timeout. If the masjid's own recording is not reachable within
-        // a few seconds the moment has passed — fall back rather than stand in
-        // silence waiting on a download.
+        final Directory dir = await getApplicationDocumentsDirectory();
+        final File urlFile = File('${dir.path}/custom_azan_cache_url.txt');
+        final File audioFile = File('${dir.path}/custom_azan_cache.mp3');
+
+        if (await audioFile.exists() &&
+            await urlFile.exists() &&
+            await urlFile.readAsString() == audioUrl) {
+          await _azanPlayer.play(DeviceFileSource(audioFile.path));
+          await AlarmEventLog.add('azan playing',
+              detail: 'masjid recording (cached)');
+          return;
+        }
+      } catch (_) {}
+
+      // Cache missed - fall back to fetching it live. THIS USED TO BE A
+      // 4-SECOND TIMEOUT, which was the actual bug: not enough time for the
+      // radio to wake, resolve DNS, and start buffering from Firebase
+      // Storage, especially from inside a background service at exactly the
+      // moment Android is least willing to grant network access. Every
+      // real-world custom upload could plausibly miss that window and
+      // silently fall back to the bundled azan below - which is exactly
+      // "I uploaded a recording and the default still plays." 15 seconds
+      // gives a cold connection a real chance while still giving up before
+      // the prayer time is meaningfully late.
+      try {
         await _azanPlayer
             .play(UrlSource(audioUrl))
-            .timeout(const Duration(seconds: 4));
-        await AlarmEventLog.add('azan playing', detail: 'masjid recording');
+            .timeout(const Duration(seconds: 15));
+        await AlarmEventLog.add('azan playing',
+            detail: 'masjid recording (live)');
         return;
       } catch (_) {}
     }

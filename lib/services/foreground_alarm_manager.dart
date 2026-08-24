@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/masjid.dart';
 import 'prayer_schedule_cache.dart';
 import 'foreground_alarm_service.dart';
@@ -87,6 +90,9 @@ class ForegroundAlarmManager {
       }),
     );
 
+    // ignore: unawaited_futures
+    _cacheCustomAzan(audioUrl);
+
     final isRunning = await FlutterForegroundTask.isRunningService;
     try {
       if (!isRunning) {
@@ -130,6 +136,13 @@ class ForegroundAlarmManager {
     };
     await FlutterForegroundTask.saveData(key: 'prayer_times_data', value: json.encode(data));
 
+    // Fire-and-forget: get the masjid's own recording sitting on disk NOW,
+    // while there is a normal foreground network connection to do it with -
+    // not later, at the exact moment an alarm needs to play it. See
+    // foreground_alarm_service.dart._playAzan for why that mattered.
+    // ignore: unawaited_futures
+    _cacheCustomAzan(masjid.customAzanAudioUrl);
+
     final isRunning = await FlutterForegroundTask.isRunningService;
     try {
       if (!isRunning) {
@@ -162,5 +175,58 @@ class ForegroundAlarmManager {
 
   static Future<void> stop() async {
     await FlutterForegroundTask.stopService();
+  }
+
+  /// Filenames shared with foreground_alarm_service.dart's _playAzan, which
+  /// looks for exactly these two files. Kept to a single slot rather than
+  /// one per masjid - a device follows one masjid's alarms at a time, so
+  /// there is nothing to gain from keeping more than the current recording
+  /// around, and it avoids an unbounded cache directory.
+  static const String _cacheAudioFileName = 'custom_azan_cache.mp3';
+  static const String _cacheUrlFileName = 'custom_azan_cache_url.txt';
+
+  /// Downloads the masjid's custom azan recording to local storage ahead of
+  /// time, so playback at the actual alarm moment does not depend on the
+  /// network at all.
+  ///
+  /// THIS WAS THE BUG: _playAzan used to fetch the recording live, over the
+  /// network, with a 4-second timeout, at the exact moment Android is least
+  /// willing to grant a background service network access (radio may be
+  /// asleep, DNS + TLS handshake + the first bytes of a Firebase Storage
+  /// download all have to land inside that window). Any real-world upload
+  /// reliably missed that window and silently fell back to the bundled azan
+  /// - which looked exactly like "I uploaded but it never plays."
+  ///
+  /// Downloading here instead - triggered whenever the app has normal
+  /// foreground connectivity and learns the masjid's audio URL - means the
+  /// file is very likely already on disk by the time an alarm needs it.
+  /// Best-effort: any failure here just means _playAzan falls through to its
+  /// own live-network attempt, same as before.
+  static Future<void> _cacheCustomAzan(String? audioUrl) async {
+    if (audioUrl == null || audioUrl.isEmpty) return;
+
+    try {
+      final Directory dir = await getApplicationDocumentsDirectory();
+      final File urlFile = File('${dir.path}/$_cacheUrlFileName');
+      final File audioFile = File('${dir.path}/$_cacheAudioFileName');
+
+      if (await audioFile.exists() &&
+          await urlFile.exists() &&
+          await urlFile.readAsString() == audioUrl) {
+        return; // Already have this exact recording cached.
+      }
+
+      // Goes through Firebase Storage's own SDK rather than a plain HTTP
+      // GET, since that is what this app already depends on and it needs no
+      // extra package for something this small.
+      await FirebaseStorage.instance
+          .refFromURL(audioUrl)
+          .writeToFile(audioFile)
+          .timeout(const Duration(seconds: 30));
+      await urlFile.writeAsString(audioUrl);
+    } catch (_) {
+      // No network right now, or the URL isn't a Storage URL this SDK can
+      // resolve. Either way, _playAzan's live-URL fallback still covers it.
+    }
   }
 }

@@ -2,7 +2,25 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import '../models/quran.dart';
 
-enum QuranLanguage { english, urdu, hindi }
+enum QuranLanguage {
+  english,
+  urdu,
+  hindi;
+
+  /// Matches QuranLocalDataService's stored string, independent of the
+  /// enum's declared order.
+  String get code => switch (this) {
+        QuranLanguage.english => 'english',
+        QuranLanguage.urdu => 'urdu',
+        QuranLanguage.hindi => 'hindi',
+      };
+
+  static QuranLanguage fromCode(String code) => switch (code) {
+        'urdu' => QuranLanguage.urdu,
+        'hindi' => QuranLanguage.hindi,
+        _ => QuranLanguage.english,
+      };
+}
 
 /// Loads the Quran (Arabic text + translation) from a file bundled
 /// directly inside the app - works completely offline, no internet or

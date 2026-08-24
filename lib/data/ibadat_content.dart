@@ -163,20 +163,20 @@ class IbadatContent {
           IbadatStep(
             title: 'Surah Al-Fatihah',
             // ALL SEVEN VERSES, verbatim from the app's own quran_en.json.
-            // It was the first two lines with an ellipsis, which is no use to
-            // anyone actually trying to recite.
             //
-            // Each verse now carries its own ayah-end mark and number, and
-            // an extra blank line between verses, instead of running seven
-            // very differently-sized lines together with only a single line
-            // break - which is what actually made this look cluttered.
+            // Each verse carries its own ayah-end mark and number, matching
+            // the Qur'an reader's own convention - that alone gives enough
+            // separation between verses of very different lengths. The
+            // earlier version also doubled every line break, which turned
+            // out to be too much empty space; back to a single line break
+            // per verse.
             arabic:
-                'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0661\n\n'
-                'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ \u06DD\u0662\n\n'
-                'ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0663\n\n'
-                'مَٰلِكِ يَوۡمِ ٱلدِّينِ \u06DD\u0664\n\n'
-                'إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ \u06DD\u0665\n\n'
-                'ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ \u06DD\u0666\n\n'
+                'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0661\n'
+                'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ \u06DD\u0662\n'
+                'ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ \u06DD\u0663\n'
+                'مَٰلِكِ يَوۡمِ ٱلدِّينِ \u06DD\u0664\n'
+                'إِيَّاكَ نَعۡبُدُ وَإِيَّاكَ نَسۡتَعِينُ \u06DD\u0665\n'
+                'ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِيمَ \u06DD\u0666\n'
                 'صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ \u06DD\u0667',
             translation:
                 'In the name of Allah, the Entirely Merciful, the Especially Merciful. '
@@ -959,8 +959,6 @@ class IbadatContent {
             // janaza and naming it as the Sunnah.
             keyPoint:
                 'Talha b. Abdullah b. Awf: "Maine Ibn Abbas (\u0631\u064E\u0636\u0650\u064A \u0627\u0644\u0644\u0651\u064E\u0647 \u0639\u064E\u0646\u0652\u0647\u064F) ke peeche namaz-e-janaza padhi, unhon ne Surah Al-Fatihah padhi aur farmaya: tumhein maloom ho jaye ke yeh Nabi \uFDFA ki Sunnat hai."',
-            practiceDiffers:
-                'Hanafi mazhab mein pehli takbeer ke baad Sana padhi jati hai, Surah Al-Fatihah nahi.',
             refs: <HadithRef>[
               HadithRef(book: HadithBook.bukhari, number: 1335,
                   note: 'Talha b. Abdullah b. Awf: Ibn Abbas recited Al-Fatiha over a janaza, "so that you would know it is Sunnah"'),

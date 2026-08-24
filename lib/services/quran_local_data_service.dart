@@ -99,6 +99,24 @@ class QuranLocalDataService {
     await prefs.setDouble(_quranFontSizeKey, size);
   }
 
+  // --- Qur'an translation language -----------------------------------------
+
+  static const _quranLanguageKey = 'quran_translation_language';
+
+  /// Which translation loads once the reader leaves Arabic-only mode.
+  /// Stored as a plain string ('english' / 'urdu' / 'hindi') rather than the
+  /// enum's index, so this survives QuranLanguage's declared order ever
+  /// changing. Defaults to English.
+  static Future<String> getQuranLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_quranLanguageKey) ?? 'english';
+  }
+
+  static Future<void> setQuranLanguageCode(String code) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_quranLanguageKey, code);
+  }
+
   // --- Where the reader stopped -------------------------------------------
 
   static const _lastReadKey = 'quran_last_read';
