@@ -717,16 +717,19 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                 else
-                  // A CARD OF ITS OWN, not text sitting directly on the ivory
-                  // sheet - white/off-white, rounded, its own soft shadow, so
-                  // it reads as one clear object rather than a loose cluster
-                  // of text and icons on the page background.
+                  // Off-white (AppColors.cream), not pure white - the same
+                  // surface tone used for cards elsewhere in the app (the
+                  // theme's surfaceContainer, the Zakat calculator card),
+                  // rather than a one-off white that stood out against it.
+                  // Also a size down from the first pass - smaller padding
+                  // and a smaller icon circle, since the card only needed to
+                  // read as a distinct object, not fill the width so fully.
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(22),
+                      color: AppColors.cream,
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: const <BoxShadow>[
                         BoxShadow(
                           color: Color(0x14000000),
@@ -743,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen>
                           style: AppText.eyebrow
                               .copyWith(color: AppColors.textMuted),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         // Icon on the left in a subtle circular outline, name
                         // and time on the right - one clear reading order
                         // instead of the clock figure, name, Arabic name, and
@@ -752,8 +755,8 @@ class _HomeScreenState extends State<HomeScreen>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              width: 58,
-                              height: 58,
+                              width: 50,
+                              height: 50,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: AppColors.emerald.withOpacity(0.08),
@@ -764,11 +767,11 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                               child: Icon(
                                 _iconFor(next.$1),
-                                size: 26,
+                                size: 22,
                                 color: AppColors.emerald,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -786,7 +789,7 @@ class _HomeScreenState extends State<HomeScreen>
                                         next.$1,
                                         style: const TextStyle(
                                           fontFamily: AppFonts.serif,
-                                          fontSize: 19,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.text,
                                         ),
@@ -795,17 +798,22 @@ class _HomeScreenState extends State<HomeScreen>
                                       Text(
                                         _arabicFor(next.$1),
                                         style: AppText.arabic.copyWith(
-                                          fontSize: 17,
+                                          fontSize: 16,
                                           color: AppColors.emerald,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 3),
+                                  // LIGHTER WEIGHT than AppText.hero's default
+                                  // w600 - a premium display figure reads as
+                                  // refined at a lighter weight, not as loud
+                                  // as the rest of the card was.
                                   Text(
                                     _clockLabel(next.$2),
                                     style: AppText.hero.copyWith(
-                                      fontSize: 32,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w400,
                                       color: AppColors.emerald,
                                     ),
                                   ),
@@ -814,7 +822,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         // Countdown and jamat, EQUALLY WEIGHTED.
                         //
                         // Same size box, same font size, same font weight -
@@ -1374,10 +1382,10 @@ class _NextPrayerStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
