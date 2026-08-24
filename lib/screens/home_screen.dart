@@ -697,14 +697,14 @@ class _HomeScreenState extends State<HomeScreen>
             child: Column(
               children: [
                 const DiamondRule(),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 // The label went missing when I compacted this block, leaving a
                 // bare time with no indication of what it was.
                 Text(
                   S.nextPrayer.toUpperCase(),
                   style: AppText.eyebrow.copyWith(color: AppColors.textMuted),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 if (next == null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
@@ -715,68 +715,116 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                 else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  // REBUILT AS A CENTRED COLUMN, not a Row.
+                  //
+                  // The old layout put the 32pt clock figure, the prayer name,
+                  // its Arabic name, the countdown, and the jamat time all in
+                  // one row - five different sizes and weights fighting for
+                  // attention with no clear order to read them in, which is
+                  // what actually read as "cluttered" rather than any one
+                  // piece being wrong on its own.
+                  //
+                  // Now: name above, then the time with a halo behind it as a
+                  // focal centre, then countdown and jamat as two small pills
+                  // below rather than competing inline text - one thing at a
+                  // time, top to bottom.
+                  Column(
                     children: [
-                      Text(
-                        _clockLabel(next.$2),
-                        style: AppText.hero
-                            .copyWith(fontSize: 32, color: AppColors.emerald),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                next.$1,
-                                style: const TextStyle(
-                                  fontFamily: AppFonts.serif,
-                                  fontSize: 17,
-                                  color: AppColors.text,
-                                ),
-                              ),
-                              const SizedBox(width: 7),
-                              Text(
-                                _arabicFor(next.$1),
-                                style: AppText.arabic.copyWith(
-                                    fontSize: 15, color: AppColors.gold),
-                              ),
-                            ],
-                          ),
                           Text(
-                            _countdownLabel(next.$2),
-                            style: AppText.caption
-                                .copyWith(color: AppColors.textMuted),
+                            next.$1,
+                            style: const TextStyle(
+                              fontFamily: AppFonts.serif,
+                              fontSize: 17,
+                              color: AppColors.text,
+                            ),
                           ),
-                          // THE JAMAT TIME, if this masjid publishes one.
-                          //
-                          // The block said when the azan is and nothing else —
-                          // but the time someone has to leave the house for is
-                          // the jamat. It was already on screen in the list
-                          // below; putting it here means the block answers the
-                          // whole question.
-                          if (_jamatFor(masjid, next.$1).isNotEmpty) ...[
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                const Icon(Icons.groups_outlined,
-                                    size: 13, color: AppColors.gold),
-                                const SizedBox(width: 5),
-                                Text(
-                                  '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
-                                  style: AppText.caption.copyWith(
-                                      color: AppColors.gold,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
+                          const SizedBox(width: 7),
+                          Text(
+                            _arabicFor(next.$1),
+                            style: AppText.arabic.copyWith(
+                                fontSize: 15, color: AppColors.gold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      SizedBox(
+                        height: 108,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const PrayerHalo(size: 132),
+                            Text(
+                              _clockLabel(next.$2),
+                              style: AppText.hero
+                                  .copyWith(fontSize: 34, color: AppColors.emerald),
                             ),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Countdown and jamat as pills, not bare inline text -
+                      // each is now one clear fact instead of a caption line
+                      // sharing space with a badge.
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.emerald.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _countdownLabel(next.$2),
+                              style: AppText.caption
+                                  .copyWith(color: AppColors.emerald),
+                            ),
+                          ),
+                          // JAMAT, IN GOLD - not bold black.
+                          //
+                          // Bold-black-on-ivory reads as "this number is more
+                          // important", but next to the emerald countdown
+                          // pill it just looked heavier, not more premium -
+                          // two different weights of the same colour is what
+                          // made the block feel basic. Gold is already this
+                          // app's accent for exactly this kind of highlight
+                          // (the JAMAT column heading, sajdah and ruku marks,
+                          // every ornament on the page) - matching it here
+                          // ties the whole block together instead of adding a
+                          // one-off bold treatment.
+                          if (_jamatFor(masjid, next.$1).isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.gold.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: AppColors.gold.withOpacity(0.4)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.groups_outlined,
+                                      size: 13, color: AppColors.gold),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
+                                    style: AppText.caption.copyWith(
+                                        color: AppColors.gold,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ],
@@ -1107,6 +1155,15 @@ class _HomeScreenState extends State<HomeScreen>
                       textAlign: TextAlign.right,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
+                      // GOLD, not bold black.
+                      //
+                      // Same colour as azan but bolder read as "the app just
+                      // made this one darker" rather than "this is the
+                      // important time" - gold is this app's actual accent
+                      // for a highlight (same colour as the JAMAT column
+                      // heading above), so using it here says the same thing
+                      // the bold weight was trying to, in the app's own
+                      // visual language instead of borrowed weight.
                       style: AppText.listTime.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -1114,7 +1171,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ? AppColors.textFaint
                             : (rows[i].$1 == nextLabel
                                 ? AppColors.emerald
-                                : AppColors.text),
+                                : AppColors.gold),
                       ),
                     ),
                   ),
