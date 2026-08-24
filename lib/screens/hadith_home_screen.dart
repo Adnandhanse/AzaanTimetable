@@ -67,17 +67,30 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
                   builder: (_) => const HadithBookmarksScreen()),
             ),
           ),
-          PopupMenuButton<HadithLanguage>(
-            icon: const Icon(Icons.translate, size: 20),
-            onSelected: _setLanguage,
-            itemBuilder: (_) => const <PopupMenuEntry<HadithLanguage>>[
-              PopupMenuItem<HadithLanguage>(
-                  value: HadithLanguage.english, child: Text('English')),
-              PopupMenuItem<HadithLanguage>(
-                  value: HadithLanguage.urdu, child: Text('اردو (Urdu)')),
-            ],
-          ),
         ],
+        // Directly visible, not a translate-icon popup menu that gave no
+        // hint it was even there - same fix as the Qur'an section's language
+        // bar, and for the same reason.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(44),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Row(
+              children: <Widget>[
+                _LangSegment(
+                  label: 'English',
+                  selected: _language == HadithLanguage.english,
+                  onTap: () => _setLanguage(HadithLanguage.english),
+                ),
+                _LangSegment(
+                  label: '\u0627\u0631\u062F\u0648',
+                  selected: _language == HadithLanguage.urdu,
+                  onTap: () => _setLanguage(HadithLanguage.urdu),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -256,6 +269,54 @@ class _BookCard extends StatelessWidget {
                     .copyWith(fontSize: 10.5, color: AppColors.textMuted),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// English/Urdu bar at the top of the Hadith section, replacing what used
+/// to be a hidden translate-icon popup menu.
+class _LangSegment extends StatelessWidget {
+  const _LangSegment({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3),
+        child: Material(
+          color: selected ? AppColors.emerald : AppColors.white,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: selected ? AppColors.emerald : AppColors.goldRule,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: AppText.caption.copyWith(
+                  color: selected ? AppColors.white : AppColors.textMuted,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ),
           ),
         ),
       ),
