@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -299,67 +297,6 @@ class Medallion extends StatelessWidget {
               : Icon(icon, size: size * 0.5, color: content),
         ),
       ),
-    );
-  }
-}
-
-class _PrayerHaloPainter extends CustomPainter {
-  const _PrayerHaloPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Offset center = size.center(Offset.zero);
-    final double r = size.width / 2;
-
-    // A faint emerald wash behind the digits, not a shape competing with
-    // them - the point is a focal centre for the block, not a decoration
-    // loud enough to fight the number sitting on it.
-    canvas.drawCircle(center, r, Paint()..color = AppColors.emerald.withOpacity(0.05));
-
-    canvas.drawCircle(
-      center,
-      r - 1,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.3
-        ..color = AppColors.gold.withOpacity(0.55),
-    );
-
-    // Twelve ticks round the ring - a sundial gesture, since this circle is
-    // marking a moment in the day, without drawing an actual clock face
-    // that would compete with the digital time sitting inside it.
-    for (int i = 0; i < 12; i++) {
-      final double angle = (i / 12) * 2 * math.pi;
-      final Offset direction = Offset(math.cos(angle), math.sin(angle));
-      final bool major = i % 3 == 0;
-      canvas.drawLine(
-        center + direction * (r - (major ? 9 : 5)),
-        center + direction * r,
-        Paint()
-          ..color = AppColors.gold.withOpacity(major ? 0.55 : 0.3)
-          ..strokeWidth = major ? 1.4 : 1,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _PrayerHaloPainter old) => false;
-}
-
-/// The soft ringed backdrop behind the next-prayer clock figure on the home
-/// screen. A plain number sitting in open space read as clutter's opposite
-/// problem - not too busy, just no focal point for the eye to land on; this
-/// gives the block a centre without adding more text or icons to read.
-class PrayerHalo extends StatelessWidget {
-  const PrayerHalo({super.key, this.size = 150});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.square(size),
-      painter: const _PrayerHaloPainter(),
     );
   }
 }

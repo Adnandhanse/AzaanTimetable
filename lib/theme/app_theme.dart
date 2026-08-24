@@ -19,6 +19,12 @@ class AppColors {
   static const Color emerald = Color(0xFF0F5E3A); // primary
   static const Color emeraldTint = Color(0xFF2C6653); // ring track on emerald
   static const Color gold = Color(0xFFC79A2E); // accent, ornament
+  // Muted, sophisticated gold used specifically for JAMAT time values - kept
+  // separate from the brighter ornamental `gold` above (rules, medallions,
+  // sajdah/ruku marks) so this one change doesn't ripple into every gold
+  // accent in the app. Not bright yellow, not dark mustard - a champagne
+  // tone, per spec.
+  static const Color champagneGold = Color(0xFFB08D57);
   static const Color goldRule = Color(0xFFE8DFC9); // hairline borders
   static const Color goldRuleFaint = Color(0xFFEFE7D3); // list separators
   static const Color goldPale = Color(0xFFD9C27E); // labels on emerald

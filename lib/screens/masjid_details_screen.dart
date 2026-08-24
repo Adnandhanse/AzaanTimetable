@@ -99,7 +99,7 @@ class MasjidDetailsScreen extends StatelessWidget {
                       child: Text('JAMAT',
                           textAlign: TextAlign.right,
                           style: AppText.eyebrow.copyWith(
-                              fontSize: 9, color: AppColors.gold)),
+                              fontSize: 9, color: AppColors.champagneGold)),
                     ),
                   ],
                 ),
@@ -138,8 +138,11 @@ class MasjidDetailsScreen extends StatelessWidget {
               flex: 3,
               child: Text(azan,
                   textAlign: TextAlign.right,
+                  // Deep emerald, same weight as jamat below - see the note
+                  // on home_screen.dart's list rows for why weight no longer
+                  // carries the distinction between the two columns.
                   style: const TextStyle(
-                      fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                      fontWeight: FontWeight.w600, color: AppColors.emerald)),
             ),
             if (jamat.trim().isNotEmpty || true)
               Expanded(
@@ -151,7 +154,7 @@ class MasjidDetailsScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: jamat.trim().isEmpty
                         ? AppColors.textFaint
-                        : AppColors.text,
+                        : AppColors.champagneGold,
                   ),
                 ),
               ),

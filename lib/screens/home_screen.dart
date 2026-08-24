@@ -119,6 +119,17 @@ class _HomeScreenState extends State<HomeScreen>
     return '';
   }
 
+  /// The icon for a prayer label, for the next-prayer card - matches
+  /// _prayerIcons' order without hardcoding an index at the call site.
+  static IconData _iconFor(String label) {
+    if (label == S.fajr) return _prayerIcons[0];
+    if (label == S.dhuhr) return _prayerIcons[1];
+    if (label == S.asr) return _prayerIcons[2];
+    if (label == S.maghrib) return _prayerIcons[3];
+    if (label == S.isha) return _prayerIcons[4];
+    return _prayerIcons[5];
+  }
+
   static const List<IconData> _prayerIcons = <IconData>[
     Icons.wb_twilight,        // Fajr
     Icons.wb_sunny_outlined,  // Dhuhr
@@ -696,15 +707,6 @@ class _HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Column(
               children: [
-                const DiamondRule(),
-                const SizedBox(height: 10),
-                // The label went missing when I compacted this block, leaving a
-                // bare time with no indication of what it was.
-                Text(
-                  S.nextPrayer.toUpperCase(),
-                  style: AppText.eyebrow.copyWith(color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 6),
                 if (next == null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
@@ -715,122 +717,135 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                 else
-                  // REBUILT AS A CENTRED COLUMN, not a Row.
-                  //
-                  // The old layout put the 32pt clock figure, the prayer name,
-                  // its Arabic name, the countdown, and the jamat time all in
-                  // one row - five different sizes and weights fighting for
-                  // attention with no clear order to read them in, which is
-                  // what actually read as "cluttered" rather than any one
-                  // piece being wrong on its own.
-                  //
-                  // Now: name above, then the time with a halo behind it as a
-                  // focal centre, then countdown and jamat as two small pills
-                  // below rather than competing inline text - one thing at a
-                  // time, top to bottom.
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            next.$1,
-                            style: const TextStyle(
-                              fontFamily: AppFonts.serif,
-                              fontSize: 17,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            _arabicFor(next.$1),
-                            style: AppText.arabic.copyWith(
-                                fontSize: 15, color: AppColors.gold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      SizedBox(
-                        height: 108,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            const PrayerHalo(size: 132),
-                            Text(
-                              _clockLabel(next.$2),
-                              style: AppText.hero
-                                  .copyWith(fontSize: 34, color: AppColors.emerald),
-                            ),
-                          ],
+                  // A CARD OF ITS OWN, not text sitting directly on the ivory
+                  // sheet - white/off-white, rounded, its own soft shadow, so
+                  // it reads as one clear object rather than a loose cluster
+                  // of text and icons on the page background.
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          color: Color(0x14000000),
+                          blurRadius: 20,
+                          offset: Offset(0, 8),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      // Countdown and jamat as pills, not bare inline text -
-                      // each is now one clear fact instead of a caption line
-                      // sharing space with a badge.
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.emerald.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              _countdownLabel(next.$2),
-                              style: AppText.caption
-                                  .copyWith(color: AppColors.emerald),
-                            ),
-                          ),
-                          // JAMAT, IN GOLD - not bold black.
-                          //
-                          // Bold-black-on-ivory reads as "this number is more
-                          // important", but next to the emerald countdown
-                          // pill it just looked heavier, not more premium -
-                          // two different weights of the same colour is what
-                          // made the block feel basic. Gold is already this
-                          // app's accent for exactly this kind of highlight
-                          // (the JAMAT column heading, sajdah and ruku marks,
-                          // every ornament on the page) - matching it here
-                          // ties the whole block together instead of adding a
-                          // one-off bold treatment.
-                          if (_jamatFor(masjid, next.$1).isNotEmpty)
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          S.nextPrayer.toUpperCase(),
+                          style: AppText.eyebrow
+                              .copyWith(color: AppColors.textMuted),
+                        ),
+                        const SizedBox(height: 16),
+                        // Icon on the left in a subtle circular outline, name
+                        // and time on the right - one clear reading order
+                        // instead of the clock figure, name, Arabic name, and
+                        // countdown all competing on one line.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
+                              width: 58,
+                              height: 58,
                               decoration: BoxDecoration(
-                                color: AppColors.gold.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
+                                shape: BoxShape.circle,
+                                color: AppColors.emerald.withOpacity(0.08),
                                 border: Border.all(
-                                    color: AppColors.gold.withOpacity(0.4)),
+                                  color: AppColors.emerald.withOpacity(0.25),
+                                  width: 1.4,
+                                ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                              child: Icon(
+                                _iconFor(next.$1),
+                                size: 26,
+                                color: AppColors.emerald,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.groups_outlined,
-                                      size: 13, color: AppColors.gold),
-                                  const SizedBox(width: 5),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      // A refined serif for the name -
+                                      // premium and readable, distinct from
+                                      // the clean sans the time is set in
+                                      // below.
+                                      Text(
+                                        next.$1,
+                                        style: const TextStyle(
+                                          fontFamily: AppFonts.serif,
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.text,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        _arabicFor(next.$1),
+                                        style: AppText.arabic.copyWith(
+                                          fontSize: 17,
+                                          color: AppColors.emerald,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
-                                    style: AppText.caption.copyWith(
-                                        color: AppColors.gold,
-                                        fontWeight: FontWeight.w700),
+                                    _clockLabel(next.$2),
+                                    style: AppText.hero.copyWith(
+                                      fontSize: 32,
+                                      color: AppColors.emerald,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Countdown and jamat, EQUALLY WEIGHTED.
+                        //
+                        // Same size box, same font size, same font weight -
+                        // the only thing that tells them apart is the icon
+                        // and the colour (emerald for azan's countdown,
+                        // champagne gold for jamat), not one being larger or
+                        // bolder than the other.
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: _NextPrayerStat(
+                                icon: Icons.access_time,
+                                label: _countdownLabel(next.$2),
+                                color: AppColors.emerald,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _NextPrayerStat(
+                                icon: Icons.groups_outlined,
+                                label: _jamatFor(masjid, next.$1).isEmpty
+                                    ? '${S.jamatLabel} \u2014'
+                                    : '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
+                                color: AppColors.champagneGold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                const SizedBox(height: 12),
-                const DiamondRule(),
               ],
             ),
           ),
@@ -1006,7 +1021,7 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Text(S.jamatLabel.toUpperCase(),
                       textAlign: TextAlign.right,
                       style: AppText.eyebrow.copyWith(
-                          fontSize: 9, letterSpacing: 1, color: AppColors.gold)),
+                          fontSize: 9, letterSpacing: 1, color: AppColors.champagneGold)),
                 ),
               ],
             ),
@@ -1124,24 +1139,19 @@ class _HomeScreenState extends State<HomeScreen>
                       textAlign: TextAlign.right,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
-                      // SAME SIZE AND SAME COLOUR AS THE JAMAT COLUMN.
+                      // SAME SIZE, SAME FAMILY, SAME WEIGHT AS JAMAT.
                       //
-                      // Azan was 15sp in muted grey against jamat at 16sp in
-                      // near-black. Two different sizes and two different
-                      // colours in adjacent columns read as misaligned even
-                      // when the baselines match, which is what you were
-                      // seeing.
-                      //
-                      // Both are now 16sp in the same colour, and only the
-                      // WEIGHT differs — jamat semibold, azan regular. That is
-                      // enough to say which matters more without making the
-                      // row look broken.
+                      // Weight used to be the thing that told azan and jamat
+                      // apart (regular vs semibold) - but two different
+                      // weights of the same colour read as "one of these got
+                      // heavier", not as two equally-important facts. Now
+                      // both are w600, and colour alone carries the
+                      // distinction: emerald for azan, champagne gold for
+                      // jamat.
                       style: AppText.listTime.copyWith(
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: rows[i].$1 == nextLabel
-                            ? AppColors.emerald
-                            : AppColors.text,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.emerald,
                       ),
                     ),
                   ),
@@ -1155,23 +1165,21 @@ class _HomeScreenState extends State<HomeScreen>
                       textAlign: TextAlign.right,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
-                      // GOLD, not bold black.
-                      //
-                      // Same colour as azan but bolder read as "the app just
-                      // made this one darker" rather than "this is the
-                      // important time" - gold is this app's actual accent
-                      // for a highlight (same colour as the JAMAT column
-                      // heading above), so using it here says the same thing
-                      // the bold weight was trying to, in the app's own
-                      // visual language instead of borrowed weight.
+                      // Champagne gold, same size and weight as azan above -
+                      // see the note on that Text for why only colour now
+                      // carries the distinction. Stays gold even on the
+                      // active row - the colour system is meant to be
+                      // stable (azan is always emerald, jamat is always
+                      // gold); the active row is already marked by its own
+                      // tinted background, left edge, and emerald icon
+                      // circle, so the time colours don't need to do that
+                      // job too.
                       style: AppText.listTime.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: rows[i].$4.trim().isEmpty
                             ? AppColors.textFaint
-                            : (rows[i].$1 == nextLabel
-                                ? AppColors.emerald
-                                : AppColors.gold),
+                            : AppColors.champagneGold,
                       ),
                     ),
                   ),
@@ -1343,6 +1351,53 @@ class _PressCardState extends State<_PressCard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// One of the two equally-weighted facts at the bottom of the Next Prayer
+/// card - countdown and jamat. Same box, same text style for both; only the
+/// icon and colour passed in differ, so neither can end up visually heavier
+/// than the other by accident.
+class _NextPrayerStat extends StatelessWidget {
+  const _NextPrayerStat({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: AppText.caption.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
