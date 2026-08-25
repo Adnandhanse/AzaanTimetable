@@ -209,19 +209,30 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                 // cover has nothing left to crop and nothing is letterboxed
                 // either. The height now follows the screen width instead of
                 // being guessed.
+                // CONTAIN, NOT COVER - and a background matched to the
+                // artwork's own tone.
+                //
+                // AspectRatio matched to the exact source ratio (400/235)
+                // should make cover crop-free in principle, but this was
+                // still coming back reported as cropped top and bottom after
+                // that fix. Rather than keep chasing the exact rounding or
+                // constraint that's doing it, contain sidesteps the question
+                // entirely - it CANNOT crop, ever, regardless of any mismatch
+                // between the box's actual rendered ratio and the image's,
+                // on any device. The tradeoff is a possible sliver of
+                // letterboxing if that mismatch exists, which is why the
+                // backdrop is cream (AppColors.cream) rather than white -
+                // sampled directly from the artwork's own background colour,
+                // so any such margin blends in rather than showing a harder
+                // white edge.
                 Container(
                   width: double.infinity,
-                  color: AppColors.white,
+                  color: AppColors.cream,
                   child: AspectRatio(
-                    // The exact ratio (400/235), not the rounded 1.70 - a
-                    // rounding difference this small (1.70 vs 1.70213) would
-                    // only shave a couple of pixels off top or bottom under
-                    // cover, but there's no reason to leave even that on the
-                    // table when the exact source ratio is known.
                     aspectRatio: 400 / 235,
                     child: Image.asset(
                       'assets/images/quran_header.webp',
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                       semanticLabel: 'Illustration of the Qur\u2019an on a stand',
                     ),
                   ),

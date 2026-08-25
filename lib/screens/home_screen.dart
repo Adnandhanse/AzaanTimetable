@@ -1037,7 +1037,7 @@ class _HomeScreenState extends State<HomeScreen>
                 Expanded(
                   flex: 4,
                   child: Text(S.azanLabel.toUpperCase(),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.center,
                       style: AppText.eyebrow.copyWith(
                           fontSize: 9, letterSpacing: 1, color: AppColors.textFaint)),
                 ),
@@ -1045,7 +1045,7 @@ class _HomeScreenState extends State<HomeScreen>
                 Expanded(
                   flex: 4,
                   child: Text(S.jamatLabel.toUpperCase(),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.center,
                       style: AppText.eyebrow.copyWith(
                           fontSize: 9, letterSpacing: 1, color: AppColors.champagneGold)),
                 ),

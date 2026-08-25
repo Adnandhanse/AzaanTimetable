@@ -90,14 +90,14 @@ class MasjidDetailsScreen extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: Text('AZAN',
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.center,
                           style: AppText.eyebrow.copyWith(
                               fontSize: 9, color: AppColors.textFaint)),
                     ),
                     Expanded(
                       flex: 3,
                       child: Text('JAMAT',
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.center,
                           style: AppText.eyebrow.copyWith(
                               fontSize: 9, color: AppColors.champagneGold)),
                     ),
