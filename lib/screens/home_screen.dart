@@ -1162,7 +1162,7 @@ class _HomeScreenState extends State<HomeScreen>
                       // meridiem is needed but does not need to compete with
                       // the digits.
                       _splitTime(rows[i].$2).$1,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
                       // SAME SIZE, SAME FAMILY, SAME WEIGHT AS JAMAT.
@@ -1190,7 +1190,7 @@ class _HomeScreenState extends State<HomeScreen>
                       rows[i].$4.trim().isEmpty
                           ? '\u2014'
                           : _splitTime(rows[i].$4).$1,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.visible,
                       // Champagne gold, same size and weight as azan above -

@@ -137,7 +137,7 @@ class MasjidDetailsScreen extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Text(azan,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                   // Deep emerald, same weight as jamat below - see the note
                   // on home_screen.dart's list rows for why weight no longer
                   // carries the distinction between the two columns.
@@ -149,7 +149,7 @@ class MasjidDetailsScreen extends StatelessWidget {
                 flex: 3,
                 child: Text(
                   jamat.trim().isEmpty ? '\u2014' : jamat,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: jamat.trim().isEmpty
