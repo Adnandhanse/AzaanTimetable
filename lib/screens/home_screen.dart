@@ -808,11 +808,14 @@ class _HomeScreenState extends State<HomeScreen>
                                   // LIGHTER WEIGHT than AppText.hero's default
                                   // w600 - a premium display figure reads as
                                   // refined at a lighter weight, not as loud
-                                  // as the rest of the card was.
+                                  // as the rest of the card was. Also a size
+                                  // down again (28 -> 24), still clearly the
+                                  // largest text on the card without dominating
+                                  // it the way the original 44sp hero size did.
                                   Text(
                                     _clockLabel(next.$2),
                                     style: AppText.hero.copyWith(
-                                      fontSize: 28,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.w400,
                                       color: AppColors.emerald,
                                     ),
@@ -857,6 +860,11 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
           ),
+          // GAP ADDED HERE. The card above had zero bottom padding, so its
+          // pills sat almost flush against the AZAN/JAMAT header of the list
+          // below - the "cramped, overlapping" look, even though the header
+          // row itself was correctly aligned to its columns underneath it.
+          const SizedBox(height: 22),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _prayerTimesList(masjid, next?.$1),
@@ -1011,7 +1019,7 @@ class _HomeScreenState extends State<HomeScreen>
       children: [
         if (showJamat)
           Padding(
-            padding: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.only(bottom: 10),
             child: Row(
               children: [
                 // THIS NOW MIRRORS THE DATA ROW BELOW EXACTLY: same 36px icon
@@ -1162,13 +1170,15 @@ class _HomeScreenState extends State<HomeScreen>
                       // Weight used to be the thing that told azan and jamat
                       // apart (regular vs semibold) - but two different
                       // weights of the same colour read as "one of these got
-                      // heavier", not as two equally-important facts. Now
-                      // both are w600, and colour alone carries the
-                      // distinction: emerald for azan, champagne gold for
-                      // jamat.
+                      // heavier", not as two equally-important facts. Colour
+                      // alone now carries the distinction: emerald for azan,
+                      // champagne gold for jamat. Also a size and a weight
+                      // down again (16/w600 -> 15/w500) - still clearly
+                      // readable, just no longer competing with the card
+                      // above it for attention.
                       style: AppText.listTime.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.emerald,
                       ),
                     ),
@@ -1193,8 +1203,8 @@ class _HomeScreenState extends State<HomeScreen>
                       // circle, so the time colours don't need to do that
                       // job too.
                       style: AppText.listTime.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
                         color: rows[i].$4.trim().isEmpty
                             ? AppColors.textFaint
                             : AppColors.champagneGold,
