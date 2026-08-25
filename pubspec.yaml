@@ -74,6 +74,18 @@ flutter_launcher_icons:
   # The foreground is the mark on a transparent background, scaled to 66% so it
   # sits inside the safe zone every launcher mask leaves alone. The background is
   # a flat colour, which is what lets the launcher do its parallax and masking.
+  #
+  # IMPORTANT: source artwork is almost never pre-padded like this - a design
+  # exported at full bleed (content touching every edge, no transparent
+  # margin) gets its edges cropped by Android's adaptive mask regardless of
+  # how it looks in Photoshop or in an emulator preview that doesn't apply
+  # the safe-zone crop. Before pointing adaptive_icon_foreground at a new
+  # image, run it through scripts/make_adaptive_icon.py first - it re-centers
+  # ANY square source image onto a transparent canvas at this same 66%, so
+  # this stays correct no matter what gets uploaded next:
+  #
+  #     python3 scripts/make_adaptive_icon.py path/to/new_icon.png
+  #     flutter pub run flutter_launcher_icons
   adaptive_icon_background: "#0F5E3A"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
 

@@ -1014,18 +1014,28 @@ class _HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.only(bottom: 6),
             child: Row(
               children: [
-                const Spacer(),
-                // Headings sized with the same flex as the columns below, so
-                // they cannot drift out of alignment on a narrow screen.
+                // THIS NOW MIRRORS THE DATA ROW BELOW EXACTLY: same 36px icon
+                // width, same 12px gap, same flex:3 name column - all empty,
+                // just reserving the identical space.
+                //
+                // It used to be a single Spacer(flex: 1) standing in for all
+                // three of those at once, sized against a totally different
+                // flex total (7, vs the data row's 11) - so it covered a
+                // different fraction of the row's width than the icon+name
+                // actually take up below it, which is exactly why AZAN and
+                // JAMAT didn't land above their own columns.
+                const SizedBox(width: 48),
+                const Expanded(flex: 3, child: SizedBox.shrink()),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text(S.azanLabel.toUpperCase(),
                       textAlign: TextAlign.right,
                       style: AppText.eyebrow.copyWith(
                           fontSize: 9, letterSpacing: 1, color: AppColors.textFaint)),
                 ),
+                const SizedBox(width: 6),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text(S.jamatLabel.toUpperCase(),
                       textAlign: TextAlign.right,
                       style: AppText.eyebrow.copyWith(
