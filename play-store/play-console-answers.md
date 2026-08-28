@@ -170,6 +170,48 @@ If you keep it, justify it as:
 
 ---
 
+# FOREGROUND SERVICE TYPE JUSTIFICATIONS
+
+**Policy → App content → Declare foreground service permissions** (only appears
+for whichever `foregroundServiceType` values are actually declared on the
+service in `android/app/src/main/AndroidManifest.xml` — check that file for
+the exact list before answering).
+
+## FOREGROUND_SERVICE_MEDIA_PLAYBACK
+
+**Answer: Media playback**
+
+*Why:* This is the whole reason the service exists. `PrayerAlarmTaskHandler`
+runs so the azan can play reliably even when the OS would otherwise kill a
+plain scheduled alarm (see the class comment in
+`foreground_alarm_service.dart`) — `_playAzan` plays the call to prayer
+through `audioplayers` with `AndroidUsageType.alarm`. Not picture-in-picture,
+nothing else applies.
+
+## FOREGROUND_SERVICE_DATA_SYNC
+
+**You no longer need to answer this question.**
+
+Traced this to the source: `.github/workflows/build.yml` generates
+`android/app/src/main/AndroidManifest.xml` fresh on every build (it is not a
+committed file - see the "Generate platform folders" step), and two separate
+steps in that script write to it:
+
+- The "Add location and notification permissions" step used to add
+  `FOREGROUND_SERVICE_DATA_SYNC` as a bare `<uses-permission>`.
+- The "Add required foreground service declaration" step attaches
+  `android:foregroundServiceType="mediaPlayback"` to the actual `<service>`
+  element - `dataSync` was never in that list.
+
+So `dataSync` was declared but never attached to any service - dead weight
+in the manifest, not something the app actually does. Removed the line from
+the workflow (see the diff to `build.yml`). Once a build runs with that
+change, Play Console's declaration form should not ask about
+`FOREGROUND_SERVICE_DATA_SYNC` at all, because the permission will no longer
+be declared.
+
+---
+
 # APP ACCESS
 
 Play asks whether any part of the app is behind a login. Answer **yes**, and
