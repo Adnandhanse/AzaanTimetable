@@ -142,8 +142,27 @@ Two permissions require a written justification.
 
 ## SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM
 
-You will be asked to declare this under **App content → Sensitive app
-permissions**. Prayer times are an accepted use. Say:
+**USE_EXACT_ALARM has been removed from the manifest** (see `build.yml`) - Play
+restricts it to apps whose core functionality IS an alarm clock or calendar
+app. This app's actual listing - masjid directory, prayer times, Qur'an,
+Hadith, duas - does not read as either of those to a reviewer, and claiming
+otherwise on the "core functionality" question is a misrepresentation risk far
+worse than losing this permission.
+
+If Play Console still asks "What is the core functionality of your app?"
+(Alarm clock / Calendar) for an already-uploaded build, that question is about
+that build specifically. Once a build without `USE_EXACT_ALARM` is uploaded,
+the question should not appear again.
+
+Losing `USE_EXACT_ALARM` has no real functional impact: the app already has a
+complete `SCHEDULE_EXACT_ALARM` permission flow (`NotificationService
+.openExactAlarmSettings`, surfaced in `setup_wizard_screen.dart` and
+`alarm_health_screen.dart`) for exactly this case - it just becomes the path
+every user goes through, rather than a rare fallback for the few who did not
+qualify for the automatic grant.
+
+`SCHEDULE_EXACT_ALARM` itself is still declared and does need justifying, if
+asked, under **App content → Sensitive app permissions**:
 
 > The app sounds the call to prayer (azan) at the exact times published by the
 > user's chosen mosque. Prayer times are religious obligations tied to precise

@@ -401,9 +401,11 @@ class NotificationService {
   }
 
   /// Exact alarms have NO system dialog — Android only offers a settings screen
-  /// for this one. On Android 14+ it is usually already granted, because the
-  /// manifest declares USE_EXACT_ALARM, which the OS grants automatically to
-  /// apps whose core purpose is alarms.
+  /// for this one. The manifest no longer declares USE_EXACT_ALARM (Play policy
+  /// restricts that to apps whose core function is an alarm clock or calendar,
+  /// which this app is not), so this settings screen is now how EVERY user
+  /// grants it, not just a rare fallback - already wired into setup_wizard_screen.dart
+  /// and alarm_health_screen.dart.
   static Future<void> openExactAlarmSettings() async {
     // permission_handler first: on Android 14+ this can return granted without
     // showing anything at all.
