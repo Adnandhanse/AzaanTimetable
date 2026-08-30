@@ -34,6 +34,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
   bool _isPlaying = false;
   bool _isSaving = false;
   bool _isUploadingAudio = false;
+  bool _isRemovingAudio = false;
 
   late String? _audioName;
   late String? _audioUrl;
@@ -160,6 +161,66 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     }
   }
 
+  Future<void> _removeAzanAudio() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove this recording?'),
+        content: Text(
+          'Everyone following this masjid will go back to the default azan '
+          'sound. "${_audioName ?? ''}" will be deleted - you would need to '
+          'upload it again to bring it back.',
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Remove', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _isRemovingAudio = true);
+    try {
+      if (_isPlaying) {
+        await _player.stop();
+        _isPlaying = false;
+      }
+
+      // Delete the actual file from Storage too - not just the reference to
+      // it - so it doesn't sit there unused forever. refFromURL rebuilds the
+      // Storage reference from the download URL already on hand, same as
+      // ForegroundAlarmManager's caching does.
+      if (_audioUrl != null) {
+        try {
+          await FirebaseStorage.instance.refFromURL(_audioUrl!).delete();
+        } catch (_) {
+          // The file may already be gone, or this may be a transient network
+          // error - either way, still clear the masjid's own record below so
+          // the app stops trying to play something that may not be there.
+        }
+      }
+
+      await MasjidRepository.removeAzanAudio(widget.masjid.id);
+      if (!mounted) return;
+      setState(() {
+        _audioName = null;
+        _audioUrl = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Removed - the default azan will play from now on.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not remove: $e')));
+    } finally {
+      if (mounted) setState(() => _isRemovingAudio = false);
+    }
+  }
+
   Future<void> _togglePlayback() async {
     if (_audioUrl == null) return;
     if (_isPlaying) {
@@ -241,9 +302,23 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
               child: ListTile(
                 leading: const Icon(Icons.audiotrack, color: Color(0xFF1F5E4A)),
                 title: Text(_audioName!),
-                trailing: IconButton(
-                  icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF1F5E4A), size: 32),
-                  onPressed: _togglePlayback,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(_isPlaying ? Icons.stop_circle : Icons.play_circle, color: const Color(0xFF1F5E4A), size: 32),
+                      onPressed: _isRemovingAudio ? null : _togglePlayback,
+                    ),
+                    IconButton(
+                      icon: _isRemovingAudio
+                          ? const SizedBox(
+                              height: 20, width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.delete_outline, color: Colors.red),
+                      tooltip: 'Remove this recording',
+                      onPressed: _isRemovingAudio ? null : _removeAzanAudio,
+                    ),
+                  ],
                 ),
               ),
             ),

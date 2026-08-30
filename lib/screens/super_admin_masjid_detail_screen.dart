@@ -89,6 +89,37 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
             decoration: BoxDecoration(color: _statusColor.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
             child: Text(_currentStatus, style: TextStyle(color: _statusColor, fontWeight: FontWeight.bold)),
           ),
+          // FLAGGED FOR EXTRA SCRUTINY: this registration only got past the
+          // duplicate-registration-number block because the registrant
+          // checked "the previous admin left" - worth actually confirming
+          // before approving, not just rubber-stamping like an ordinary new
+          // registration.
+          if (m.previousAdminLeftClaim == true) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This registration number already had an active masjid. '
+                      'The registrant claimed the previous admin left - worth '
+                      'confirming before approving.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
 
           _sectionTitle('Masjid Details'),

@@ -29,8 +29,31 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
   bool _isSendingOtp = false;
   bool _isFetchingLocation = false;
+  bool _isCheckingDuplicate = false;
   double? _latitude;
   double? _longitude;
+
+  /// Set once a Verified masjid is found under the same registration number.
+  /// Shows the error card and the "previous admin left" checkbox below the
+  /// registration number field.
+  Masjid? _duplicateOf;
+  bool _previousAdminLeft = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Editing the registration number after seeing the duplicate error means
+    // they may be correcting it or trying a different masjid - the old
+    // error would otherwise sit there stale until they pressed submit again.
+    _registrationNo.addListener(() {
+      if (_duplicateOf != null) {
+        setState(() {
+          _duplicateOf = null;
+          _previousAdminLeft = false;
+        });
+      }
+    });
+  }
 
   Future<void> _useCurrentLocation() async {
     setState(() => _isFetchingLocation = true);
@@ -138,6 +161,39 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       return;
     }
 
+    // DUPLICATE REGISTRATION-NUMBER CHECK.
+    //
+    // Same registration number, and an ACTIVE (Verified) masjid already
+    // exists under it - almost certainly the same real-world masjid being
+    // registered a second time, whether by mistake or by someone with no
+    // real claim to it. Blocked by default. "Previous masjid admin left" is
+    // the one deliberate way past this - and even then, this still goes
+    // through the ordinary Pending Verification review below; checking the
+    // box does not skip approval, it only gets past this specific block.
+    if (!_previousAdminLeft) {
+      setState(() => _isCheckingDuplicate = true);
+      Masjid? existing;
+      try {
+        existing = await MasjidRepository.findActiveByRegistrationNo(
+            _registrationNo.text.trim());
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isCheckingDuplicate = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not check registration number: $e')),
+        );
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _isCheckingDuplicate = false;
+        _duplicateOf = existing;
+      });
+      if (existing != null) return; // Error card + checkbox now visible below.
+    } else {
+      setState(() => _duplicateOf = null);
+    }
+
     setState(() => _isSendingOtp = true);
 
     await AuthService.sendOtp(
@@ -182,6 +238,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       adminName: _adminName.text,
       adminMobile: _mobile.text,
       adminEmail: _email.text,
+      previousAdminLeftClaim: _previousAdminLeft ? true : null,
       prayerTimes: PrayerTimes(fajr: '--:--', dhuhr: '--:--', asr: '--:--', maghrib: '--:--', isha: '--:--', juma: '--:--'),
     );
 
@@ -211,6 +268,55 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
           children: [
             _field(_masjidName, 'Masjid Name', Icons.mosque),
             _field(_registrationNo, 'Mosque Registration No.', Icons.badge),
+            // DUPLICATE-REGISTRATION ERROR, only shown once a check has
+            // actually found an active masjid under this number.
+            if (_duplicateOf != null) ...[
+              Card(
+                color: const Color(0xFFFDECEC),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '"${_duplicateOf!.name}" is already active with this '
+                              'registration number. You cannot register a duplicate.',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      CheckboxListTile(
+                        value: _previousAdminLeft,
+                        onChanged: (v) => setState(() => _previousAdminLeft = v ?? false),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: const Text(
+                          'The previous masjid admin left - I am taking over this masjid',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      if (_previousAdminLeft)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 4, bottom: 4),
+                          child: Text(
+                            'You can submit now. This will still be reviewed by us before it goes live, same as any other registration.',
+                            style: TextStyle(fontSize: 12, color: Colors.black54),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
             const SizedBox(height: 4),
             OutlinedButton.icon(
               icon: _isFetchingLocation
@@ -258,8 +364,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
-                onPressed: _isSendingOtp ? null : _submit,
-                child: _isSendingOtp
+                onPressed: (_isSendingOtp || _isCheckingDuplicate) ? null : _submit,
+                child: (_isSendingOtp || _isCheckingDuplicate)
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text('Verify Mobile & Register', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),

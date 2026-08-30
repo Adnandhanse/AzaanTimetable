@@ -14,11 +14,37 @@ class SuperAdminDashboardScreen extends StatefulWidget {
 
 class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Name, city, address, registration number, admin name, admin mobile -
+  /// whichever of these a platform admin is likely to actually have on hand
+  /// when they're looking for one specific masjid instead of scrolling.
+  List<Masjid> _filtered(List<Masjid> masjids) {
+    if (_query.isEmpty) return masjids;
+    return masjids.where((m) {
+      return m.name.toLowerCase().contains(_query) ||
+          m.city.toLowerCase().contains(_query) ||
+          m.address.toLowerCase().contains(_query) ||
+          m.registrationNo.toLowerCase().contains(_query) ||
+          m.adminName.toLowerCase().contains(_query) ||
+          m.adminMobile.contains(_query);
+    }).toList();
   }
 
   @override
@@ -47,22 +73,54 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
           tabs: const [Tab(text: 'Pending'), Tab(text: 'All Masjids')],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          StreamBuilder<List<Masjid>>(
-            stream: MasjidRepository.streamPending(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-              return _buildList(snapshot.data!);
-            },
+          // ONE search bar above both tabs, not duplicated per tab - a
+          // platform admin looking for a specific masjid does not care
+          // which tab it happens to be sitting in.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by name, city, registration no., admin...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => _searchController.clear(),
+                      ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
           ),
-          StreamBuilder<List<Masjid>>(
-            stream: MasjidRepository.streamAll(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-              return _buildList(snapshot.data!);
-            },
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                StreamBuilder<List<Masjid>>(
+                  stream: MasjidRepository.streamPending(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                    return _buildList(_filtered(snapshot.data!));
+                  },
+                ),
+                StreamBuilder<List<Masjid>>(
+                  stream: MasjidRepository.streamAll(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                    return _buildList(_filtered(snapshot.data!));
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -71,7 +129,13 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
 
   Widget _buildList(List<Masjid> masjids) {
     if (masjids.isEmpty) {
-      return const Center(child: Text('Nothing here right now.', style: TextStyle(color: Colors.grey)));
+      return Center(
+        child: Text(
+          _query.isEmpty ? 'Nothing here right now.' : 'No masjid matches "${_searchController.text.trim()}".',
+          style: const TextStyle(color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16),

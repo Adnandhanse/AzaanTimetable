@@ -113,6 +113,14 @@ class Masjid {
   String? customAzanAudioName;
   String? customAzanAudioUrl;
 
+  /// Set when this masjid was registered despite an active masjid already
+  /// existing under the same registration number - the registrant checked
+  /// "the previous admin left" to get past that block. Surfaced to the
+  /// platform admin reviewing this registration; does not affect anything
+  /// else about how the masjid behaves. Null for the overwhelming majority
+  /// of masjids, which never hit that block at all.
+  bool? previousAdminLeftClaim;
+
   /// When the prayer times were last changed, from the SERVER clock.
   ///
   /// Null for every masjid registered before this existed, and for any that has
@@ -145,6 +153,7 @@ class Masjid {
     this.verificationDocName,
     this.customAzanAudioName,
     this.customAzanAudioUrl,
+    this.previousAdminLeftClaim,
     this.followerCount = 0,
     this.timesUpdatedAt,
   });
@@ -164,6 +173,8 @@ class Masjid {
         'verificationDocName': verificationDocName,
         'customAzanAudioName': customAzanAudioName,
         'customAzanAudioUrl': customAzanAudioUrl,
+        if (previousAdminLeftClaim == true)
+          'previousAdminLeftClaim': previousAdminLeftClaim,
       };
 
   factory Masjid.fromMap(String id, Map<String, dynamic> map) => Masjid(
@@ -188,5 +199,6 @@ class Masjid {
         verificationDocName: map['verificationDocName'],
         customAzanAudioName: map['customAzanAudioName'],
         customAzanAudioUrl: map['customAzanAudioUrl'],
+        previousAdminLeftClaim: map['previousAdminLeftClaim'] as bool?,
       );
 }

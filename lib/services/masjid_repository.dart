@@ -99,4 +99,32 @@ class MasjidRepository {
       'customAzanAudioUrl': url,
     });
   }
+
+  /// Clears the masjid's custom azan, reverting everyone following it back
+  /// to the bundled default. Does NOT delete anything about the masjid
+  /// itself - only these two fields.
+  static Future<void> removeAzanAudio(String id) async {
+    await _collection.doc(id).update({
+      'customAzanAudioName': FieldValue.delete(),
+      'customAzanAudioUrl': FieldValue.delete(),
+    });
+  }
+
+  /// The currently-active (Verified) masjid registered under this number, if
+  /// one exists. Used to block accidental or bad-faith re-registration of a
+  /// masjid that already has an active admin - see register_masjid_screen.dart.
+  ///
+  /// NOTE: this query needs a composite index on (registrationNo,
+  /// verificationStatus) - Firestore will throw with a direct link to create
+  /// it the first time this runs if that index does not exist yet.
+  static Future<Masjid?> findActiveByRegistrationNo(String registrationNo) async {
+    final snapshot = await _collection
+        .where('registrationNo', isEqualTo: registrationNo)
+        .where('verificationStatus', isEqualTo: 'Verified')
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    final doc = snapshot.docs.first;
+    return Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+  }
 }
