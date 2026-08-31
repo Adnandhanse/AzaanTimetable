@@ -127,10 +127,11 @@ jobs:
 
           android {
               namespace = "com.adnandhanse.islamconnect"
-              // Play requires new apps to target API 35 as of 2025. targetSdk
-              // is set to 35 below; compileSdk must be at least as high, so it
-              // is pinned here rather than inherited from flutter.compileSdkVersion.
-              compileSdk = 35
+              // Play requires new apps AND updates to target API 36 (Android 16)
+              // starting August 31, 2026. compileSdk must be at least as high
+              // as targetSdk, so it is pinned here rather than inherited from
+              // flutter.compileSdkVersion.
+              compileSdk = 36
               ndkVersion = flutter.ndkVersion
 
               compileOptions {
@@ -154,7 +155,7 @@ jobs:
                   // never sees it.
                   applicationId = "com.adnandhanse.islamconnect"
                   minSdk = 23
-                  targetSdk = 35
+                  targetSdk = 36
                   versionCode = flutter.versionCode
                   versionName = flutter.versionName
               }
