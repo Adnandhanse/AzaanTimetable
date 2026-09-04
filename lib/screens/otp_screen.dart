@@ -36,17 +36,39 @@ class _OtpScreenState extends State<OtpScreen> {
     }
 
     setState(() => _isVerifying = true);
+
+    // THE BUG: this used to wrap OTP verification AND onVerified() (which
+    // saves the masjid to Firestore) in the SAME try/catch, and reported
+    // every failure - from either step - as "Incorrect code, please try
+    // again." So a correct OTP with a Firestore write failure behind it
+    // (bad network, a permissions rule, anything) looked EXACTLY like a
+    // wrong OTP, sending someone back to re-type a code that was never
+    // the actual problem. Split into two separate try blocks so each
+    // failure gets reported as what it actually was.
     try {
       await AuthService.verifyOtp(
         verificationId: widget.verificationId,
         smsCode: _otpController.text,
       );
-      await widget.onVerified();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isVerifying = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Incorrect code, please try again.')),
+      );
+      return;
+    }
+
+    // The OTP itself is now confirmed correct - anything that goes wrong
+    // from here on is a DIFFERENT problem and needs to say so, not blame
+    // the code the person just typed correctly.
+    try {
+      await widget.onVerified();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isVerifying = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Verified, but something went wrong saving your registration: $e')),
       );
     }
   }
