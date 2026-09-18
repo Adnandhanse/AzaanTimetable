@@ -51,11 +51,21 @@ class _OtpScreenState extends State<OtpScreen> {
         smsCode: _otpController.text,
       );
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isVerifying = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Incorrect code, please try again.')),
-      );
+  if (!mounted) return;
+
+  setState(() => _isVerifying = false);
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('OTP Error: $e'),
+      duration: const Duration(seconds: 8),
+    ),
+  );
+
+  debugPrint('OTP VERIFICATION ERROR: $e');
+
+  return;
+}
       return;
     }
 
