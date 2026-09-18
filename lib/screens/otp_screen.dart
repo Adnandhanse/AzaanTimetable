@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
-/// Generic OTP verification screen. Used only for masjid admin
-/// registration (to prove the admin's phone is real) - regular app
-/// users never see this, to keep SMS costs down.
+/// OTP verification screen for masjid admin registration.
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
 
-  /// Called after the OTP is successfully verified. The caller decides
-  /// what happens next (e.g. save the masjid, then navigate onward).
+  /// Called after OTP is successfully verified.
   final Future<void> Function() onVerified;
 
   const OtpScreen({
@@ -25,60 +22,107 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   final TextEditingController _otpController = TextEditingController();
+
   bool _isVerifying = false;
 
+  @override
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
+
   Future<void> _verifyOtp() async {
-    if (_otpController.text.length < 4) {
+    final otp = _otpController.text.trim();
+
+    if (otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter the OTP sent to your phone')),
+        const SnackBar(
+          content: Text('Please enter the 6-digit OTP'),
+        ),
       );
       return;
     }
 
-    setState(() => _isVerifying = true);
+    setState(() {
+      _isVerifying = true;
+    });
 
-    // THE BUG: this used to wrap OTP verification AND onVerified() (which
-    // saves the masjid to Firestore) in the SAME try/catch, and reported
-    // every failure - from either step - as "Incorrect code, please try
-    // again." So a correct OTP with a Firestore write failure behind it
-    // (bad network, a permissions rule, anything) looked EXACTLY like a
-    // wrong OTP, sending someone back to re-type a code that was never
-    // the actual problem. Split into two separate try blocks so each
-    // failure gets reported as what it actually was.
+    // ---------------------------------------------------------
+    // STEP 1: Verify OTP with Firebase
+    // ---------------------------------------------------------
     try {
       await AuthService.verifyOtp(
         verificationId: widget.verificationId,
-        smsCode: _otpController.text,
+        smsCode: otp,
       );
+    } on Exception catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isVerifying = false;
+      });
+
+      debugPrint('OTP VERIFICATION ERROR: $e');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'OTP verification failed:\n$e',
+          ),
+          duration: const Duration(seconds: 10),
+        ),
+      );
+
+      return;
     } catch (e) {
-  if (!mounted) return;
+      if (!mounted) return;
 
-  setState(() => _isVerifying = false);
+      setState(() {
+        _isVerifying = false;
+      });
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('OTP Error: $e'),
-      duration: const Duration(seconds: 8),
-    ),
-  );
+      debugPrint('OTP VERIFICATION UNKNOWN ERROR: $e');
 
-  debugPrint('OTP VERIFICATION ERROR: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'OTP verification failed:\n$e',
+          ),
+          duration: const Duration(seconds: 10),
+        ),
+      );
 
-  return;
-}
       return;
     }
 
-    // The OTP itself is now confirmed correct - anything that goes wrong
-    // from here on is a DIFFERENT problem and needs to say so, not blame
-    // the code the person just typed correctly.
+    // ---------------------------------------------------------
+    // STEP 2: OTP is verified successfully
+    // Now save the masjid / continue registration.
+    // ---------------------------------------------------------
     try {
       await widget.onVerified();
+
+      if (!mounted) return;
+
+      setState(() {
+        _isVerifying = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _isVerifying = false);
+
+      setState(() {
+        _isVerifying = false;
+      });
+
+      debugPrint('POST OTP / REGISTRATION ERROR: $e');
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verified, but something went wrong saving your registration: $e')),
+        SnackBar(
+          content: Text(
+            'OTP verified, but registration could not be completed:\n$e',
+          ),
+          duration: const Duration(seconds: 10),
+        ),
       );
     }
   }
@@ -86,31 +130,62 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('OTP Verification')),
+      appBar: AppBar(
+        title: const Text('OTP Verification'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Enter the OTP sent to +91 ${widget.phoneNumber}'),
+            Text(
+              'Enter the OTP sent to +91 ${widget.phoneNumber}',
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            ),
+
             const SizedBox(height: 24),
+
             TextField(
               controller: _otpController,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              decoration: const InputDecoration(labelText: 'OTP', border: OutlineInputBorder()),
+              enabled: !_isVerifying,
+              decoration: const InputDecoration(
+                labelText: 'OTP',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
             ),
+
             const SizedBox(height: 16),
+
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1F5E4A),
+                ),
                 onPressed: _isVerifying ? null : _verifyOtp,
                 child: _isVerifying
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Verify', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Verify',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ],
