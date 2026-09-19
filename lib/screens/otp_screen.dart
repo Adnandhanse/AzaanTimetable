@@ -2,14 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
-/// OTP verification screen for masjid admin registration.
 class OtpScreen extends StatefulWidget {
-  final String phoneNumber;
-  final String verificationId;
-  final int? resendToken;
-  /// Called after OTP is successfully verified.
-  final Future<void> Function() onVerified;
-
   const OtpScreen({
     super.key,
     required this.phoneNumber,
@@ -29,11 +22,60 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   final TextEditingController _otpController = TextEditingController();
-
   bool _isVerifying = false;
   bool _isResending = false;
   StreamSubscription<dynamic>? _authSub;
   bool _autoHandled = false;
+
+  // Mutable - a resend replaces both with fresh ones from Firebase. The
+  // widget's own fields stay as the INITIAL values; these track whichever
+  // verification attempt is actually current.
+  late String _verificationId = widget.verificationId;
+  int? _resendToken;
+
+  // SMS codes expire after a few minutes - this counts down so it's obvious
+  // when "resend" is actually needed rather than someone re-typing the same
+  // now-dead code over and over.
+  static const int _codeLifetimeSeconds = 120;
+  int _secondsRemaining = _codeLifetimeSeconds;
+  Timer? _countdownTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _resendToken = widget.resendToken;
+    _startCountdown();
+
+    // Catches auto-verification (see the note in _verifyOtp) THE MOMENT it
+    // happens, rather than only when the person next presses "Verify" -
+    // most of the time now, this screen just closes itself before they've
+    // even finished manually typing the code, instead of them fighting a
+    // false "incorrect code" error for a code that verified fine already.
+    _authSub = AuthService.authStateChanges.listen((user) {
+      if (_autoHandled || _isVerifying || !mounted) return;
+      if (user != null && !user.isAnonymous) {
+        _autoHandled = true;
+        _completeVerification();
+      }
+    });
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() => _secondsRemaining = _codeLifetimeSeconds);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
+        setState(() => _secondsRemaining = 0);
+      } else {
+        setState(() => _secondsRemaining -= 1);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -43,94 +85,15 @@ class _OtpScreenState extends State<OtpScreen> {
     super.dispose();
   }
 
-  Future<void> _verifyOtp() async {
-    final otp = _otpController.text.trim();
-
-    if (otp.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter the 6-digit OTP'),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isVerifying = true;
-    });
-
-    try {
-      await AuthService.verifyOtp(
-        verificationId: _verificationId,
-        smsCode: otp,
-      );
-    } on Exception catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _isVerifying = false;
-      });
-
-      debugPrint('OTP VERIFICATION ERROR: $e');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'OTP verification failed:\n$e',
-          ),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-
-      return;
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _isVerifying = false;
-      });
-
-      debugPrint('OTP VERIFICATION UNKNOWN ERROR: $e');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'OTP verification failed:\n$e',
-          ),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-
-      return;
-    }
-
+  Future<void> _completeVerification() async {
+    setState(() => _isVerifying = true);
     try {
       await widget.onVerified();
-
-    try {
-      await widget.onVerified();
-
-      if (!mounted) return;
-
-      setState(() {
-        _isVerifying = false;
-      });
     } catch (e) {
       if (!mounted) return;
-
-      setState(() {
-        _isVerifying = false;
-      });
-
-      debugPrint('POST OTP / REGISTRATION ERROR: $e');
-
+      setState(() => _isVerifying = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'OTP verified, but registration could not be completed:\n$e',
-          ),
-          duration: const Duration(seconds: 10),
-        ),
+        SnackBar(content: Text('Verified, but something went wrong saving your registration: $e')),
       );
     }
   }
@@ -236,69 +199,42 @@ class _OtpScreenState extends State<OtpScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OTP Verification'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFF1F5E4A)),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Enter the OTP sent to +91 ${widget.phoneNumber}',
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 40),
+              Text('Enter the OTP sent to +91 ${widget.phoneNumber}',
+                  style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 20),
               TextField(
                 controller: _otpController,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
-                enabled: !_isVerifying,
-                decoration: const InputDecoration(
+                style: const TextStyle(fontSize: 22, letterSpacing: 4),
+                decoration: InputDecoration(
                   labelText: 'OTP',
-                  border: OutlineInputBorder(),
-                  counterText: '',
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F5E4A),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFC79A2E)),
                   ),
-                  onPressed: _isVerifying ? null : _verifyOtp,
-                  child: _isVerifying
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Verify',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFC79A2E)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFC79A2E), width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
-              ),
-              const SizedBox(height: 4),
-
               ),
               const SizedBox(height: 4),
               // Countdown, so it is obvious when a code has actually gone
