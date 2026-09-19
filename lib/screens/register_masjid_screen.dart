@@ -198,7 +198,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
 
     await AuthService.sendOtp(
       phoneNumber: '+91${_mobile.text}',
-      onCodeSent: (verificationId) {
+      onCodeSent: (verificationId, resendToken) {
         if (!mounted) return;
         setState(() => _isSendingOtp = false);
         Navigator.of(context).push(
@@ -206,6 +206,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             builder: (_) => OtpScreen(
               phoneNumber: _mobile.text,
               verificationId: verificationId,
+              resendToken: resendToken,
               onVerified: _saveMasjidAfterVerification,
             ),
           ),

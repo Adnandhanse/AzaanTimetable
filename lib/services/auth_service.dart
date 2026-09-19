@@ -9,6 +9,12 @@ class AuthService {
   /// Firebase Auth persists this automatically across app restarts.
   static User? get currentUser => _auth.currentUser;
 
+  /// Fires whenever the signed-in user changes - used by OtpScreen to
+  /// notice when verificationCompleted's background auto sign-in lands,
+  /// so it can move on immediately instead of waiting on a manual "Verify"
+  /// tap that would otherwise fail against an already-spent session.
+  static Stream<User?> get authStateChanges => _auth.authStateChanges();
+
   /// True only for a real (non-anonymous) signed-in account - i.e. the
   /// platform admin, who signs in with email/password rather than the
   /// anonymous sessions regular users get automatically.
@@ -45,15 +51,25 @@ class AuthService {
 
   /// Starts phone verification. Calls [onCodeSent] with the verificationId
   /// once Firebase has sent the SMS, or [onError] if something goes wrong.
+  ///
+  /// [forceResendingToken] - pass the token from a previous [onCodeSent]
+  /// call to request a genuine RESEND on the same number, rather than a
+  /// fresh verification attempt. Lets OtpScreen offer a "Resend code"
+  /// button when the SMS code expires (Firebase's codes are only valid for
+  /// a few minutes - taking too long to type it in makes even the exact
+  /// right digits get rejected, which is expected security behaviour, not
+  /// a bug - the fix is a way to get a new code without leaving the screen).
   static Future<void> sendOtp({
     required String phoneNumber,
-    required void Function(String verificationId) onCodeSent,
+    required void Function(String verificationId, int? resendToken) onCodeSent,
     required void Function(String error) onError,
+    int? forceResendingToken,
   }) async {
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
+        forceResendingToken: forceResendingToken,
         verificationCompleted: (PhoneAuthCredential credential) async {
           // Auto-retrieval on some Android devices - sign in directly.
           await _auth.signInWithCredential(credential);
@@ -62,7 +78,7 @@ class AuthService {
           onError(e.message ?? 'Verification failed');
         },
         codeSent: (String verificationId, int? resendToken) {
-          onCodeSent(verificationId);
+          onCodeSent(verificationId, resendToken);
         },
         codeAutoRetrievalTimeout: (String verificationId) {},
       );
