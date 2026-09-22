@@ -271,7 +271,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                         Text(_speaking ? S.stopWord : S.listenToTranslation),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.emerald,
-                      side: const BorderSide(color: AppColors.goldRule),
+                      side: BorderSide(color: AppColors.goldRule),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4)),
@@ -300,7 +300,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                         label: Text(S.previousWord),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
-                          side: const BorderSide(color: AppColors.goldRule),
+                          side: BorderSide(color: AppColors.goldRule),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4)),
@@ -318,7 +318,7 @@ class _HadithSingleScreenState extends State<HadithSingleScreen> {
                         label: Text(S.nextWord),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
-                          side: const BorderSide(color: AppColors.goldRule),
+                          side: BorderSide(color: AppColors.goldRule),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4)),

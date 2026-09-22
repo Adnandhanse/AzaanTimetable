@@ -75,7 +75,7 @@ class PillarDetailScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 18),
             child: Row(
               children: <Widget>[
-                const Icon(Icons.info_outline,
+                Icon(Icons.info_outline,
                     size: 19, color: AppColors.warningFg),
                 const SizedBox(width: 10),
                 Expanded(
@@ -202,7 +202,7 @@ class _StepCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 1),
                   child: Icon(Icons.compare_arrows,
                       size: 15, color: AppColors.gold),

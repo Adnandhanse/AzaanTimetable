@@ -121,6 +121,21 @@ class Masjid {
   /// of masjids, which never hit that block at all.
   bool? previousAdminLeftClaim;
 
+  /// Approximate number of people the masjid can hold. Optional - many
+  /// admins won't know an exact figure, and this is informational for
+  /// worshippers browsing, not something the app enforces.
+  int? capacity;
+
+  /// Free-text description shown on the masjid's detail page - history,
+  /// facilities, anything the admin wants visitors to know.
+  String? about;
+
+  /// Firebase Storage download URLs for the masjid's photos. Capped at 3 -
+  /// see update_prayer_times_screen.dart's upload flow, which enforces the
+  /// limit at the point of picking a photo rather than here, so the person
+  /// finds out before they've already waited for an upload.
+  List<String> photoUrls;
+
   /// When the prayer times were last changed, from the SERVER clock.
   ///
   /// Null for every masjid registered before this existed, and for any that has
@@ -156,6 +171,9 @@ class Masjid {
     this.previousAdminLeftClaim,
     this.followerCount = 0,
     this.timesUpdatedAt,
+    this.capacity,
+    this.about,
+    this.photoUrls = const <String>[],
   });
 
   Map<String, dynamic> toMap() => {
@@ -175,6 +193,9 @@ class Masjid {
         'customAzanAudioUrl': customAzanAudioUrl,
         if (previousAdminLeftClaim == true)
           'previousAdminLeftClaim': previousAdminLeftClaim,
+        'capacity': capacity,
+        'about': about,
+        'photoUrls': photoUrls,
       };
 
   factory Masjid.fromMap(String id, Map<String, dynamic> map) => Masjid(
@@ -200,5 +221,8 @@ class Masjid {
         customAzanAudioName: map['customAzanAudioName'],
         customAzanAudioUrl: map['customAzanAudioUrl'],
         previousAdminLeftClaim: map['previousAdminLeftClaim'] as bool?,
+        capacity: (map['capacity'] as num?)?.toInt(),
+        about: map['about'] as String?,
+        photoUrls: (map['photoUrls'] as List?)?.cast<String>() ?? const <String>[],
       );
 }

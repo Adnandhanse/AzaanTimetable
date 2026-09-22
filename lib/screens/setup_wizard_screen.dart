@@ -271,7 +271,7 @@ class _Step extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           done
-              ? const Icon(Icons.check_circle,
+              ? Icon(Icons.check_circle,
                   color: AppColors.emerald, size: 34)
               : Medallion(label: '$number', size: 34),
           const SizedBox(width: 13),
@@ -292,7 +292,7 @@ class _Step extends StatelessWidget {
                     onPressed: busy ? null : onTap,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.emerald,
-                      side: const BorderSide(color: AppColors.gold),
+                      side: BorderSide(color: AppColors.gold),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 18, vertical: 9),
                       minimumSize: Size.zero,

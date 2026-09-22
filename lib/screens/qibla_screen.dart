@@ -228,7 +228,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               onPressed: _findQiblaDirection,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.emerald,
-                side: const BorderSide(color: AppColors.gold),
+                side: BorderSide(color: AppColors.gold),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4)),
                 padding:

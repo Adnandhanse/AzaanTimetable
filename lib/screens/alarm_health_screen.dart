@@ -140,7 +140,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                   label: const Text('Run setup again'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.emerald,
-                    side: const BorderSide(color: AppColors.gold),
+                    side: BorderSide(color: AppColors.gold),
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
@@ -214,7 +214,7 @@ class _StatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.goldRuleFaint)),
       ),
       child: Row(

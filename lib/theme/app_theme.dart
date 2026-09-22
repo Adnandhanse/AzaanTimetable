@@ -1,45 +1,76 @@
 import 'package:flutter/material.dart';
+import 'app_theme_controller.dart';
 
-/// Direction A — "Illuminated".
+/// Direction A — "Illuminated" (the light-green default) plus "Black & Gold"
+/// (the dark theme). Which one is live is decided at runtime by
+/// [AppThemeController], not at compile time — that is the whole point of
+/// every value here being a `get` rather than a `const`.
 ///
-/// Single source of truth for colour and type. If a screen needs something not
-/// in here, that's a design decision, not a code decision — add it here rather
-/// than inlining a hex value in a widget.
+/// EVERY CALL SITE ACROSS THE APP THAT USED TO WRITE
+/// `const SomeWidget(color: AppColors.x)` HAD ITS `const` REMOVED. That is
+/// not optional cleanup - Dart requires every value inside a const
+/// constructor to be a compile-time constant, and a get that reads
+/// AppThemeController's current value at runtime is not one. This was a
+/// deliberate, one-time, all-at-once change across every affected file
+/// (there is no way to do it gradually - the moment any one AppColors
+/// member becomes a get, every const reference to ANY AppColors member,
+/// anywhere in the app, stops compiling until its const is removed).
+///
+/// If a screen needs something not in here, that is a design decision, not
+/// a code decision - add it here (in BOTH palettes below) rather than
+/// inlining a hex value in a widget.
 class AppColors {
   AppColors._();
 
-  // Palette set to the exact values specified.
-  static const Color ivory = Color(0xFFFAF7F0); // page background
-  static const Color white = Color(0xFFFFFFFF); // cards, headers, nav bar
+  static bool get _dark => AppThemeController.instance.isDark;
 
-  /// Sits between white and ivory. Used for Material 3 surface containers —
-  /// menus, bottom sheets, anything layered over the page — so they read as
-  /// slightly recessed rather than picking up the seed-derived blue-green.
-  static const Color cream = Color(0xFFF4EFE3);
-  static const Color emerald = Color(0xFF0F5E3A); // primary
-  static const Color emeraldTint = Color(0xFF2C6653); // ring track on emerald
-  static const Color gold = Color(0xFFC79A2E); // accent, ornament
-  // Muted, sophisticated gold used specifically for JAMAT time values - kept
-  // separate from the brighter ornamental `gold` above (rules, medallions,
-  // sajdah/ruku marks) so this one change doesn't ripple into every gold
-  // accent in the app. Not bright yellow, not dark mustard - a champagne
-  // tone, per spec.
-  static const Color champagneGold = Color(0xFFB08D57);
-  static const Color goldRule = Color(0xFFE8DFC9); // hairline borders
-  static const Color goldRuleFaint = Color(0xFFEFE7D3); // list separators
-  static const Color goldPale = Color(0xFFD9C27E); // labels on emerald
-  static const Color text = Color(0xFF1B1B1B);
-  static const Color textMid = Color(0xFF5C6560);
-  static const Color textMuted = Color(0xFF6B6B6B);
-  static const Color textFaint = Color(0xFFB5AC98);
-  static const Color chevron = Color(0xFFC0B79F);
-  static const Color navInactive = Color(0xFFA9A192);
-  static const Color onEmeraldMuted = Color(0xFFA9C0B6);
-  static const Color kaabaBlack = Color(0xFF23241F);
-  static const Color textDim = Color(0xFF8B8676);
+  // page background
+  static Color get ivory => _dark ? const Color(0xFF0B1211) : const Color(0xFFFAF7F0);
+  // cards, headers, nav bar
+  static Color get white => _dark ? const Color(0xFF101D1A) : const Color(0xFFFFFFFF);
 
-  /// Kept for the exact-alarm warning banner. Amber carries meaning there, so
-  /// it deliberately sits outside the palette.
+  /// Sits between white and ivory - Material 3 surface containers (menus,
+  /// bottom sheets, anything layered over the page).
+  static Color get cream => _dark ? const Color(0xFF16211D) : const Color(0xFFF4EFE3);
+
+  // primary. In Black & Gold this stays a genuine emerald rather than
+  // becoming another gold - the brief asks for gold as an ACCENT against a
+  // dark ground, not for green to disappear from the palette; it is
+  // brightened here purely so it still reads clearly against #0B1211.
+  static Color get emerald => _dark ? const Color(0xFF2A9D6F) : const Color(0xFF0F5E3A);
+  static Color get emeraldTint => _dark ? const Color(0xFF1F5E45) : const Color(0xFF2C6653);
+
+  // accent, ornament - #D4AF57 is the exact champagne gold specified for
+  // Black & Gold.
+  static Color get gold => _dark ? const Color(0xFFD4AF57) : const Color(0xFFC79A2E);
+
+  /// Muted, sophisticated gold used specifically for JAMAT time values -
+  /// kept distinct from the brighter ornamental [gold] above so tuning one
+  /// does not ripple into the other.
+  static Color get champagneGold => _dark ? const Color(0xFFC9A45C) : const Color(0xFFB08D57);
+
+  // Hairline borders / list separators. "Subtle gold outlines instead of
+  // bright borders" in dark mode, per spec - a muted gold-gray, not the
+  // bright accent gold itself.
+  static Color get goldRule => _dark ? const Color(0xFF2A3530) : const Color(0xFFE8DFC9);
+  static Color get goldRuleFaint => _dark ? const Color(0xFF1D2622) : const Color(0xFFEFE7D3);
+  static Color get goldPale => _dark ? const Color(0xFFE8CD8A) : const Color(0xFFD9C27E);
+
+  // #F4F0E5 warm off-white is the exact primary-text value specified.
+  static Color get text => _dark ? const Color(0xFFF4F0E5) : const Color(0xFF1B1B1B);
+  static Color get textMid => _dark ? const Color(0xFFC9C4B8) : const Color(0xFF5C6560);
+  // muted gold/gray secondary text, per spec.
+  static Color get textMuted => _dark ? const Color(0xFF9C9686) : const Color(0xFF6B6B6B);
+  static Color get textFaint => _dark ? const Color(0xFF6B6558) : const Color(0xFFB5AC98);
+  static Color get chevron => _dark ? const Color(0xFF8A8474) : const Color(0xFFC0B79F);
+  static Color get navInactive => _dark ? const Color(0xFF6B6558) : const Color(0xFFA9A192);
+  static Color get onEmeraldMuted => _dark ? const Color(0xFFB8C9BE) : const Color(0xFFA9C0B6);
+  static Color get kaabaBlack => const Color(0xFF000000); // already black either way
+  static Color get textDim => _dark ? const Color(0xFF7A7568) : const Color(0xFF8B8676);
+
+  /// The exact-alarm warning banner. Amber carries meaning there regardless
+  /// of theme, so it is NOT theme-switched - a warning should look like a
+  /// warning in every palette.
   static const Color warningBg = Color(0xFFFFF3CD);
   static const Color warningFg = Color(0xFF8A5A00);
 }

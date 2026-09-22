@@ -129,7 +129,7 @@ class HadithRefChip extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 1),
                 child: Icon(Icons.link, size: 15, color: AppColors.gold),
               ),
@@ -158,7 +158,7 @@ class HadithRefChip extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, size: 16, color: AppColors.chevron),
+              Icon(Icons.chevron_right, size: 16, color: AppColors.chevron),
             ],
           ),
         ),

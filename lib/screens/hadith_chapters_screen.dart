@@ -162,7 +162,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                           hintText: S.searchChapterOrNumber,
                           hintStyle:
                               AppText.body.copyWith(color: AppColors.textFaint),
-                          prefixIcon: const Icon(Icons.search,
+                          prefixIcon: Icon(Icons.search,
                               size: 18, color: AppColors.textMuted),
                           suffixIcon: q.isEmpty
                               ? null
@@ -179,16 +179,16 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(4),
                             borderSide:
-                                const BorderSide(color: AppColors.goldRule),
+                                BorderSide(color: AppColors.goldRule),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(4),
                             borderSide:
-                                const BorderSide(color: AppColors.goldRule),
+                                BorderSide(color: AppColors.goldRule),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(4),
-                            borderSide: const BorderSide(color: AppColors.gold),
+                            borderSide: BorderSide(color: AppColors.gold),
                           ),
                         ),
                         onChanged: (v) => setState(() => _query = v),
@@ -257,7 +257,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                             decoration: BoxDecoration(
                               border: index == 0
                                   ? null
-                                  : const Border(
+                                  : Border(
                                       top: BorderSide(
                                           color: AppColors.goldRuleFaint)),
                             ),
@@ -295,7 +295,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                                         ],
                                       ),
                               ),
-                              trailing: const Icon(Icons.chevron_right,
+                              trailing: Icon(Icons.chevron_right,
                                   size: 18, color: AppColors.chevron),
                               onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -339,7 +339,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.emerald,
-                side: const BorderSide(color: AppColors.gold),
+                side: BorderSide(color: AppColors.gold),
                 shape:
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                 padding:
@@ -404,7 +404,7 @@ class _DirectHit extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward, size: 18, color: AppColors.emerald),
+              Icon(Icons.arrow_forward, size: 18, color: AppColors.emerald),
             ],
           ),
         ),

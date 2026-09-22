@@ -26,6 +26,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _adminName = TextEditingController();
   final _mobile = TextEditingController();
   final _email = TextEditingController();
+  final _capacity = TextEditingController();
+  final _about = TextEditingController();
 
   bool _isSendingOtp = false;
   bool _isFetchingLocation = false;
@@ -240,6 +242,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       adminMobile: _mobile.text,
       adminEmail: _email.text,
       previousAdminLeftClaim: _previousAdminLeft ? true : null,
+      capacity: _capacity.text.trim().isEmpty ? null : int.tryParse(_capacity.text.trim()),
+      about: _about.text.trim().isEmpty ? null : _about.text.trim(),
       prayerTimes: PrayerTimes(fajr: '--:--', dhuhr: '--:--', asr: '--:--', maghrib: '--:--', isha: '--:--', juma: '--:--'),
     );
 
@@ -334,6 +338,10 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             _field(_city, 'City', Icons.location_city),
             _field(_landmark, 'Building Name / Landmark (helps accuracy)', Icons.apartment, required: false),
             _field(_address, 'Address', Icons.home),
+            _field(_capacity, 'Capacity (approx. number of people)', Icons.groups_outlined,
+                keyboardType: TextInputType.number, required: false),
+            _field(_about, 'About the Masjid', Icons.info_outline,
+                required: false, maxLines: 4),
             const Divider(height: 32),
             const Text('Admin Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
@@ -377,13 +385,24 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon, {TextInputType? keyboardType, bool required = true}) {
+  Widget _field(TextEditingController c, String label, IconData icon,
+      {TextInputType? keyboardType, bool required = true, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: c,
         keyboardType: keyboardType,
-        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon), border: const OutlineInputBorder()),
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: maxLines > 1
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 60),
+                  child: Icon(icon),
+                )
+              : Icon(icon),
+          border: const OutlineInputBorder(),
+        ),
         validator: required ? (v) => (v == null || v.isEmpty) ? 'Required' : null : null,
       ),
     );

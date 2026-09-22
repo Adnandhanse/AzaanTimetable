@@ -182,7 +182,7 @@ class _RoleCard extends StatelessWidget {
                         style: AppText.rowTitle
                             .copyWith(fontSize: 18, color: AppColors.text)),
                   ),
-                  const Icon(Icons.chevron_right,
+                  Icon(Icons.chevron_right,
                       size: 18, color: AppColors.chevron),
                 ],
               ),
@@ -193,7 +193,7 @@ class _RoleCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(top: 4),
                         child: Icon(Icons.check, size: 13, color: AppColors.gold),
                       ),

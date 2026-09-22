@@ -385,7 +385,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            const Icon(Icons.info_outline, color: AppColors.warningFg, size: 19),
+            Icon(Icons.info_outline, color: AppColors.warningFg, size: 19),
             const SizedBox(width: 10),
             Expanded(
               child: Text(S.ratesNeeded,

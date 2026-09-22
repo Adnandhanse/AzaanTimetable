@@ -325,7 +325,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right,
+                Icon(Icons.chevron_right,
                     size: 18, color: AppColors.chevron),
               ],
             ),
@@ -354,7 +354,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
             decoration: InputDecoration(
               hintText: S.searchSurahHint,
               hintStyle: AppText.body.copyWith(color: AppColors.textFaint),
-              prefixIcon: const Icon(Icons.search,
+              prefixIcon: Icon(Icons.search,
                   size: 18, color: AppColors.textMuted),
               filled: true,
               fillColor: AppColors.white,
@@ -363,15 +363,15 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
-                borderSide: const BorderSide(color: AppColors.goldRule),
+                borderSide: BorderSide(color: AppColors.goldRule),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
-                borderSide: const BorderSide(color: AppColors.goldRule),
+                borderSide: BorderSide(color: AppColors.goldRule),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
-                borderSide: const BorderSide(color: AppColors.gold),
+                borderSide: BorderSide(color: AppColors.gold),
               ),
             ),
             onChanged: (v) => setState(() => _query = v),
@@ -402,7 +402,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                       decoration: BoxDecoration(
                         border: index == 0
                             ? null
-                            : const Border(
+                            : Border(
                                 top: BorderSide(
                                     color: AppColors.goldRuleFaint)),
                       ),
@@ -486,7 +486,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
           decoration: BoxDecoration(
             border: index == 0
                 ? null
-                : const Border(
+                : Border(
                     top: BorderSide(color: AppColors.goldRuleFaint)),
           ),
           child: InkWell(
@@ -519,7 +519,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right,
+                  Icon(Icons.chevron_right,
                       size: 18, color: AppColors.chevron),
                 ],
               ),

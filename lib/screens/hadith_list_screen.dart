@@ -331,7 +331,7 @@ class _HadithCard extends StatelessWidget {
                             style: AppText.caption
                                 .copyWith(color: AppColors.gold)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.expand_more,
+                        Icon(Icons.expand_more,
                             size: 16, color: AppColors.gold),
                       ],
                     ),
@@ -366,7 +366,7 @@ class _HadithCard extends StatelessWidget {
                             isSpeaking ? S.stopWord : S.listenToTranslation),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.emerald,
-                          side: const BorderSide(color: AppColors.goldRule),
+                          side: BorderSide(color: AppColors.goldRule),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           minimumSize: Size.zero,
@@ -448,7 +448,7 @@ class _HadithCard extends StatelessWidget {
                               Text(S.collapse,
                                   style: AppText.caption
                                       .copyWith(color: AppColors.textMuted)),
-                              const Icon(Icons.expand_less,
+                              Icon(Icons.expand_less,
                                   size: 16, color: AppColors.textMuted),
                             ],
                           ),

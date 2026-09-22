@@ -117,7 +117,7 @@ class _Option extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right,
+              Icon(Icons.chevron_right,
                   size: 18, color: AppColors.chevron),
             ],
           ),

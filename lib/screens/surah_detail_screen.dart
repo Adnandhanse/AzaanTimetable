@@ -306,7 +306,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                   child: Row(
                     children: <Widget>[
-                      const Text('A',
+                      Text('A',
                           style: TextStyle(
                               fontSize: 12, color: AppColors.textMuted)),
                       Expanded(
@@ -330,7 +330,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                           ),
                         ),
                       ),
-                      const Text('A',
+                      Text('A',
                           style: TextStyle(
                               fontSize: 20, color: AppColors.textMuted)),
                     ],
@@ -347,7 +347,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       bottomNavigationBar: _playingVerse == null
           ? null
           : Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.white,
                 border: Border(
                     top: BorderSide(color: AppColors.goldRule)),
@@ -357,7 +357,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                 top: false,
                 child: Row(
                   children: [
-                    const Icon(Icons.graphic_eq,
+                    Icon(Icons.graphic_eq,
                         size: 17, color: AppColors.emerald),
                     const SizedBox(width: 8),
                     Text('Ayah $_playingVerse',

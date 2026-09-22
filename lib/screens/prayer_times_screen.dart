@@ -67,7 +67,7 @@ class PrayerTimesScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: i == 0
                     ? null
-                    : const Border(
+                    : Border(
                         top: BorderSide(color: AppColors.goldRuleFaint)),
               ),
               // Same flex proportions as the home screen list, so the two read

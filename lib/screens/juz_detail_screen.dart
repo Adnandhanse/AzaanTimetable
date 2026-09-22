@@ -170,7 +170,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                   child: Row(
                     children: <Widget>[
-                      const Text('A',
+                      Text('A',
                           style: TextStyle(
                               fontSize: 12, color: AppColors.textMuted)),
                       Expanded(
@@ -194,7 +194,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                           ),
                         ),
                       ),
-                      const Text('A',
+                      Text('A',
                           style: TextStyle(
                               fontSize: 20, color: AppColors.textMuted)),
                     ],

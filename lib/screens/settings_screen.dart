@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
@@ -6,6 +7,8 @@ import 'hijri_calendar_screen.dart';
 import 'role_selection_screen.dart';
 import '../services/app_language.dart';
 import '../services/app_strings.dart';
+import '../theme/app_theme_controller.dart';
+import 'theme_selection_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,6 +29,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          // Listens to the theme controller directly (rather than via
+          // setState) so the subtitle updates itself even if the theme was
+          // changed elsewhere and this screen is still on the stack.
+          ListenableBuilder(
+            listenable: AppThemeController.instance,
+            builder: (context, _) => ListTile(
+              leading: Icon(Icons.palette_outlined, color: AppColors.emerald),
+              title: const Text('Appearance'),
+              subtitle: Text(
+                AppThemeController.instance.themeId == 'black_gold'
+                    ? 'Black & Gold'
+                    : 'Green (Light)',
+              ),
+              trailing: const Icon(Icons.chevron_right, size: 18),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ThemeSelectionScreen()),
+              ),
+            ),
+          ),
+          const Divider(),
           ListTile(
             leading: Icon(Icons.language, color: AppColors.emerald),
             title: Text(S.appLanguage),
@@ -66,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // an app that ships other people's work should say so — and if
           // anyone ever asks, the answer is already in the app.
           ListTile(
-            leading: const Icon(Icons.info_outline, color: AppColors.emerald),
+            leading: Icon(Icons.info_outline, color: AppColors.emerald),
             title: Text(S.isUrdu ? 'ایپ کے بارے میں' : 'About & credits'),
             trailing: const Icon(Icons.chevron_right, size: 18),
             onTap: () => showDialog<void>(
@@ -115,8 +138,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(),
+          // A real way to reach a human, not just an app-store review box -
+          // pre-fills subject and device info so a bug report doesn't start
+          // with three back-and-forth messages just figuring out what phone
+          // and version someone is on.
           ListTile(
-            leading: const Icon(Icons.calendar_month_outlined,
+            leading: Icon(Icons.mail_outline, color: AppColors.emerald),
+            title: Text(S.isUrdu ? 'تجاویز اور سوالات' : 'Feedback & support'),
+            subtitle: const Text('dhanseadnan81@gmail.com'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () async {
+              final Uri emailUri = Uri(
+                scheme: 'mailto',
+                path: 'dhanseadnan81@gmail.com',
+                query: 'subject=${Uri.encodeComponent('Islam Connect \u2013 Feedback')}'
+                    '&body=${Uri.encodeComponent('\n\n\n---\nApp: Islam Connect')}',
+              );
+              if (await canLaunchUrl(emailUri)) {
+                await launchUrl(emailUri);
+              } else if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No email app found \u2014 write to dhanseadnan81@gmail.com'),
+                  ),
+                );
+              }
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: Icon(Icons.calendar_month_outlined,
                 color: AppColors.emerald),
             title: Text(S.isUrdu ? 'اسلامی کیلنڈر' : 'Hijri calendar'),
             subtitle: Text(S.isUrdu
@@ -132,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // without this, someone who picked wrong could only change it by
           // reinstalling.
           ListTile(
-            leading: const Icon(Icons.switch_account_outlined,
+            leading: Icon(Icons.switch_account_outlined,
                 color: AppColors.emerald),
             title: Text(S.isUrdu ? 'استعمال کا طریقہ' : 'How you use the app'),
             subtitle: Text(S.isUrdu
@@ -149,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // the app" — they look identical from the outside and need
           // completely different fixes.
           ListTile(
-            leading: const Icon(Icons.health_and_safety_outlined,
+            leading: Icon(Icons.health_and_safety_outlined,
                 color: AppColors.emerald),
             title: const Text('Alarm health'),
             subtitle: const Text(

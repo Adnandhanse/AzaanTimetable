@@ -28,11 +28,11 @@ class LanguageSelectionScreen extends StatelessWidget {
             children: [
               Icon(Icons.language, size: 56, color: AppColors.emerald),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Choose your language',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.text),
               ),
-              const Text(
+              Text(
                 'اپنی زبان منتخب کریں',
                 style: TextStyle(fontSize: 18, color: AppColors.textMuted),
               ),
@@ -45,7 +45,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                     side: BorderSide(color: AppColors.emerald, width: 1.5),
                   ),
                   onPressed: () => _choose(context, AppLanguage.english),
-                  child: const Text('English', style: TextStyle(fontSize: 18, color: AppColors.emerald)),
+                  child: Text('English', style: TextStyle(fontSize: 18, color: AppColors.emerald)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -59,7 +59,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'You can change this anytime in Settings.',
                 style: TextStyle(fontSize: 12, color: AppColors.textMuted),
               ),

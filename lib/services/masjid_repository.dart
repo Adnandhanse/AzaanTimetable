@@ -110,6 +110,24 @@ class MasjidRepository {
     });
   }
 
+  static Future<void> updateAboutAndCapacity(
+    String id, {
+    String? about,
+    int? capacity,
+  }) async {
+    await _collection.doc(id).update({
+      'about': about,
+      'capacity': capacity,
+    });
+  }
+
+  /// Replaces the masjid's whole photo list. Capped at 3 - the screen that
+  /// calls this enforces the limit before it ever gets here, so the person
+  /// finds out at the point of picking a 4th photo, not after an upload.
+  static Future<void> updatePhotos(String id, List<String> photoUrls) async {
+    await _collection.doc(id).update({'photoUrls': photoUrls});
+  }
+
   /// The currently-active (Verified) masjid registered under this number, if
   /// one exists. Used to block accidental or bad-faith re-registration of a
   /// masjid that already has an active admin - see register_masjid_screen.dart.

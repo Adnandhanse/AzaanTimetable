@@ -77,8 +77,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                   // white. This screen set the text to white to match its dark
                   // green background — so what you typed was white on white and
                   // invisible. The label was too.
-                  style: const TextStyle(color: AppColors.text),
-                  decoration: const InputDecoration(
+                  style: TextStyle(color: AppColors.text),
+                  decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(color: AppColors.textMuted),
                     border: OutlineInputBorder(),
@@ -89,8 +89,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                 TextFormField(
                   controller: _password,
                   obscureText: true,
-                  style: const TextStyle(color: AppColors.text),
-                  decoration: const InputDecoration(
+                  style: TextStyle(color: AppColors.text),
+                  decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: AppColors.textMuted),
                     border: OutlineInputBorder(),

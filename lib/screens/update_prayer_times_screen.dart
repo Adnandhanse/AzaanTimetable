@@ -39,6 +39,10 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
   late String? _audioName;
   late String? _audioUrl;
 
+  static const int _maxPhotos = 3;
+  late List<String> _photoUrls;
+  bool _isUploadingPhoto = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +61,7 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     _jumaJ = t.jumaJamat;
     _audioName = widget.masjid.customAzanAudioName;
     _audioUrl = widget.masjid.customAzanAudioUrl;
+    _photoUrls = List<String>.from(widget.masjid.photoUrls);
   }
 
   @override
@@ -221,6 +226,73 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     }
   }
 
+  Future<void> _pickMasjidPhoto() async {
+    if (_photoUrls.length >= _maxPhotos) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Up to 3 photos - remove one to add another.')),
+      );
+      return;
+    }
+
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result == null || result.files.isEmpty || result.files.first.path == null) return;
+
+    final file = File(result.files.first.path!);
+    final fileName = result.files.first.name;
+
+    setState(() => _isUploadingPhoto = true);
+    try {
+      final ref = FirebaseStorage.instance.ref(
+          'masjid_photos/${widget.masjid.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName');
+      await ref.putFile(file);
+      final url = await ref.getDownloadURL();
+
+      final updated = [..._photoUrls, url];
+      await MasjidRepository.updatePhotos(widget.masjid.id, updated);
+
+      if (!mounted) return;
+      setState(() => _photoUrls = updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Photo added.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+    } finally {
+      if (mounted) setState(() => _isUploadingPhoto = false);
+    }
+  }
+
+  Future<void> _removeMasjidPhoto(String url) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove this photo?'),
+        content: const Text('It will no longer be shown on the masjid\u2019s page.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Remove', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await FirebaseStorage.instance.refFromURL(url).delete();
+    } catch (_) {
+      // Same reasoning as azan removal - stale reference or transient
+      // network error either way, still update the masjid's own record
+      // below so a broken photo doesn't linger in the list.
+    }
+
+    final updated = _photoUrls.where((u) => u != url).toList();
+    await MasjidRepository.updatePhotos(widget.masjid.id, updated);
+    if (!mounted) return;
+    setState(() => _photoUrls = updated);
+  }
+
   Future<void> _togglePlayback() async {
     if (_audioUrl == null) return;
     if (_isPlaying) {
@@ -329,6 +401,56 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
                 : const Icon(Icons.mic),
             label: Text(_isUploadingAudio ? 'Uploading...' : (_audioName == null ? 'Upload Azan Recording' : 'Replace Recording')),
             onPressed: _isUploadingAudio ? null : _pickAzanAudio,
+          ),
+          const Divider(height: 40),
+          const Text('Masjid Photos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(
+            'Up to $_maxPhotos photos - shown when someone opens this masjid from Nearby Masjids.',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 12),
+          if (_photoUrls.isNotEmpty)
+            SizedBox(
+              height: 96,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _photoUrls.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final url = _photoUrls[index];
+                  return Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(url, width: 96, height: 96, fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () => _removeMasjidPhoto(url),
+                          child: const CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.black54,
+                            child: Icon(Icons.close, size: 14, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          if (_photoUrls.isNotEmpty) const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: _isUploadingPhoto
+                ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.add_photo_alternate_outlined),
+            label: Text(_isUploadingPhoto
+                ? 'Uploading...'
+                : 'Add Photo (${_photoUrls.length}/$_maxPhotos)'),
+            onPressed: (_isUploadingPhoto || _photoUrls.length >= _maxPhotos) ? null : _pickMasjidPhoto,
           ),
         ],
       ),

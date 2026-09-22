@@ -140,7 +140,7 @@ class IlluminatedHeader extends StatelessWidget {
       width: double.infinity,
       child: Stack(
         children: <Widget>[
-          const Positioned.fill(child: ColoredBox(color: AppColors.white)),
+          Positioned.fill(child: ColoredBox(color: AppColors.white)),
           const Positioned.fill(
             child: CustomPaint(painter: GirihPainter()),
           ),

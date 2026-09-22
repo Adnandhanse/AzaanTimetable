@@ -130,7 +130,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.people_outline,
+                          Icon(Icons.people_outline,
                               size: 14, color: AppColors.emerald),
                           const SizedBox(width: 5),
                           Text(

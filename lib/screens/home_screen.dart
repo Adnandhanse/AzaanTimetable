@@ -385,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(top: 2),
                         child: Icon(Icons.warning_amber,
                             color: AppColors.warningFg, size: 20),
@@ -490,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen>
       // opens the same search and sets the same selection, and a floating
       // button was covering the last row of prayer times to do it twice.
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.white,
           border: Border(top: BorderSide(color: AppColors.goldRule)),
         ),
@@ -681,7 +681,7 @@ class _HomeScreenState extends State<HomeScreen>
           Transform.translate(
             offset: const Offset(0, -18),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.ivory,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
                 boxShadow: <BoxShadow>[
@@ -787,7 +787,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       // below.
                                       Text(
                                         next.$1,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: AppFonts.serif,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w600,
@@ -911,7 +911,7 @@ class _HomeScreenState extends State<HomeScreen>
                   label: Text(S.viewFullPrayerSchedule),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.emerald,
-                    side: const BorderSide(color: AppColors.gold),
+                    side: BorderSide(color: AppColors.gold),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -1063,11 +1063,11 @@ class _HomeScreenState extends State<HomeScreen>
                   : null,
               borderRadius: BorderRadius.circular(6),
               border: rows[i].$1 == nextLabel
-                  ? const Border(
+                  ? Border(
                       left: BorderSide(color: AppColors.emerald, width: 3))
                   : (i == 0
                       ? null
-                      : const Border(
+                      : Border(
                           top: BorderSide(color: AppColors.goldRuleFaint))),
             ),
             // EVERYTHING IS FLEX NOW, no fixed pixel widths.
@@ -1240,7 +1240,7 @@ class _HomeScreenState extends State<HomeScreen>
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  const Icon(Icons.campaign_outlined,
+                  Icon(Icons.campaign_outlined,
                       size: 19, color: AppColors.gold),
                   const SizedBox(width: 9),
                   Expanded(

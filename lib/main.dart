@@ -8,6 +8,7 @@ import 'services/notification_service.dart';
 import 'services/app_language.dart';
 import 'services/follower_service.dart';
 import 'theme/app_theme.dart';
+import 'theme/app_theme_controller.dart';
 
 /// Lets code outside the widget tree (the notification tap callback) push
 /// a new screen - used to open the Azan ringing screen when an alarm fires.
@@ -23,6 +24,7 @@ void main() async {
   }
 
   await AppLanguageController.instance.load();
+  await AppThemeController.instance.load();
 
   await NotificationService.init(
     onTapPayload: (payload) {
@@ -142,8 +144,12 @@ class MasjidAlarmApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Both language AND theme need to rebuild the whole app when they
+    // change - Merging them under Listenable.merge means one MaterialApp
+    // that reacts to either, rather than nesting two separate builders.
     return ListenableBuilder(
-      listenable: AppLanguageController.instance,
+      listenable: Listenable.merge(
+          [AppLanguageController.instance, AppThemeController.instance]),
       builder: (context, _) {
         return MaterialApp(
           navigatorKey: navigatorKey,
