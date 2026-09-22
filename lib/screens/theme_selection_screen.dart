@@ -45,7 +45,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                 title: Text(label),
                 subtitle: available ? null : const Text('Coming soon'),
                 trailing: selected
-                    ? const Icon(Icons.check_circle, color: AppColors.gold)
+                    ? Icon(Icons.check_circle, color: AppColors.gold)
                     : null,
                 onTap: available
                     ? () => AppThemeController.instance.setTheme(id)

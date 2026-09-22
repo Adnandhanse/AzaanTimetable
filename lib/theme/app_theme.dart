@@ -7,7 +7,7 @@ import 'app_theme_controller.dart';
 /// every value here being a `get` rather than a `const`.
 ///
 /// EVERY CALL SITE ACROSS THE APP THAT USED TO WRITE
-/// `const SomeWidget(color: AppColors.x)` HAD ITS `const` REMOVED. That is
+/// `SomeWidget(color: AppColors.x)` had its `const` keyword removed. That is
 /// not optional cleanup - Dart requires every value inside a const
 /// constructor to be a compile-time constant, and a get that reads
 /// AppThemeController's current value at runtime is not one. This was a
@@ -293,7 +293,7 @@ class AppTheme {
       primaryColor: AppColors.emerald,
       cardColor: AppColors.white,
       fontFamily: AppFonts.sans,
-      iconTheme: const IconThemeData(color: AppColors.text),
+      iconTheme: IconThemeData(color: AppColors.text),
       // Every Card in the app: white, flat, gold hairline, 4px corners.
       // ~20 screens use bare Card widgets, so this is what makes them agree.
       cardTheme: CardTheme(
@@ -304,7 +304,7 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(vertical: 5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: const BorderSide(color: AppColors.goldRule),
+          side: BorderSide(color: AppColors.goldRule),
         ),
       ),
 
@@ -313,7 +313,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: const BorderSide(color: AppColors.goldRule),
+          side: BorderSide(color: AppColors.goldRule),
         ),
       ),
 
@@ -328,24 +328,24 @@ class AppTheme {
         labelStyle: AppText.body.copyWith(color: AppColors.textMuted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(color: AppColors.goldRule),
+          borderSide: BorderSide(color: AppColors.goldRule),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(color: AppColors.goldRule),
+          borderSide: BorderSide(color: AppColors.goldRule),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(color: AppColors.gold),
+          borderSide: BorderSide(color: AppColors.gold),
         ),
       ),
 
-      listTileTheme: const ListTileThemeData(
+      listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         iconColor: AppColors.emerald,
       ),
 
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.emerald,
         elevation: 0,
