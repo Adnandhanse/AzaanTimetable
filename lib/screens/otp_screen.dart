@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({
@@ -201,7 +202,7 @@ class _OtpScreenState extends State<OtpScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF1F5E4A)),
+        iconTheme: IconThemeData(color: AppColors.emerald),
       ),
       body: SafeArea(
         child: Padding(
@@ -222,15 +223,15 @@ class _OtpScreenState extends State<OtpScreen> {
                   labelText: 'OTP',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFC79A2E)),
+                    borderSide: BorderSide(color: AppColors.gold),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFC79A2E)),
+                    borderSide: BorderSide(color: AppColors.gold),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFC79A2E), width: 2),
+                    borderSide: BorderSide(color: AppColors.gold, width: 2),
                   ),
                   filled: true,
                   fillColor: Colors.white,
@@ -254,7 +255,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F5E4A),
+                    backgroundColor: AppColors.emerald,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -272,15 +273,15 @@ class _OtpScreenState extends State<OtpScreen> {
                 child: TextButton(
                   onPressed: canResend ? _resendCode : null,
                   child: _isResending
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 16, width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1F5E4A)))
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.emerald))
                       : Text(
                           canResend
                               ? 'Resend code'
                               : 'Resend code (${_secondsRemaining}s)',
                           style: TextStyle(
-                            color: canResend ? const Color(0xFF1F5E4A) : Colors.black38,
+                            color: canResend ? AppColors.emerald : Colors.black38,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

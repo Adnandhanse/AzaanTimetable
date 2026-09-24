@@ -237,8 +237,22 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result == null || result.files.isEmpty || result.files.first.path == null) return;
 
-    final file = File(result.files.first.path!);
-    final fileName = result.files.first.name;
+    final picked = result.files.first;
+
+    // 2MB cap, checked from the picker's own metadata before touching the
+    // file - same limit and same approach as the registration form's
+    // photo picker.
+    if (picked.size > 2 * 1024 * 1024) {
+      if (!mounted) return;
+      final sizeMb = (picked.size / (1024 * 1024)).toStringAsFixed(1);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('That photo is ${sizeMb}MB - please choose one under 2MB.')),
+      );
+      return;
+    }
+
+    final file = File(picked.path!);
+    final fileName = picked.name;
 
     setState(() => _isUploadingPhoto = true);
     try {

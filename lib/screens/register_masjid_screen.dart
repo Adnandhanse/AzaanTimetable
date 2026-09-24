@@ -1,10 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
+import '../theme/app_theme_controller.dart';
 import 'admin_dashboard_screen.dart';
 import 'otp_screen.dart';
 import 'map_picker_screen.dart';
@@ -28,6 +33,16 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _email = TextEditingController();
   final _capacity = TextEditingController();
   final _about = TextEditingController();
+
+  // Photos are picked HERE, during registration, but not uploaded until
+  // _saveMasjidAfterVerification - the masjid does not have a real ID
+  // (Firestore assigns one on creation) until registration + OTP both
+  // succeed, and the Storage path needs that ID. Held as local Files in
+  // the meantime; nothing touches the network for these until then.
+  static const int _maxPhotos = 3;
+  static const int _maxPhotoBytes = 2 * 1024 * 1024; // 2 MB, per spec
+  final List<File> _pickedPhotos = [];
+  bool _isSavingPhotos = false;
 
   bool _isSendingOtp = false;
   bool _isFetchingLocation = false;
@@ -224,6 +239,58 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     );
   }
 
+  Future<void> _pickMasjidPhoto() async {
+    if (_pickedPhotos.length >= _maxPhotos) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Up to 3 photos - remove one to add another.')),
+      );
+      return;
+    }
+
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result == null || result.files.isEmpty || result.files.first.path == null) return;
+
+    final picked = result.files.first;
+
+    // Checked from the picker's own metadata, before touching the file
+    // itself - no need to read it off disk just to find out it is too big.
+    if (picked.size > _maxPhotoBytes) {
+      if (!mounted) return;
+      final sizeMb = (picked.size / (1024 * 1024)).toStringAsFixed(1);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('That photo is ${sizeMb}MB - please choose one under 2MB.')),
+      );
+      return;
+    }
+
+    setState(() => _pickedPhotos.add(File(picked.path!)));
+  }
+
+  void _removeMasjidPhoto(int index) {
+    setState(() => _pickedPhotos.removeAt(index));
+  }
+
+  /// Uploads whatever photos were picked, now that [masjidId] actually
+  /// exists. Best-effort per photo: one failing does not stop the others
+  /// or block the registration that already succeeded - a partially
+  /// uploaded gallery is a much smaller problem than losing the whole
+  /// registration over a single bad upload.
+  Future<List<String>> _uploadPickedPhotos(String masjidId) async {
+    final List<String> urls = [];
+    for (final file in _pickedPhotos) {
+      try {
+        final fileName = file.path.split('/').last;
+        final ref = FirebaseStorage.instance.ref(
+            'masjid_photos/$masjidId/${DateTime.now().millisecondsSinceEpoch}_$fileName');
+        await ref.putFile(file);
+        urls.add(await ref.getDownloadURL());
+      } catch (_) {
+        // Best-effort, as above - skip this one, keep going.
+      }
+    }
+    return urls;
+  }
+
   Future<void> _saveMasjidAfterVerification() async {
     final combinedAddress = _landmark.text.trim().isEmpty
         ? _address.text
@@ -247,8 +314,18 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       prayerTimes: PrayerTimes(fajr: '--:--', dhuhr: '--:--', asr: '--:--', maghrib: '--:--', isha: '--:--', juma: '--:--'),
     );
 
-    await MasjidRepository.register(newMasjid);
+    final String newId = await MasjidRepository.register(newMasjid);
     if (!mounted) return;
+
+    if (_pickedPhotos.isNotEmpty) {
+      setState(() => _isSavingPhotos = true);
+      final urls = await _uploadPickedPhotos(newId);
+      if (urls.isNotEmpty) {
+        await MasjidRepository.updatePhotos(newId, urls);
+      }
+      if (!mounted) return;
+      setState(() => _isSavingPhotos = false);
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Registered. Status: Pending Verification.')),
@@ -277,7 +354,12 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             // actually found an active masjid under this number.
             if (_duplicateOf != null) ...[
               Card(
-                color: const Color(0xFFFDECEC),
+                // A fixed light-pink error card looked broken against a
+                // black page in Black & Gold - a muted dark red instead of
+                // pretending the page is still light underneath it.
+                color: AppThemeController.instance.isDark
+                    ? const Color(0xFF3A1A1A)
+                    : const Color(0xFFFDECEC),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -342,6 +424,51 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                 keyboardType: TextInputType.number, required: false),
             _field(_about, 'About the Masjid', Icons.info_outline,
                 required: false, maxLines: 4),
+            const SizedBox(height: 4),
+            const Text('Masjid Photos (optional)', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(
+              'Up to $_maxPhotos photos, 2MB each. Shown when someone opens this masjid from Nearby Masjids.',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            if (_pickedPhotos.isNotEmpty)
+              SizedBox(
+                height: 90,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _pickedPhotos.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) => Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(_pickedPhotos[index],
+                            width: 90, height: 90, fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () => _removeMasjidPhoto(index),
+                          child: const CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.black54,
+                            child: Icon(Icons.close, size: 14, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (_pickedPhotos.isNotEmpty) const SizedBox(height: 8),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              label: Text('Add Photo (${_pickedPhotos.length}/$_maxPhotos)'),
+              onPressed: _pickedPhotos.length >= _maxPhotos ? null : _pickMasjidPhoto,
+            ),
+            const SizedBox(height: 12),
             const Divider(height: 32),
             const Text('Admin Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
@@ -350,14 +477,14 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             _field(_email, 'Email', Icons.email, keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 8),
             Card(
-              color: const Color(0xFFFCFAF5),
-              child: const Padding(
-                padding: EdgeInsets.all(12),
+              color: AppColors.cream,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Color(0xFF1F5E4A)),
-                    SizedBox(width: 8),
-                    Expanded(
+                    Icon(Icons.info_outline, color: AppColors.emerald),
+                    const SizedBox(width: 8),
+                    const Expanded(
                       child: Text(
                         "We'll send an OTP to the mobile number above to confirm it's yours "
                         'before your masjid is registered.',
@@ -372,8 +499,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             SizedBox(
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1F5E4A)),
-                onPressed: (_isSendingOtp || _isCheckingDuplicate) ? null : _submit,
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+                onPressed: (_isSendingOtp || _isCheckingDuplicate || _isSavingPhotos) ? null : _submit,
                 child: (_isSendingOtp || _isCheckingDuplicate)
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text('Verify Mobile & Register', style: TextStyle(color: Colors.white, fontSize: 16)),
