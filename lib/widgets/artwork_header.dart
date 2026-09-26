@@ -22,7 +22,6 @@ class ArtworkHeader extends StatelessWidget {
     super.key,
     required this.masjidName,
     required this.metaLine,
-    required this.onSettingsTap,
     required this.onMetaTap,
     required this.phase,
     this.onDirectionsTap,
@@ -37,7 +36,6 @@ class ArtworkHeader extends StatelessWidget {
   /// City and Hijri date, already formatted.
   final String metaLine;
 
-  final VoidCallback onSettingsTap;
   final VoidCallback onMetaTap;
 
   /// Null when the masjid has no coordinates, in which case no button is shown
@@ -165,18 +163,15 @@ class ArtworkHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Settings on top, announcements beneath it. Stacked rather
-                  // than side by side so the name and address keep their full
-                  // width — they are the reason the banner exists.
+                  // Settings used to live here as a gear icon on the
+                  // banner. Moved to the bottom nav bar, after Masjid Admin
+                  // - easier to find as a permanent tab than a small icon
+                  // sitting on top of a photo that changes colour by time
+                  // of day, and consistent with how every other section
+                  // (Quran, Hadith, Prayers) is reached.
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.settings_outlined,
-                            color: Colors.white, size: 21),
-                        tooltip: 'Settings',
-                        onPressed: onSettingsTap,
-                      ),
                       if (onAnnouncementsTap != null && announcementCount > 0)
                         IconButton(
                           tooltip: 'Announcements',

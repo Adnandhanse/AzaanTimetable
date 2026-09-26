@@ -516,6 +516,12 @@ class _HomeScreenState extends State<HomeScreen>
             } else if (index == 4 && _isAdmin) {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminLoginScreen()));
+            } else if (index == (_isAdmin ? 5 : 4)) {
+              // Settings - used to be a gear icon floating on the header
+              // photo; moved here so it sits with every other section
+              // instead of being the one thing reached a different way.
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()));
             }
           },
           items: [
@@ -540,6 +546,9 @@ class _HomeScreenState extends State<HomeScreen>
               BottomNavigationBarItem(
                   icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
                   label: S.masjidAdmin),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.settings_outlined, size: 20),
+                label: 'Settings'),
           ],
         ),
       ),
@@ -644,9 +653,6 @@ class _HomeScreenState extends State<HomeScreen>
               onAnnouncementsTap: _announcementList.isEmpty
                   ? null
                   : () => _showAnnouncements(_announcementList, masjid.name),
-              onSettingsTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              ),
               onMetaTap: _showHijriInfo,
                 ),
               ),

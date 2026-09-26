@@ -128,6 +128,69 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
           _row('City', m.city),
           _row('Address', m.address),
           _row('Coordinates', m.latitude == 0.0 && m.longitude == 0.0 ? 'Not captured' : '${m.latitude}, ${m.longitude}'),
+          if (m.capacity != null) _row('Capacity', '${m.capacity}'),
+          if (m.about != null && m.about!.trim().isNotEmpty) _row('About', m.about!),
+
+          // PHOTOS - this was the actual gap. The registration form and
+          // model both carried photoUrls already; this screen (the one a
+          // platform admin actually reviews submissions on) never rendered
+          // them at all, so an uploaded photo existed in the data with
+          // nowhere for an admin to see it.
+          if (m.photoUrls.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text('Photos', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: m.photoUrls.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => _AdminPhotoViewer(
+                        photoUrls: m.photoUrls,
+                        initialIndex: index,
+                      ),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      m.photoUrls[index],
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.cover,
+                      // A broken/expired URL should show as a broken tile,
+                      // not silently vanish and leave the admin thinking
+                      // no photo was ever uploaded at all.
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 110,
+                        height: 110,
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          width: 110,
+                          height: 110,
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 20),
           _sectionTitle('Admin Details'),
@@ -210,4 +273,49 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
           ],
         ),
       );
+}
+
+/// Same full-screen swipeable viewer pattern as the public masjid details
+/// screen - tap a thumbnail, get a proper look at it.
+class _AdminPhotoViewer extends StatefulWidget {
+  const _AdminPhotoViewer({required this.photoUrls, required this.initialIndex});
+
+  final List<String> photoUrls;
+  final int initialIndex;
+
+  @override
+  State<_AdminPhotoViewer> createState() => _AdminPhotoViewerState();
+}
+
+class _AdminPhotoViewerState extends State<_AdminPhotoViewer> {
+  late final PageController _controller =
+      PageController(initialPage: widget.initialIndex);
+  late int _currentIndex = widget.initialIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          '${_currentIndex + 1} / ${widget.photoUrls.length}',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      body: PageView.builder(
+        controller: _controller,
+        itemCount: widget.photoUrls.length,
+        onPageChanged: (index) => setState(() => _currentIndex = index),
+        itemBuilder: (context, index) => InteractiveViewer(
+          minScale: 1,
+          maxScale: 4,
+          child: Center(
+            child: Image.network(widget.photoUrls[index], fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    );
+  }
 }
