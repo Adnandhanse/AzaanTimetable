@@ -43,6 +43,15 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
   late List<String> _photoUrls;
   bool _isUploadingPhoto = false;
 
+  // Capacity and About - the registration form collected these for new
+  // masjids, but there was never a way to ADD or EDIT them for a masjid
+  // already registered before this existed, or one that skipped these
+  // optional fields the first time. That is likely why they looked
+  // "missing" - there was genuinely nowhere to put them in after the fact.
+  final _capacityController = TextEditingController();
+  final _aboutController = TextEditingController();
+  bool _isSavingAboutCapacity = false;
+
   @override
   void initState() {
     super.initState();
@@ -62,11 +71,40 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
     _audioName = widget.masjid.customAzanAudioName;
     _audioUrl = widget.masjid.customAzanAudioUrl;
     _photoUrls = List<String>.from(widget.masjid.photoUrls);
+    _capacityController.text = widget.masjid.capacity?.toString() ?? '';
+    _aboutController.text = widget.masjid.about ?? '';
+  }
+
+  Future<void> _saveAboutAndCapacity() async {
+    setState(() => _isSavingAboutCapacity = true);
+    try {
+      final int? capacity = _capacityController.text.trim().isEmpty
+          ? null
+          : int.tryParse(_capacityController.text.trim());
+      final String? about =
+          _aboutController.text.trim().isEmpty ? null : _aboutController.text.trim();
+      await MasjidRepository.updateAboutAndCapacity(
+        widget.masjid.id,
+        about: about,
+        capacity: capacity,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Saved.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+    } finally {
+      if (mounted) setState(() => _isSavingAboutCapacity = false);
+    }
   }
 
   @override
   void dispose() {
     _player.dispose();
+    _capacityController.dispose();
+    _aboutController.dispose();
     super.dispose();
   }
 
@@ -415,6 +453,36 @@ class _UpdatePrayerTimesScreenState extends State<UpdatePrayerTimesScreen> {
                 : const Icon(Icons.mic),
             label: Text(_isUploadingAudio ? 'Uploading...' : (_audioName == null ? 'Upload Azan Recording' : 'Replace Recording')),
             onPressed: _isUploadingAudio ? null : _pickAzanAudio,
+          ),
+          const Divider(height: 40),
+          const Text('Masjid Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _capacityController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Capacity (approx. number of people)',
+              prefixIcon: Icon(Icons.groups_outlined),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _aboutController,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              labelText: 'About the Masjid',
+              alignLabelWithHint: true,
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: _isSavingAboutCapacity
+                ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.save_outlined),
+            label: Text(_isSavingAboutCapacity ? 'Saving...' : 'Save Details'),
+            onPressed: _isSavingAboutCapacity ? null : _saveAboutAndCapacity,
           ),
           const Divider(height: 40),
           const Text('Masjid Photos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

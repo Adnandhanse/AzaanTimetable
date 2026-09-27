@@ -22,51 +22,193 @@ import 'app_theme_controller.dart';
 class AppColors {
   AppColors._();
 
-  static bool get _dark => AppThemeController.instance.isDark;
+  /// Every AppColors getter picks its value from here, keyed by
+  /// AppThemeController's current themeId. Adding a fully-designed theme
+  /// from here on is just adding one more key to each of these maps - the
+  /// const-removal/getter-conversion work (the actually large one-time
+  /// cost) only had to happen once.
+  static T _pick<T>(Map<String, T> options) =>
+      options[AppThemeController.instance.themeId] ?? options['green_light']!;
 
   // page background
-  static Color get ivory => _dark ? const Color(0xFF0B1211) : const Color(0xFFFAF7F0);
+  static Color get ivory => _pick({
+        'green_light': const Color(0xFFFAF7F0),
+        'black_gold': const Color(0xFF0B1211),
+        'green_dark': const Color(0xFF0D1B16),
+        'blue': const Color(0xFFF2F6FB),
+        'amber': const Color(0xFFFBF6EC),
+        'purple': const Color(0xFFF7F4FA),
+      });
+
   // cards, headers, nav bar
-  static Color get white => _dark ? const Color(0xFF101D1A) : const Color(0xFFFFFFFF);
+  static Color get white => _pick({
+        'green_light': const Color(0xFFFFFFFF),
+        'black_gold': const Color(0xFF101D1A),
+        'green_dark': const Color(0xFF14261F),
+        'blue': const Color(0xFFFFFFFF),
+        'amber': const Color(0xFFFFFFFF),
+        'purple': const Color(0xFFFFFFFF),
+      });
 
   /// Sits between white and ivory - Material 3 surface containers (menus,
   /// bottom sheets, anything layered over the page).
-  static Color get cream => _dark ? const Color(0xFF16211D) : const Color(0xFFF4EFE3);
+  static Color get cream => _pick({
+        'green_light': const Color(0xFFF4EFE3),
+        'black_gold': const Color(0xFF16211D),
+        'green_dark': const Color(0xFF182D25),
+        'blue': const Color(0xFFE7EFF7),
+        'amber': const Color(0xFFF5EBD6),
+        'purple': const Color(0xFFEDE6F5),
+      });
 
-  // primary. In Black & Gold this stays a genuine emerald rather than
-  // becoming another gold - the brief asks for gold as an ACCENT against a
-  // dark ground, not for green to disappear from the palette; it is
-  // brightened here purely so it still reads clearly against #0B1211.
-  static Color get emerald => _dark ? const Color(0xFF2A9D6F) : const Color(0xFF0F5E3A);
-  static Color get emeraldTint => _dark ? const Color(0xFF1F5E45) : const Color(0xFF2C6653);
+  // primary. Each theme keeps its own named colour as the actual primary
+  // (blue is blue, amber is amber, purple is purple) rather than every
+  // theme secretly still being green underneath - gold stays the one
+  // constant across all of them as the shared "accent" identity, which is
+  // what actually ties the themes together as one family.
+  static Color get emerald => _pick({
+        'green_light': const Color(0xFF0F5E3A),
+        'black_gold': const Color(0xFF2A9D6F),
+        'green_dark': const Color(0xFF34A874),
+        'blue': const Color(0xFF1D5A8F),
+        'amber': const Color(0xFFA9601A),
+        'purple': const Color(0xFF6B3FA0),
+      });
 
-  // accent, ornament - #D4AF57 is the exact champagne gold specified for
-  // Black & Gold.
-  static Color get gold => _dark ? const Color(0xFFD4AF57) : const Color(0xFFC79A2E);
+  static Color get emeraldTint => _pick({
+        'green_light': const Color(0xFF2C6653),
+        'black_gold': const Color(0xFF1F5E45),
+        'green_dark': const Color(0xFF2A6B4C),
+        'blue': const Color(0xFF3D7BAE),
+        'amber': const Color(0xFFC67F33),
+        'purple': const Color(0xFF8A63B8),
+      });
+
+  // accent, ornament - gold stays close to the same value across every
+  // theme (see note on `emerald` above), only shifting where a theme's own
+  // background genuinely needs a brighter or muted version for contrast.
+  static Color get gold => _pick({
+        'green_light': const Color(0xFFC79A2E),
+        'black_gold': const Color(0xFFD4AF57),
+        'green_dark': const Color(0xFFC9A227),
+        'blue': const Color(0xFFC79A2E),
+        'amber': const Color(0xFFC79A2E),
+        'purple': const Color(0xFFC79A2E),
+      });
 
   /// Muted, sophisticated gold used specifically for JAMAT time values -
   /// kept distinct from the brighter ornamental [gold] above so tuning one
   /// does not ripple into the other.
-  static Color get champagneGold => _dark ? const Color(0xFFC9A45C) : const Color(0xFFB08D57);
+  static Color get champagneGold => _pick({
+        'green_light': const Color(0xFFB08D57),
+        'black_gold': const Color(0xFFC9A45C),
+        'green_dark': const Color(0xFFB8963E),
+        'blue': const Color(0xFFB08D57),
+        'amber': const Color(0xFFB08D57),
+        'purple': const Color(0xFFB08D57),
+      });
 
-  // Hairline borders / list separators. "Subtle gold outlines instead of
-  // bright borders" in dark mode, per spec - a muted gold-gray, not the
-  // bright accent gold itself.
-  static Color get goldRule => _dark ? const Color(0xFF2A3530) : const Color(0xFFE8DFC9);
-  static Color get goldRuleFaint => _dark ? const Color(0xFF1D2622) : const Color(0xFFEFE7D3);
-  static Color get goldPale => _dark ? const Color(0xFFE8CD8A) : const Color(0xFFD9C27E);
+  // Hairline borders / list separators.
+  static Color get goldRule => _pick({
+        'green_light': const Color(0xFFE8DFC9),
+        'black_gold': const Color(0xFF2A3530),
+        'green_dark': const Color(0xFF24382E),
+        'blue': const Color(0xFFD9E3ED),
+        'amber': const Color(0xFFEBDAB8),
+        'purple': const Color(0xFFE1D5EE),
+      });
 
-  // #F4F0E5 warm off-white is the exact primary-text value specified.
-  static Color get text => _dark ? const Color(0xFFF4F0E5) : const Color(0xFF1B1B1B);
-  static Color get textMid => _dark ? const Color(0xFFC9C4B8) : const Color(0xFF5C6560);
-  // muted gold/gray secondary text, per spec.
-  static Color get textMuted => _dark ? const Color(0xFF9C9686) : const Color(0xFF6B6B6B);
-  static Color get textFaint => _dark ? const Color(0xFF6B6558) : const Color(0xFFB5AC98);
-  static Color get chevron => _dark ? const Color(0xFF8A8474) : const Color(0xFFC0B79F);
-  static Color get navInactive => _dark ? const Color(0xFF6B6558) : const Color(0xFFA9A192);
-  static Color get onEmeraldMuted => _dark ? const Color(0xFFB8C9BE) : const Color(0xFFA9C0B6);
-  static Color get kaabaBlack => const Color(0xFF000000); // already black either way
-  static Color get textDim => _dark ? const Color(0xFF7A7568) : const Color(0xFF8B8676);
+  static Color get goldRuleFaint => _pick({
+        'green_light': const Color(0xFFEFE7D3),
+        'black_gold': const Color(0xFF1D2622),
+        'green_dark': const Color(0xFF1A2921),
+        'blue': const Color(0xFFEEF3F8),
+        'amber': const Color(0xFFF5ECDA),
+        'purple': const Color(0xFFF1EAF8),
+      });
+
+  static Color get goldPale => _pick({
+        'green_light': const Color(0xFFD9C27E),
+        'black_gold': const Color(0xFFE8CD8A),
+        'green_dark': const Color(0xFFD9C27E),
+        'blue': const Color(0xFFD9C27E),
+        'amber': const Color(0xFFE0BC6E),
+        'purple': const Color(0xFFD9C27E),
+      });
+
+  static Color get text => _pick({
+        'green_light': const Color(0xFF1B1B1B),
+        'black_gold': const Color(0xFFF4F0E5),
+        'green_dark': const Color(0xFFEDEFE9),
+        'blue': const Color(0xFF1B2430),
+        'amber': const Color(0xFF2A1F12),
+        'purple': const Color(0xFF241B2E),
+      });
+
+  static Color get textMid => _pick({
+        'green_light': const Color(0xFF5C6560),
+        'black_gold': const Color(0xFFC9C4B8),
+        'green_dark': const Color(0xFFA9B6AC),
+        'blue': const Color(0xFF4B5A68),
+        'amber': const Color(0xFF6B5A40),
+        'purple': const Color(0xFF5A4A6B),
+      });
+
+  static Color get textMuted => _pick({
+        'green_light': const Color(0xFF6B6B6B),
+        'black_gold': const Color(0xFF9C9686),
+        'green_dark': const Color(0xFF8CA192),
+        'blue': const Color(0xFF6B7684),
+        'amber': const Color(0xFF7D6B4E),
+        'purple': const Color(0xFF705E80),
+      });
+
+  static Color get textFaint => _pick({
+        'green_light': const Color(0xFFB5AC98),
+        'black_gold': const Color(0xFF6B6558),
+        'green_dark': const Color(0xFF5E6D62),
+        'blue': const Color(0xFFA8B4C0),
+        'amber': const Color(0xFFBFAE8C),
+        'purple': const Color(0xFFB7A6C4),
+      });
+
+  static Color get chevron => _pick({
+        'green_light': const Color(0xFFC0B79F),
+        'black_gold': const Color(0xFF8A8474),
+        'green_dark': const Color(0xFF7E9184),
+        'blue': const Color(0xFF9DAAB8),
+        'amber': const Color(0xFFC2AE84),
+        'purple': const Color(0xFFAC9BBC),
+      });
+
+  static Color get navInactive => _pick({
+        'green_light': const Color(0xFFA9A192),
+        'black_gold': const Color(0xFF6B6558),
+        'green_dark': const Color(0xFF5E6D62),
+        'blue': const Color(0xFF93A0AC),
+        'amber': const Color(0xFFB0A080),
+        'purple': const Color(0xFF9F8DB0),
+      });
+
+  static Color get onEmeraldMuted => _pick({
+        'green_light': const Color(0xFFA9C0B6),
+        'black_gold': const Color(0xFFB8C9BE),
+        'green_dark': const Color(0xFFB8C9BE),
+        'blue': const Color(0xFFB7CBDB),
+        'amber': const Color(0xFFE8CFA6),
+        'purple': const Color(0xFFD4C2E3),
+      });
+
+  static Color get kaabaBlack => const Color(0xFF000000); // same in every theme
+
+  static Color get textDim => _pick({
+        'green_light': const Color(0xFF8B8676),
+        'black_gold': const Color(0xFF7A7568),
+        'green_dark': const Color(0xFF6D7A70),
+        'blue': const Color(0xFF7C8794),
+        'amber': const Color(0xFF8F7C5C),
+        'purple': const Color(0xFF8A7896),
+      });
 
   /// The exact-alarm warning banner. Amber carries meaning there regardless
   /// of theme, so it is NOT theme-switched - a warning should look like a

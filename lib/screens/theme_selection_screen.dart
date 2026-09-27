@@ -16,11 +16,15 @@ class ThemeSelectionScreen extends StatelessWidget {
 
   static const List<(String id, String label, bool available)> _options = [
     ('green_light', 'Green (Light)', true),
-    ('green_dark', 'Green (Dark)', false),
+    ('green_dark', 'Green (Dark)', true),
     ('black_gold', 'Black & Gold', true),
-    ('blue', 'Blue', false),
-    ('amber', 'Amber', false),
-    ('purple', 'Purple', false),
+    ('blue', 'Blue', true),
+    ('amber', 'Amber', true),
+    ('purple', 'Purple', true),
+    // System Default needs to follow the DEVICE's own light/dark setting
+    // live, which is a different mechanism (MediaQuery platform brightness)
+    // from picking a fixed palette - still not built, unlike the other
+    // five, which are now all real.
     ('system', 'System Default', false),
   ];
 
@@ -73,6 +77,10 @@ class _Swatch extends StatelessWidget {
     final (Color bg, Color fg) = switch (themeId) {
       'green_light' => (const Color(0xFFFAF7F0), const Color(0xFF0F5E3A)),
       'black_gold' => (const Color(0xFF0B1211), const Color(0xFFD4AF57)),
+      'green_dark' => (const Color(0xFF0D1B16), const Color(0xFF34A874)),
+      'blue' => (const Color(0xFFF2F6FB), const Color(0xFF1D5A8F)),
+      'amber' => (const Color(0xFFFBF6EC), const Color(0xFFA9601A)),
+      'purple' => (const Color(0xFFF7F4FA), const Color(0xFF6B3FA0)),
       _ => (const Color(0xFFE0DCD0), const Color(0xFFB5AC98)),
     };
     return Container(

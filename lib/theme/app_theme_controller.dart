@@ -24,7 +24,11 @@ class AppThemeController extends ChangeNotifier {
 
   String _themeId = 'green_light';
   String get themeId => _themeId;
-  bool get isDark => _themeId == 'black_gold';
+
+  /// True for any theme with a dark page background - used where something
+  /// needs a plain light/dark decision (status bar icon brightness, etc.)
+  /// rather than the specific palette.
+  bool get isDark => _themeId == 'black_gold' || _themeId == 'green_dark';
 
   /// Call once, early (e.g. in main() before runApp), so the persisted
   /// choice is loaded before the first frame - otherwise the app would
