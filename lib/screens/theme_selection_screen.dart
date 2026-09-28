@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_theme_controller.dart';
 
-/// The 7 options as specified: Green (Dark), Green (Light), Black & Gold,
-/// Blue, Amber, Purple, System Default.
-///
-/// Only 'green_light' and 'black_gold' are wired to real, hand-specified
-/// palettes in AppColors right now - see the scope note on
-/// AppThemeController. The other five are listed (so the picker matches
-/// what was asked for) but disabled with a "Coming soon" tag rather than
-/// silently pretending to work - picking "Blue" and having nothing change
-/// would be a worse experience than not offering it yet.
+/// Six real, selectable themes: Green (Light), Green (Dark), Black & Gold,
+/// Blue, Amber, Purple - all wired to real, hand-specified palettes in
+/// AppColors. "System Default" was in the original 7-option list but has
+/// been removed on request; it would need to track the device's own live
+/// light/dark setting rather than a fixed palette, a different mechanism
+/// from the other six.
 class ThemeSelectionScreen extends StatelessWidget {
   const ThemeSelectionScreen({super.key});
 
@@ -21,11 +18,6 @@ class ThemeSelectionScreen extends StatelessWidget {
     ('blue', 'Blue', true),
     ('amber', 'Amber', true),
     ('purple', 'Purple', true),
-    // System Default needs to follow the DEVICE's own light/dark setting
-    // live, which is a different mechanism (MediaQuery platform brightness)
-    // from picking a fixed palette - still not built, unlike the other
-    // five, which are now all real.
-    ('system', 'System Default', false),
   ];
 
   @override
