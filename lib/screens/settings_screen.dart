@@ -37,15 +37,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
             builder: (context, _) => ListTile(
               leading: Icon(Icons.palette_outlined, color: AppColors.emerald),
               title: const Text('Appearance'),
-              subtitle: Text(
-                AppThemeController.instance.themeId == 'black_gold'
-                    ? 'Black & Gold'
-                    : 'Green (Light)',
-              ),
+              // Was a two-way check (black_gold vs everything else) from
+              // when those were the only two real themes - now covers all
+              // six, matching theme_selection_screen.dart's own labels.
+              subtitle: Text(switch (AppThemeController.instance.themeId) {
+                'black_gold' => 'Black & Gold',
+                'green_dark' => 'Green (Dark)',
+                'blue' => 'Blue',
+                'amber' => 'Amber',
+                'purple' => 'Purple',
+                _ => 'Green (Light)',
+              }),
               trailing: const Icon(Icons.chevron_right, size: 18),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const ThemeSelectionScreen()),
               ),
+            ),
+          ),
+          const Divider(),
+          // Moved here, right after Appearance, per request.
+          ListTile(
+            leading: Icon(Icons.switch_account_outlined,
+                color: AppColors.emerald),
+            title: Text(S.isUrdu ? 'استعمال کا طریقہ' : 'How you use the app'),
+            subtitle: Text(S.isUrdu
+                ? 'نمازی یا مسجد کا ذمہ دار'
+                : 'Switch between worshipper and masjid admin'),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
             ),
           ),
           const Divider(),
@@ -176,22 +196,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right, size: 18),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
-            ),
-          ),
-          const Divider(),
-          // So the role choice is changeable. It is asked once at first launch;
-          // without this, someone who picked wrong could only change it by
-          // reinstalling.
-          ListTile(
-            leading: Icon(Icons.switch_account_outlined,
-                color: AppColors.emerald),
-            title: Text(S.isUrdu ? 'استعمال کا طریقہ' : 'How you use the app'),
-            subtitle: Text(S.isUrdu
-                ? 'نمازی یا مسجد کا ذمہ دار'
-                : 'Switch between worshipper and masjid admin'),
-            trailing: const Icon(Icons.chevron_right, size: 18),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
             ),
           ),
           const Divider(),

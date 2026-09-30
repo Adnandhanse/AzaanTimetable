@@ -28,21 +28,27 @@ class ThemeSelectionScreen extends StatelessWidget {
         listenable: AppThemeController.instance,
         builder: (context, _) {
           final String current = AppThemeController.instance.themeId;
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+          // 3 columns x 2 rows for the 6 themes, as requested - a grid of
+          // swatches reads faster than a scrolling list when every option
+          // is a colour choice, and it means all six are visible at once
+          // with no scrolling on a normal phone.
+          return GridView.builder(
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.85,
+            ),
             itemCount: _options.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final (id, label, available) = _options[index];
               final bool selected = id == current;
-              return ListTile(
-                enabled: available,
-                leading: _Swatch(themeId: id),
-                title: Text(label),
-                subtitle: available ? null : const Text('Coming soon'),
-                trailing: selected
-                    ? Icon(Icons.check_circle, color: AppColors.gold)
-                    : null,
+              return _ThemeTile(
+                id: id,
+                label: label,
+                available: available,
+                selected: selected,
                 onTap: available
                     ? () => AppThemeController.instance.setTheme(id)
                     : null,
@@ -50,6 +56,85 @@ class ThemeSelectionScreen extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+/// One grid cell: swatch, name, and a gold ring/checkmark when it is the
+/// current theme - the card itself is the tap target, not just the swatch.
+class _ThemeTile extends StatelessWidget {
+  const _ThemeTile({
+    required this.id,
+    required this.label,
+    required this.available,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String id;
+  final String label;
+  final bool available;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: available ? 1 : 0.45,
+      child: Material(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selected ? AppColors.gold : Colors.black12,
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _Swatch(themeId: id),
+                    if (selected)
+                      Positioned(
+                        right: -4,
+                        bottom: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(1),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.check_circle,
+                              color: AppColors.gold, size: 18),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                if (!available) ...[
+                  const SizedBox(height: 2),
+                  const Text('Coming soon',
+                      style: TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
