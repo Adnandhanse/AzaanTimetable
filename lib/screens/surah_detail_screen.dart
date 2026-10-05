@@ -64,6 +64,12 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   static const double _minFontSize = 18;
   static const double _maxFontSize = 40;
 
+  /// True while playing a run of verses started from Mushaf mode's "Play
+  /// Surah" button - advances to the next verse on its own rather than
+  /// stopping after one, which is the whole point of playing in a mode
+  /// meant for continuous reading rather than tapping one verse at a time.
+  bool _sequential = false;
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +78,22 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     _loadFontSize();
     _loadNotes();
     _scroll.addListener(_onScroll);
+
+    // THIS WAS A REAL BUG: _togglePlay used to call
+    // _player.onPlayerComplete.listen(...) itself, every time it played a
+    // verse - so after N verses played in a row, N stacked listeners would
+    // all fire on the next completion. For a single tapped verse that is
+    // merely wasteful; for sequential surah playback it would have meant
+    // the player racing itself forward multiple verses at once. Registered
+    // ONCE here instead.
+    _player.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      if (_sequential && _playingVerse != null) {
+        _advanceSequential();
+      } else {
+        setState(() => _playingVerse = null);
+      }
+    });
 
     final double? jumpTo = widget.initialOffset;
     if (jumpTo != null && jumpTo > 0) {
@@ -186,12 +208,50 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   /// the one part of the Quran section that needs internet, since
   /// bundling audio for the entire Quran offline would make the app
   /// enormous. Reading (Arabic + translation) always works offline.
+  ///
+  /// Used by the Translation-mode per-verse play button - taps one verse,
+  /// stops after it finishes (non-sequential). Mushaf mode's "Play Surah"
+  /// uses [_playSequentialFrom] instead, below.
   Future<void> _togglePlay(int verseNumber) async {
     if (_playingVerse == verseNumber) {
+      _sequential = false;
       await _player.stop();
       setState(() => _playingVerse = null);
       return;
     }
+    _sequential = false;
+    await _playVerseNumber(verseNumber);
+  }
+
+  /// Starts (or stops, if already playing) continuous playback through the
+  /// surah from [verseNumber] onward - this is what Mushaf mode's play
+  /// button calls, since Arabic-only reading is meant to be a continuous
+  /// listen, not a tap-one-verse-at-a-time interaction the way the
+  /// Translation-mode list is.
+  Future<void> _playSequentialFrom(int verseNumber) async {
+    if (_playingVerse != null) {
+      _sequential = false;
+      await _player.stop();
+      setState(() => _playingVerse = null);
+      return;
+    }
+    _sequential = true;
+    await _playVerseNumber(verseNumber);
+  }
+
+  Future<void> _advanceSequential() async {
+    final int currentIndex =
+        widget.surah.verses.indexWhere((v) => v.number == _playingVerse);
+    final int nextIndex = currentIndex + 1;
+    if (currentIndex == -1 || nextIndex >= widget.surah.verses.length) {
+      _sequential = false;
+      if (mounted) setState(() => _playingVerse = null);
+      return;
+    }
+    await _playVerseNumber(widget.surah.verses[nextIndex].number);
+  }
+
+  Future<void> _playVerseNumber(int verseNumber) async {
     final surahStr = widget.surah.number.toString().padLeft(3, '0');
     final verseStr = verseNumber.toString().padLeft(3, '0');
     final url = 'https://everyayah.com/data/Alafasy_128kbps/$surahStr$verseStr.mp3';
@@ -203,12 +263,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       try {
         await _player.setPlaybackRate(_recitationRate);
       } catch (_) {}
-      setState(() => _playingVerse = verseNumber);
-      _player.onPlayerComplete.listen((_) {
-        if (mounted) setState(() => _playingVerse = null);
-      });
+      if (mounted) setState(() => _playingVerse = verseNumber);
     } catch (_) {
+      _sequential = false;
       if (mounted) {
+        setState(() => _playingVerse = null);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not play audio - check your internet connection.')),
         );
@@ -272,6 +331,26 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ],
         ),
         actions: [
+          // RECITATION IN ARABIC-ONLY MODE.
+          //
+          // Audio used to only exist in the Translation list - one verse at
+          // a time, tap by tap. Mushaf mode (the default, and the one most
+          // people actually read in) had no way to hear the surah at all.
+          // This plays continuously from verse 1 - or from the bookmark, if
+          // one is set - advancing on its own rather than needing a tap per
+          // verse, since that is what continuous Arabic reading calls for.
+          // The existing speed-control bar at the bottom of the screen
+          // already works here unchanged - it shows whenever something is
+          // playing, regardless of which mode you are in.
+          if (_mushafMode)
+            IconButton(
+              tooltip: _playingVerse == null ? 'Play Surah' : 'Stop',
+              icon: Icon(
+                _playingVerse == null ? Icons.play_circle_outline : Icons.stop_circle_outlined,
+                color: AppColors.emerald,
+              ),
+              onPressed: () => _playSequentialFrom(_markedVerse ?? 1),
+            ),
           // Two ways to read the same surah. One control, so it is always
           // obvious which mode you are in.
           Padding(
@@ -306,7 +385,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                   child: Row(
                     children: <Widget>[
-                      Text('A',
+                      const Text('A',
                           style: TextStyle(
                               fontSize: 12, color: AppColors.textMuted)),
                       Expanded(
@@ -330,7 +409,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                           ),
                         ),
                       ),
-                      Text('A',
+                      const Text('A',
                           style: TextStyle(
                               fontSize: 20, color: AppColors.textMuted)),
                     ],
@@ -347,7 +426,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       bottomNavigationBar: _playingVerse == null
           ? null
           : Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.white,
                 border: Border(
                     top: BorderSide(color: AppColors.goldRule)),
@@ -357,7 +436,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                 top: false,
                 child: Row(
                   children: [
-                    Icon(Icons.graphic_eq,
+                    const Icon(Icons.graphic_eq,
                         size: 17, color: AppColors.emerald),
                     const SizedBox(width: 8),
                     Text('Ayah $_playingVerse',
