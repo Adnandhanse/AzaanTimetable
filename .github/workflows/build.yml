@@ -154,7 +154,7 @@ jobs:
                   // renaming it would touch every file for no benefit; Google
                   // never sees it.
                   applicationId = "com.adnandhanse.islamconnect"
-                  minSdk = 23
+                  minSdk = 24
                   targetSdk = 36
                   versionCode = flutter.versionCode
                   versionName = flutter.versionName
