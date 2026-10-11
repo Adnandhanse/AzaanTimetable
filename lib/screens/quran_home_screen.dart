@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
 import '../services/quran_repository.dart';
 import '../services/quran_local_data_service.dart';
@@ -26,6 +27,18 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
   Map<String, dynamic>? _lastRead;
   late TabController _tabController;
 
+  // AUDIO FROM THE INDEX.
+  //
+  // One player for the whole list, one surah at a time - starting a second
+  // surah stops the first rather than layering them. Plays the surah
+  // straight through from verse 1, advancing on its own, the same
+  // continuous-listen behaviour as the reader's own play button, so
+  // someone can start a recitation here and put the phone down without
+  // ever opening the reader.
+  final AudioPlayer _player = AudioPlayer();
+  int? _playingSurah;
+  int _playingVerseNumber = 0;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +46,68 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     _loadPreferences();
     _loadFavourites();
     _loadLastRead();
+
+    // Registered ONCE here, never inside the play method - registering it
+    // per-play stacks a new listener each time, so after a few surahs
+    // every completion would fire several handlers at once and the
+    // player would skip ahead multiple verses per tick.
+    _player.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      _advanceToNextVerse();
+    });
+  }
+
+  Future<void> _toggleSurahPlay(Surah surah) async {
+    // Tapping the surah that is already playing stops it.
+    if (_playingSurah == surah.number) {
+      await _player.stop();
+      if (mounted) setState(() => _playingSurah = null);
+      return;
+    }
+    // Anything else: stop whatever was playing, start this one from verse 1.
+    await _player.stop();
+    if (!mounted) return;
+    setState(() {
+      _playingSurah = surah.number;
+      _playingVerseNumber = 0;
+    });
+    await _playVerse(surah, 1);
+  }
+
+  Future<void> _playVerse(Surah surah, int verseNumber) async {
+    final surahStr = surah.number.toString().padLeft(3, '0');
+    final verseStr = verseNumber.toString().padLeft(3, '0');
+    final url = 'https://everyayah.com/data/Alafasy_128kbps/$surahStr$verseStr.mp3';
+    try {
+      await _player.play(UrlSource(url));
+      if (mounted) setState(() => _playingVerseNumber = verseNumber);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _playingSurah = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not play audio - check your internet connection.')),
+      );
+    }
+  }
+
+  Future<void> _advanceToNextVerse() async {
+    final int? playing = _playingSurah;
+    if (playing == null) return;
+    final Surah? surah = _surahs?.firstWhere(
+      (s) => s.number == playing,
+      orElse: () => _surahs!.first,
+    );
+    if (surah == null || surah.number != playing) {
+      setState(() => _playingSurah = null);
+      return;
+    }
+    final int next = _playingVerseNumber + 1;
+    if (next > surah.verses.length) {
+      // Reached the end of the surah.
+      if (mounted) setState(() => _playingSurah = null);
+      return;
+    }
+    await _playVerse(surah, next);
   }
 
   Future<void> _loadLastRead() async {
@@ -99,6 +174,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -438,12 +514,56 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
                               Text(
                                 surah.arabicName,
                                 style: AppText.arabic.copyWith(
-                                  fontSize: 17,
+                                  fontSize: 16,
                                   height: 1.3,
                                   color: AppColors.gold,
                                 ),
                               ),
+                              const SizedBox(width: 4),
+                              // PLAY / PAUSE. Filled emerald circle while
+                              // THIS surah is playing, plain outline when
+                              // idle - so scanning down the list, the one
+                              // currently playing is obvious without
+                              // reading anything. Compact tap target
+                              // (36dp, not the default 48) on both icons,
+                              // so adding a fifth element to the row
+                              // doesn't squeeze the Surah name.
                               IconButton(
+                                tooltip: _playingSurah == surah.number
+                                    ? 'Stop'
+                                    : 'Play recitation',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                    minWidth: 36, minHeight: 36),
+                                icon: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _playingSurah == surah.number
+                                        ? AppColors.emerald
+                                        : Colors.transparent,
+                                    border: Border.all(
+                                      color: AppColors.emerald,
+                                      width: 1.4,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _playingSurah == surah.number
+                                        ? Icons.stop_rounded
+                                        : Icons.play_arrow_rounded,
+                                    size: 18,
+                                    color: _playingSurah == surah.number
+                                        ? Colors.white
+                                        : AppColors.emerald,
+                                  ),
+                                ),
+                                onPressed: () => _toggleSurahPlay(surah),
+                              ),
+                              IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                    minWidth: 36, minHeight: 36),
                                 icon: Icon(
                                   isFav
                                       ? Icons.favorite
