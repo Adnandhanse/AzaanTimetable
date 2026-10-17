@@ -1,0 +1,32 @@
+name: Deploy ownership transfer service
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check deployment credentials are configured
+        env:
+          DEPLOY_CREDENTIALS: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+        run: |
+          if [ -z "$DEPLOY_CREDENTIALS" ]; then
+            echo 'Add the FIREBASE_DEPLOY_CREDENTIALS repository secret first. See TRANSFER_BUTTON_AND_SERVICE_SETUP.md.'
+            exit 1
+          fi
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+      - name: Install backend dependencies
+        run: npm --prefix functions install
+      - name: Validate transfer logic
+        run: npm --prefix functions test
+      - name: Deploy the ownership codebase
+        run: npx --yes firebase-tools@14 --config firebase.transfer.json deploy --only functions:ownership-transfer --project actual-masjid-prayer-time --non-interactive
+      - name: List functions after deployment
+        run: npx --yes firebase-tools@14 functions:list --project actual-masjid-prayer-time
