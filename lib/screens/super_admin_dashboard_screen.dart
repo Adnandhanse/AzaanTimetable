@@ -3,6 +3,7 @@ import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/auth_service.dart';
 import 'super_admin_login_screen.dart';
+import 'ownership_transfers_screen.dart';
 import 'super_admin_masjid_detail_screen.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
@@ -53,6 +54,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
       appBar: AppBar(
         title: const Text('Platform Admin'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz),
+            tooltip: 'Ownership requests',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const OwnershipTransfersScreen())),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',

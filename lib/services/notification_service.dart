@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:ui' show DartPluginRegistrant;
 
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -15,6 +13,7 @@ import 'foreground_alarm_manager.dart';
 import 'notification_channels.dart';
 import 'prayer_schedule_cache.dart';
 import 'prayer_notification_preferences.dart';
+import 'azan_stop_controller.dart';
 
 /// Schedules local notifications that fire daily at each prayer time for
 /// the masjid a user is following. Uses a full-screen alarm-style
@@ -141,7 +140,7 @@ class NotificationService {
   /// isolate; this one cannot touch it directly.
   static void _stopAzanEverywhere() {
     try {
-      FlutterForegroundTask.sendDataToTask('stop_azan');
+      AzanStopController.stop();
     } catch (_) {}
   }
 
@@ -344,7 +343,7 @@ class NotificationService {
       // Taps that arrive while the app is not running come here instead.
       // Without this, the Stop button on a prayer notification would do
       // nothing in exactly the case that matters — phone locked, app closed.
-      onDidReceiveBackgroundNotificationResponse: notificationActionBackground,
+      onDidReceiveBackgroundNotificationResponse: azanNotificationActionBackground,
     );
 
     // Remove the pre-azan channel. Anyone upgrading already has it, it has no
@@ -868,12 +867,5 @@ class NotificationService {
 /// situation it exists for.
 @pragma('vm:entry-point')
 void notificationActionBackground(NotificationResponse response) {
-  if (response.actionId != 'stop_azan') return;
-  try {
-    // Plugins are not registered by default in a background isolate.
-    DartPluginRegistrant.ensureInitialized();
-  } catch (_) {}
-  try {
-    FlutterForegroundTask.sendDataToTask('stop_azan');
-  } catch (_) {}
+  azanNotificationActionBackground(response);
 }

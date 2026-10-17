@@ -104,7 +104,7 @@ class ForegroundAlarmManager {
           // which it refuses to do exactly when the phone is locked — so
           // without this the azan could play with no way to stop it.
           notificationButtons: [
-            const NotificationButton(id: 'stop_azan', text: 'Stop azan'),
+            const NotificationButton(id: 'stop_azan', text: 'STOP AZAAN'),
           ],
           callback: startForegroundTaskCallback,
         );
@@ -150,7 +150,7 @@ class ForegroundAlarmManager {
           notificationTitle: 'Islam Connect is active',
           notificationText: 'Watching prayer times for ${masjid.name}',
           notificationButtons: [
-            const NotificationButton(id: 'stop_azan', text: 'Stop azan'),
+            const NotificationButton(id: 'stop_azan', text: 'STOP AZAAN'),
           ],
           callback: startForegroundTaskCallback,
         );

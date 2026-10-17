@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/masjid.dart';
+import 'auth_service.dart';
 
 /// Handles all reads/writes to the "masjids" collection in Firestore.
 /// This is the single source of truth for masjid data - replacing the
@@ -67,9 +68,25 @@ class MasjidRepository {
     });
   }
 
+  static Future<String?> getAdminUid(String id) async {
+    final doc = await _collection.doc(id).get();
+    if (!doc.exists) throw StateError('Masjid not found.');
+    return (doc.data() as Map<String, dynamic>)['adminUid'] as String?;
+  }
+
   /// Registers a new masjid and returns the new Firestore document id.
   static Future<String> register(Masjid masjid) async {
-    final docRef = await _collection.add(masjid.toMap());
+    if (await findActiveByRegistrationNo(masjid.registrationNo.trim()) != null) {
+      throw StateError('This registration already exists. Request administration transfer instead.');
+    }
+    final data = masjid.toMap();
+    data['registrationNo'] = masjid.registrationNo.trim();
+    final user = AuthService.currentUser;
+    if (user == null || user.phoneNumber != '+91${masjid.adminMobile.trim()}') {
+      throw StateError('Verify the registered admin mobile first.');
+    }
+    data['adminUid'] = user.uid;
+    final docRef = await _collection.add(data);
     return docRef.id;
   }
 
@@ -128,20 +145,16 @@ class MasjidRepository {
     await _collection.doc(id).update({'photoUrls': photoUrls});
   }
 
-  /// The currently-active (Verified) masjid registered under this number, if
-  /// one exists. Used to block accidental or bad-faith re-registration of a
-  /// masjid that already has an active admin - see register_masjid_screen.dart.
-  ///
-  /// NOTE: this query needs a composite index on (registrationNo,
-  /// verificationStatus) - Firestore will throw with a direct link to create
-  /// it the first time this runs if that index does not exist yet.
+  /// Match any existing registration, regardless of verification status.
+  /// Refuse ambiguous legacy duplicates instead of choosing the wrong record.
   static Future<Masjid?> findActiveByRegistrationNo(String registrationNo) async {
     final snapshot = await _collection
         .where('registrationNo', isEqualTo: registrationNo)
-        .where('verificationStatus', isEqualTo: 'Verified')
-        .limit(1)
         .get();
     if (snapshot.docs.isEmpty) return null;
+    if (snapshot.docs.length > 1) {
+      throw StateError('Multiple masjids have this registration number. Contact the platform admin to resolve them before transferring.');
+    }
     final doc = snapshot.docs.first;
     return Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>);
   }

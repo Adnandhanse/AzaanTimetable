@@ -54,7 +54,7 @@ class _OtpScreenState extends State<OtpScreen> {
     // false "incorrect code" error for a code that verified fine already.
     _authSub = AuthService.authStateChanges.listen((user) {
       if (_autoHandled || _isVerifying || !mounted) return;
-      if (user != null && !user.isAnonymous) {
+      if (user != null && user.phoneNumber == '+91${widget.phoneNumber.trim()}') {
         _autoHandled = true;
         _completeVerification();
       }
@@ -94,7 +94,7 @@ class _OtpScreenState extends State<OtpScreen> {
       if (!mounted) return;
       setState(() => _isVerifying = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verified, but something went wrong saving your registration: $e')),
+        SnackBar(content: Text('Phone verified, but the operation could not be completed: $e')),
       );
     }
   }
@@ -151,7 +151,7 @@ class _OtpScreenState extends State<OtpScreen> {
     // person even presses this button, most of the time - this check is the
     // fallback for whatever gap remains (e.g. the auth state event and this
     // button press landing in the same frame).
-    if (AuthService.currentUser != null && !AuthService.currentUser!.isAnonymous) {
+    if (AuthService.currentUser?.phoneNumber == '+91${widget.phoneNumber.trim()}') {
       _autoHandled = true;
       await _completeVerification();
       return;

@@ -4,6 +4,8 @@ import 'register_masjid_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'super_admin_login_screen.dart';
 import '../services/masjid_repository.dart';
+import '../services/auth_service.dart';
+import 'otp_screen.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -47,7 +49,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         // so a removed admin is not let straight back in.
         final matches =
             await MasjidRepository.streamByAdminMobile(saved).first;
-        if (matches.isNotEmpty && mounted) {
+        if (matches.isNotEmpty && mounted && AuthService.currentUser?.phoneNumber == '+91$saved') {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (_) => AdminDashboardScreen(adminMobile: saved)),
@@ -61,32 +63,44 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     if (mounted) setState(() => _restoring = false);
   }
 
-  // Note: this is a simple mobile-number lookup against Firestore, not a
-  // full Firebase Auth login for admins yet. Good enough for now since
-  // only someone who registered the masjid would know this number, but
-  // a future phase should add real OTP verification here too.
+  Future<void> _openDashboard(String mobile) async {
+    if (AuthService.currentUser?.phoneNumber != '+91$mobile') {
+      throw StateError('Verify this mobile number first.');
+    }
+    final matches = await MasjidRepository.streamByAdminMobile(mobile).first;
+    if (matches.isEmpty) throw StateError('This number no longer manages a masjid.');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, mobile);
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
+      builder: (_) => AdminDashboardScreen(adminMobile: mobile)), (route) => false);
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+    final mobile = _mobileController.text.trim();
     setState(() => _isChecking = true);
-
-    final matches = await MasjidRepository.streamByAdminMobile(_mobileController.text).first;
-
-    if (!mounted) return;
-    setState(() => _isChecking = false);
-
-    if (matches.isNotEmpty) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_key, _mobileController.text.trim());
-      } catch (_) {}
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => AdminDashboardScreen(adminMobile: _mobileController.text)),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No masjid found for this number. Register one below.')),
-      );
+    try {
+      final matches = await MasjidRepository.streamByAdminMobile(mobile).first;
+      if (matches.isEmpty) throw StateError('No masjid found for this number. Register one below.');
+      if (AuthService.currentUser?.phoneNumber == '+91$mobile') {
+        await _openDashboard(mobile);
+        return;
+      }
+      await AuthService.sendOtp(phoneNumber: '+91$mobile',
+        onCodeSent: (id, token) {
+          if (!mounted) return;
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => OtpScreen(
+            phoneNumber: mobile, verificationId: id, resendToken: token,
+            onVerified: () => _openDashboard(mobile))));
+        },
+        onError: (error) {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+        });
+    } catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$error')));
+    } finally {
+      if (mounted) setState(() => _isChecking = false);
     }
   }
 

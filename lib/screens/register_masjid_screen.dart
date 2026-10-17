@@ -13,6 +13,8 @@ import '../theme/app_theme_controller.dart';
 import 'admin_dashboard_screen.dart';
 import 'otp_screen.dart';
 import 'map_picker_screen.dart';
+import 'home_screen.dart';
+import '../services/ownership_transfer_repository.dart';
 
 class RegisterMasjidScreen extends StatefulWidget {
   const RegisterMasjidScreen({super.key});
@@ -178,38 +180,21 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       return;
     }
 
-    // DUPLICATE REGISTRATION-NUMBER CHECK.
-    //
-    // Same registration number, and an ACTIVE (Verified) masjid already
-    // exists under it - almost certainly the same real-world masjid being
-    // registered a second time, whether by mistake or by someone with no
-    // real claim to it. Blocked by default. "Previous masjid admin left" is
-    // the one deliberate way past this - and even then, this still goes
-    // through the ordinary Pending Verification review below; checking the
-    // box does not skip approval, it only gets past this specific block.
-    if (!_previousAdminLeft) {
-      setState(() => _isCheckingDuplicate = true);
-      Masjid? existing;
-      try {
-        existing = await MasjidRepository.findActiveByRegistrationNo(
-            _registrationNo.text.trim());
-      } catch (e) {
-        if (!mounted) return;
-        setState(() => _isCheckingDuplicate = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not check registration number: $e')),
-        );
-        return;
-      }
+    // Always re-check, including after the takeover checkbox is selected.
+    setState(() => _isCheckingDuplicate = true);
+    Masjid? existing;
+    try {
+      existing = await MasjidRepository.findActiveByRegistrationNo(_registrationNo.text.trim());
+    } catch (error) {
       if (!mounted) return;
-      setState(() {
-        _isCheckingDuplicate = false;
-        _duplicateOf = existing;
-      });
-      if (existing != null) return; // Error card + checkbox now visible below.
-    } else {
-      setState(() => _duplicateOf = null);
+      setState(() => _isCheckingDuplicate = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not check registration: $error')));
+      return;
     }
+    if (!mounted) return;
+    setState(() { _isCheckingDuplicate = false; _duplicateOf = existing; });
+    if (existing != null && !_previousAdminLeft) return;
+    if (existing == null) _previousAdminLeft = false;
 
     setState(() => _isSendingOtp = true);
 
@@ -292,6 +277,23 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   }
 
   Future<void> _saveMasjidAfterVerification() async {
+    // Check again after OTP in case registration changed while SMS was pending.
+    final existing = await MasjidRepository.findActiveByRegistrationNo(_registrationNo.text.trim());
+    if (existing != null) {
+      if (!_previousAdminLeft) {
+        throw StateError('This masjid already exists. Go back and select the administration transfer option.');
+      }
+      await OwnershipTransferRepository.request(existing,
+        name: _adminName.text, mobile: _mobile.text, email: _email.text);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
+        'Administration transfer requested. The platform admin will verify it. Existing masjid data and followers are preserved.')));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
+      return;
+    }
+    if (_previousAdminLeft) throw StateError('The existing masjid was not found. Please check the registration number again.');
+
     final combinedAddress = _landmark.text.trim().isEmpty
         ? _address.text
         : '${_landmark.text.trim()}, ${_address.text}';
@@ -394,7 +396,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                         const Padding(
                           padding: EdgeInsets.only(left: 4, bottom: 4),
                           child: Text(
-                            'You can submit now. This will still be reviewed by us before it goes live, same as any other registration.',
+                            'Submit to request administration of the existing masjid. After platform approval, only admin details change. All existing followers, timings, photos and audio stay.',
                             style: TextStyle(fontSize: 12, color: Colors.black54),
                           ),
                         ),

@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
 import '../services/prayer_notification_preferences.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import '../services/azan_stop_controller.dart';
 import 'hijri_calendar_screen.dart';
 import 'role_selection_screen.dart';
 import '../services/app_language.dart';
@@ -38,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _soundLoading = true);
     try {
       await PrayerNotificationPreferences.setSoundEnabled(value);
-      if (!value) FlutterForegroundTask.sendDataToTask('stop_azan');
+      if (!value) await AzanStopController.stop();
       if (mounted) setState(() => azanEnabled = value);
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(

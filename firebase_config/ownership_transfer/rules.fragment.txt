@@ -1,0 +1,75 @@
+// MERGE into service cloud.firestore / match /databases/{database}/documents.
+// This is a fragment, NOT a replacement for your existing rules.
+function transferPlatformAdmin() {
+  return request.auth != null &&
+    get(/databases/$(database)/documents/platformAdmins/$(request.auth.uid)).data.enabled == true;
+}
+match /platformAdmins/{uid} {
+  allow get: if request.auth != null && request.auth.uid == uid;
+  allow list, write: if false; // Seed only through Firebase Console/Admin SDK.
+}
+match /ownershipTransferRequests/{requestId} {
+  allow read: if transferPlatformAdmin();
+  // A requester may get only their own deterministic request, needed by transaction.
+  allow get: if request.auth != null &&
+    (resource == null || resource.data.requesterUid == request.auth.uid);
+  allow create, update: if validTransferRequest();
+  allow update: if transferPlatformAdmin() &&
+    resource.data.status == 'Pending' &&
+    request.resource.data.diff(resource.data).affectedKeys()
+      .hasOnly(['status', 'reviewedBy', 'reviewedAt']) &&
+    request.resource.data.reviewedBy == request.auth.uid &&
+    request.resource.data.reviewedAt == request.time &&
+    (request.resource.data.status == 'Rejected' ||
+      (request.resource.data.status == 'Approved' &&
+       getAfter(/databases/$(database)/documents/masjids/$(resource.data.masjidId)).data.adminUid == resource.data.requesterUid &&
+       getAfter(/databases/$(database)/documents/masjids/$(resource.data.masjidId)).data.ownershipTransferRequestId == requestId));
+  allow delete: if false;
+
+  function validTransferRequest() {
+    let d = request.resource.data;
+    let m = get(/databases/$(database)/documents/masjids/$(d.masjidId)).data;
+    return request.auth != null &&
+      d.keys().hasOnly(['masjidId', 'masjidName', 'registrationNo', 'previousAdminMobile',
+        'previousAdminUid', 'requesterUid', 'newAdminName', 'newAdminMobile',
+        'newAdminEmail', 'status', 'requestedAt']) &&
+      d.requesterUid == request.auth.uid &&
+      requestId == d.masjidId + '_' + request.auth.uid &&
+      request.auth.token.phone_number == '+91' + d.newAdminMobile &&
+      d.newAdminName is string && d.newAdminEmail is string &&
+      d.newAdminMobile != m.adminMobile &&
+      d.masjidName == m.name && d.registrationNo == m.registrationNo &&
+      d.previousAdminMobile == m.adminMobile &&
+      d.previousAdminUid == m.get('adminUid', null) &&
+      d.status == 'Pending' && d.requestedAt == request.time &&
+      (resource == null || resource.data.status != 'Pending');
+  }
+}
+
+// Add this function at database scope and use it as an allow-update condition
+// in your EXISTING match /masjids/{masjidId} block.
+function approvedAdminTransfer(masjidId) {
+  let id = request.resource.data.ownershipTransferRequestId;
+  let before = get(/databases/$(database)/documents/ownershipTransferRequests/$(id)).data;
+  let after = getAfter(/databases/$(database)/documents/ownershipTransferRequests/$(id)).data;
+  return transferPlatformAdmin() && before.status == 'Pending' &&
+    before.masjidId == masjidId &&
+    before.previousAdminMobile == resource.data.adminMobile &&
+    before.previousAdminUid == resource.data.get('adminUid', null) &&
+    after.status == 'Approved' && after.reviewedBy == request.auth.uid &&
+    request.resource.data.adminUid == before.requesterUid &&
+    request.resource.data.adminName == before.newAdminName &&
+    request.resource.data.adminMobile == before.newAdminMobile &&
+    request.resource.data.adminEmail == before.newAdminEmail &&
+    request.resource.data.ownershipTransferredAt == request.time &&
+    request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      'adminUid', 'adminName', 'adminMobile', 'adminEmail',
+      'ownershipTransferredAt', 'ownershipTransferRequestId']);
+}
+// Example INSIDE the existing masjids block:
+// allow update: if approvedAdminTransfer(masjidId);
+// IMPORTANT: tighten every other matching update rule. For normal masjid edits,
+// require request.auth.uid == resource.data.adminUid when adminUid exists, AND
+// disallow changes to administrator fields and transfer audit fields.
+// Retain separate constrained follower-count writes; worshippers are not owners.
+// Broad allow-write rules elsewhere override these protections and must be removed.

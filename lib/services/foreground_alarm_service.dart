@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show Color;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'alarm_event_log.dart';
 import 'notification_channels.dart';
+import 'azan_stop_controller.dart';
 import 'prayer_notification_preferences.dart';
 import 'package:azan_screen_events/azan_screen_events.dart';
 
@@ -45,7 +47,12 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     if (_pluginInitialized) return;
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(initSettings,
+      onDidReceiveNotificationResponse: (response) {
+        if (response.actionId == 'stop_azan') _stopAzan();
+      },
+      onDidReceiveBackgroundNotificationResponse: azanNotificationActionBackground,
+    );
     _pluginInitialized = true;
   }
 
@@ -53,12 +60,16 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     await _ensurePluginInitialized();
     _screenEvents = AzanScreenEvents.changes.listen((_) {
-      if (_ringing) _stopAzan();
+      if (_ringing || _activeNotificationId != null) _stopAzan();
     }, onError: (Object error) {
       AlarmEventLog.add('screen event listener failed', detail: '$error');
     });
+    _playerComplete = _azanPlayer.onPlayerComplete.listen((_) {
+      if (_ringing) _stopAzan(reason: 'Azaan finished');
+    });
   }
 
+  StreamSubscription<void>? _playerComplete;
   StreamSubscription<dynamic>? _screenEvents;
   bool _ringing = false;
   int _playbackGeneration = 0;
@@ -66,16 +77,6 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   @override
   Future<void> onRepeatEvent(DateTime timestamp) async {
     await _ensurePluginInitialized();
-
-    // Proof-of-life: update the persistent notification's text with the
-    // last-checked time, so we can visually confirm this loop is really
-    // running, without needing device logs.
-    await FlutterForegroundTask.updateService(
-      notificationTitle: 'Islam Connect is active',
-      notificationText: 'Last checked: ${timestamp.hour.toString().padLeft(2, '0')}:'
-          '${timestamp.minute.toString().padLeft(2, '0')}:'
-          '${timestamp.second.toString().padLeft(2, '0')}',
-    );
 
     // A one-off test, delivered down the SAME path a prayer uses.
     //
@@ -131,7 +132,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     // rewriting a notification every 20 seconds is three times the work for no
     // visible difference.
     if (now.second < 20) {
-      await _updateNotificationText(times, now);
+      if (!_ringing) await _updateNotificationText(times, now);
     }
 
     if (now.second < 20) {
@@ -230,137 +231,104 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   /// notification channel sound. Nothing has to be granted for it to work.
   static final AudioPlayer _azanPlayer = AudioPlayer();
 
-  Future<void> _playAzan(String? audioUrl) async {
-    if (!await PrayerNotificationPreferences.soundEnabled()) return;
-    final generation = ++_playbackGeneration;
-    _ringing = true;
-    bool cancelled() => generation != _playbackGeneration;
-
-    try {
-      // Alarm usage: plays at alarm volume and is not silenced by the ringer
-      // switch, which is what a call to prayer should do.
-      await _azanPlayer.setAudioContext(
-        AudioContext(
-          android: const AudioContextAndroid(
-            isSpeakerphoneOn: false,
-            stayAwake: true,
-            contentType: AndroidContentType.music,
-            usageType: AndroidUsageType.alarm,
-            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
-          ),
-        ),
-      );
-      await _azanPlayer.setVolume(1.0);
-    } catch (_) {}
-
-    if (audioUrl != null && audioUrl.isNotEmpty) {
-      // Local cache first - see ForegroundAlarmManager._cacheCustomAzan,
-      // which downloads this ahead of time whenever the app has a normal
-      // foreground connection. No network dependency at all if it is there.
-      try {
-        final Directory dir = await getApplicationDocumentsDirectory();
-        final File urlFile = File('${dir.path}/custom_azan_cache_url.txt');
-        final File audioFile = File('${dir.path}/custom_azan_cache.mp3');
-
-        if (await audioFile.exists() &&
-            await urlFile.exists() &&
-            await urlFile.readAsString() == audioUrl) {
-          if (cancelled()) return;
-          await _azanPlayer.play(DeviceFileSource(audioFile.path));
-          if (cancelled()) { await _azanPlayer.stop(); return; }
-          await AlarmEventLog.add('azan playing',
-              detail: 'masjid recording (cached)');
-          return;
-        }
-      } catch (_) {}
-
-      // Cache missed - fall back to fetching it live. THIS USED TO BE A
-      // 4-SECOND TIMEOUT, which was the actual bug: not enough time for the
-      // radio to wake, resolve DNS, and start buffering from Firebase
-      // Storage, especially from inside a background service at exactly the
-      // moment Android is least willing to grant network access. Every
-      // real-world custom upload could plausibly miss that window and
-      // silently fall back to the bundled azan below - which is exactly
-      // "I uploaded a recording and the default still plays." 15 seconds
-      // gives a cold connection a real chance while still giving up before
-      // the prayer time is meaningfully late.
-      try {
-        if (cancelled()) return;
-        await _azanPlayer
-            .play(UrlSource(audioUrl))
-            .timeout(const Duration(seconds: 15));
-        if (cancelled()) { await _azanPlayer.stop(); return; }
-        await AlarmEventLog.add('azan playing',
-            detail: 'masjid recording (live)');
-        return;
-      } catch (_) {}
-    }
-
-    try {
-      if (cancelled()) return;
-      await _azanPlayer.play(AssetSource('audio/azan.mp3'));
-      if (cancelled()) { await _azanPlayer.stop(); return; }
-      await AlarmEventLog.add('azan playing', detail: 'bundled recording');
-    } catch (e) {
-      await AlarmEventLog.add('azan FAILED', detail: '$e');
-    }
-  }
-
-  /// Belt and braces. If playback somehow loops or hangs, this ends it without
-  /// the user having to do anything. An azan that will not stop is worse than
-  /// one that is a minute late.
-  void _armAutoStop() {
-    _autoStop?.cancel();
-    _autoStop = Timer(const Duration(minutes: 6), () {
-      _stopAzan();
-      _setServiceNotice('Watching prayer times');
-    });
-  }
-
   Timer? _autoStop;
+  Timer? _stopWatch;
+  int? _activeNotificationId;
+  String _activePrayer = 'Prayer';
+  String _activeMasjid = '';
 
-  Future<void> _stopAzan() async {
-    _ringing = false;
-    _playbackGeneration++;
-    _autoStop?.cancel();
+  Future<void> _playAzan(String? audioUrl, int generation, int stopSequence) async {
+    Future<bool> cancelled() async => !_ringing || generation != _playbackGeneration ||
+        await AzanScreenEvents.stopSequence() != stopSequence;
+
     try {
-      await _azanPlayer.stop();
-      await AlarmEventLog.add('azan stopped');
-    } catch (_) {}
+      await _azanPlayer.setAudioContext(AudioContext(
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.alarm,
+          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+        ),
+      ));
+      await _azanPlayer.setVolume(1.0);
+      bool loaded = false;
+      if (audioUrl != null && audioUrl.isNotEmpty) {
+        try {
+          final dir = await getApplicationDocumentsDirectory();
+          final urlFile = File('${dir.path}/custom_azan_cache_url.txt');
+          final audioFile = File('${dir.path}/custom_azan_cache.mp3');
+          if (await cancelled()) return;
+          if (await audioFile.exists() && await urlFile.exists() &&
+              await urlFile.readAsString() == audioUrl) {
+            await _azanPlayer.setSource(DeviceFileSource(audioFile.path));
+            loaded = true;
+          }
+        } catch (_) {}
+        if (!loaded) {
+          if (await cancelled()) return;
+          try {
+            // Prepare first; never start playback as a side effect of loading.
+            await _azanPlayer.setSource(UrlSource(audioUrl)).timeout(const Duration(seconds: 15));
+            loaded = true;
+          } catch (_) {
+            await _azanPlayer.stop();
+          }
+        }
+      }
+      if (await cancelled()) return;
+      if (!loaded) await _azanPlayer.setSource(AssetSource('audio/azan.mp3'));
+      if (await cancelled()) return;
+      await _azanPlayer.resume();
+      if (await cancelled()) {
+        await _azanPlayer.stop();
+        return;
+      }
+      await AlarmEventLog.add('azan playing', detail: _activePrayer);
+    } catch (error) {
+      await AlarmEventLog.add('azan FAILED', detail: '$error');
+      if (generation == _playbackGeneration) await _stopAzan(reason: 'Audio unavailable');
+    }
   }
 
-  /// Lets the app tell the service to stop the azan. The two live in different
-  /// isolates and cannot share the player, so this is the only route.
+  /// All stop controls reach the same player and invalidate pending audio loads.
+  Future<void> _stopAzan({String reason = 'Azaan stopped'}) async {
+    _ringing = false;
+    final generation = ++_playbackGeneration;
+    _autoStop?.cancel();
+    _stopWatch?.cancel();
+    try { await _azanPlayer.stop(); } catch (_) {}
+    if (generation != _playbackGeneration) return;
+    final id = _activeNotificationId;
+    _activeNotificationId = null;
+    if (id != null) {
+      await _plugin.show(id, '$_activePrayer • $reason', _activeMasjid,
+        NotificationDetails(android: AndroidNotificationDetails(
+          NotificationChannels.silent, 'Prayer Time Alarms',
+          playSound: false, enableVibration: false,
+          importance: Importance.defaultImportance, priority: Priority.defaultPriority,
+          onlyAlertOnce: true, ongoing: false, autoCancel: true,
+          color: const Color(0xFF175941),
+        )));
+    }
+    await _setServiceNotice('Prayer reminders are active');
+    await AlarmEventLog.add('azan stopped', detail: reason);
+  }
+
   @override
   void onReceiveData(Object data) {
-    if (data == 'stop_azan') {
-      _stopAzan();
-    }
+    if (data == 'stop_azan') _stopAzan();
   }
 
-  /// The Stop button on the service's own persistent notification.
-  ///
-  /// THIS is the reliable stop. The ringing screen's button only exists if
-  /// Android launched that screen, which is the very thing it refuses to do
-  /// when the phone is locked — so the azan could play with no way to stop it
-  /// short of powering the phone off.
-  ///
-  /// The service notification is always present whenever the service is
-  /// running, and this handler executes in the isolate that owns the player.
   @override
   void onNotificationButtonPressed(String id) {
-    if (id == 'stop_azan') {
-      _stopAzan();
-      _setServiceNotice('Watching prayer times');
-    }
+    if (id == 'stop_azan') _stopAzan();
   }
 
   Future<void> _setServiceNotice(String text) async {
     try {
       await FlutterForegroundTask.updateService(
-        notificationTitle: 'Islam Connect is active',
-        notificationText: text,
-      );
+        notificationTitle: 'Islam Connect', notificationText: text);
     } catch (_) {}
   }
 
@@ -438,113 +406,67 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       await AlarmEventLog.add('FIRED test by service',
           detail: 'delivered by the polling service, not the OS scheduler');
 
-      await _plugin.show(
-        996,
-        'Test alarm',
-        'Delivered by the background service. This is the path prayers use.',
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            NotificationChannels.silent,
-            'Prayer Time Alarms',
-            channelDescription: 'Alerts you when it is time for prayer',
-            importance: Importance.max,
-            priority: Priority.high,
-            category: AndroidNotificationCategory.alarm,
-            fullScreenIntent: true,
-            playSound: false,
-            ongoing: true,
-            actions: <AndroidNotificationAction>[
-              AndroidNotificationAction(
-                'stop_azan',
-                'Stop azan',
-                showsUserInterface: false,
-                cancelNotification: true,
-              ),
-            ],
-          ),
-        ),
-        payload: 'Test|||Test|||',
-      );
-
-      // Play the azan on the test too — otherwise the test proves the
-      // notification works while saying nothing about the part that matters.
-      await _setServiceNotice('Azan playing - tap Stop azan to end it');
-      _armAutoStop();
-      await _playAzan(null);
+      await _showPrayerAlert('Test', 'Islam Connect', null, id: 996);
     } catch (_) {}
   }
 
-  Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) async {
-    // OVERLAY REMOVED.
-    //
-    // This used to open a system overlay window before posting the
-    // notification, on the reasoning that an overlay draws over anything
-    // including the lock screen, whereas a full-screen intent only
-    // auto-launches when locked.
-    //
-    // In practice it earned nothing. Tested on a device with "Appear on top"
-    // switched OFF the whole time: the azan still played and the alert still
-    // arrived, because the service plays the audio itself and the notification
-    // carries a full-screen intent.
-    //
-    // It cost SYSTEM_ALERT_WINDOW — the permission Google scrutinises hardest —
-    // plus a native plugin and a second Flutter entry point, to duplicate
-    // something that already worked.
+  Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) =>
+      _showPrayerAlert(label, masjidName, audioUrl);
 
-    // Also fire a regular notification as a backup/secondary signal -
-    // this still works even if overlay permission was never granted.
-    await _plugin.show(
-      200,
-      '$label - $masjidName',
-      "It's time for $label prayer.",
-      NotificationDetails(
-        // MUST match the channel NotificationService creates.
-        //
-        // This posted to 'prayer_times_channel', which NotificationService now
-        // deletes on startup. On Android 8+ posting to a deleted channel fails
-        // SILENTLY - so this backup path, the one that matters most when the
-        // app has been killed, was doing nothing at all.
-        android: AndroidNotificationDetails(
-          NotificationChannels.silent,
-          'Prayer Time Alarms',
-          channelDescription: 'Alerts you when it is time for prayer',
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          fullScreenIntent: true,
-          playSound: false,
-          // Deliberately NOT the raw azan resource. If that file is missing
-          // from the build the URI is invalid, and this path — the one that
-          // actually delivers on restrictive phones — would break with it.
-          // The service plays the azan itself instead.
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          // Stop, on the notification you actually see. The service's own
-          // notification also carries one, but that sits collapsed at the
-          // bottom of the shade at LOW importance — no use when an azan is
-          // playing and you want it to stop NOW.
-          ongoing: true,
-          actions: <AndroidNotificationAction>[
-            AndroidNotificationAction(
-              'stop_azan',
-              'Stop azan',
-              showsUserInterface: false,
-              cancelNotification: true,
-            ),
-          ],
-        ),
-      ),
+  Future<void> _showPrayerAlert(String label, String masjidName, String? audioUrl,
+      {int id = 200}) async {
+    final generation = ++_playbackGeneration;
+    _autoStop?.cancel();
+    _stopWatch?.cancel();
+    _activePrayer = label;
+    _activeMasjid = masjidName;
+    _activeNotificationId = id;
+    _ringing = true; // Includes preparation: a stop during loading must win.
+    final sequence = await AzanScreenEvents.stopSequence();
+    final sound = await PrayerNotificationPreferences.soundEnabled();
+    if (generation != _playbackGeneration) return;
+    _ringing = sound;
+    await _plugin.show(id, '$label prayer time',
+      sound ? '$masjidName • Tap STOP AZAAN to end the sound' : masjidName,
+      NotificationDetails(android: AndroidNotificationDetails(
+        NotificationChannels.silent, 'Prayer Time Alarms',
+        channelDescription: 'Prayer reminders with Azaan playback controls',
+        importance: Importance.max, priority: Priority.high,
+        category: AndroidNotificationCategory.alarm,
+        fullScreenIntent: sound, playSound: false,
+        color: const Color(0xFF175941),
+        styleInformation: BigTextStyleInformation(
+          sound ? '$masjidName\nAzaan is playing. Tap STOP AZAAN to stop.'
+              : '$masjidName\nIt is time for $label prayer.'),
+        onlyAlertOnce: true, ongoing: sound, autoCancel: !sound,
+        actions: sound ? <AndroidNotificationAction>[
+          AndroidNotificationAction('stop_azan', 'STOP AZAAN',
+            showsUserInterface: false, cancelNotification: false),
+        ] : null,
+      )),
       payload: '$label|||$masjidName|||${audioUrl ?? ''}',
     );
-
-    // Play it here, from the service. Whether or not any screen opens.
-    await _setServiceNotice('Azan playing - tap Stop azan to end it');
-    _armAutoStop();
-    await _playAzan(audioUrl);
+    if (generation != _playbackGeneration ||
+        await AzanScreenEvents.stopSequence() != sequence) {
+      await _stopAzan();
+      return;
+    }
+    if (!sound) { _activeNotificationId = null; return; }
+    await _setServiceNotice('$label Azaan • Tap STOP AZAAN to stop');
+    _autoStop = Timer(const Duration(minutes: 6), () => _stopAzan(reason: 'Azaan finished'));
+    // Persisted fallback: if a broadcast is missed, stop still reaches playback.
+    _stopWatch = Timer.periodic(const Duration(milliseconds: 400), (_) async {
+      if (_ringing && await AzanScreenEvents.stopSequence() != sequence) {
+        await _stopAzan();
+      }
+    });
+    await _playAzan(audioUrl, generation, sequence);
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp) async {
     await _screenEvents?.cancel();
+    await _playerComplete?.cancel();
     await _stopAzan();
     await _azanPlayer.dispose();
   }

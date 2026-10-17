@@ -18,7 +18,7 @@ class AuthService {
   /// True only for a real (non-anonymous) signed-in account - i.e. the
   /// platform admin, who signs in with email/password rather than the
   /// anonymous sessions regular users get automatically.
-  static bool get isAdminLoggedIn => currentUser != null && !currentUser!.isAnonymous;
+  static bool get isAdminLoggedIn => currentUser != null && currentUser!.providerData.any((provider) => provider.providerId == 'password');
 
   static Future<void> signInAdmin(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);

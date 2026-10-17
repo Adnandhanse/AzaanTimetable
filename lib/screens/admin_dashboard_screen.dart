@@ -6,6 +6,7 @@ import 'announcement_admin_screen.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import 'update_prayer_times_screen.dart';
+import 'transfer_administration_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final String adminMobile;
@@ -159,6 +160,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               builder: (_) =>
                                   AnnouncementAdminScreen(masjid: masjid)),
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.swap_horiz, size: 20),
+                        tooltip: 'Transfer administration',
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => TransferAdministrationScreen(masjid: masjid))),
                       ),
                       const Icon(Icons.chevron_right),
                     ],
