@@ -1065,7 +1065,7 @@ class _HomeScreenState extends State<HomeScreen>
                 // different fraction of the row's width than the icon+name
                 // actually take up below it, which is exactly why AZAN and
                 // JAMAT didn't land above their own columns.
-                const SizedBox(width: 48),
+                const SizedBox(width: 64),
                 const Expanded(flex: 3, child: SizedBox.shrink()),
                 Expanded(
                   flex: 4,
@@ -1114,13 +1114,38 @@ class _HomeScreenState extends State<HomeScreen>
             // scales with the screen instead of assuming one.
             child: Row(
               children: [
-                IconButton(
-                  tooltip: '${rows[i].$1} notifications: ${(_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true) ? "on" : "off"}',
-                  icon: Icon((_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
-                      ? Icons.notifications_active_outlined : Icons.notifications_off_outlined),
-                  color: AppColors.emerald,
-                  onPressed: _savingNotification || _prayerNotifications.isEmpty ? null
-                      : () => _togglePrayerNotification(PrayerNotificationPreferences.keys[i]),
+                SizedBox(
+                  width: 64,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Semantics(
+                        label: '${rows[i].$1} prayer notifications',
+                        child: Switch(
+                          value: _prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true,
+                          activeColor: AppColors.emerald,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          onChanged: _savingNotification || _prayerNotifications.isEmpty
+                              ? null
+                              : (_) => _togglePrayerNotification(PrayerNotificationPreferences.keys[i]),
+                        ),
+                      ),
+                      Text(
+                        _prayerNotifications.isEmpty
+                            ? '…'
+                            : (_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
+                                ? 'ON'
+                                : 'OFF',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: (_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
+                              ? AppColors.emerald
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   // 3, not 4. The longest label is "JUMA (FRIDAY)" and it can
