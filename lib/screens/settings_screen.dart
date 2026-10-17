@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
+import '../services/prayer_notification_preferences.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'hijri_calendar_screen.dart';
 import 'role_selection_screen.dart';
 import '../services/app_language.dart';
@@ -19,6 +21,33 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool azanEnabled = true;
+  bool _soundLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSound();
+  }
+
+  Future<void> _loadSound() async {
+    final value = await PrayerNotificationPreferences.soundEnabled();
+    if (mounted) setState(() { azanEnabled = value; _soundLoading = false; });
+  }
+
+  Future<void> _saveSound(bool value) async {
+    setState(() => _soundLoading = true);
+    try {
+      await PrayerNotificationPreferences.setSoundEnabled(value);
+      if (!value) FlutterForegroundTask.sendDataToTask('stop_azan');
+      if (mounted) setState(() => azanEnabled = value);
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Please try again.')));
+    } finally {
+      if (mounted) setState(() => _soundLoading = false);
+    }
+  }
+
   bool vibrateEnabled = true;
 
   @override
@@ -93,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(S.azanSoundAlarm),
             subtitle: const Text('Play Azan when prayer time arrives'),
             value: azanEnabled,
-            onChanged: (v) => setState(() => azanEnabled = v),
+            onChanged: _soundLoading ? null : _saveSound,
           ),
           SwitchListTile(
             title: Text(S.vibrate),

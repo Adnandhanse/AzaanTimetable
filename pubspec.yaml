@@ -7,6 +7,8 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  azan_screen_events:
+    path: packages/azan_screen_events
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6

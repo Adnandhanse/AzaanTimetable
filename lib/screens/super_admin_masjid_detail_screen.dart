@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/masjid.dart';
+import '../services/follower_service.dart';
 import '../services/masjid_repository.dart';
 
 class SuperAdminMasjidDetailScreen extends StatefulWidget {
@@ -124,6 +125,11 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
 
           _sectionTitle('Masjid Details'),
           _row('Name', m.name),
+          StreamBuilder<int>(
+            stream: FollowerService.streamFollowerCount(m.id),
+            builder: (context, snapshot) => _row('Followers', snapshot.hasError
+                ? 'Unable to load' : snapshot.hasData ? '${snapshot.data! < 0 ? 0 : snapshot.data!}' : 'Loading…'),
+          ),
           _row('Registration No.', m.registrationNo.isEmpty ? '—' : m.registrationNo),
           _row('City', m.city),
           _row('Address', m.address),

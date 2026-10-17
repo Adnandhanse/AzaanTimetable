@@ -210,6 +210,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Test prayer notification preferences
+        run: flutter test test/prayer_notification_preferences_test.dart
+
       - name: Generate app launcher icon
         run: dart run flutter_launcher_icons
 

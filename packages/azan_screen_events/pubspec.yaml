@@ -1,0 +1,14 @@
+name: azan_screen_events
+description: Screen state events for stopping active Azaan playback.
+version: 1.0.0
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.adnandhanse.azan_screen_events
+        pluginClass: AzanScreenEventsPlugin

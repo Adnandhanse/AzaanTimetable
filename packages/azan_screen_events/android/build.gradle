@@ -1,0 +1,16 @@
+group 'com.adnandhanse.azan_screen_events'
+version '1.0'
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:7.3.0' }
+}
+apply plugin: 'com.android.library'
+android {
+    namespace 'com.adnandhanse.azan_screen_events'
+    compileSdk 34
+    defaultConfig { minSdk 23 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}

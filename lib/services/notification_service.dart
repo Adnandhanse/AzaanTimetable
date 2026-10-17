@@ -14,6 +14,7 @@ import 'alarm_event_log.dart';
 import 'foreground_alarm_manager.dart';
 import 'notification_channels.dart';
 import 'prayer_schedule_cache.dart';
+import 'prayer_notification_preferences.dart';
 
 /// Schedules local notifications that fire daily at each prayer time for
 /// the masjid a user is following. Uses a full-screen alarm-style
@@ -53,7 +54,7 @@ class NotificationService {
 
   static AndroidNotificationDetails alarmChannel({bool withAzan = true}) =>
       AndroidNotificationDetails(
-        withAzan ? channelIdAzan : channelIdPlain,
+        NotificationChannels.silent,
         _channelName,
         channelDescription: withAzan
             ? 'Plays the azan when it is time for prayer'
@@ -62,10 +63,8 @@ class NotificationService {
         priority: Priority.high,
         category: AndroidNotificationCategory.alarm,
         fullScreenIntent: true,
-        playSound: true,
-        sound: withAzan
-            ? const RawResourceAndroidNotificationSound('azan')
-            : null,
+        playSound: false,
+        sound: null,
         audioAttributesUsage: AudioAttributesUsage.alarm,
         autoCancel: true,
       );
@@ -183,34 +182,14 @@ class NotificationService {
         AndroidFlutterLocalNotificationsPlugin>();
     if (android == null) return;
 
-    // The plain channel always exists. The azan channel is only created once
-    // the user opts in — creating it eagerly would bake a possibly-invalid
-    // sound URI into a channel permanently, and Android never lets you change
-    // a channel's sound afterwards.
-    if (await useAzanSound()) {
-      try {
-        await android.createNotificationChannel(const AndroidNotificationChannel(
-          _channelId,
-          _channelName,
-          description: 'Plays the azan when it is time for prayer',
-          importance: Importance.max,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound('azan'),
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-        ));
-      } catch (_) {}
-    }
-
-    try {
-      await android.createNotificationChannel(const AndroidNotificationChannel(
-        channelIdPlain,
-        'Prayer Alarms (default sound)',
-        description: 'Alerts you when it is time for prayer',
-        importance: Importance.max,
-        playSound: true,
-        audioAttributesUsage: AudioAttributesUsage.alarm,
-      ));
-    } catch (_) {}
+    // Audio belongs to the service so every stop control affects the same player.
+    await android.createNotificationChannel(const AndroidNotificationChannel(
+      NotificationChannels.silent,
+      _channelName,
+      description: 'Prayer alerts; Azaan playback is controlled by the app',
+      importance: Importance.max,
+      playSound: false,
+    ));
   }
 
   /// Posts a notification immediately, bypassing AlarmManager entirely.
@@ -624,6 +603,7 @@ class NotificationService {
     for (final entry in _labels.entries) {
       final key = entry.key;
       final label = entry.value;
+      if (!await PrayerNotificationPreferences.enabled(key)) continue;
       final timeStr = schedule.times[key];
       if (timeStr == null) continue;
       final dt = _parseTimeToday(timeStr);
@@ -714,6 +694,7 @@ class NotificationService {
 
     final expected = <int>{};
     for (final entry in _labels.entries) {
+      if (!await PrayerNotificationPreferences.enabled(entry.key)) continue;
       final t = schedule.times[entry.key];
       if (t == null) continue;
       if (_parseTimeToday(t) == null) continue;

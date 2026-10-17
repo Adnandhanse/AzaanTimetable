@@ -6,6 +6,7 @@ import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
 import '../services/notification_service.dart';
+import '../services/prayer_notification_preferences.dart';
 import '../services/announcement_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/foreground_alarm_manager.dart';
@@ -55,6 +56,31 @@ class _HomeScreenState extends State<HomeScreen>
   late final AnimationController _intro;
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
+
+  final Map<String, bool> _prayerNotifications = {};
+  bool _savingNotification = false;
+
+  Future<void> _loadPrayerNotifications() async {
+    final values = <String, bool>{};
+    for (final key in PrayerNotificationPreferences.keys) {
+      values[key] = await PrayerNotificationPreferences.enabled(key);
+    }
+    if (mounted) setState(() => _prayerNotifications.addAll(values));
+  }
+
+  Future<void> _togglePrayerNotification(String key) async {
+    setState(() => _savingNotification = true);
+    try {
+      await PrayerNotificationPreferences.setEnabled(key, !(_prayerNotifications[key] ?? true));
+      await _loadPrayerNotifications();
+      await NotificationService.scheduleFromCache();
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not update notifications. Please try again.')));
+    } finally {
+      if (mounted) setState(() => _savingNotification = false);
+    }
+  }
 
   String? _selectedMasjidId;
   bool _loading = true;
@@ -156,6 +182,7 @@ class _HomeScreenState extends State<HomeScreen>
     _intro.forward();
     // Re-check the alarms whenever the app comes back to the foreground.
     WidgetsBinding.instance.addObserver(this);
+    _loadPrayerNotifications();
     _loadSelectedMasjid();
     _loadRole();
     _repairAlarmsIfNeeded();
@@ -1087,27 +1114,14 @@ class _HomeScreenState extends State<HomeScreen>
             // scales with the screen instead of assuming one.
             child: Row(
               children: [
-                // A circular icon per prayer, tinted emerald for the next one.
-                // It gives the eye something to land on and makes the row read
-                // as a list of moments in a day rather than a table of numbers.
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: rows[i].$1 == nextLabel
-                        ? AppColors.emerald
-                        : AppColors.gold.withOpacity(0.10),
-                  ),
-                  child: Icon(
-                    _prayerIcons[i],
-                    size: 18,
-                    color: rows[i].$1 == nextLabel
-                        ? Colors.white
-                        : AppColors.gold,
-                  ),
+                IconButton(
+                  tooltip: '${rows[i].$1} notifications: ${(_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true) ? "on" : "off"}',
+                  icon: Icon((_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
+                      ? Icons.notifications_active_outlined : Icons.notifications_off_outlined),
+                  color: AppColors.emerald,
+                  onPressed: _savingNotification || _prayerNotifications.isEmpty ? null
+                      : () => _togglePrayerNotification(PrayerNotificationPreferences.keys[i]),
                 ),
-                const SizedBox(width: 12),
                 Expanded(
                   // 3, not 4. The longest label is "JUMA (FRIDAY)" and it can
                   // ellipsize; a truncated TIME cannot be guessed from what is

@@ -12,6 +12,7 @@
 /// does nothing for anyone who already has the app installed.
 class NotificationChannels {
   NotificationChannels._();
+  static const String silent = 'prayer_alarm_service_audio_v1';
 
   /// Alarms carrying the bundled azan.
   static const String azan = 'prayer_alarm_azan_v2';

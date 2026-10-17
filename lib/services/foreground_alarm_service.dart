@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'alarm_event_log.dart';
 import 'notification_channels.dart';
+import 'prayer_notification_preferences.dart';
+import 'package:azan_screen_events/azan_screen_events.dart';
 
 /// This runs in its own persistent background isolate, kept alive by a
 /// permanent low-priority "service" notification. Instead of relying on
@@ -50,7 +52,16 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     await _ensurePluginInitialized();
+    _screenEvents = AzanScreenEvents.changes.listen((_) {
+      if (_ringing) _stopAzan();
+    }, onError: (Object error) {
+      AlarmEventLog.add('screen event listener failed', detail: '$error');
+    });
   }
+
+  StreamSubscription<dynamic>? _screenEvents;
+  bool _ringing = false;
+  int _playbackGeneration = 0;
 
   @override
   Future<void> onRepeatEvent(DateTime timestamp) async {
@@ -130,6 +141,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
     for (final entry in times.entries) {
       final label = entry.key;
+      if (!await PrayerNotificationPreferences.enabled(
+          PrayerNotificationPreferences.keyForLabel(label))) continue;
       final timeStr = entry.value as String;
       final parsed = _parseTime(timeStr);
       if (parsed == null) continue;
@@ -218,6 +231,11 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   static final AudioPlayer _azanPlayer = AudioPlayer();
 
   Future<void> _playAzan(String? audioUrl) async {
+    if (!await PrayerNotificationPreferences.soundEnabled()) return;
+    final generation = ++_playbackGeneration;
+    _ringing = true;
+    bool cancelled() => generation != _playbackGeneration;
+
     try {
       // Alarm usage: plays at alarm volume and is not silenced by the ringer
       // switch, which is what a call to prayer should do.
@@ -247,7 +265,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         if (await audioFile.exists() &&
             await urlFile.exists() &&
             await urlFile.readAsString() == audioUrl) {
+          if (cancelled()) return;
           await _azanPlayer.play(DeviceFileSource(audioFile.path));
+          if (cancelled()) { await _azanPlayer.stop(); return; }
           await AlarmEventLog.add('azan playing',
               detail: 'masjid recording (cached)');
           return;
@@ -265,9 +285,11 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       // gives a cold connection a real chance while still giving up before
       // the prayer time is meaningfully late.
       try {
+        if (cancelled()) return;
         await _azanPlayer
             .play(UrlSource(audioUrl))
             .timeout(const Duration(seconds: 15));
+        if (cancelled()) { await _azanPlayer.stop(); return; }
         await AlarmEventLog.add('azan playing',
             detail: 'masjid recording (live)');
         return;
@@ -275,7 +297,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     }
 
     try {
+      if (cancelled()) return;
       await _azanPlayer.play(AssetSource('audio/azan.mp3'));
+      if (cancelled()) { await _azanPlayer.stop(); return; }
       await AlarmEventLog.add('azan playing', detail: 'bundled recording');
     } catch (e) {
       await AlarmEventLog.add('azan FAILED', detail: '$e');
@@ -296,6 +320,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Timer? _autoStop;
 
   Future<void> _stopAzan() async {
+    _ringing = false;
+    _playbackGeneration++;
     _autoStop?.cancel();
     try {
       await _azanPlayer.stop();
@@ -418,13 +444,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         'Delivered by the background service. This is the path prayers use.',
         NotificationDetails(
           android: AndroidNotificationDetails(
-            NotificationChannels.plain,
+            NotificationChannels.silent,
             'Prayer Time Alarms',
             channelDescription: 'Alerts you when it is time for prayer',
             importance: Importance.max,
             priority: Priority.high,
             category: AndroidNotificationCategory.alarm,
             fullScreenIntent: true,
+            playSound: false,
             ongoing: true,
             actions: <AndroidNotificationAction>[
               AndroidNotificationAction(
@@ -478,14 +505,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         // SILENTLY - so this backup path, the one that matters most when the
         // app has been killed, was doing nothing at all.
         android: AndroidNotificationDetails(
-          NotificationChannels.plain,
+          NotificationChannels.silent,
           'Prayer Time Alarms',
           channelDescription: 'Alerts you when it is time for prayer',
           importance: Importance.max,
           priority: Priority.high,
           category: AndroidNotificationCategory.alarm,
           fullScreenIntent: true,
-          playSound: true,
+          playSound: false,
           // Deliberately NOT the raw azan resource. If that file is missing
           // from the build the URI is invalid, and this path — the one that
           // actually delivers on restrictive phones — would break with it.
@@ -516,5 +543,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   }
 
   @override
-  Future<void> onDestroy(DateTime timestamp) async {}
+  Future<void> onDestroy(DateTime timestamp) async {
+    await _screenEvents?.cancel();
+    await _stopAzan();
+    await _azanPlayer.dispose();
+  }
 }
