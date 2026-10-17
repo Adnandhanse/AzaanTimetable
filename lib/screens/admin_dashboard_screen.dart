@@ -100,7 +100,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               final masjid = masjids[index];
               final verified = masjid.verificationStatus == 'Verified';
               return Card(
-                child: ListTile(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ListTile(
                   leading: Icon(verified ? Icons.verified : Icons.hourglass_top, color: verified ? Colors.green : Colors.orange),
                   title: Text(masjid.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   // Follower count is the number an imam actually wants: how
@@ -161,12 +164,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   AnnouncementAdminScreen(masjid: masjid)),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.swap_horiz, size: 20),
-                        tooltip: 'Transfer administration',
-                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => TransferAdministrationScreen(masjid: masjid))),
-                      ),
                       const Icon(Icons.chevron_right),
                     ],
                   ),
@@ -175,6 +172,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       MaterialPageRoute(builder: (_) => UpdatePrayerTimesScreen(masjid: masjid)),
                     );
                   },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.emerald,
+                          side: BorderSide(color: AppColors.emerald),
+                          minimumSize: const Size.fromHeight(48),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: const Icon(Icons.swap_horiz_rounded, size: 22),
+                        label: const Text('Transfer Administration',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => TransferAdministrationScreen(masjid: masjid))),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

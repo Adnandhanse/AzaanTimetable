@@ -55,12 +55,6 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
         title: const Text('Platform Admin'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.swap_horiz),
-            tooltip: 'Ownership requests',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => const OwnershipTransfersScreen())),
-          ),
-          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () async {
@@ -82,6 +76,19 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.swap_horiz_rounded),
+                label: const Text('Review Ownership Requests'),
+                style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const OwnershipTransfersScreen())),
+              ),
+            ),
+          ),
           // ONE search bar above both tabs, not duplicated per tab - a
           // platform admin looking for a specific masjid does not care
           // which tab it happens to be sitting in.

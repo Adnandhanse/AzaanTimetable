@@ -4,6 +4,9 @@ import 'package:cloud_functions/cloud_functions.dart';
 
 /// B authenticates in a separate Firebase app. A's main login stays intact.
 class DirectOwnershipTransfer {
+  // Must match the export/region in functions/index.js.
+  static const functionName = 'transferMasjidAdministration';
+  static const functionRegion = 'us-central1';
   FirebaseApp? _app;
   FirebaseAuth? _auth;
   FirebaseAuth get auth => _auth!;
@@ -21,8 +24,8 @@ class DirectOwnershipTransfer {
     final user = auth.currentUser;
     if (user?.phoneNumber != '+91$mobile') throw StateError('Verify B’s phone first.');
     final token = await user!.getIdToken(true);
-    await FirebaseFunctions.instanceFor(region: 'us-central1')
-      .httpsCallable('transferMasjidAdministration').call({
+    await FirebaseFunctions.instanceFor(app: Firebase.app(), region: functionRegion)
+      .httpsCallable(functionName).call({
         'masjidId': masjidId, 'name': name.trim(), 'mobile': mobile,
         'email': email.trim(), 'recipientIdToken': token, 'operationId': operationId,
         'expectedAdminMobile': expectedAdminMobile, 'expectedAdminUid': expectedAdminUid,

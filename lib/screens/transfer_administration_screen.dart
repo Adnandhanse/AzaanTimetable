@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/masjid.dart';
 import '../services/auth_service.dart';
@@ -41,8 +43,49 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
     }
   }
 
+  String? _transferError;
+
+  String _friendlyError(Object error) {
+    if (error is FirebaseFunctionsException) {
+      switch (error.code) {
+        case 'not-found':
+          return 'The transfer service could not be found. Please contact the platform admin to complete the setup.';
+        case 'unauthenticated':
+          return 'Phone verification has expired. Verify the phone number again.';
+        case 'permission-denied':
+          return 'You do not have permission to transfer this masjid. Please contact the platform admin.';
+        case 'unavailable':
+        case 'deadline-exceeded':
+          return 'We could not confirm the transfer. Check your connection and retry on this page.';
+        case 'failed-precondition':
+          return error.message ?? 'The admin details have changed or verification has expired. Please reopen this page and verify again.';
+        default:
+          return 'The transfer could not be completed. Please try again or contact the platform admin.';
+      }
+    }
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'invalid-verification-code': return 'The OTP is incorrect. Please check and try again.';
+        case 'session-expired': return 'The OTP has expired. Please request a new code.';
+        case 'too-many-requests': return 'Too many OTP attempts. Please wait before trying again.';
+        case 'network-request-failed': return 'Check your internet connection and try again.';
+        default: return 'Phone verification could not be completed. Please try again.';
+      }
+    }
+    if (error is FirebaseException && error.code == 'permission-denied') {
+      return 'Unable to read the masjid details. Please contact the platform admin.';
+    }
+    if (error is StateError) return '${error.message}';
+    return 'Something went wrong. Please try again.';
+  }
+
   void _error(Object error) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$error')));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(_friendlyError(error)),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 6),
+    ));
   }
 
   Future<void> _sendOtp() async {
@@ -110,7 +153,7 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
         TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirm transfer'))],
     ));
     if (confirmed != true || !mounted) return;
-    setState(() => _busy = true);
+    setState(() { _busy = true; _transferError = null; });
     try {
       // Capture ownership when opening this screen, not after a competing transfer.
       await _recipient.submit(masjidId: widget.masjid.id, name: _name.text,
@@ -122,8 +165,9 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
         'Administration transferred. All masjid data and followers are preserved.')));
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
-    } catch (error) { _error(error); }
-    finally { if (mounted) setState(() => _busy = false); }
+    } catch (error) {
+      if (mounted) setState(() => _transferError = _friendlyError(error));
+    } finally { if (mounted) setState(() => _busy = false); }
   }
 
   String? _expectedAdminUid;
@@ -154,6 +198,22 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
         const Text('Complete this on the current admin’s phone with the new admin present. With their consent, enter the OTP received on their phone. No new masjid registration is needed.'),
         const SizedBox(height: 20),
         if (_initializationError != null) Text(_initializationError!),
+        if (_transferError != null) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onErrorContainer),
+              const SizedBox(width: 10),
+              Expanded(child: Text(_transferError!, style: TextStyle(
+                color: Theme.of(context).colorScheme.onErrorContainer))),
+            ]),
+          ),
+        ],
         TextFormField(controller: _name, enabled: !_busy,
           decoration: const InputDecoration(labelText: 'New admin name'),
           validator: (v) => (v ?? '').trim().isEmpty ? 'Enter a name' : null),
