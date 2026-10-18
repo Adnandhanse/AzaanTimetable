@@ -1,0 +1,52 @@
+OTP transfer + Hadith tabs update
+
+Upload/replace the included files in the SAME folders shown in this ZIP.
+This is a changed-files patch, not the complete repository. Existing pastel
+covers and daily Roman Urdu files are not replaced by this patch.
+
+TRANSFER SERVER SETUP (required for a working transfer)
+The old backend incorrectly called ALL token verification failures "expired".
+The screenshot alone cannot prove an expired OTP: a runtime IAM failure can
+produce the same old message. The new backend distinguishes caller session,
+recipient session, server permissions and temporary failures. Revocation and
+disabled-user checks remain enabled.
+
+In Google Cloud console select project actual-masjid-prayer-time.
+Open https://console.cloud.google.com/iam-admin/iam?project=actual-masjid-prayer-time
+Find the FUNCTION RUNTIME account (previous deployment used):
+532564834976-compute@developer.gserviceaccount.com
+If not listed, Grant access and paste that account as the principal.
+Give it these two project roles if absent, then Save:
+- Firebase Authentication Viewer (roles/firebaseauth.viewer)
+- Cloud Datastore User (roles/datastore.user)
+Do not grant these to your Gmail or only to the GitHub deployment account.
+If the function uses a different runtime account, use that actual account;
+check Cloud Run > transfermasjidadministration > Security / service account.
+These runtime roles enable revoked-token/user checks and the Firestore update.
+No additional Owner or Editor grant is requested.
+
+Then:
+1. GitHub Actions > Deploy ownership transfer service > Run workflow > main.
+   Start a NEW run after committing these files.
+2. Build Android APK from the same new commit and install it.
+3. Reopen Transfer Administration, verify B's phone, and transfer.
+4. Verify B can manage the SAME masjid, A's management access has ended, and
+   followers/timings/data are retained.
+If it still fails, use the NEW message / function logs; never paste tokens,
+OTP values or service-account private keys into chat.
+
+HADITH DISPLAY
+Book opens into ALL / SAHIH / ZAEEF tabs with counts and reading cards.
+Sahih al-Bukhari and Sahih Muslim: all nonempty bundled entries in Sahih,
+using collection-level placement as requested, not an invented scholar label.
+Other books: Al-Albani where supplied; otherwise matching source categories.
+Hasan, missing and unclear grades stay in ALL with original status. They are
+not called Zaeef just to force every entry into a binary category.
+Book name, number, source status, Play translation, More, bookmarks, speed,
+search and access to chapters/full Arabic are preserved.
+
+VALIDATION
+Local Node tests cover expiry versus IAM errors, revocation enforcement,
+caller/recipient separation, admin-only updates and preserving masjid data.
+Dart syntax/data audits are run. Flutter APK build and live Firebase transfer
+have not been run in this environment; those still need the steps above.

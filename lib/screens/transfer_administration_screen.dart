@@ -29,6 +29,7 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
   bool _ready = false, _busy = false, _verified = false, _complete = false;
   String? _verificationId, _recipientMobile;
   int? _resendToken;
+  int _otpAttempt = 0;
   String? _initializationError;
 
   @override
@@ -51,7 +52,15 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
         case 'not-found':
           return 'The transfer service could not be found. Please contact the platform admin to complete the setup.';
         case 'unauthenticated':
-          return 'Phone verification has expired. Verify the phone number again.';
+          final details = error.details;
+          final reason = details is Map ? details['reason'] : null;
+          if (reason == 'caller-session-invalid') {
+            return 'Your current-admin session needs verification. Sign in again as the current admin.';
+          }
+          if (reason == 'recipient-session-invalid') {
+            return 'Verify the new admin phone again, then retry the transfer.';
+          }
+          return 'The transfer session could not be checked. Try Verify phone again. If it continues, the platform admin should check the server logs.';
         case 'permission-denied':
           return 'You do not have permission to transfer this masjid. Please contact the platform admin.';
         case 'unavailable':
@@ -113,25 +122,37 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
   Future<void> _sendRecipientOtp() async {
     final mobile = _mobile.text.trim();
     final token = _recipientMobile == mobile ? _resendToken : null;
-    setState(() { _busy = true; _verified = false; _recipientMobile = mobile; });
+    final attempt = ++_otpAttempt;
+    setState(() {
+      _busy = true; _verified = false; _recipientMobile = mobile;
+      _verificationId = null; _transferError = null;
+      _otp.clear();
+    });
     try {
       await _recipient.auth.signOut();
       await _recipient.auth.verifyPhoneNumber(phoneNumber: '+91$mobile', forceResendingToken: token,
         verificationCompleted: (credential) async {
-          if (!mounted || _complete) return;
+          if (!mounted || _complete || attempt != _otpAttempt) return;
           try {
             await _recipient.auth.signInWithCredential(credential);
-            if (mounted) setState(() { _verified = true; _busy = false; });
+            if (_recipient.auth.currentUser?.phoneNumber != '+91$mobile') {
+              throw StateError('The verified number does not match the new admin phone.');
+            }
+            if (mounted && attempt == _otpAttempt) setState(() { _verified = true; _busy = false; _transferError = null; });
           } catch (error) { if (mounted) setState(() => _busy = false); _error(error); }
         },
-        verificationFailed: (error) { if (mounted) setState(() => _busy = false); _error(error.message ?? 'OTP failed'); },
+        verificationFailed: (error) { if (!mounted || attempt != _otpAttempt) return; setState(() => _busy = false); _error(error); },
         codeSent: (id, token) {
-          if (mounted) setState(() { _verificationId = id; _resendToken = token; _busy = false; });
+          if (mounted && attempt == _otpAttempt) setState(() { _verificationId = id; _resendToken = token; _busy = false; });
         }, codeAutoRetrievalTimeout: (_) {});
     } catch (error) { if (mounted) setState(() => _busy = false); _error(error); }
   }
 
   Future<void> _verifyRecipient() async {
+    if (_verificationId == null || !RegExp(r'^\d{6}$').hasMatch(_otp.text.trim())) {
+      _error(StateError('Enter the 6-digit OTP received on the new admin phone.'));
+      return;
+    }
     setState(() => _busy = true);
     try {
       await _recipient.auth.signInWithCredential(PhoneAuthProvider.credential(
@@ -139,7 +160,7 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
       if (_recipient.auth.currentUser?.phoneNumber != '+91$_recipientMobile') {
         throw StateError('The verified number does not match B’s phone.');
       }
-      if (mounted) setState(() => _verified = true);
+      if (mounted) setState(() { _verified = true; _transferError = null; });
     } catch (error) { _error(error); }
     finally { if (mounted) setState(() => _busy = false); }
   }
@@ -166,7 +187,15 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
         'Administration transferred. All masjid data and followers are preserved.')));
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
     } catch (error) {
-      if (mounted) setState(() => _transferError = _friendlyError(error));
+      if (mounted) setState(() {
+        _transferError = _friendlyError(error);
+        if (error is FirebaseFunctionsException && error.details is Map &&
+            (error.details as Map)['reason'] == 'recipient-session-invalid') {
+          _verified = false;
+          _verificationId = null;
+          _otp.clear();
+        }
+      });
     } finally { if (mounted) setState(() => _busy = false); }
   }
 
@@ -234,6 +263,11 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
         ],
         if (_verified) ...[
           Text('New admin phone verified: $_recipientMobile'),
+          TextButton.icon(
+            onPressed: _busy ? null : _sendOtp,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Verify phone again'),
+          ),
           ElevatedButton(onPressed: _busy || !_ownershipLoaded ? null : _transfer, child: const Text('Transfer administration')),
         ],
         if (_busy) const Center(child: CircularProgressIndicator()),

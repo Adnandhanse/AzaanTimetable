@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../services/app_strings.dart';
+import '../services/hadith_grade_sections.dart';
+import 'hadith_single_screen.dart';
 
 import '../models/hadith.dart';
 import '../services/quran_local_data_service.dart';
@@ -16,6 +18,8 @@ class HadithListScreen extends StatefulWidget {
 
   /// Optional grade-section items; original collection/numbering stay intact.
   final List<HadithItem>? selectedHadiths;
+  final bool enableGradeTabs;
+  final VoidCallback? onBrowseChapters;
 
   /// Land on this hadith, expanded and outlined. Used when someone searches a
   /// number and wants the hadith itself, not the chapter it lives in.
@@ -29,6 +33,8 @@ class HadithListScreen extends StatefulWidget {
     required this.language,
     this.highlightHadithNumber,
     this.selectedHadiths,
+    this.enableGradeTabs = false,
+    this.onBrowseChapters,
   });
 
   @override
@@ -46,10 +52,21 @@ class _HadithListScreenState extends State<HadithListScreen> {
 
   int? _speaking;
   double _rate = 0.45;
+  int _activeTab = 0;
+  String _query = '';
+  bool _showSearch = false;
+  final _searchController = TextEditingController();
+  final Map<HadithItem, HadithGradeSection?> _grades = {};
+
 
   @override
   void initState() {
     super.initState();
+    if (widget.enableGradeTabs) {
+      for (final item in _baseHadiths) {
+        _grades[item] = HadithGradeSections.classify(item, bookKey: widget.bookKey);
+      }
+    }
     final int? target = widget.highlightHadithNumber;
     if (target != null) {
       // The searched hadith opens expanded. Landing on a collapsed card would
@@ -69,6 +86,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
   void dispose() {
     TtsService.stop();
     _scroll.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -90,8 +108,40 @@ class _HadithListScreenState extends State<HadithListScreen> {
     _loadBookmarks();
   }
 
-  List<HadithItem> get _hadiths =>
+  List<HadithItem> get _baseHadiths =>
       widget.selectedHadiths ?? widget.collection.hadithsInChapter(widget.chapter.number);
+
+  List<HadithItem> get _searched {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return _baseHadiths;
+    final number = int.tryParse(q);
+    return _baseHadiths.where((h) => number != null
+        ? h.hadithNumber == number
+        : h.text.toLowerCase().contains(q) || h.arabicText.contains(q)).toList();
+  }
+
+  List<HadithItem> get _hadiths => _searched.where((h) => !widget.enableGradeTabs ||
+      _activeTab == 0 || _grades[h] == (_activeTab == 1
+          ? HadithGradeSection.sahih : HadithGradeSection.daif)).toList();
+
+  String get _bookName {
+    for (final book in HadithBook.values) {
+      if (book.fileKey == widget.bookKey) return widget.language == 'urd' ? book.urduName : book.displayName;
+    }
+    return widget.collection.name;
+  }
+
+  String _sourceStatus(HadithItem h) {
+    if (HadithGradeSections.isSahihCollection(widget.bookKey)) return 'Sahih';
+    for (final grade in h.grades) {
+      final separator = grade.lastIndexOf(' - ');
+      if (separator < 0) continue;
+      final name = grade.substring(separator + 3)
+          .toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
+      if (name.contains('albani')) return grade;
+    }
+    return h.grades.isEmpty ? (widget.language == 'urd' ? 'درجہ دستیاب نہیں' : 'Grade not supplied') : h.grades.join(' • ');
+  }
 
   /// NO SCROLL-TO-TARGET HERE, DELIBERATELY.
   ///
@@ -138,9 +188,70 @@ class _HadithListScreenState extends State<HadithListScreen> {
   Widget build(BuildContext context) {
     final hadiths = _hadiths;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.chapter.title)),
-      body: hadiths.isEmpty
+    final scope = _searched;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final urdu = widget.language == 'urd';
+    final sahihCount = scope.where((h) => _grades[h] == HadithGradeSection.sahih).length;
+    final daifCount = scope.where((h) => _grades[h] == HadithGradeSection.daif).length;
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+      appBar: AppBar(
+        title: widget.enableGradeTabs ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(_bookName, style: const TextStyle(fontSize: 17)),
+          Text('${hadiths.length} ${urdu ? 'احادیث' : 'hadith found'}', style: const TextStyle(fontSize: 12)),
+        ]) : Text(widget.chapter.title),
+        actions: widget.enableGradeTabs ? [
+          IconButton(icon: Icon(_showSearch ? Icons.close : Icons.search),
+            tooltip: urdu ? 'تلاش کریں' : 'Search',
+            onPressed: () => setState(() {
+              _showSearch = !_showSearch;
+              if (!_showSearch) { _query = ''; _searchController.clear(); }
+            })),
+          if (widget.onBrowseChapters != null)
+            IconButton(icon: const Icon(Icons.menu_book_outlined),
+              tooltip: urdu ? 'ابواب' : 'Browse chapters', onPressed: widget.onBrowseChapters),
+        ] : null,
+        bottom: widget.enableGradeTabs ? PreferredSize(
+          preferredSize: Size.fromHeight(_showSearch ? 116 : 48),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            if (_showSearch) Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: TextField(controller: _searchController,
+                onChanged: (value) => setState(() => _query = value),
+                decoration: InputDecoration(isDense: true,
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: urdu ? 'حدیث یا نمبر تلاش کریں' : 'Search text or hadith number')),
+            ),
+            TabBar(
+              labelPadding: EdgeInsets.zero,
+              labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              labelColor: dark ? const Color(0xFFA7D2B5) : const Color(0xFF276346),
+              unselectedLabelColor: dark ? Colors.white70 : const Color(0xFF6B736E),
+              indicatorColor: const Color(0xFF659D7B),
+              onTap: (index) async {
+                await TtsService.stop();
+                if (mounted) setState(() { _activeTab = index; _speaking = null; });
+              },
+              tabs: [
+                Tab(text: '${urdu ? 'تمام' : 'ALL'} · ${scope.length}'),
+                Tab(text: '${urdu ? 'صحیح' : 'SAHIH'} · $sahihCount'),
+                Tab(text: '${urdu ? 'ضعیف' : 'ZAEEF'} · $daifCount'),
+              ],
+            ),
+          ]),
+        ) : null,
+      ),
+      body: Column(children: [
+        if (widget.enableGradeTabs) Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: Text(HadithGradeSections.isSahihCollection(widget.bookKey)
+            ? (urdu ? 'صحیح مجموعہ: تمام احادیث صحیح ٹیب میں ہیں۔' : 'Sahih collection: all entries appear in the Sahih tab.')
+            : (urdu ? 'درجہ: البانی جہاں موجود ہو۔ حسن اور غیر واضح درجات اصل حیثیت کے ساتھ تمام میں ہیں۔'
+                : 'Al-Albani grading where supplied. Hasan and unclear grades remain in All with their original status.'),
+            style: TextStyle(fontSize: 11, color: dark ? Colors.white60 : const Color(0xFF6B736E))),
+        ),
+        Expanded(child: hadiths.isEmpty
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.all(28),
@@ -161,6 +272,19 @@ class _HadithListScreenState extends State<HadithListScreen> {
                 final h = hadiths[index];
                 final bool isTarget =
                     widget.highlightHadithNumber == h.hadithNumber;
+                if (widget.enableGradeTabs) {
+                  return _BookReadingCard(
+                    item: h, bookName: _bookName, status: _sourceStatus(h),
+                    urdu: urdu, speaking: _speaking == h.hadithNumber,
+                    bookmarked: _isBookmarked(h.hadithNumber), rate: _rate,
+                    onPlay: () => _speak(h), onBookmark: () => _toggleBookmark(h.hadithNumber),
+                    onRate: (r) async { await TtsService.setSpeechRate(r); if (mounted) setState(() => _rate = r); },
+                    onReadFull: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (_) => HadithSingleScreen(collection: widget.collection,
+                        hadithNumber: h.hadithNumber, bookKey: widget.bookKey,
+                        bookName: _bookName, language: widget.language))),
+                  );
+                }
                 return _HadithCard(
                   item: h,
                   isUrduText: widget.language == 'urd',
@@ -182,7 +306,9 @@ class _HadithListScreenState extends State<HadithListScreen> {
                   onSpeak: () => _speak(h),
                 );
               },
-            ),
+            )),
+      ]),
+      ),
     );
   }
 }
@@ -489,6 +615,81 @@ class _Badge extends StatelessWidget {
         style: AppText.caption
             .copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
       ),
+    );
+  }
+}
+
+
+class _BookReadingCard extends StatelessWidget {
+  const _BookReadingCard({required this.item, required this.bookName,
+    required this.status, required this.urdu, required this.speaking,
+    required this.bookmarked, required this.rate, required this.onPlay,
+    required this.onBookmark, required this.onReadFull, required this.onRate});
+  final HadithItem item;
+  final String bookName, status;
+  final bool urdu, speaking, bookmarked;
+  final double rate;
+  final VoidCallback onPlay, onBookmark, onReadFull;
+  final ValueChanged<double> onRate;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? const Color(0xFFB5D9BF) : const Color(0xFF2B5E43);
+    final text = item.text.trim().isEmpty ? item.arabicText : item.text;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: dark ? const Color(0xFF28382F) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: dark ? const Color(0xFF3C5043) : const Color(0xFFE3E8DE)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 3))],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SelectableText(text,
+          textDirection: urdu || item.text.trim().isEmpty ? TextDirection.rtl : TextDirection.ltr,
+          textAlign: urdu ? TextAlign.right : TextAlign.left,
+          style: urdu ? AppText.urduText.copyWith(fontSize: 18, color: ink)
+              : AppText.translation.copyWith(fontSize: 16, height: 1.7, color: ink)),
+        const SizedBox(height: 20),
+        Divider(color: ink.withOpacity(0.15)),
+        const SizedBox(height: 8),
+        Text('${urdu ? 'کتاب' : 'Book'}: $bookName',
+          style: TextStyle(fontSize: 13, color: dark ? Colors.white70 : const Color(0xFF536157))),
+        const SizedBox(height: 4),
+        Text('${urdu ? 'حدیث نمبر' : 'Hadith No.'} ${item.hadithNumber}',
+          style: TextStyle(fontSize: 13, color: ink, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('${urdu ? 'درجہ' : 'Status'}: $status',
+          style: TextStyle(fontSize: 12, color: dark ? Colors.white70 : const Color(0xFF536157))),
+        const SizedBox(height: 12),
+        Wrap(spacing: 12, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+          FilledButton.icon(onPressed: item.text.trim().isEmpty ? null : onPlay,
+            icon: Icon(speaking ? Icons.stop_rounded : Icons.play_arrow_rounded),
+            label: Text(speaking ? S.stopWord : (urdu ? 'ترجمہ سنیں' : 'Play translation')),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF47775A), foregroundColor: Colors.white)),
+          PopupMenuButton<String>(
+            tooltip: urdu ? 'مزید' : 'More',
+            icon: Icon(Icons.more_vert, color: ink),
+            onSelected: (action) {
+              if (action == 'full') onReadFull();
+              if (action == 'bookmark') onBookmark();
+              if (action == 'grades') showDialog<void>(context: context, builder: (ctx) => AlertDialog(
+                title: Text(S.gradings),
+                content: SingleChildScrollView(child: Text(item.grades.isEmpty ? status : item.grades.join('\n\n'))),
+                actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))],
+              ));
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'full', child: Text(urdu ? 'مکمل حدیث اور عربی' : 'Read in full / Arabic')),
+              PopupMenuItem(value: 'bookmark', child: Text(bookmarked ? 'Remove bookmark' : 'Bookmark')),
+              PopupMenuItem(value: 'grades', child: Text(S.gradings)),
+            ],
+          ),
+          SpeedSelector(options: TtsService.speeds, value: rate, onChanged: onRate, compact: true),
+        ]),
+      ]),
     );
   }
 }
