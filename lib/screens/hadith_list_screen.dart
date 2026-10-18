@@ -308,16 +308,6 @@ class _HadithCard extends StatelessWidget {
                                 bg: AppColors.gold.withOpacity(0.15),
                                 fg: const Color(0xFF8A6D1E),
                               ),
-                            for (final g in item.grades)
-                              _Badge(
-                                text: g,
-                                bg: g.toLowerCase().contains('daif')
-                                    ? const Color(0x1AB3261E)
-                                    : AppColors.emerald.withOpacity(0.08),
-                                fg: g.toLowerCase().contains('daif')
-                                    ? const Color(0xFFB3261E)
-                                    : AppColors.textMid,
-                              ),
                           ],
                         ),
                       ),
@@ -467,7 +457,7 @@ class _HadithCard extends StatelessWidget {
                       style: AppText.caption
                           .copyWith(color: AppColors.textFaint),
                     ),
-                  if (item.grades.length > 1) ...[
+                  if (item.grades.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(S.gradings,
                         style: AppText.eyebrow.copyWith(

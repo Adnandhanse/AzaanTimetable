@@ -1,21 +1,20 @@
-Hadith classic layout refinement
+Hadith coloured-category + clean-preview fix
 
-Upload the 5 included Dart files into their matching repository folders.
-Then build and install a new APK. No Firebase function deployment is needed
-for this Hadith-only patch.
+Upload these 5 Dart files to the same paths in the repository. Build/install
+a new APK. No Firebase backend deployment is needed for this Hadith patch.
 
-Flow: pastel book cover -> original chapter list -> expandable hadith cards.
-Chapter rows and reading cards have improved spacing, rounded borders and
-clearer references. Existing search, Arabic/Urdu/English text, bookmarks and
-translation playback/speed controls are retained.
+Flow: pastel book cover -> light green Sahih / light peach Zaeef categories
+-> chapters of that category -> original expandable hadith cards.
+Bukhari and Muslim entries all appear under Sahih. The Zaeef tile is empty
+for those collections. Browse all chapters retains access to Hasan/unclear
+source grades in the other books without incorrectly calling them weak.
 
-Sahih Bukhari and Sahih Muslim entries display Sahih by collection. For other
-books the named source classification is retained (Al-Albani where supplied).
-Hasan or unclear grades retain their original source labels; not relabelled weak.
+Preview shows the short Sahih/Zaeef badge and reference. Scholar names and
+detailed source gradings appear ONLY after Tap to read in full, including
+a single supplied grade. No hadith text or original grading data is removed.
 
-This patch contains no daily-hadith/Roman data or ownership-transfer changes.
-Keep the earlier daily-hadith and OTP fixes. This replaces the newer tabbed
-Hadith layout only.
+Checks: Dart syntax, navigation/scoping, exact-number search under category,
+and hiding preview scholar details. Flutter build/device visual tests pending.
 
-Checked: Dart syntax, navigation wiring, collection placement and preservation
-of reading controls. Flutter APK build and phone visual checks remain unverified.
+This supersedes the Hadith_Classic_Layout_Improved.zip UI files. Keep the
+separate ownership-transfer fix and daily/Roman files already uploaded.

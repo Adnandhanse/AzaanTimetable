@@ -4,6 +4,7 @@ import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../models/hadith.dart';
 import '../services/hadith_repository.dart';
+import '../services/hadith_grade_sections.dart';
 import '../services/hadith_section_titles.dart';
 import '../widgets/ornaments.dart';
 import 'hadith_list_screen.dart';
@@ -31,11 +32,13 @@ class _ChapterRange {
 class HadithChaptersScreen extends StatefulWidget {
   final HadithBook book;
   final HadithLanguage language;
+  final HadithGradeSection? gradeSection;
 
   const HadithChaptersScreen({
     super.key,
     required this.book,
     required this.language,
+    this.gradeSection,
   });
 
   @override
@@ -61,8 +64,17 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
   Future<void> _load() async {
     try {
       await HadithSectionTitles.load();
-      final collection =
+      var collection =
           await HadithRepository.loadCollection(widget.book, widget.language);
+      if (widget.gradeSection != null) {
+        final items = collection.hadiths.where((h) => HadithGradeSections.classify(
+            h, bookKey: widget.book.fileKey) == widget.gradeSection).toList();
+        final chapterNumbers = items.map((h) => h.chapterNumber).toSet();
+        // New view only: never mutate the repository's cached complete book.
+        collection = HadithCollection(name: collection.name,
+          chapters: collection.chapters.where((c) => chapterNumbers.contains(c.number)).toList(),
+          hadiths: items);
+      }
       if (!mounted) return;
 
       _ranges.clear();
@@ -102,6 +114,8 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
 
     final String q = _query.trim();
     final int? asNumber = int.tryParse(q);
+    final exactNumberChapters = _collection?.hadiths
+        .where((h) => h.hadithNumber == asNumber).map((h) => h.chapterNumber).toSet() ?? <int>{};
 
     final List<HadithChapter> chapters = _collection == null
         ? <HadithChapter>[]
@@ -111,9 +125,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
             // chapter with that number. Typing 300 should take you to the
             // chapter holding hadith 300, which is the useful behaviour.
             if (asNumber != null) {
-              final _ChapterRange? r = _ranges[c.number];
-              return (r != null && r.contains(asNumber)) ||
-                  c.number == asNumber;
+              return exactNumberChapters.contains(c.number) || c.number == asNumber;
             }
             return displayTitle(c).toLowerCase().contains(q.toLowerCase());
           }).toList();
@@ -129,7 +141,12 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.book.localName),
+        title: widget.gradeSection == null ? Text(widget.book.localName)
+          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(widget.book.localName, style: const TextStyle(fontSize: 16)),
+              Text(widget.gradeSection == HadithGradeSection.sahih ? 'Sahih' : 'Zaeef',
+                style: const TextStyle(fontSize: 12)),
+            ]),
         actions: [
           if (_collection != null)
             IconButton(
@@ -201,7 +218,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                     if (asNumber != null)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-                        child: chapters.isEmpty
+                        child: exactNumberChapters.isEmpty
                             ? Text(
                                 'No hadith numbered $asNumber in this book.',
                                 style: AppText.caption
@@ -209,7 +226,8 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                               )
                             : _DirectHit(
                                 hadithNumber: asNumber,
-                                chapterTitle: displayTitle(chapters.first),
+                                chapterTitle: displayTitle(_collection!.chapters.firstWhere(
+                                    (c) => exactNumberChapters.contains(c.number))),
                                 // Opens the HADITH, not the chapter it lives
                                 // in. Scrolling a variable-height list to an
                                 // index cannot be done reliably — searching

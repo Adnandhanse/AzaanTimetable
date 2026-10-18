@@ -5,7 +5,7 @@ import '../models/hadith.dart';
 import '../services/app_strings.dart';
 import '../services/quran_local_data_service.dart';
 import '../theme/app_theme.dart';
-import 'hadith_chapters_screen.dart';
+import 'hadith_grade_sections_screen.dart';
 import 'hadith_bookmarks_screen.dart';
 
 /// Arabic title, volume count, and how many hadith the app actually holds.
@@ -151,7 +151,7 @@ class _HadithHomeScreenState extends State<HadithHomeScreen> {
                   book: book,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(builder: (_) =>
-                        HadithChaptersScreen(book: book, language: _language)),
+                        HadithGradeSectionsScreen(book: book, language: _language)),
                   ),
                 ),
               )).toList(),
