@@ -177,17 +177,17 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 12),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide:
                                 BorderSide(color: AppColors.goldRule),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide:
                                 BorderSide(color: AppColors.goldRule),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(color: AppColors.gold),
                           ),
                         ),
@@ -254,21 +254,20 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                           final HadithChapter chapter = chapters[index];
                           final _ChapterRange? r = _ranges[chapter.number];
                           return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
                             decoration: BoxDecoration(
-                              border: index == 0
-                                  ? null
-                                  : Border(
-                                      top: BorderSide(
-                                          color: AppColors.goldRuleFaint)),
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.goldRuleFaint),
                             ),
                             child: ListTile(
                               contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 6),
+                                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               leading: Medallion(label: '${chapter.number}'),
                               title: Text(
                                 displayTitle(chapter),
-                                style: AppText.rowTitle.copyWith(
-                                    fontSize: 17, color: AppColors.text),
+                                style: (urdu ? AppText.urduText : AppText.body).copyWith(
+                                    fontSize: 16, color: AppColors.text),
                               ),
                               subtitle: Padding(
                                 padding: const EdgeInsets.only(top: 2),
@@ -278,7 +277,9 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                                         style: AppText.caption.copyWith(
                                             color: AppColors.textFaint),
                                       )
-                                    : Row(
+                                    : Wrap(
+                                        spacing: 4,
+                                        runSpacing: 4,
                                         children: [
                                           Text(
                                             '${S.hadithWord} ${r.label}',
@@ -341,7 +342,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                 foregroundColor: AppColors.emerald,
                 side: BorderSide(color: AppColors.gold),
                 shape:
-                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 textStyle: AppText.body,
@@ -370,13 +371,13 @@ class _DirectHit extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.white,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onOpen,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.gold, width: 1.4),
           ),
           padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),

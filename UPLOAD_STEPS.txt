@@ -1,0 +1,21 @@
+Hadith classic layout refinement
+
+Upload the 5 included Dart files into their matching repository folders.
+Then build and install a new APK. No Firebase function deployment is needed
+for this Hadith-only patch.
+
+Flow: pastel book cover -> original chapter list -> expandable hadith cards.
+Chapter rows and reading cards have improved spacing, rounded borders and
+clearer references. Existing search, Arabic/Urdu/English text, bookmarks and
+translation playback/speed controls are retained.
+
+Sahih Bukhari and Sahih Muslim entries display Sahih by collection. For other
+books the named source classification is retained (Al-Albani where supplied).
+Hasan or unclear grades retain their original source labels; not relabelled weak.
+
+This patch contains no daily-hadith/Roman data or ownership-transfer changes.
+Keep the earlier daily-hadith and OTP fixes. This replaces the newer tabbed
+Hadith layout only.
+
+Checked: Dart syntax, navigation wiring, collection placement and preservation
+of reading controls. Flutter APK build and phone visual checks remain unverified.
