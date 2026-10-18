@@ -14,6 +14,9 @@ class HadithListScreen extends StatefulWidget {
   final String bookKey;
   final String language;
 
+  /// Optional grade-section items; original collection/numbering stay intact.
+  final List<HadithItem>? selectedHadiths;
+
   /// Land on this hadith, expanded and outlined. Used when someone searches a
   /// number and wants the hadith itself, not the chapter it lives in.
   final int? highlightHadithNumber;
@@ -25,6 +28,7 @@ class HadithListScreen extends StatefulWidget {
     required this.bookKey,
     required this.language,
     this.highlightHadithNumber,
+    this.selectedHadiths,
   });
 
   @override
@@ -87,7 +91,7 @@ class _HadithListScreenState extends State<HadithListScreen> {
   }
 
   List<HadithItem> get _hadiths =>
-      widget.collection.hadithsInChapter(widget.chapter.number);
+      widget.selectedHadiths ?? widget.collection.hadithsInChapter(widget.chapter.number);
 
   /// NO SCROLL-TO-TARGET HERE, DELIBERATELY.
   ///
@@ -141,7 +145,9 @@ class _HadithListScreenState extends State<HadithListScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(28),
                 child: Text(
-                  'No hadith in this chapter are available in this translation.',
+                  widget.selectedHadiths != null
+                      ? (widget.language == 'urd' ? 'اس حصے میں کوئی حدیث دستیاب نہیں ہے۔' : 'No hadith in this section in the bundled data.')
+                      : 'No hadith in this chapter are available in this translation.',
                   textAlign: TextAlign.center,
                   style: AppText.body.copyWith(color: AppColors.textMuted),
                 ),
@@ -269,7 +275,7 @@ class _HadithCard extends StatelessWidget {
                                 bg: AppColors.gold.withOpacity(0.15),
                                 fg: const Color(0xFF8A6D1E),
                               ),
-                            for (final g in item.grades.take(1))
+                            for (final g in item.grades)
                               _Badge(
                                 text: g,
                                 bg: g.toLowerCase().contains('daif')
