@@ -27,6 +27,6 @@ jobs:
       - name: Validate transfer logic
         run: npm --prefix functions test
       - name: Deploy the ownership codebase
-        run: npx --yes firebase-tools@14 --config firebase.transfer.json deploy --only functions:ownership-transfer --project actual-masjid-prayer-time --non-interactive
+        run: npx --yes firebase-tools@14 --config firebase.transfer.json deploy --only functions:ownership-transfer --project actual-masjid-prayer-time --non-interactive --force
       - name: List functions after deployment
         run: npx --yes firebase-tools@14 functions:list --project actual-masjid-prayer-time
