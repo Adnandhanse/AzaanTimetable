@@ -33,7 +33,14 @@ class DailyHadithCard {
     }
 
     if (!context.mounted) return;
-    final h = DailyHadith.forDate(now);
+    DailyHadith h;
+    try {
+      h = await DailyHadith.loadForDate(now);
+    } catch (_) {
+      // A missing/corrupt asset must not prevent the prayer home screen opening.
+      h = DailyHadith.forDate(now);
+    }
+    if (!context.mounted) return;
 
     // THE DIALOG RETURNS A REQUEST; THIS CALLER ACTS ON IT.
     //
@@ -84,7 +91,9 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
     // Roman is the one script almost everyone here can read: Urdu speakers
     // because it is their language spelled out, and English readers because
     // they recognise the letters. The other two are one tap away.
-    _script = _Script.roman;
+    _script = widget.hadith.textHi.trim().isNotEmpty
+        ? _Script.roman
+        : (S.isUrdu ? _Script.urdu : _Script.english);
   }
 
   @override
@@ -94,7 +103,7 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
     final String body = switch (_script) {
       _Script.urdu => hadith.textUr,
       _Script.roman => hadith.textHi,
-      _Script.english => hadith.text,
+      _Script.english => hadith.previewEnglish,
     };
     final String theme = S.isUrdu ? hadith.themeUr : hadith.theme;
 
@@ -102,7 +111,8 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 26),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           // TRANSLUCENT, and small.
@@ -172,7 +182,9 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: Text(
-                          hadith.arabic,
+                          hadith.previewArabic,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
                           style: AppText.arabicVerse.copyWith(
                               fontSize: 20, height: 1.95, color: AppColors.text),
@@ -190,6 +202,8 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                             urdu ? TextDirection.rtl : TextDirection.ltr,
                         child: Text(
                           body,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           textAlign: urdu ? TextAlign.right : TextAlign.left,
                           style: urdu
                               ? AppText.urduText
@@ -198,6 +212,11 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                                   .copyWith(color: AppColors.textMid),
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(_script == _Script.roman && hadith.romanIsAutomatic
+                          ? 'Automatic Roman Urdu · Original Urdu available'
+                          : (urdu ? 'مختصر اقتباس — مکمل سیاق کے لیے پوری حدیث پڑھیں' : 'Short preview · Read in full for context'),
+                          style: AppText.caption.copyWith(color: AppColors.textMuted)),
                       const SizedBox(height: 12),
                       // Urdu / Roman / English.
                       //
@@ -207,9 +226,10 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                       // translation.
                       Row(
                         children: <Widget>[
-                          for (final (_Script sc, String label) in const <(_Script, String)>[
+                          for (final (_Script sc, String label) in <(_Script, String)>[
                             (_Script.urdu, 'اردو'),
-                            (_Script.roman, 'Roman'),
+                            if (hadith.textHi.trim().isNotEmpty)
+                              (_Script.roman, 'Roman'),
                             (_Script.english, 'English'),
                           ])
                             Padding(
@@ -277,6 +297,7 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

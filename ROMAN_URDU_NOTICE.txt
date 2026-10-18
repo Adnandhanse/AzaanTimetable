@@ -1,0 +1,19 @@
+Roman Urdu resource notice
+
+The 2,000 daily-card Roman Urdu previews were generated automatically from the
+app's existing Urdu hadith translations. Source Arabic, Urdu, English and book /
+hadith-number links are retained. These are transliterations, not new hadith,
+new grades, or an independent scholarly review. They require wording review
+before a production release, especially uncommon names and embedded Arabic.
+The daily card labels generated Roman text as automatic and retains Urdu access.
+Previously supplied Roman excerpts are retained where available.
+
+Generation tool: urdunlp 0.2.0 by hammasbuilds
+https://github.com/hammasbuilds/urdunlp
+Code licence: MIT. Model data: CC BY-SA 4.0, derived from Dakshina (Roark et al.,
+2020), Wikipedia and HotpotQA. No Python library or model is shipped in the app.
+Generated spelling was adjusted with common-word/religious-term overrides.
+CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+
+Only Dart source/text data are included in this patch. No new Flutter package,
+API key, internet permission or Firebase deployment is required for this change.
