@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "source": "functions-ask",
+    "codebase": "ask-islam-connect",
+    "ignore": ["node_modules", ".git", "test", "*.log", "*.local"]
+  }
+}

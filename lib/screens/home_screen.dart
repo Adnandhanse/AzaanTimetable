@@ -584,27 +584,36 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _askIslamConnectButton() => Material(
-    color: AppColors.emerald,
-    borderRadius: BorderRadius.circular(20),
+    color: AppColors.white,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24),
+      side: BorderSide(color: AppColors.goldRule)),
     clipBehavior: Clip.antiAlias,
     child: InkWell(
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => const AskIslamConnectScreen())),
-      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      child: Ink(
+        decoration: BoxDecoration(gradient: LinearGradient(
+          colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
+          begin: Alignment.topLeft, end: Alignment.bottomRight)),
+        padding: const EdgeInsets.all(20),
         child: Row(children: [
-          Container(padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-            child: const Icon(Icons.mic_none_rounded, size: 28, color: Colors.white)),
+          Container(padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(color: AppColors.goldRule.withOpacity(.5),
+              borderRadius: BorderRadius.circular(18)),
+            child: Icon(Icons.mic_none_rounded, size: 28, color: AppColors.text)),
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Ask Islam Connect', style: AppText.rowTitle.copyWith(
-              color: Colors.white, fontSize: 21)),
+              color: AppColors.text, fontSize: 22)),
+            const SizedBox(height: 5),
+            Text('Apna sawal boliye ya likhiye',
+              style: AppText.body.copyWith(color: AppColors.textMuted, fontSize: 13)),
             const SizedBox(height: 4),
-            const Text('Apna sawal boliye · Quran aur hadees mein talaash',
-              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4)),
+            Text('Quran, hadees aur Prophet Stories',
+              style: AppText.caption.copyWith(color: AppColors.textMuted)),
           ])),
           const SizedBox(width: 6),
-          const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 22),
+          Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 22),
         ])),
     ),
   );

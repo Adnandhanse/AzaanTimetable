@@ -1,28 +1,32 @@
-LEARN ISLAM - ILLUSTRATED CARDS
+ASK ISLAM CONNECT — AI LANGUAGE UNDERSTANDING
 
-Apply this update LAST, after your Ask Islam Connect, 25 Prophet Stories,
-and Learn Islam naming updates. It replaces the older Learn screen/pubspec.
+Apply AFTER Ask_And_Prophet_Stories_Improved_Update.zip.
+Only changed/new files are supplied. Extract; upload into matching repo paths.
 
-1. Extract this ZIP. Do not upload the ZIP itself into GitHub.
-2. Replace lib/screens/prayers_home_screen.dart in that exact folder.
-3. Replace pubspec.yaml at the repository root (not pubspec.yml).
-4. Upload all 8 .webp files into assets/learn_illustrations/.
-5. Keep the existing Prophet Stories code and assets from the earlier bundle.
-6. Commit changes, then run your Android build workflow and install its APK.
-   No Firebase deployment and no new dependency are needed.
+REPLACE / ADD APP FILES:
+lib/screens/ask_islam_connect_screen.dart
+lib/services/ask_connect_ai.dart (new)
 
-Changes: 8 pastel illustrated cards, readable titles, preserved destinations,
-Urdu labels, responsive layout and larger text support. Titles are Flutter text,
-not baked into images. No people or animals in the artwork.
+ADD SERVER / CONFIG:
+functions-ask/ (all supplied files, including its test folder/package files)
+firebase.ask.json (repository root)
+.github/workflows/deploy-ask-islam-connect.yml
+ASK_AI_SETUP.md (setup instructions)
 
-Checks completed: Dart source syntax, YAML parsing, image decoding, asset paths,
-route preservation and ZIP integrity. Flutter SDK is unavailable here, so an
-APK build and device visual/tap test are still required before release.
+Then complete ASK_AI_SETUP.md:
+- Your OpenAI API key goes ONLY in the ASK_OPENAI_API_KEY GitHub Actions secret.
+- Enable Firebase Anonymous authentication; protect the usage-counter collection
+  and configure the necessary server/deployer access described in the setup.
+- Run Deploy Ask Islam Connect AI, then Build Android APK and test the new APK.
 
-Test: open Learn Islam; tap Shahada, Namaz, Roza, Zakat, Hajj & Umrah, Umrah,
-Daily Duas and Prophet Stories. Check Urdu, large text, scrolling and dark mode.
+This is actual AI integration code, NOT an already-live service.
+No API key was provided here, and no live model call/cloud deployment was made.
+An APK build by itself will not activate it. No Flutter package/pubspec change.
 
-Version remains 1.0.0+17 as supplied. For Play Store release, use a versionCode
-higher than your highest uploaded version in your release build configuration.
+The backend test/package files are needed by the deployment workflow. They do
+not become a new screen or feature inside the APK. Generated search corpus is
+built automatically from your existing repository assets; it is not in this ZIP.
 
-ARTWORK_PROMPTS.json records the built-in image generation prompts and paths.
+Update the privacy policy/Data Safety for the new optional question-processing
+flow before publicly releasing the AI-enabled APK. Details and a factual policy
+paragraph are in ASK_AI_SETUP.md.

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'ask_roman_text.dart';
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/services.dart';
@@ -44,6 +45,9 @@ class AskConnectSearch {
     final en = await rootBundle.loadString('assets/quran/quran_en.json', cache: false);
     final ur = await rootBundle.loadString('assets/quran/quran_ur.json', cache: false);
     await _request({'op': 'quran', 'en': en, 'ur': ur});
+    progress('Prophet Stories tayyar ho rahi hain…');
+    final stories = await rootBundle.loadString('assets/prophet_stories/stories.json', cache: false);
+    await _request({'op': 'stories', 'data': stories});
     for (final book in ['bukhari', 'muslim', 'abudawud', 'tirmidhi', 'nasai', 'ibnmajah']) {
       if (_closed) throw StateError('Search closed');
       progress('Hadees library: $book…');
@@ -91,9 +95,68 @@ String normalizeAskText(String value) => value.toLowerCase()
 /// a finger question cannot return a hadith merely because it says "prayer".
 const askConcepts = <List<String>>[
   ['namaz', 'namaaz', 'salah', 'salat', 'prayer', 'prayers', 'praying', 'prays', 'نماز', 'صلاۃ', 'नमाज', 'नमाज़'],
-  ['ungli', 'unglee', 'finger', 'fingers', 'forefinger', 'انگلی', 'انگلیوں', 'उंगली', 'उँगली'],
-  ['harkat', 'hilana', 'hilaana', 'movement', 'moving', 'move', 'moved', 'حرکت', 'ہلانا', 'ہلانے', 'ہلاتے', 'हिलाना', 'हिलाने', 'हिलाते', 'हरकत'],
+  ['ungli', 'unglee', 'ungali', 'ungliyon', 'finger', 'fingers', 'forefinger', 'انگلی', 'انگلیوں', 'उंगली', 'उँगली'],
+  ['harkat', 'hilana', 'hilaana', 'hilane', 'hilate', 'movement', 'moving', 'move', 'moved', 'حرکت', 'ہلانا', 'ہلانے', 'ہلاتے', 'हिलाना', 'हिलाने', 'हिलाते', 'हरकत'],
   ['tashahhud', 'tashahud', 'تشہد', 'तशह्हुद'],
+  ['haath', 'hath', 'haathon', 'hathon', 'hand', 'hands', 'arm', 'arms', 'forearm', 'forearms', 'wrist', 'wrists', 'ہاتھ', 'ہاتھوں', 'بازو', 'کلائی'],
+  ['baandhna', 'bandhna', 'baandhne', 'bandhne', 'baandhte', 'bandhte', 'baandhein', 'bandhein', 'bandhe', 'baandhe', 'rakhna', 'rakhne', 'rakhte', 'rakhein', 'fold', 'folding', 'folded', 'place', 'placed', 'placing', 'put', 'puts', 'grasp', 'grasped', 'باندھنا', 'باندھنے', 'باندھے', 'رکھنا', 'رکھتے', 'رکھا'],
+  ['uthana', 'uthaana', 'uthane', 'uthate', 'uthayein', 'raise', 'raised', 'raises', 'raising', 'lift', 'lifted', 'lifting', 'rafayadain', 'rafayadein', 'rafal', 'رفع', 'اٹھانا', 'اٹھانے', 'اٹھاتے', 'اٹھایا'],
+  ['seena', 'seene', 'sina', 'sine', 'chhati', 'chest', 'breast', 'سینہ', 'سینے'],
+  ['naaf', 'navel', 'ناف'],
+  ['neeche', 'niche', 'below', 'beneath', 'under', 'نیچے'],
+  ['upar', 'oopar', 'above', 'اوپر'],
+  ['dayan', 'dahina', 'right', 'دائیں', 'دایاں'],
+  ['bayan', 'bayein', 'left', 'بائیں', 'بایاں'],
+  ['ruku', 'rukoo', 'bow', 'bowing', 'bowed', 'رکوع'],
+  ['sajda', 'sajdah', 'sajde', 'sujud', 'prostrate', 'prostration', 'prostrating', 'سجدہ', 'سجدے', 'سجود'],
+  ['ishara', 'ishaara', 'ishare', 'point', 'pointing', 'pointed', 'اشارہ', 'اشارے'],
+  ['rakat', 'rakaat', 'rakah', 'rak ah', 'rak a', 'رکعت', 'رکعات'],
+  ['safar', 'travel', 'travelling', 'traveling', 'journey', 'مسافر', 'سفر'],
+  ['khana', 'khane', 'food', 'eat', 'eating', 'ate', 'کھانا', 'کھانے'],
+  ['sona', 'sone', 'sleep', 'sleeping', 'slept', 'سونا', 'سونے'],
+  ['sood', 'sud', 'riba', 'usury', 'interest', 'سود', 'ربا'],
+  ['adam', 'aadam', 'آدم'],
+  ['idris', 'idrees', 'enoch', 'ادریس'],
+  ['nuh', 'nooh', 'noah', 'نوح'],
+  ['hud', 'hood', 'ہود'],
+  ['salih', 'saleh', 'صالح'],
+  ['ibrahim', 'ibraheem', 'abraham', 'ابراہیم'],
+  ['lut', 'loot', 'lot', 'لوط'],
+  ['ismail', 'ismaeel', 'ishmael', 'اسماعیل'],
+  ['ishaq', 'isaac', 'اسحاق'],
+  ['yaqub', 'yaqoob', 'jacob', 'یعقوب'],
+  ['yusuf', 'yousuf', 'yousof', 'yousef', 'yusoof', 'joseph', 'یوسف'],
+  ['ayyub', 'ayub', 'ayyoob', 'job', 'ایوب'],
+  ['shuayb', 'shuaib', 'شعیب'],
+  ['musa', 'moosa', 'moses', 'موسی', 'موسیٰ'],
+  ['harun', 'haroon', 'aaron', 'ہارون'],
+  ['dhulkifl', 'ذوالکفل'],
+  ['dawud', 'dawood', 'daud', 'david', 'داود', 'داؤد'],
+  ['sulayman', 'sulaiman', 'suleiman', 'solomon', 'سلیمان'],
+  ['ilyas', 'ilyaas', 'elijah', 'الیاس'],
+  ['alyasa', 'elisha', 'الیسع'],
+  ['yunus', 'younus', 'yoonus', 'jonah', 'یونس'],
+  ['zakariya', 'zakaria', 'zakariyya', 'zechariah', 'زکریا'],
+  ['yahya', 'john', 'یحیی', 'یحیٰی'],
+  ['isa', 'eesa', 'jesus', 'عیسی', 'عیسیٰ'],
+  ['muhammad', 'mohammad', 'mohammed', 'محمد'],
+  ['zamzam', 'زمزم'],
+  ['hajar', 'hajra', 'hajrah', 'hagar', 'ہاجرہ', 'ہاجر'],
+  ['safa', 'صفا'],
+  ['marwa', 'marwah', 'مروہ'],
+  ['firaun', 'firon', 'firaon', 'pharaoh', 'فرعون'],
+  ['aag', 'fire', 'آگ'],
+  ['kuan', 'kua', 'kuen', 'well', 'کنواں', 'کنویں'],
+  ['qaid', 'jail', 'prison', 'قید', 'جیل'],
+  ['khwaab', 'khwab', 'dream', 'dreams', 'خواب'],
+  ['kashti', 'ship', 'boat', 'ark', 'کشتی'],
+  ['samandar', 'sea', 'سمندر'],
+  ['machhli', 'machli', 'fish', 'whale', 'مچھلی'],
+  ['kaaba', 'kabah', 'kaabah', 'کعبہ'],
+  ['qurbani', 'sacrifice', 'sacrifices', 'قربانی'],
+  ['hijrat', 'migration', 'emigration', 'ہجرت'],
+  ['paidaish', 'birth', 'born', 'پیدائش'],
+  ['maut', 'wafat', 'death', 'died', 'موت', 'وفات'],
   ['sabr', 'sabar', 'patience', 'patient', 'صبر', 'صابر', 'सब्र'],
   ['gussa', 'ghussa', 'anger', 'angry', 'غصہ', 'غصے', 'غضب', 'गुस्सा'],
   ['walidain', 'parents', 'parent', 'والدین', 'माता', 'पिता'],
@@ -122,25 +185,54 @@ const askConcepts = <List<String>>[
 const _askStop = 'a an the of in on at to and or about how what is are does do should '
     'can i me please tell hadith hadees hadiths quran ayat verse verses hukum hukm '
     'ka ki ke ko se mein mai me hai hain kya kaise bare baare batao bataye dene '
-    'karna karne k liye kuch chahiye mujhe do '
+    'story stories kahaniyan kahaniyaan prophet prophets nabi nabiyon anbiya hazrat hz alayhis alaihis alaihissalam alayhissalam al assalam a s kiya kiye baat janna jaanna janana jaanana jan na jaane jaanne janane bataye kahani kahaani kissa qissa waqia waqiya waqea zindagi life history tell know about نبی حضرت کہانی قصہ واقعہ علیہ السلام '
+    'karna karne k liye kuch chahiye mujhe do main hum hume humein mera mere meri aap apne apni apna ab to par aur kyun kab kaun kahan kaha kitna kitni ho hota hoti hote tha thi hain hoon bhi hi ye yeh wo woh agar bas related regarding bata bataiye batayein batana batane bataoge bata sakte sakta sakti saktiye poochna puchna puchu poochun sawal sawalon masla masale tareeqa tarika sunnat sahi chiz cheez chahiye wala wali wale waale na nahi please explain know want would could tell someone something regarding concerning '
     'کے کی کا کو میں سے ہے ہیں کیا کیسے بارے حکم حدیث قرآن بتائیں دینے کرنا کریں چاہیے مجھے '
     'का की के में से है हैं क्या कैसे बारे हुक्म हुकुम हदीस बताओ देने करना चाहिए मुझे';
 
 List<List<String>> askQueryGroups(String query) {
-  final words = normalizeAskText(query).split(' ');
+  final clean = askRomanTranscript(query).toLowerCase()
+      .replaceAll(RegExp(r'\b(alayhis|alaihis|alayhi|alaihi)\s+(salam|salaam)\b'), ' ')
+      .replaceAll('علیہ السلام', ' ').replaceAll('عليہ السلام', ' ')
+      .replaceAll('dhul kifl', 'dhulkifl').replaceAll('dhul-kifl', 'dhulkifl')
+      .replaceAll('al yasa', 'alyasa').replaceAll('al-yasa', 'alyasa');
+  final words = normalizeAskText(clean).split(' ');
   final stop = normalizeAskText(_askStop).split(' ').toSet();
-  final groups = <List<String>>[];
+  final known = <List<String>>[], unknown = <List<String>>[];
   final seen = <int>{};
   for (final word in words) {
     if (word.isEmpty || stop.contains(word)) continue;
     final index = askConcepts.indexWhere((g) => g.map(normalizeAskText).contains(word));
     if (index >= 0) {
-      if (seen.add(index)) groups.add(askConcepts[index].map(normalizeAskText).toList());
-    } else if (word.length >= 2) {
-      if (!groups.any((g) => g.length == 1 && g.single == word)) groups.add([word]);
+      if (seen.add(index)) known.add(askConcepts[index].map(normalizeAskText).toList());
+    } else if (word.length >= 2 && !unknown.any((g) => g.single == word)) {
+      unknown.add([word]);
     }
   }
-  return groups;
+  // Natural questions contain conversational words that aren't in the books.
+  // Once specific topics are recognized, rank on those topics. A generic
+  // "namaz" plus an unknown topic still requires the unknown topic, so the
+  // user does not get every prayer narration for an unsupported question.
+  final specific = known.any((g) => !g.contains('namaz'));
+  return specific ? known : [...known, ...unknown.take(8)];
+}
+
+/// Same matcher used by the worker. Every extracted topic is required; we do
+/// not silently fall back to all prayer reports if "hands" or "chest" fails.
+int askDocumentScore(List<List<String>> groups, String normalized) {
+  if (groups.isEmpty) return 0;
+  var score = 0;
+  for (final group in groups) {
+    final hits = group.where((term) => normalized.contains(' $term ')).length;
+    if (hits == 0) return 0;
+    score += (group.contains('namaz') ? 5 : 20) + (hits > 3 ? 3 : hits);
+  }
+  if (groups.any((g) => g.contains('namaz')) &&
+      groups.any((g) => g.contains('ungli')) &&
+      ['tashahhud', 'tashahud', 'تشہد'].any((t) => normalized.contains(' $t '))) {
+    score += 30;
+  }
+  return score;
 }
 
 class _AskDocument {
@@ -170,6 +262,20 @@ void _askSearchWorker(SendPort host) {
               'number': _number(v['id']), 'title': s['transliteration'],
               'en': v['translation'] ?? '', 'ur': translations[_number(v['id'])] ?? '',
               'ar': v['text'] ?? '', 'grades': <String>[]}));
+          }
+        }
+      } else if (m['op'] == 'stories') {
+        final books = (jsonDecode(m['data'] as String) as Map)['books'] as List;
+        for (final book in books) {
+          final pages = book['pages'] as List;
+          for (var i = 0; i < pages.length; i++) {
+            final page = pages[i];
+            documents.add(_AskDocument({'kind': 'story', 'storyId': book['id'],
+              'pageId': page['id'], 'number': i + 1, 'title': book['name'],
+              'chapter': page['title'], 'roman': page['roman'],
+              'en': page['english'], 'ur': '', 'ar': '', 'grades': <String>[],
+              'context': '${book['id']} ${book['name']} ${page['title']} ${page['roman']}',
+              'image': 'assets/prophet_stories/scenes/${page['scene']}.webp'}));
           }
         }
       } else if (m['op'] == 'book') {
@@ -203,25 +309,33 @@ void _askSearchWorker(SendPort host) {
       } else if (m['op'] == 'search') {
         final groups = askQueryGroups(m['query'] as String);
         final matches = <(int, _AskDocument)>[];
-        final prayerFinger = groups.any((g) => g.contains('namaz')) &&
-            groups.any((g) => g.contains('ungli'));
-        if (groups.isNotEmpty && groups.length <= 12) {
+        final browseStories = groups.isEmpty && (m['kind'] == 'story' ||
+            RegExp(r'\b(story|stories|kahani|kahaniyan|kahaani|prophet|prophets|anbiya)\b')
+              .hasMatch(normalizeAskText(askRomanTranscript(m['query'] as String))));
+        if (browseStories) {
+          for (final doc in documents) {
+            if (doc.data['kind'] == 'story' && doc.data['number'] == 1 &&
+                (m['kind'] == 'all' || m['kind'] == 'story')) matches.add((1, doc));
+          }
+        } else if (groups.isNotEmpty) {
           for (final doc in documents) {
             if (m['kind'] != 'all' && doc.data['kind'] != m['kind']) continue;
-            var score = 0; var all = true;
-            for (final group in groups) {
-              final hits = group.where((term) => doc.normalized.contains(' $term ')).length;
-              if (hits == 0) { all = false; break; }
-              score += 10 + (hits > 3 ? 3 : hits);
+            var score = askDocumentScore(groups, doc.normalized);
+            if (score == 0) continue;
+            if (doc.data['kind'] == 'story') {
+              score += 12;
+              if (groups.any((g) => g.contains(doc.data['storyId']))) {
+                score += 60;
+                // A name-only question opens the beginning, not whichever
+                // middle chapter happens to contain the shortest paragraph.
+                if (groups.length == 1) {
+                  final part = doc.data['number'] as int;
+                  score += (part == 1 ? 100 : 0) + 30 - part;
+                }
+              }
             }
-            if (all) {
-              // A common specific topic: promote seated-prayer narrations over
-              // long reports that mention fingers and prayer in unrelated parts.
-              if (prayerFinger && ['tashahhud', 'tashahud', 'تشہد'].any(
-                  (word) => doc.normalized.contains(' $word '))) score += 30;
-              if (doc.data['book'] == 'bukhari' || doc.data['book'] == 'muslim') score += 1;
-              matches.add((score, doc));
-            }
+            if (doc.data['book'] == 'bukhari' || doc.data['book'] == 'muslim') score += 1;
+            matches.add((score, doc));
           }
         }
         matches.sort((a, b) {
