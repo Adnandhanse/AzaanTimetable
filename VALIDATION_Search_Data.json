@@ -1,0 +1,375 @@
+{
+  "counts": {
+    "quran": 6236,
+    "bukhari": 7557,
+    "muslim": 7482,
+    "abudawud": 5274,
+    "tirmidhi": 3947,
+    "nasai": 5676,
+    "ibnmajah": 4340
+  },
+  "total": 40512,
+  "queries": [
+    {
+      "query": "sabr",
+      "terms": [
+        "sabr"
+      ],
+      "count": 367,
+      "sample": [
+        [
+          "quran",
+          2,
+          45
+        ],
+        [
+          "quran",
+          2,
+          61
+        ],
+        [
+          "quran",
+          2,
+          153
+        ],
+        [
+          "quran",
+          2,
+          155
+        ],
+        [
+          "quran",
+          2,
+          156
+        ]
+      ]
+    },
+    {
+      "query": "gussa",
+      "terms": [
+        "gussa"
+      ],
+      "count": 554,
+      "sample": [
+        [
+          "quran",
+          1,
+          7
+        ],
+        [
+          "quran",
+          2,
+          41
+        ],
+        [
+          "quran",
+          2,
+          61
+        ],
+        [
+          "quran",
+          2,
+          90
+        ],
+        [
+          "quran",
+          2,
+          282
+        ]
+      ]
+    },
+    {
+      "query": "maa",
+      "terms": [
+        "maa"
+      ],
+      "count": 1061,
+      "sample": [
+        [
+          "quran",
+          2,
+          83
+        ],
+        [
+          "quran",
+          2,
+          233
+        ],
+        [
+          "quran",
+          2,
+          238
+        ],
+        [
+          "quran",
+          4,
+          7
+        ],
+        [
+          "quran",
+          4,
+          11
+        ]
+      ]
+    },
+    {
+      "query": "namaz mein ungli",
+      "terms": [
+        "namaz",
+        "ungli"
+      ],
+      "count": 148,
+      "sample": [
+        [
+          "bukhari",
+          169,
+          0
+        ],
+        [
+          "bukhari",
+          248,
+          0
+        ],
+        [
+          "bukhari",
+          344,
+          0
+        ],
+        [
+          "bukhari",
+          479,
+          0
+        ],
+        [
+          "bukhari",
+          481,
+          0
+        ]
+      ]
+    },
+    {
+      "query": "Namaz me ungli harkat dene ka hukum",
+      "terms": [
+        "namaz",
+        "ungli",
+        "harkat"
+      ],
+      "count": 13,
+      "sample": [
+        [
+          "bukhari",
+          248,
+          0
+        ],
+        [
+          "muslim",
+          718,
+          0
+        ],
+        [
+          "muslim",
+          1452,
+          0
+        ],
+        [
+          "muslim",
+          2951,
+          0
+        ],
+        [
+          "abudawud",
+          989,
+          0
+        ]
+      ]
+    },
+    {
+      "query": "नमाज में उंगली हिलाने का हुक्म",
+      "terms": [
+        "namaz",
+        "ungli",
+        "harkat"
+      ],
+      "count": 13,
+      "sample": [
+        [
+          "bukhari",
+          248,
+          0
+        ],
+        [
+          "muslim",
+          718,
+          0
+        ],
+        [
+          "muslim",
+          1452,
+          0
+        ],
+        [
+          "muslim",
+          2951,
+          0
+        ],
+        [
+          "abudawud",
+          989,
+          0
+        ]
+      ]
+    },
+    {
+      "query": "نماز میں انگلی حرکت دینے کا حکم",
+      "terms": [
+        "namaz",
+        "ungli",
+        "harkat"
+      ],
+      "count": 13,
+      "sample": [
+        [
+          "bukhari",
+          248,
+          0
+        ],
+        [
+          "muslim",
+          718,
+          0
+        ],
+        [
+          "muslim",
+          1452,
+          0
+        ],
+        [
+          "muslim",
+          2951,
+          0
+        ],
+        [
+          "abudawud",
+          989,
+          0
+        ]
+      ]
+    },
+    {
+      "query": "patience",
+      "terms": [
+        "sabr"
+      ],
+      "count": 367,
+      "sample": [
+        [
+          "quran",
+          2,
+          45
+        ],
+        [
+          "quran",
+          2,
+          61
+        ],
+        [
+          "quran",
+          2,
+          153
+        ],
+        [
+          "quran",
+          2,
+          155
+        ],
+        [
+          "quran",
+          2,
+          156
+        ]
+      ]
+    },
+    {
+      "query": "forgiveness",
+      "terms": [
+        "maafi"
+      ],
+      "count": 1167,
+      "sample": [
+        [
+          "quran",
+          2,
+          37
+        ],
+        [
+          "quran",
+          2,
+          52
+        ],
+        [
+          "quran",
+          2,
+          54
+        ],
+        [
+          "quran",
+          2,
+          58
+        ],
+        [
+          "quran",
+          2,
+          128
+        ]
+      ]
+    },
+    {
+      "query": "wuzu",
+      "terms": [
+        "wudu"
+      ],
+      "count": 1155,
+      "sample": [
+        [
+          "bukhari",
+          60,
+          0
+        ],
+        [
+          "bukhari",
+          96,
+          0
+        ],
+        [
+          "bukhari",
+          117,
+          0
+        ],
+        [
+          "bukhari",
+          132,
+          0
+        ],
+        [
+          "bukhari",
+          135,
+          0
+        ]
+      ]
+    },
+    {
+      "query": "zzzzunfindable",
+      "terms": [
+        "zzzzunfindable"
+      ],
+      "count": 0,
+      "sample": []
+    },
+    {
+      "query": "kya hai",
+      "terms": [],
+      "count": 0,
+      "sample": []
+    }
+  ]
+}

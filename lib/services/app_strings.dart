@@ -13,7 +13,7 @@ class S {
   static String get prayerTime => _t('Prayer Time', 'نماز کا وقت');
   static String get quran => _t('Quran', 'قرآن');
   static String get hadith => _t('Hadith', 'حدیث');
-  static String get prayers => _t('Prayers', 'عبادات');
+  static String get prayers => _t('Learn Islam', 'اسلام سیکھیں');
   static String get masjidAdmin => _t('Masjid Admin', 'مسجد ایڈمن');
   static String get settings => _t('Settings', 'ترتیبات');
 

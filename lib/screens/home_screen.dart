@@ -27,6 +27,7 @@ import 'hadith_home_screen.dart';
 import 'prayers_home_screen.dart';
 import 'qibla_screen.dart';
 import 'admin_login_screen.dart';
+import 'ask_islam_connect_screen.dart';
 
 /// Arabic prayer names for the gold middle column. Deliberately separate from
 /// S.*: those return English or Urdu depending on the language toggle, and this
@@ -562,7 +563,7 @@ class _HomeScreenState extends State<HomeScreen>
                 icon: const Icon(Icons.auto_stories_outlined, size: 20),
                 label: S.hadith),
             BottomNavigationBarItem(
-                icon: const Icon(Icons.explore_outlined, size: 20),
+                icon: const Icon(Icons.school_outlined, size: 20),
                 label: S.prayers),
             // Admins only. Four tabs for everyone else.
             //
@@ -582,13 +583,41 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Widget _askIslamConnectButton() => Material(
+    color: AppColors.emerald,
+    borderRadius: BorderRadius.circular(20),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => const AskIslamConnectScreen())),
+      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: Row(children: [
+          Container(padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+            child: const Icon(Icons.mic_none_rounded, size: 28, color: Colors.white)),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Ask Islam Connect', style: AppText.rowTitle.copyWith(
+              color: Colors.white, fontSize: 21)),
+            const SizedBox(height: 4),
+            const Text('Apna sawal boliye · Quran aur hadees mein talaash',
+              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4)),
+          ])),
+          const SizedBox(width: 6),
+          const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 22),
+        ])),
+    ),
+  );
+
   Widget _buildNoMasjidSelected() {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _askIslamConnectButton(),
+            const SizedBox(height: 24),
             const Medallion(icon: Icons.mosque_outlined, size: 52),
             const SizedBox(height: 16),
             Text(
@@ -633,7 +662,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -897,7 +926,12 @@ class _HomeScreenState extends State<HomeScreen>
           // pills sat almost flush against the AZAN/JAMAT header of the list
           // below - the "cramped, overlapping" look, even though the header
           // row itself was correctly aligned to its columns underneath it.
-          const SizedBox(height: 22),
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _askIslamConnectButton(),
+          ),
+          const SizedBox(height: 18),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _prayerTimesList(masjid, next?.$1),

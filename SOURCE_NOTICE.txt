@@ -1,0 +1,23 @@
+Prophet stories: editorial Roman Urdu and English paraphrases, not Quran text,
+not scholarly-certified translations, and not independently verified biographies.
+The source reference for each page is provided in stories.json and the review CSV.
+
+The Quran source assets already bundled by the project are from risan/quran-json
+(CC BY-SA 4.0; English Sahih International / Urdu Abul Ala Maududi per existing
+repository attribution). Existing Quran files are not modified or duplicated here.
+https://github.com/risan/quran-json
+https://creativecommons.org/licenses/by-sa/4.0/
+This new narrative text is made available under CC BY-SA 4.0 to retain attribution
+for adaptations based on that material. Attribute: Islam Connect prophet-story
+adaptation based on the cited Quran passages and Sahih Bukhari/Muslim reports.
+This does not change licenses on the app's existing code or Hadith data.
+
+Hadith references resolve against the existing fawazahmed0/hadith-api bundled
+collections. Numbering can differ across editions; Muslim 2750 in the app maps
+here to the commonly cited 1162e. No new remote religious-content API is used.
+https://github.com/fawazahmed0/hadith-api
+https://sunnah.com/bukhari:3364
+https://sunnah.com/muslim:1162e
+
+Artwork is AI-generated interpretive landscape/object illustration, not a claim
+of historically documented appearance. Prompt records are included for review.

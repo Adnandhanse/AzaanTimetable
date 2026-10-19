@@ -8,6 +8,7 @@ import 'pillar_detail_screen.dart';
 import 'dua_home_screen.dart';
 import 'namaz_home_screen.dart';
 import 'zakat_home_screen.dart';
+import 'prophet_stories_screen.dart';
 
 class PrayersHomeScreen extends StatelessWidget {
   const PrayersHomeScreen({super.key});
@@ -103,6 +104,16 @@ class PrayersHomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: [
+          Card(margin: const EdgeInsets.only(bottom: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: AppColors.goldRule)),
+            child: ListTile(contentPadding: const EdgeInsets.all(16),
+              leading: Icon(Icons.auto_stories_outlined, color: AppColors.emerald, size: 32),
+              title: Text(S.isUrdu ? 'انبیاء کے واقعات' : 'Prophet Stories', style: AppText.rowTitle),
+              subtitle: Text(S.isUrdu ? 'قصص الانبیاء · 25 کتابیں' : 'Nabiyon ki kahaniyan · 25 books'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => const ProphetStoriesScreen())))),
           SectionRule(label: S.fivePillars, trailingDiamond: true),
           const SizedBox(height: 14),
           GridView.builder(

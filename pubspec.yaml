@@ -113,6 +113,8 @@ flutter:
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp
     - assets/icon/app_icon.png
+    - assets/prophet_stories/
+    - assets/prophet_stories/scenes/
     - assets/quran/quran_en.json
     - assets/quran/quran_ur.json
     - assets/quran/quran_hi_lookup.json

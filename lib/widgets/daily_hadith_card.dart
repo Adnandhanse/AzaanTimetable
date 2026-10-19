@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_hadith.dart';
+import '../data/daily_quran_ayah.dart';
+import '../screens/surah_detail_screen.dart';
+import '../services/quran_repository.dart';
 import '../services/app_strings.dart';
 import '../services/hadith_link.dart';
 import '../theme/app_theme.dart';
 
-/// The hadith of the day, shown once per day on opening the app.
+/// One daily reminder: Quran and Hadith alternate on local calendar days.
 ///
 /// ONCE. Not once per launch — someone who checks prayer times four times a day
 /// would see it four times and start dismissing it without reading, which is
@@ -14,7 +17,7 @@ import '../theme/app_theme.dart';
 class DailyHadithCard {
   DailyHadithCard._();
 
-  static const _key = 'daily_hadith_shown';
+  static const _key = 'daily_reminder_quran_hadith_v1_shown';
 
   /// Shows the card if it has not been shown today.
   ///
@@ -33,13 +36,15 @@ class DailyHadithCard {
     }
 
     if (!context.mounted) return;
-    DailyHadith h;
-    try {
-      h = await DailyHadith.loadForDate(now);
-    } catch (_) {
-      // A missing/corrupt asset must not prevent the prayer home screen opening.
-      h = DailyHadith.forDate(now);
-    }
+    final dayIndex = DateTime.utc(now.year, now.month, now.day)
+        .difference(DateTime.utc(2020, 1, 1)).inDays;
+    final contentIndex = dayIndex ~/ 2;
+    // Independent counters: neither collection skips every other entry.
+    final _DailyReminder h = dayIndex.isEven
+        ? _DailyReminder.quran(DailyQuranAyah.all[
+            contentIndex % DailyQuranAyah.all.length])
+        : _DailyReminder.hadith(DailyHadith.all[
+            contentIndex % DailyHadith.all.length]);
     if (!context.mounted) return;
 
     // THE DIALOG RETURNS A REQUEST; THIS CALLER ACTS ON IT.
@@ -51,7 +56,7 @@ class DailyHadithCard {
     //
     // Now the dialog pops with the reference it wants opened, and the screen
     // that opened the dialog — whose context is alive — does the navigating.
-    final HadithRef? wanted = await showDialog<HadithRef>(
+    final _Script? wanted = await showDialog<_Script>(
       context: context,
       // Dismissible by tapping outside as well as by the X. Something that
       // appears on its own should be easy to get rid of.
@@ -60,7 +65,24 @@ class DailyHadithCard {
     );
 
     if (wanted != null && context.mounted) {
-      await HadithLink.open(context, wanted);
+      if (!h.isQuran) {
+        await HadithLink.open(context, h.hadith!.ref);
+      } else {
+        try {
+          final language = wanted == _Script.english
+              ? QuranLanguage.english : QuranLanguage.urdu;
+          final surahs = await QuranRepository.loadSurahs(language);
+          final surah = surahs.firstWhere((s) => s.number == h.ayah!.surah);
+          if (!context.mounted) return;
+          await Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => SurahDetailScreen(
+              surah: surah, initialVerse: h.ayah!.ayah),
+          ));
+        } catch (_) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open this Quran verse. Please try again.')));
+        }
+      }
     }
   }
 }
@@ -68,7 +90,7 @@ class DailyHadithCard {
 class _DailyHadithDialog extends StatefulWidget {
   const _DailyHadithDialog({required this.hadith});
 
-  final DailyHadith hadith;
+  final _DailyReminder hadith;
 
   @override
   State<_DailyHadithDialog> createState() => _DailyHadithDialogState();
@@ -98,7 +120,7 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final DailyHadith hadith = widget.hadith;
+    final _DailyReminder hadith = widget.hadith;
     final bool urdu = _script == _Script.urdu;
     final String body = switch (_script) {
       _Script.urdu => hadith.textUr,
@@ -146,7 +168,9 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        urdu ? 'آج کی حدیث' : 'Hadith of the day',
+                        hadith.isQuran
+                            ? (urdu ? 'آج کی قرآنی آیت' : 'Quran ayat of the day')
+                            : (urdu ? 'آج کی حدیث' : 'Hadith of the day'),
                         style: AppText.eyebrow.copyWith(
                             letterSpacing: 1.5, color: AppColors.gold),
                       ),
@@ -183,10 +207,8 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                         textDirection: TextDirection.rtl,
                         child: Text(
                           hadith.previewArabic,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
-                          style: AppText.arabicVerse.copyWith(
+                          style: (hadith.isQuran ? AppText.quranAyah : AppText.arabicVerse).copyWith(
                               fontSize: 20, height: 1.95, color: AppColors.text),
                         ),
                       ),
@@ -202,8 +224,6 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                             urdu ? TextDirection.rtl : TextDirection.ltr,
                         child: Text(
                           body,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                           textAlign: urdu ? TextAlign.right : TextAlign.left,
                           style: urdu
                               ? AppText.urduText
@@ -213,17 +233,22 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(_script == _Script.roman && hadith.romanIsAutomatic
-                          ? 'Automatic Roman Urdu · Original Urdu available'
-                          : (urdu ? 'مختصر اقتباس — مکمل سیاق کے لیے پوری حدیث پڑھیں' : 'Short preview · Read in full for context'),
-                          style: AppText.caption.copyWith(color: AppColors.textMuted)),
+                      Text(
+                        hadith.isQuran
+                            ? (_script == _Script.roman
+                                ? 'Roman Urdu meaning · Complete Quran verse'
+                                : (urdu ? 'مکمل آیت · سورت میں سیاق پڑھیں' : 'Complete verse · Open Surah for context'))
+                            : (_script == _Script.roman
+                                ? 'Roman Urdu meaning · Read in full for context'
+                                : (urdu ? 'مختصر اقتباس — مکمل سیاق کے لیے پوری حدیث پڑھیں' : 'Short hadith · Read in full for context')),
+                        style: AppText.caption.copyWith(color: AppColors.textMuted)),
                       const SizedBox(height: 12),
                       // Urdu / Roman / English.
                       //
                       // Roman Urdu is there because a great many readers speak
                       // Urdu but read Latin script more easily than Nastaliq.
-                      // It is a transliteration of the Urdu, not a separate
-                      // translation.
+                      // The selected short text has a simple Roman Urdu meaning.
+                      // Original source text stays available in the full reader.
                       Row(
                         children: <Widget>[
                           for (final (_Script sc, String label) in <(_Script, String)>[
@@ -267,7 +292,7 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: Text(hadith.ref.label,
+                            child: Text(hadith.referenceLabel,
                                 style: AppText.caption
                                     .copyWith(color: AppColors.textMuted)),
                           ),
@@ -275,7 +300,7 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                             // Returns the reference rather than navigating
                             // from inside a route that is about to close.
                             onPressed: () =>
-                                Navigator.of(context).pop(hadith.ref),
+                                Navigator.of(context).pop(_script),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.emerald,
                               padding:
@@ -284,7 +309,9 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                               tapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
                             ),
-                            child: Text(urdu ? 'مکمل پڑھیں' : 'Read in full',
+                            child: Text(hadith.isQuran
+                                ? (urdu ? 'سورت کھولیں' : 'Open Surah')
+                                : (urdu ? 'مکمل پڑھیں' : 'Read in full'),
                                 style: AppText.caption
                                     .copyWith(color: AppColors.emerald)),
                           ),
@@ -301,4 +328,22 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
       ),
     );
   }
+}
+
+/// Typed wrapper keeps Quran citations out of the Hadith reference model.
+class _DailyReminder {
+  const _DailyReminder.hadith(DailyHadith entry) : hadith = entry, ayah = null;
+  const _DailyReminder.quran(DailyQuranAyah entry) : ayah = entry, hadith = null;
+  final DailyHadith? hadith;
+  final DailyQuranAyah? ayah;
+  bool get isQuran => ayah != null;
+  String get textUr => ayah?.urdu ?? hadith!.textUr;
+  String get textHi => ayah?.roman ?? hadith!.textHi;
+  String get previewEnglish => ayah?.english ?? hadith!.previewEnglish;
+  String get previewArabic => ayah?.arabic ?? hadith!.previewArabic;
+  String get theme => isQuran ? 'A moment with the Quran' : hadith!.theme;
+  String get themeUr => isQuran ? 'قرآن سے ایک یاد دہانی' : hadith!.themeUr;
+  String get referenceLabel => isQuran
+      ? 'Quran · ${S.isUrdu ? ayah!.surahNameUr : ayah!.surahName} ${ayah!.surah}:${ayah!.ayah}'
+      : hadith!.ref.label;
 }

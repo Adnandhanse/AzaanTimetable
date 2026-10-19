@@ -5,12 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.EventChannel;
 
 /** Registered in every Flutter engine, including the foreground service engine. */
-public final class AzanScreenEventsPlugin implements FlutterPlugin, EventChannel.StreamHandler {
+public final class AzanScreenEventsPlugin implements FlutterPlugin, EventChannel.StreamHandler, ActivityAware {
+    private final AskVoiceSearch voice = new AskVoiceSearch();
+    private MethodChannel voiceChannel;
     private Context context;
     private EventChannel channel;
     private MethodChannel control;
@@ -31,6 +35,11 @@ public final class AzanScreenEventsPlugin implements FlutterPlugin, EventChannel
 
     @Override public void onAttachedToEngine(FlutterPluginBinding binding) {
         context = binding.getApplicationContext();
+        voiceChannel = new MethodChannel(binding.getBinaryMessenger(), "islam_connect/voice_search");
+        voiceChannel.setMethodCallHandler((call, result) -> {
+            if ("listen".equals(call.method)) voice.listen(call.argument("locale"), result);
+            else result.notImplemented();
+        });
         channel = new EventChannel(binding.getBinaryMessenger(), "islam_connect/screen_events");
         channel.setStreamHandler(this);
         control = new MethodChannel(binding.getBinaryMessenger(), "islam_connect/azan_control");
@@ -79,9 +88,15 @@ public final class AzanScreenEventsPlugin implements FlutterPlugin, EventChannel
     }
 
     @Override public void onDetachedFromEngine(FlutterPluginBinding binding) {
+        voice.cancel();
+        voiceChannel.setMethodCallHandler(null);
         onCancel(null);
         channel.setStreamHandler(null);
         control.setMethodCallHandler(null);
         context = null;
     }
+    @Override public void onAttachedToActivity(ActivityPluginBinding binding) { voice.attach(binding); }
+    @Override public void onDetachedFromActivityForConfigChanges() { voice.detach(true); }
+    @Override public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) { voice.attach(binding); }
+    @Override public void onDetachedFromActivity() { voice.detach(false); }
 }

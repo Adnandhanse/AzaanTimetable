@@ -1,0 +1,3019 @@
+{
+  "version": 1,
+  "books": [
+    {
+      "id": "adam",
+      "name": "Adam",
+      "birthNote": "Adam alayhis salam ki kahani paidaish ke bajaye Allah ki taraf se unki takhleeq se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "adam_mitti_se_takhleeq",
+          "title": "Mitti se takhleeq",
+          "scene": "clay",
+          "roman": "Allah ne Adam ko mitti se paida kiya. Quran unki takhleeq ko Allah ki qudrat ki nishani batata hai. Is ki tareekh ya jagah ki apni taraf se tafseel nahi jori gayi.",
+          "english": "Allah created Adam from dust. The Quran presents his creation as a sign of Allah’s power; it does not give a birth date.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 59,
+              "end": 59
+            },
+            {
+              "kind": "quran",
+              "surah": 15,
+              "start": 26,
+              "end": 26
+            }
+          ]
+        },
+        {
+          "id": "adam_zameen_par_zimmedari",
+          "title": "Zameen par zimmedari",
+          "scene": "garden",
+          "roman": "Allah ne farishton ko zameen mein ek khalifah banane ki khabar di. Farishton ne sawal kiya; Allah ne farmaya ke woh jaanta hai jo woh nahi jaante.",
+          "english": "Allah told the angels that He would place a successor on earth. He knew what they did not know.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 30,
+              "end": 30
+            }
+          ]
+        },
+        {
+          "id": "adam_ilm_ki_nemat",
+          "title": "Ilm ki nemat",
+          "scene": "scrolls",
+          "roman": "Allah ne Adam ko naam sikhaye. Farishton ne apne ilm ki had tasleem ki. Adam ke waqia mein ilm Allah ki ata ke taur par samne aata hai.",
+          "english": "Allah taught Adam the names. The angels acknowledged that they knew only what Allah had taught them.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 31,
+              "end": 33
+            }
+          ]
+        },
+        {
+          "id": "adam_iblis_ka_takabbur",
+          "title": "Iblis ka takabbur",
+          "scene": "night",
+          "roman": "Farishton ko Adam ke samne sajde ka hukm diya gaya. Iblis ne inkar kiya aur takabbur dikhaya. Us ne apni paidaish ka muqabla karke khud ko behtar samjha.",
+          "english": "The angels were commanded to prostrate before Adam. Iblis refused out of arrogance and claimed superiority.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 34,
+              "end": 34
+            },
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 11,
+              "end": 13
+            }
+          ]
+        },
+        {
+          "id": "adam_jannat_aur_mana_kiya_gaya_darakht",
+          "title": "Jannat aur mana kiya gaya darakht",
+          "scene": "garden",
+          "roman": "Adam aur unki biwi ko Jannat mein rehne ki ijazat mili. Unhein ek darakht ke qareeb jane se mana kiya gaya. Quran darakht ki qisam nahi batata.",
+          "english": "Adam and his wife were permitted to live in the Garden, but were forbidden to approach one tree. Its species is not named.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 35,
+              "end": 35
+            },
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 19,
+              "end": 19
+            }
+          ]
+        },
+        {
+          "id": "adam_waswasa_aur_apni_ghalati_ka_iqrar",
+          "title": "Waswasa aur apni ghalati ka iqrar",
+          "scene": "valley",
+          "roman": "Shaitan ne unhein behkaya. Jab unhon ne mana kiye gaye darakht se khaya, to apni ghalati samajh li. Unhon ne Allah se maghfirat aur rahmat mangi.",
+          "english": "Satan tempted them. After eating from the forbidden tree, they acknowledged their wrongdoing and asked Allah for forgiveness and mercy.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 20,
+              "end": 23
+            }
+          ]
+        },
+        {
+          "id": "adam_taubah_aur_zameen_par_hidayat",
+          "title": "Taubah aur zameen par hidayat",
+          "scene": "sunrise",
+          "roman": "Allah ne Adam ko taubah ke alfaaz sikhaye aur unki taubah qubool ki. Zameen par rehne ke saath Allah ki hidayat ki pairwi ka rasta bataya gaya.",
+          "english": "Allah accepted Adam’s repentance. Life on earth would be accompanied by guidance from Him, which people were to follow.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 37,
+              "end": 39
+            }
+          ]
+        },
+        {
+          "id": "adam_do_beton_ki_qurbani",
+          "title": "Do beton ki qurbani",
+          "scene": "garden",
+          "roman": "Quran Adam ke do beton ka waqia bayan karta hai. Donon ne qurbani pesh ki; ek ki qubool hui aur doosre ki nahi. Jawab mein Allah ke haan taqwa ki ahmiyat batayi gayi. In ayaat mein beton ke naam nahi diye gaye.",
+          "english": "The Quran relates that Adam’s two sons offered sacrifices. One was accepted and the other was not. Acceptance is linked to mindfulness of Allah; the sons are not named in these verses.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 27,
+              "end": 27
+            }
+          ]
+        },
+        {
+          "id": "adam_na_haq_qatl_ka_zulm",
+          "title": "Na-haq qatl ka zulm",
+          "scene": "mountain",
+          "roman": "Ek bhai ne doosre ko qatl ki dhamki di. Doosre ne Allah ka khauf zahir kiya. Phir uske bhai ne use qatl kar diya aur nuqsan uthane walon mein ho gaya.",
+          "english": "One brother threatened to kill the other, who expressed fear of Allah. His brother then killed him and became one of the losers.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 28,
+              "end": 30
+            }
+          ]
+        },
+        {
+          "id": "adam_zameen_aur_dafan_ki_seekh",
+          "title": "Zameen aur dafan ki seekh",
+          "scene": "clay",
+          "roman": "Allah ne ek kawwa bheja jo zameen khod raha tha, taake qatil ko apne bhai ki mayyat chhupane ka tareeqa samajh aaye. Use apni bebasi par afsos hua.",
+          "english": "Allah sent a crow scratching the ground to show the killer how to cover his brother’s body. He recognized his helplessness and became regretful.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 31,
+              "end": 31
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "Adam’s account begins with his creation by Allah, rather than a human birth."
+    },
+    {
+      "id": "idris",
+      "name": "Idris",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "idris_sachche_nabi",
+          "title": "Sachche Nabi",
+          "scene": "scrolls",
+          "roman": "Quran Idris alayhis salam ko sachcha aur Nabi kehta hai. Unki paidaish, peshe ya safaron ki tafseel in ayaat mein nahi di gayi.",
+          "english": "The Quran describes Idris as a man of truth and a prophet. These verses do not narrate his birth, occupation or journeys.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 56,
+              "end": 56
+            }
+          ]
+        },
+        {
+          "id": "idris_buland_maqam_aur_sabr",
+          "title": "Buland maqam aur sabr",
+          "scene": "sunrise",
+          "roman": "Allah ne Idris ko buland maqam ata kiya. Quran unhein sabr karne walon mein shamil karta hai aur Allah ki rahmat mein dakhil hone ka zikr karta hai.",
+          "english": "Allah raised Idris to a high station. He is also named among the patient and those admitted into Allah’s mercy.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 57,
+              "end": 57
+            },
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 85,
+              "end": 86
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "nuh",
+      "name": "Nuh",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "nuh_apni_qaum_ki_taraf_paigham",
+          "title": "Apni qaum ki taraf paigham",
+          "scene": "valley",
+          "roman": "Nuh alayhis salam ne apni qaum ko Allah ki ibadat aur uske taqwa ki dawat di. Unhon ne apne paigham par dunyawi maal ka badla nahi manga.",
+          "english": "Nuh called his people to worship Allah and be mindful of Him. He did not ask them for wealth in return.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 59,
+              "end": 59
+            },
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 29,
+              "end": 29
+            }
+          ]
+        },
+        {
+          "id": "nuh_din_aur_raat_dawat",
+          "title": "Din aur raat dawat",
+          "scene": "night",
+          "roman": "Nuh ne din aur raat, khule taur par aur alag se, apni qaum ko samjhaya. Unhon ne Allah se maghfirat mangne ki dawat di, lekin log inkar par jamay rahe.",
+          "english": "Nuh called his people by night and day, publicly and privately. He urged them to seek forgiveness, but many persisted in refusal.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 71,
+              "start": 5,
+              "end": 12
+            }
+          ]
+        },
+        {
+          "id": "nuh_lambi_muddat",
+          "title": "Lambi muddat",
+          "scene": "sunrise",
+          "roman": "Quran kehta hai ke Nuh apni qaum mein pachaas kam ek hazaar saal rahe. Yeh unki dawat ki lambi muddat ka zikr hai; ise unki poori umar ka yaqini hisab nahi banaya gaya.",
+          "english": "The Quran says Nuh remained among his people for a thousand years less fifty. This is not presented here as a complete calculation of his lifespan.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 29,
+              "start": 14,
+              "end": 14
+            }
+          ]
+        },
+        {
+          "id": "nuh_kashti_banane_ka_hukm",
+          "title": "Kashti banane ka hukm",
+          "scene": "ark_dry",
+          "roman": "Allah ne Nuh ko apni nigrani aur wahi ke mutabiq kashti banane ka hukm diya. Qaum ke sardaar guzarte hue unka mazaq urate rahe.",
+          "english": "Allah instructed Nuh to build the ark under His care and revelation. Passing leaders mocked him as he worked.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 36,
+              "end": 39
+            }
+          ]
+        },
+        {
+          "id": "nuh_toofan_aur_sawari",
+          "title": "Toofan aur sawari",
+          "scene": "ark",
+          "roman": "Jab Allah ka hukm aaya, Nuh ko iman walon aur hukm ke mutabiq joron ko kashti mein lene ko kaha gaya. Iman lane wale kam the.",
+          "english": "When Allah’s command came, Nuh took the believers and the commanded pairs aboard. Only a few had believed.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 40,
+              "end": 41
+            }
+          ]
+        },
+        {
+          "id": "nuh_beta_aur_pahad",
+          "title": "Beta aur pahad",
+          "scene": "storm",
+          "roman": "Nuh ne apne bete ko kashti mein aane ke liye pukara. Us ne pahad par bachne ka khayal kiya. Lehren darmiyan aa gayin aur woh doob gaya.",
+          "english": "Nuh called his son to board. His son thought a mountain would protect him, but a wave separated them and he drowned.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 42,
+              "end": 43
+            }
+          ]
+        },
+        {
+          "id": "nuh_pani_utar_gaya",
+          "title": "Pani utar gaya",
+          "scene": "mountain",
+          "roman": "Allah ke hukm se zameen ne pani nigal liya aur aasman tham gaya. Kashti Judi par thehar gayi. Nuh ko salamati aur barkaton ke saath utarne ko kaha gaya.",
+          "english": "At Allah’s command, the waters receded and the ark rested on Judi. Nuh was told to disembark in peace and blessing.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 44,
+              "end": 48
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "hud",
+      "name": "Hud",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "hud_aad_ki_taraf_dawat",
+          "title": "Aad ki taraf dawat",
+          "scene": "city",
+          "roman": "Hud alayhis salam Aad ki taraf bheje gaye. Unhon ne qaum ko sirf Allah ki ibadat ki dawat di aur apne liye koi ujrat nahi mangi.",
+          "english": "Hud was sent to Aad. He called them to worship Allah alone and asked no payment for his message.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 65,
+              "end": 65
+            },
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 50,
+              "end": 51
+            }
+          ]
+        },
+        {
+          "id": "hud_quwwat_par_ghuroor",
+          "title": "Quwwat par ghuroor",
+          "scene": "mountain",
+          "roman": "Aad ko quwwat aur imkanat mile the. Hud ne unhein Allah ki nematein yaad dilayin aur takabbur se roka. Qaum ne apni taqat par ghuroor kiya.",
+          "english": "Aad had strength and resources. Hud reminded them of Allah’s gifts, while they arrogantly boasted of their power.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 69,
+              "end": 69
+            },
+            {
+              "kind": "quran",
+              "surah": 41,
+              "start": 15,
+              "end": 15
+            }
+          ]
+        },
+        {
+          "id": "hud_badal_aur_tez_hawa",
+          "title": "Badal aur tez hawa",
+          "scene": "storm",
+          "roman": "Unhon ne badal dekha to use barish lane wala samjha. Woh azab wali hawa thi. Quran us tez hawa ka zikr karta hai jo un par musallat hui.",
+          "english": "They saw a cloud and expected rain, but it brought the wind of punishment. The Quran describes a fiercely destructive wind.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 46,
+              "start": 24,
+              "end": 25
+            },
+            {
+              "kind": "quran",
+              "surah": 69,
+              "start": 6,
+              "end": 8
+            }
+          ]
+        },
+        {
+          "id": "hud_iman_walon_ki_nijat",
+          "title": "Iman walon ki nijat",
+          "scene": "sunrise",
+          "roman": "Allah ne Hud aur unke saath iman lane walon ko apni rahmat se bacha liya. Qaum ki quwwat Allah ke faisle ko rok na saki.",
+          "english": "Allah saved Hud and the believers with him through His mercy. Their people’s worldly strength could not prevent His judgment.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 58,
+              "end": 60
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "salih",
+      "name": "Salih",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "salih_thamud_aur_pahari_ghar",
+          "title": "Thamud aur pahari ghar",
+          "scene": "city",
+          "roman": "Salih alayhis salam ne Thamud ko Allah ki ibadat ki dawat di. Unki qaum paharon mein ghar tarashti thi. Quran is hunar ke saath unki zimmedari bhi yaad dilata hai.",
+          "english": "Salih called Thamud to worship Allah. His people carved homes into mountains, but their skill did not remove their responsibility to Him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 73,
+              "end": 74
+            },
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 149,
+              "end": 149
+            }
+          ]
+        },
+        {
+          "id": "salih_allah_ki_nishani",
+          "title": "Allah ki nishani",
+          "scene": "valley",
+          "roman": "Qaum ke liye oontni ek nishani thi. Salih ne usko nuqsan na pahunchane ko kaha. Pani ke liye uska aur qaum ka muqarrar hissa tha.",
+          "english": "A she-camel was a sign for the people. Salih warned them not to harm her, and water was to be shared on appointed turns.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 73,
+              "end": 73
+            },
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 155,
+              "end": 156
+            }
+          ]
+        },
+        {
+          "id": "salih_hukm_ki_khilaf_warzi",
+          "title": "Hukm ki khilaf warzi",
+          "scene": "city",
+          "roman": "Qaum ne oontni ko maar diya aur apne Rabb ke hukm se sarkashi ki. Salih ne unhein teen din ki mohlat ki khabar di. Is waqia ki jaanwar wali tasveer nahi banayi gayi.",
+          "english": "The people killed the she-camel and defied their Lord’s command. Salih announced a respite of three days. No animal is illustrated.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 77,
+              "end": 77
+            },
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 65,
+              "end": 65
+            }
+          ]
+        },
+        {
+          "id": "salih_nijat_aur_anjaam",
+          "title": "Nijat aur anjaam",
+          "scene": "sunrise",
+          "roman": "Allah ne Salih aur iman walon ko bachaya. Zulm karne walon ko saikha ne aa liya aur unke ghar unhein na bacha sake.",
+          "english": "Allah saved Salih and the believers. Those who did wrong were overtaken by the blast; their homes could not protect them.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 66,
+              "end": 68
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "ibrahim",
+      "name": "Ibrahim",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "ibrahim_rushd_aur_haq_ki_taraf_rujoo",
+          "title": "Rushd aur haq ki taraf rujoo",
+          "scene": "night",
+          "roman": "Allah ne Ibrahim alayhis salam ko pehle hi rushd ata kiya. Quran unki paidaish ki tareekh ya bachpan ki ghair-sabit kahaniyan nahi deta; hum unki sabit dawat se shuru karte hain.",
+          "english": "Allah granted Ibrahim sound judgment. This account begins with his scripturally established call, without adding an unreported birth date or childhood legend.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 51,
+              "end": 51
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_walid_ko_narmi_se_samjhana",
+          "title": "Walid ko narmi se samjhana",
+          "scene": "city",
+          "roman": "Ibrahim ne apne walid se poocha ke woh aisi cheezon ki ibadat kyun karte hain jo sunti, dekhti ya madad nahi kartin. Unhon ne adab ke saath hidayat ki taraf bulaya.",
+          "english": "Ibrahim respectfully questioned his father about worshipping what could neither hear nor see, and invited him to guidance.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 41,
+              "end": 48
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_sitara_chand_aur_suraj",
+          "title": "Sitara, chand aur suraj",
+          "scene": "night",
+          "roman": "Ibrahim ne sitare, chand aur suraj ke dhal jane par apni qaum ke samne daleel rakhi. Unhon ne aasman aur zameen ke paida karne wale ki taraf apna rukh kiya.",
+          "english": "Ibrahim’s argument drew attention to the setting star, moon and sun. He turned toward the Creator of the heavens and earth.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 6,
+              "start": 75,
+              "end": 79
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_buton_ke_bare_mein_sawal",
+          "title": "Buton ke bare mein sawal",
+          "scene": "city",
+          "roman": "Ibrahim ne qaum ke buton par sawal uthaye. Unhon ne unhein tor diya, siwaye bade but ke, taake log apne aqeede par ghaur karein.",
+          "english": "Ibrahim challenged his people’s idols and broke them except the largest, prompting them to confront their beliefs.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 52,
+              "end": 67
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_aag_se_hifazat",
+          "title": "Aag se hifazat",
+          "scene": "fire",
+          "roman": "Qaum ne Ibrahim ko jalane ka irada kiya. Allah ne aag ko unke liye thandi aur salamati wali hone ka hukm diya. Dushmanon ki tadbeer nakaam hui.",
+          "english": "His people intended to burn Ibrahim. Allah commanded the fire to be cool and safe for him, and their plot failed.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 68,
+              "end": 70
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_rabb_ke_bare_mein_daleel",
+          "title": "Rabb ke bare mein daleel",
+          "scene": "palace",
+          "roman": "Ibrahim ne ek hukmaran ke samne kaha ke unka Rabb zinda karta aur maut deta hai. Phir suraj ke mashriq se nikalne ki daleel di; inkar karne wala lajawab hua.",
+          "english": "Ibrahim argued with a ruler about the Lord who gives life and death, then challenged him concerning the rising sun. The disbeliever was confounded.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 258,
+              "end": 258
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_dil_ka_itminan",
+          "title": "Dil ka itminan",
+          "scene": "mountain",
+          "roman": "Ibrahim ne Allah se poocha ke woh murdon ko kaise zinda karta hai. Unhon ne iman ka iqrar kiya aur dil ke mazeed itminan ki darkhwast ki. Allah ne unhein is ki nishani dikhayi.",
+          "english": "Ibrahim asked to see how Allah gives life to the dead. He affirmed his belief and sought reassurance of the heart; Allah showed him a sign.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 260,
+              "end": 260
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_hijrat_aur_nek_aulaad_ki_dua",
+          "title": "Hijrat aur nek aulaad ki dua",
+          "scene": "sunrise",
+          "roman": "Ibrahim ne kaha ke woh apne Rabb ki taraf ja rahe hain. Unhon ne nek aulaad ki dua ki. Allah ne unhein ek burdbar bete ki khushkhabri di.",
+          "english": "Ibrahim declared that he was going to his Lord and prayed for a righteous child. He received glad tidings of a forbearing son.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 99,
+              "end": 101
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_hajar_aur_ismail_ki_waadi",
+          "title": "Hajar aur Ismail ki waadi",
+          "scene": "valley",
+          "roman": "Ibrahim Hajar aur doodh peete Ismail ko Makkah ki be-aab waadi mein laye. Unke paas khajoor aur pani ka mashk chhora. Hajar ne Allah ke hukm ka pata chalne par us par bharosa kiya.",
+          "english": "Ibrahim brought Hajar and the infant Ismail to the waterless valley of Makkah, leaving dates and a water-skin. Hajar trusted Allah’s command.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            },
+            {
+              "kind": "quran",
+              "surah": 14,
+              "start": 37,
+              "end": 37
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_safa_se_talaash",
+          "title": "Safa se talaash",
+          "scene": "safa",
+          "roman": "Jab pani khatam hua, Hajar madad ki talaash mein Safa par charhin. Unhon ne waadi mein dekha ke koi nazar aaye. Wahan unhein koi dikhayi na diya.",
+          "english": "When the water ran out, Hajar climbed Safa and looked across the valley for help, but saw no one.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_safa_aur_marwa_ke_darmiyan",
+          "title": "Safa aur Marwa ke darmiyan",
+          "scene": "marwa",
+          "roman": "Hajar waadi se guzarkar Marwa par gayin aur wahan se bhi dekha. Riwayat mein unke is tarah saat martaba jane ka zikr hai. Yeh koshish aur tawakkul ka waqia hai.",
+          "english": "Hajar crossed the valley to Marwa and looked again. The report describes seven traversals between the two hills.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_zamzam_ka_pani",
+          "title": "Zamzam ka pani",
+          "scene": "spring",
+          "roman": "Hajar ne Zamzam ki jagah farishte ko zameen khodte dekha; riwayat mein erhi ya par ka zikr hai. Pani nikal aaya. Unhon ne usko jama kiya aur mashk bhara.",
+          "english": "The report describes an angel digging at Zamzam with a heel or wing, after which water emerged. Hajar gathered it and filled her water-skin.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_waadi_mein_abadkari",
+          "title": "Waadi mein abadkari",
+          "scene": "valley",
+          "roman": "Pani milne ke baad Jurhum ke log wahan rehne lage. Ismail unke darmiyan barhe aur unki zaban seekhi. Pani wali waadi mein zindagi abad hone lagi.",
+          "english": "After water became available, people of Jurhum settled there. Ismail grew up among them and learned their language.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_khwaab_aur_ita_at_ki_azmaish",
+          "title": "Khwaab aur ita-at ki azmaish",
+          "scene": "mountain",
+          "roman": "Ibrahim ne bete ko khwaab mein qurbani ka hukm dekhne ki baat batayi. Donon ne Allah ki ita-at ikhtiyar ki. Allah ne is azmaish ke anjaam par badi qurbani ka fidya diya. In ayaat mein bete ka naam nahi diya gaya.",
+          "english": "Ibrahim told his son of the sacrificial dream. Both submitted to Allah, and Allah provided a great sacrifice in ransom. These verses do not name the son.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 102,
+              "end": 107
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_ishaq_ki_khushkhabri",
+          "title": "Ishaq ki khushkhabri",
+          "scene": "palace",
+          "roman": "Farishton ne Ibrahim ke ghar Ishaq aur uske baad Yaqub ki khushkhabri di. Unki biwi ne barhapa dekhkar hairat ki, lekin Allah ki qudrat par yeh mushkil na tha.",
+          "english": "Angelic messengers announced Ishaq and, after him, Yaqub. Ibrahim’s wife was astonished in old age, but this was Allah’s decree.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 69,
+              "end": 73
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_kaaba_ki_bunyadein",
+          "title": "Kaaba ki bunyadein",
+          "scene": "kaaba",
+          "roman": "Ibrahim aur Ismail ne Allah ke ghar ki bunyadein uthayin. Woh dua kar rahe the ke Allah unka amal qubool kare aur unhein apna farmanbardar banaye.",
+          "english": "Ibrahim and Ismail raised the foundations of the House, praying for acceptance and for themselves and their descendants to submit to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 125,
+              "end": 129
+            }
+          ]
+        },
+        {
+          "id": "ibrahim_aman_aur_ibadat_ki_dua",
+          "title": "Aman aur ibadat ki dua",
+          "scene": "sunrise",
+          "roman": "Ibrahim ne shehar ke aman, but-parasti se hifazat, namaz qayam rakhne aur maghfirat ki dua ki. Unki kahani tawheed, ita-at aur dua ke paigham ke saath samne aati hai.",
+          "english": "Ibrahim prayed for the city’s safety, protection from idol worship, steadfast prayer and forgiveness. His story centres on worship and submission to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 14,
+              "start": 35,
+              "end": 41
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "lut",
+      "name": "Lut",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "lut_qaum_ko_naseehat",
+          "title": "Qaum ko naseehat",
+          "scene": "city",
+          "roman": "Lut alayhis salam ne apni qaum ko behayai aur zulm se roka. Unhon ne unki aisi bad-amali ki nishandahi ki jo Quran ne wazeh taur par bayan ki hai.",
+          "english": "Lut warned his people against grave indecency and wrongdoing. The Quran describes his condemnation of their conduct.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 80,
+              "end": 81
+            },
+            {
+              "kind": "quran",
+              "surah": 29,
+              "start": 28,
+              "end": 29
+            }
+          ]
+        },
+        {
+          "id": "lut_mehmanon_ki_amad",
+          "title": "Mehmanon ki amad",
+          "scene": "palace",
+          "roman": "Farishtay Lut ke paas mehmanon ki surat mein aaye. Lut ko apni qaum ke rawaiye ka khauf hua. Farishton ne bataya ke woh Allah ke bheje hue hain.",
+          "english": "Angelic messengers came to Lut as guests. Distressed by his people’s behaviour, he was reassured that the visitors were messengers from Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 77,
+              "end": 81
+            }
+          ]
+        },
+        {
+          "id": "lut_raat_ko_nikalne_ka_hukm",
+          "title": "Raat ko nikalne ka hukm",
+          "scene": "night",
+          "roman": "Lut ko apne ghar walon ko raat ke ek hisse mein le jane ka hukm mila. Unki biwi bachne walon mein shamil nahi thi.",
+          "english": "Lut was instructed to leave with his household during the night. His wife was not among those who would be saved.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 81,
+              "end": 81
+            },
+            {
+              "kind": "quran",
+              "surah": 15,
+              "start": 65,
+              "end": 65
+            }
+          ]
+        },
+        {
+          "id": "lut_nijat_aur_basti_ka_anjaam",
+          "title": "Nijat aur basti ka anjaam",
+          "scene": "valley",
+          "roman": "Allah ne Lut aur unke iman wale ghar walon ko bachaya. Basti par azab aaya. Quran is waqia ko baad mein guzarne walon ke liye nishani batata hai.",
+          "english": "Allah saved Lut and his believing household. Punishment overtook the town, leaving a sign for those who would pass by.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 82,
+              "end": 83
+            },
+            {
+              "kind": "quran",
+              "surah": 29,
+              "start": 32,
+              "end": 35
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "ismail",
+      "name": "Ismail",
+      "birthNote": "Ibrahim ki dua aur bete ki nemat ka zikr Quran mein hai. Ismail ki shuruati zindagi Makkah mein Sahih Bukhari ki riwayat se bayan hoti hai.",
+      "pages": [
+        {
+          "id": "ismail_dua_aur_aulaad_ki_nemat",
+          "title": "Dua aur aulaad ki nemat",
+          "scene": "night",
+          "roman": "Ibrahim ne nek aulaad ki dua ki. Quran mein unhon ne barhape mein Ismail aur Ishaq milne par Allah ka shukr ada kiya.",
+          "english": "Ibrahim prayed for righteous offspring and thanked Allah for granting Ismail and Ishaq in old age.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 100,
+              "end": 100
+            },
+            {
+              "kind": "quran",
+              "surah": 14,
+              "start": 39,
+              "end": 39
+            }
+          ]
+        },
+        {
+          "id": "ismail_makkah_mein_bachpan",
+          "title": "Makkah mein bachpan",
+          "scene": "valley",
+          "roman": "Ismail doodh peete bachche the jab Ibrahim unhein unki walida ke saath Makkah laye. Us waqt wahan na abadi thi aur na pani.",
+          "english": "Ismail was a nursing infant when Ibrahim brought him and his mother to Makkah, then an uninhabited place without water.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ismail_hajar_ki_talaash_aur_zamzam",
+          "title": "Hajar ki talaash aur Zamzam",
+          "scene": "safa",
+          "roman": "Pani khatam hua to Ismail ki walida Safa aur Marwa ke darmiyan madad ki talaash mein gayin. Allah ne Zamzam ka pani ata kiya.",
+          "english": "When their water ran out, Ismail’s mother searched between Safa and Marwa. Allah provided water at Zamzam.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ismail_abadi_aur_jawani",
+          "title": "Abadi aur jawani",
+          "scene": "spring",
+          "roman": "Jurhum ke log pani ke qareeb abad hue. Ismail unke darmiyan barhe, Arabi seekhi aur bade hokar unmein shadi ki. Riwayat inki zindagi ka yeh hissa bayan karti hai.",
+          "english": "People of Jurhum settled near the water. Ismail grew up among them, learned Arabic and later married into their community.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3364
+            }
+          ]
+        },
+        {
+          "id": "ismail_walid_ke_saath_ghar_ki_tameer",
+          "title": "Walid ke saath ghar ki tameer",
+          "scene": "kaaba",
+          "roman": "Ismail ne Ibrahim ke saath Allah ke ghar ki bunyadein uthayin. Donon apne Rabb se qubooliyat aur farmanbardari ki dua karte rahe.",
+          "english": "Ismail helped Ibrahim raise the foundations of the House. Together they prayed for acceptance and submission to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 127,
+              "end": 129
+            }
+          ]
+        },
+        {
+          "id": "ismail_sachcha_wada_aur_namaz",
+          "title": "Sachcha wada aur namaz",
+          "scene": "sunrise",
+          "roman": "Quran Ismail ko wade ka sachcha, rasool aur Nabi kehta hai. Woh apne ghar walon ko namaz aur zakat ka hukm dete the aur apne Rabb ke nazdeek pasandeeda the.",
+          "english": "The Quran calls Ismail true to his promise, a messenger and prophet. He instructed his family in prayer and charity and was pleasing to his Lord.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 54,
+              "end": 55
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran recalls Ibrahim’s prayer and the gift of children. Sahih Bukhari relates Ismail’s infancy in Makkah."
+    },
+    {
+      "id": "ishaq",
+      "name": "Ishaq",
+      "birthNote": "Ishaq ki paidaish ki khushkhabri Quran mein bayan hai; exact tareekh aur bachpan ki mazeed tafseel nahi di gayi.",
+      "pages": [
+        {
+          "id": "ishaq_barhape_mein_khushkhabri",
+          "title": "Barhape mein khushkhabri",
+          "scene": "palace",
+          "roman": "Allah ke farishton ne Ibrahim ki biwi ko Ishaq, aur uske baad Yaqub ki khushkhabri di. Unhon ne apni aur shohar ki bari umar dekhkar hairat ki.",
+          "english": "Allah’s messengers announced Ishaq and, after him, Yaqub. Ibrahim’s wife expressed astonishment at becoming a mother in old age.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 71,
+              "end": 73
+            }
+          ]
+        },
+        {
+          "id": "ishaq_nabuwat_aur_barkat",
+          "title": "Nabuwat aur barkat",
+          "scene": "scrolls",
+          "roman": "Allah ne Ishaq ko saliheen mein se Nabi banne ki khushkhabri di aur Ibrahim aur Ishaq par barkat nazil ki.",
+          "english": "Allah announced Ishaq as a prophet among the righteous and bestowed blessing upon Ibrahim and Ishaq.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 112,
+              "end": 113
+            }
+          ]
+        },
+        {
+          "id": "ishaq_neki_aur_ibadat_ki_rehnumai",
+          "title": "Neki aur ibadat ki rehnumai",
+          "scene": "sunrise",
+          "roman": "Ishaq aur Yaqub ko Allah ne nek banaya aur rehnuma banaya. Unhein nek kaam, namaz qayam karne aur zakat dene ki wahi ki gayi.",
+          "english": "Allah made Ishaq and Yaqub righteous leaders, inspiring good deeds, prayer and charity. They worshipped Him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 72,
+              "end": 73
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran announces Ishaq’s birth, but does not provide a precise date or detailed childhood here."
+    },
+    {
+      "id": "yaqub",
+      "name": "Yaqub",
+      "birthNote": "Yaqub ki paidaish ki khushkhabri Ishaq ke baad Quran mein aati hai. Unke bachpan ki tafseel nahi di gayi.",
+      "pages": [
+        {
+          "id": "yaqub_khushkhabri_aur_rehnumai",
+          "title": "Khushkhabri aur rehnumai",
+          "scene": "palace",
+          "roman": "Ibrahim ke ghar Ishaq ke baad Yaqub ki khushkhabri di gayi. Allah ne Yaqub ko bhi neki aur hidayat se nawaza.",
+          "english": "Yaqub was announced after Ishaq in the glad tidings to Ibrahim’s household. Allah granted him righteousness and guidance.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 71,
+              "end": 71
+            },
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 72,
+              "end": 73
+            }
+          ]
+        },
+        {
+          "id": "yaqub_yusuf_ka_khwaab",
+          "title": "Yusuf ka khwaab",
+          "scene": "night",
+          "roman": "Yusuf ne apne walid Yaqub ko khwaab bataya. Yaqub ne samjhaya ke ise bhaiyon ke samne na bayan karein aur Allah ki ata ki basharat di.",
+          "english": "Yusuf told Yaqub his dream. Yaqub advised him not to relate it to his brothers and spoke of Allah’s coming favour.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 4,
+              "end": 6
+            }
+          ]
+        },
+        {
+          "id": "yaqub_judai_aur_sabr",
+          "title": "Judai aur sabr",
+          "scene": "valley",
+          "roman": "Yusuf ke bhai ghalat khabar aur khoon laga qamees laye. Yaqub ne sabr-e-jameel ikhtiyar kiya. Gham ke bawajood unhon ne Allah se umeed na chhori.",
+          "english": "Yusuf’s brothers brought a bloodstained shirt and a false account. Yaqub chose beautiful patience and continued to hope in Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 16,
+              "end": 18
+            },
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 83,
+              "end": 87
+            }
+          ]
+        },
+        {
+          "id": "yaqub_dobara_mulaqat",
+          "title": "Dobara mulaqat",
+          "scene": "palace",
+          "roman": "Yusuf ki qamees aane par Yaqub ki basarat lauti. Baad mein ghar wale Yusuf ke paas pahunche aur judai ke baad mulaqat hui.",
+          "english": "Yaqub’s sight returned when Yusuf’s shirt was brought to him. The family later reunited with Yusuf after their separation.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 93,
+              "end": 100
+            }
+          ]
+        },
+        {
+          "id": "yaqub_aakhri_naseehat",
+          "title": "Aakhri naseehat",
+          "scene": "scrolls",
+          "roman": "Maut ke waqt Yaqub ne beton se poocha ke unke baad woh kiski ibadat karenge. Unhon ne ek Allah ki ibadat aur uski farmanbardari ka iqrar kiya.",
+          "english": "As death approached, Yaqub asked his sons whom they would worship after him. They affirmed worship of the one God.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 132,
+              "end": 133
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran announces Yaqub after Ishaq. It does not provide a detailed childhood account here."
+    },
+    {
+      "id": "yusuf",
+      "name": "Yusuf",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "yusuf_bachpan_ka_khwaab",
+          "title": "Bachpan ka khwaab",
+          "scene": "night",
+          "roman": "Yusuf ne apne walid ko gyarah sitaron, suraj aur chand ke sajde ka khwaab bataya. Walid ne unhein bhaiyon ko na batane ki naseehat ki.",
+          "english": "Young Yusuf told his father of a dream in which eleven stars, the sun and moon bowed to him. His father advised discretion.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 4,
+              "end": 6
+            }
+          ]
+        },
+        {
+          "id": "yusuf_bhaiyon_ki_tadbeer",
+          "title": "Bhaiyon ki tadbeer",
+          "scene": "valley",
+          "roman": "Bhaiyon ne Yusuf ke liye hasad mehsoos kiya. Unhon ne unhein apne saath le jane ki ijazat li aur kuen mein daal diya.",
+          "english": "Yusuf’s brothers acted out of jealousy. They obtained permission to take him with them and then cast him into a well.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 8,
+              "end": 15
+            }
+          ]
+        },
+        {
+          "id": "yusuf_kuen_se_nikalna",
+          "title": "Kuen se nikalna",
+          "scene": "well",
+          "roman": "Ek qafila aaya. Pani nikalne wale ne Yusuf ko paya. Unhein maal-e-tijarat samjha gaya aur kam qeemat par bech diya gaya.",
+          "english": "A caravan’s water-drawer found Yusuf. He was treated as merchandise and sold for a small price.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 19,
+              "end": 20
+            }
+          ]
+        },
+        {
+          "id": "yusuf_misr_mein_nayi_zindagi",
+          "title": "Misr mein nayi zindagi",
+          "scene": "palace",
+          "roman": "Misr ke ek shakhs ne Yusuf ko khareeda aur apni biwi se unhein izzat se rakhne ko kaha. Allah ne unhein zameen mein jagah di aur ilm ata kiya.",
+          "english": "An Egyptian man bought Yusuf and instructed his wife to treat him honourably. Allah established Yusuf and granted him knowledge and judgment.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 21,
+              "end": 22
+            }
+          ]
+        },
+        {
+          "id": "yusuf_gunah_se_panah",
+          "title": "Gunah se panah",
+          "scene": "door",
+          "roman": "Jis ghar mein Yusuf the, uski aurat ne unhein gunah ki taraf bulaya. Yusuf ne Allah ki panah mangi. Darwaze par qamees phatne ka waqia unki begunahi ki daleel bana.",
+          "english": "The woman of the house tried to seduce Yusuf. He sought refuge in Allah, and the torn shirt became evidence supporting his innocence.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 23,
+              "end": 29
+            }
+          ]
+        },
+        {
+          "id": "yusuf_qaid_ka_intikhab",
+          "title": "Qaid ka intikhab",
+          "scene": "prison",
+          "roman": "Yusuf ne gunah ki dawat ke muqable mein qaid ko pasand kiya aur Allah se hifazat mangi. Baad mein unhein ek muddat ke liye qaid kar diya gaya.",
+          "english": "Yusuf preferred imprisonment to the wrongdoing being urged upon him and prayed for protection. He was later imprisoned for a time.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 30,
+              "end": 35
+            }
+          ]
+        },
+        {
+          "id": "yusuf_qaid_mein_dawat",
+          "title": "Qaid mein dawat",
+          "scene": "prison_window",
+          "roman": "Qaid mein do saathiyon ne khwaab pooche. Yusuf ne pehle ek Allah ki ibadat samjhayi, phir Allah ke sikhaye ilm se unke khwaabon ki tabeer batayi.",
+          "english": "Two fellow prisoners asked about dreams. Yusuf first explained worship of Allah alone, then interpreted their dreams using knowledge Allah had taught him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 36,
+              "end": 42
+            }
+          ]
+        },
+        {
+          "id": "yusuf_badshah_ka_khwaab",
+          "title": "Badshah ka khwaab",
+          "scene": "night",
+          "roman": "Badshah ke khwaab ki tabeer ke liye Yusuf se rujoo hua. Unhon ne saat saal kasrat se kheti, phir saat sakht saal aur uske baad farakhi ka zikr kiya.",
+          "english": "Yusuf interpreted the king’s dream: seven years of cultivation, followed by seven hard years, then a year of relief.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 43,
+              "end": 49
+            }
+          ]
+        },
+        {
+          "id": "yusuf_begunahi_wazeh_hui",
+          "title": "Begunahi wazeh hui",
+          "scene": "palace",
+          "roman": "Yusuf ne riha hone se pehle apne ilzam ki tehqeeq mangi. Auraton ne unki begunahi mani aur Aziz ki biwi ne apni ghalati tasleem ki.",
+          "english": "Before leaving prison, Yusuf requested an investigation. The women acknowledged his innocence, and the wife of the Aziz admitted her wrongdoing.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 50,
+              "end": 53
+            }
+          ]
+        },
+        {
+          "id": "yusuf_amanat_ki_zimmedari",
+          "title": "Amanat ki zimmedari",
+          "scene": "scrolls",
+          "roman": "Badshah ne Yusuf ko maqam diya. Yusuf ne zameen ke khazanon ki zimmedari mangi aur apni hifazat aur ilm ka zikr kiya. Allah ne unhein ikhtiyar ata kiya.",
+          "english": "The king honoured Yusuf. Yusuf asked to oversee the storehouses, citing his trustworthiness and knowledge, and Allah established him in authority.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 54,
+              "end": 57
+            }
+          ]
+        },
+        {
+          "id": "yusuf_bhaiyon_se_dobara_mulaqat",
+          "title": "Bhaiyon se dobara mulaqat",
+          "scene": "palace",
+          "roman": "Qahat ke dino mein Yusuf ke bhai ghalla lene aaye. Unhon ne Yusuf ko na pehchana, lekin Yusuf ne unhein pehchan liya. Baad ke safar mein unka saga bhai bhi aaya.",
+          "english": "Yusuf’s brothers came for provisions without recognizing him, though he recognized them. On a later visit, his brother also came.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 58,
+              "end": 69
+            }
+          ]
+        },
+        {
+          "id": "yusuf_pehchan_aur_maafi",
+          "title": "Pehchan aur maafi",
+          "scene": "sunrise",
+          "roman": "Aakhir Yusuf ne apni pehchan batayi. Bhaiyon ne ghalati tasleem ki. Yusuf ne un par us din malamat na karne ki baat kahi aur maghfirat ki dua ki.",
+          "english": "Yusuf revealed his identity. His brothers admitted their wrongdoing, and he declined to reproach them, praying for their forgiveness.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 89,
+              "end": 92
+            }
+          ]
+        },
+        {
+          "id": "yusuf_ghar_walon_ki_mulaqat",
+          "title": "Ghar walon ki mulaqat",
+          "scene": "palace",
+          "roman": "Yusuf ne apni qamees walid ke paas bheji. Phir ghar wale Misr aaye. Yusuf ne bachpan ke khwaab ki tabeer poori hone ko Allah ki meherbani kaha.",
+          "english": "Yusuf sent his shirt to his father, and the family came to Egypt. He recognized the fulfilment of his childhood dream as Allah’s kindness.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 93,
+              "end": 101
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "ayyub",
+      "name": "Ayyub",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "ayyub_takleef_mein_dua",
+          "title": "Takleef mein dua",
+          "scene": "valley",
+          "roman": "Ayyub alayhis salam ko takleef pahunchi. Unhon ne apne Rabb ko pukara aur uski rahmat ka zikr kiya. Bemari ki ghair-sabit, khaufnaak tafseel yahan nahi jori gayi.",
+          "english": "Ayyub suffered affliction and called upon his Lord, appealing to His mercy. Unestablished graphic descriptions of illness are not added.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 83,
+              "end": 83
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 41,
+              "end": 41
+            }
+          ]
+        },
+        {
+          "id": "ayyub_pani_aur_shifa",
+          "title": "Pani aur shifa",
+          "scene": "healing_spring",
+          "roman": "Allah ne Ayyub ko zameen par paon marne ka hukm diya aur thanda pani nahane aur peene ke liye ata kiya.",
+          "english": "Allah instructed Ayyub to strike the ground with his foot and provided cool water for washing and drinking.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 42,
+              "end": 42
+            }
+          ]
+        },
+        {
+          "id": "ayyub_rahmat_aur_ghar_wale",
+          "title": "Rahmat aur ghar wale",
+          "scene": "garden",
+          "roman": "Allah ne unki takleef door ki aur unhein unke ghar wale aur unke saath utne hi mazeed ata kiye. Quran ise rahmat aur ibadat karne walon ke liye yaad-dihani kehta hai.",
+          "english": "Allah removed Ayyub’s affliction and restored his family, with as many more, as mercy and a reminder for worshippers.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 84,
+              "end": 84
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 43,
+              "end": 43
+            }
+          ]
+        },
+        {
+          "id": "ayyub_sabr_karne_wala_banda",
+          "title": "Sabr karne wala banda",
+          "scene": "sunrise",
+          "roman": "Allah ne Ayyub ko sabr karne wala aur behtareen banda kaha jo uski taraf rujoo karta tha. Unki kahani mein dard ke saath dua aur sabr ka zikr hai.",
+          "english": "Allah praised Ayyub as patient, an excellent servant who repeatedly turned to Him. His account joins suffering with prayer and perseverance.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 44,
+              "end": 44
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "shuayb",
+      "name": "Shuayb",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "shuayb_madyan_ki_taraf_paigham",
+          "title": "Madyan ki taraf paigham",
+          "scene": "city",
+          "roman": "Shuayb alayhis salam ne Madyan ko Allah ki ibadat aur naap-tol mein insaf ki dawat di. Unhon ne logon ka haq kam karne aur zameen mein fasad se roka.",
+          "english": "Shuayb called Madyan to worship Allah, give full measure and weight, and refrain from cheating people and spreading corruption.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 85,
+              "end": 85
+            },
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 84,
+              "end": 85
+            }
+          ]
+        },
+        {
+          "id": "shuayb_tijarat_mein_diyanat",
+          "title": "Tijarat mein diyanat",
+          "scene": "scales",
+          "roman": "Unhon ne kaha ke Allah ka diya hua halal baqiya unke liye behtar hai. Maqsad sirf apni istitaat ke mutabiq islah tha, aur bharosa Allah par tha.",
+          "english": "He taught that what Allah left lawfully was better. He sought reform as far as he could and relied upon Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 86,
+              "end": 88
+            }
+          ]
+        },
+        {
+          "id": "shuayb_qaum_ki_dhamki",
+          "title": "Qaum ki dhamki",
+          "scene": "city",
+          "roman": "Qaum ke takabbur wale sardaron ne Shuayb aur iman walon ko nikalne ki dhamki di. Shuayb ne Allah par tawakkul kiya aur usse faisla manga.",
+          "english": "Arrogant leaders threatened to expel Shuayb and the believers. He placed his trust in Allah and asked Him to judge.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 88,
+              "end": 89
+            }
+          ]
+        },
+        {
+          "id": "shuayb_inkar_aur_anjaam",
+          "title": "Inkar aur anjaam",
+          "scene": "storm",
+          "roman": "Qaum ne inkar jari rakha. Allah ne Shuayb aur iman walon ko apni rahmat se bachaya aur zalimon ko azab ne aa liya.",
+          "english": "The people continued to reject the message. Allah saved Shuayb and the believers through His mercy, while punishment overtook the wrongdoers.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 11,
+              "start": 91,
+              "end": 95
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "musa",
+      "name": "Musa",
+      "birthNote": "Musa ki paidaish aur bachpan ka waqia Quran mein bayan hai. Exact tareekh is account mein nahi di gayi.",
+      "pages": [
+        {
+          "id": "musa_zulm_ke_daur_mein_paidaish",
+          "title": "Zulm ke daur mein paidaish",
+          "scene": "river",
+          "roman": "Firaun logon ko girohon mein baantkar ek giroh ke beton ko qatl karwata tha. Isi daur mein Allah ne Musa ki walida ko unhein doodh pilane aur khatre par darya mein rakhne ki hidayat di.",
+          "english": "Pharaoh oppressed a group of people and killed their sons. Allah guided Musa’s mother to nurse him and, when afraid, place him in the river.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 4,
+              "end": 7
+            }
+          ]
+        },
+        {
+          "id": "musa_darya_se_mahal_tak",
+          "title": "Darya se mahal tak",
+          "scene": "palace",
+          "roman": "Musa ek sanduq mein darya tak pahunche aur Firaun ke ghar walon ne unhein utha liya. Firaun ki biwi ne unhein qatl na karne ko kaha.",
+          "english": "Musa was placed in a chest in the river and taken in by Pharaoh’s household. Pharaoh’s wife pleaded that he should not be killed.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 38,
+              "end": 40
+            },
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 8,
+              "end": 9
+            }
+          ]
+        },
+        {
+          "id": "musa_walida_ki_god_mein_wapsi",
+          "title": "Walida ki god mein wapsi",
+          "scene": "river",
+          "roman": "Musa ki behen door se unki khabar leti rahi. Allah ne unhein doosri doodh pilane waliyon se roka; phir unki walida tak wapas pahunchaya, taake unki aankh thandi ho.",
+          "english": "Musa’s sister watched from a distance. Allah prevented him from accepting other wet nurses and reunited him with his mother.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 10,
+              "end": 13
+            }
+          ]
+        },
+        {
+          "id": "musa_jawani_aur_ek_ghalati",
+          "title": "Jawani aur ek ghalati",
+          "scene": "city",
+          "roman": "Musa ko jawani mein hikmat aur ilm mila. Shehar mein jhagra dekhkar unhon ne ek shakhs ko mukka mara, jis se woh mar gaya. Musa ne Allah se maafi mangi.",
+          "english": "As an adult, Musa received wisdom and knowledge. During a quarrel he struck a man who died, then sought Allah’s forgiveness.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 14,
+              "end": 17
+            }
+          ]
+        },
+        {
+          "id": "musa_madyan_ki_taraf_safar",
+          "title": "Madyan ki taraf safar",
+          "scene": "valley",
+          "roman": "Khatre ki khabar milne par Musa shehar se nikal gaye. Unhon ne apne Rabb se nijat aur seedhe raste ki dua ki aur Madyan ki taraf safar kiya.",
+          "english": "Warned of danger, Musa left the city and prayed for deliverance and guidance as he travelled toward Madyan.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 18,
+              "end": 22
+            }
+          ]
+        },
+        {
+          "id": "musa_pani_par_madad",
+          "title": "Pani par madad",
+          "scene": "well",
+          "roman": "Madyan ke pani par Musa ne do auraton ki madad ki. Unke liye pani pilane ke baad woh saaye mein gaye aur Allah se apni zaroorat ki dua ki.",
+          "english": "At Madyan’s water, Musa helped two women water their flock. He then rested in the shade and prayed to Allah in need.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 23,
+              "end": 24
+            }
+          ]
+        },
+        {
+          "id": "musa_aman_aur_ghar_ki_zindagi",
+          "title": "Aman aur ghar ki zindagi",
+          "scene": "palace",
+          "roman": "Un auraton ke walid ne Musa ko aman ki khabar di. Shadi aur aath ya das saal ki khidmat ka muahida hua. Quran un buzurg ka naam nahi batata.",
+          "english": "Their father reassured Musa. An agreement involved marriage and eight or ten years of service. The Quran does not name this elder.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 25,
+              "end": 28
+            }
+          ]
+        },
+        {
+          "id": "musa_aag_ke_paas_nida",
+          "title": "Aag ke paas nida",
+          "scene": "fire",
+          "roman": "Muddat poori karke Musa apne ghar walon ke saath rawana hue. Aag dekhkar qareeb gaye, jahan Allah ki nida aayi. Unhein nabuwat ki zimmedari aur nishaniyan di gayin.",
+          "english": "After completing the term, Musa travelled with his family. Seeing a fire, he approached and received Allah’s call and signs.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 29,
+              "end": 35
+            },
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 9,
+              "end": 16
+            }
+          ]
+        },
+        {
+          "id": "musa_harun_ki_madad_ki_dua",
+          "title": "Harun ki madad ki dua",
+          "scene": "mountain",
+          "roman": "Musa ne apna seena kholne, kaam aasaan karne aur apni zaban ki girah kholne ki dua ki. Unhon ne bhai Harun ko madadgar banane ki darkhwast ki, jo qubool hui.",
+          "english": "Musa prayed for ease, clear speech and help from his brother Harun. Allah granted his request.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 25,
+              "end": 36
+            }
+          ]
+        },
+        {
+          "id": "musa_firaun_ke_samne_dawat",
+          "title": "Firaun ke samne dawat",
+          "scene": "palace",
+          "roman": "Musa aur Harun ko Firaun ke paas narmi se baat karne bheja gaya. Unhon ne Bani Israil ko saath jane dene ka mutalaba kiya aur Allah ki nishaniyan pesh ki.",
+          "english": "Musa and Harun were sent to address Pharaoh gently, ask him to release the Israelites and present Allah’s signs.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 43,
+              "end": 56
+            }
+          ]
+        },
+        {
+          "id": "musa_jadugaron_ka_iman",
+          "title": "Jadugaron ka iman",
+          "scene": "city",
+          "roman": "Muqable mein Musa ki nishani ne jadugaron ke banaye dhoke ko mita diya. Jadugar Allah par iman laye aur Firaun ki dhamkiyon ke bawajood apne iman par qaim rahe.",
+          "english": "At the contest, the sign given to Musa overcame the magicians’ deception. They believed and remained firm despite Pharaoh’s threats.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 57,
+              "end": 73
+            }
+          ]
+        },
+        {
+          "id": "musa_sakhti_aur_nishaniyan",
+          "title": "Sakhti aur nishaniyan",
+          "scene": "storm",
+          "roman": "Firaun ki qaum par mukhtalif nishaniyan aur sakhtiyan aayin. Woh azab hatne par apna wada tor dete the. Aakhir Bani Israil ko raat mein nikalne ka hukm mila.",
+          "english": "Pharaoh’s people experienced signs and afflictions, yet broke their promises after relief. The Israelites were eventually commanded to depart by night.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 130,
+              "end": 136
+            },
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 52,
+              "end": 52
+            }
+          ]
+        },
+        {
+          "id": "musa_samandar_mein_rasta",
+          "title": "Samandar mein rasta",
+          "scene": "sea",
+          "roman": "Peechhe Firaun ka lashkar aur samne samandar tha. Musa ne Allah ki rehnumai par yaqeen zahir kiya. Allah ke hukm se samandar phata aur rasta ban gaya.",
+          "english": "With Pharaoh’s army behind and the sea ahead, Musa trusted Allah’s guidance. At Allah’s command the sea parted and a path opened.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 60,
+              "end": 66
+            }
+          ]
+        },
+        {
+          "id": "musa_nijat_aur_firaun_ka_anjaam",
+          "title": "Nijat aur Firaun ka anjaam",
+          "scene": "sunrise",
+          "roman": "Allah ne Musa aur unke saath walon ko bachaya, phir peechha karne walon ko gharaq kiya. Quran is waqia ko ek badi nishani kehta hai.",
+          "english": "Allah saved Musa and those with him, while the pursuing forces drowned. The Quran describes this as a sign.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 65,
+              "end": 68
+            },
+            {
+              "kind": "quran",
+              "surah": 10,
+              "start": 90,
+              "end": 92
+            }
+          ]
+        },
+        {
+          "id": "musa_toor_par_wahi",
+          "title": "Toor par wahi",
+          "scene": "mountain",
+          "roman": "Musa ne muqarrar muddat ke liye Harun ko qaum mein apna naib banaya. Allah ne Musa se kalam kiya aur takhtiyon mein naseehat aur ahkam diye.",
+          "english": "Musa left Harun in charge during an appointed absence. Allah spoke to Musa and gave instruction and guidance on the tablets.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 142,
+              "end": 145
+            }
+          ]
+        },
+        {
+          "id": "musa_bachhre_ki_azmaish",
+          "title": "Bachhre ki azmaish",
+          "scene": "city",
+          "roman": "Musa ki ghair-hazri mein qaum ke kuch log bachhre ki ibadat mein par gaye. Harun ne unhein roka tha. Wapsi par Musa ne is sarkashi par sakht ranj zahir kiya.",
+          "english": "During Musa’s absence, some people worshipped the calf. Harun had warned them, and Musa returned deeply distressed by their wrongdoing.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 83,
+              "end": 98
+            }
+          ]
+        },
+        {
+          "id": "musa_safar_mein_pani_aur_rizq",
+          "title": "Safar mein pani aur rizq",
+          "scene": "water_rock",
+          "roman": "Allah ne Musa ki qaum ko nematein di. Pani mangne par chattan se barah chashme nikle aur har giroh ne apna pani peene ka maqam pehchana.",
+          "english": "Allah provided for Musa’s people. When they sought water, twelve springs emerged from the rock and each group knew its drinking place.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 57,
+              "end": 60
+            }
+          ]
+        },
+        {
+          "id": "musa_ilm_ke_safar_ki_seekh",
+          "title": "Ilm ke safar ki seekh",
+          "scene": "ocean",
+          "roman": "Musa ne Allah ke ek bande ke saath ilm ka safar kiya. Kashti, ek ladke aur deewar ke waqiat ki hikmat baad mein kholi gayi. Quran insani ilm ki had yaad dilata hai.",
+          "english": "Musa journeyed with a servant of Allah to learn. The reasons behind events involving a boat, a boy and a wall were explained afterward.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 18,
+              "start": 60,
+              "end": 82
+            }
+          ]
+        },
+        {
+          "id": "musa_maut_aur_qurb_ki_dua",
+          "title": "Maut aur qurb ki dua",
+          "scene": "mountain",
+          "roman": "Sahih Bukhari mein Musa ki wafat ke waqia ka zikr hai. Jab maut ka waqt aaya, unhon ne Allah se muqaddas sarzameen ke qareeb pahunchane ki dua ki. Riwayat unki qabr ko surkh retili pahari ke qareeb batati hai.",
+          "english": "Sahih Bukhari recounts Musa’s death and his prayer to be brought near the sacred land. The report describes his grave near a red sandy hill.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 1339
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran describes Musa’s birth and early life. No exact calendar date is supplied here."
+    },
+    {
+      "id": "harun",
+      "name": "Harun",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "harun_musa_ke_bhai",
+          "title": "Musa ke bhai",
+          "scene": "mountain",
+          "roman": "Musa ne apne bhai Harun ko madadgar banane ki dua ki. Allah ne unki darkhwast qubool ki aur Harun ko unki madad ke liye diya.",
+          "english": "Musa asked Allah to appoint his brother Harun as a helper. Allah granted the request.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 29,
+              "end": 36
+            },
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 53,
+              "end": 53
+            }
+          ]
+        },
+        {
+          "id": "harun_narmi_se_paigham",
+          "title": "Narmi se paigham",
+          "scene": "palace",
+          "roman": "Musa aur Harun ko Firaun ke paas jane aur narmi se baat karne ka hukm diya gaya. Donon ne Allah ki rasalat ka paigham pahunchaya.",
+          "english": "Musa and Harun were commanded to approach Pharaoh with gentle speech and deliver Allah’s message.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 43,
+              "end": 48
+            }
+          ]
+        },
+        {
+          "id": "harun_qaum_mein_zimmedari",
+          "title": "Qaum mein zimmedari",
+          "scene": "mountain",
+          "roman": "Musa apne Rabb ki muqarrar muddat ke liye gaye to Harun ko qaum mein apni jagah rakha. Unhein islah aur fasad se bachne ki hidayat di.",
+          "english": "When Musa left for his appointed meeting, he placed Harun in charge, instructing him to maintain order and avoid corruption.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 7,
+              "start": 142,
+              "end": 142
+            }
+          ]
+        },
+        {
+          "id": "harun_azmaish_mein_rokna",
+          "title": "Azmaish mein rokna",
+          "scene": "city",
+          "roman": "Jab kuch log bachhre ki taraf mayil hue, Harun ne unhein samjhaya ke unka Rabb Rahman hai. Qaum ne Musa ki wapsi tak apna amal chhorne se inkar kiya.",
+          "english": "When some turned to the calf, Harun reminded them that their Lord was the Most Merciful. They refused to stop until Musa returned.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 20,
+              "start": 90,
+              "end": 94
+            }
+          ]
+        },
+        {
+          "id": "harun_allah_ka_salam",
+          "title": "Allah ka salam",
+          "scene": "sunrise",
+          "roman": "Quran Musa aur Harun dono par Allah ki nemat, nijat aur seedhi rahnumai ka zikr karta hai. Donon par salam bheja gaya hai.",
+          "english": "The Quran recounts Allah’s favour, rescue and guidance for Musa and Harun, and sends peace upon them.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 114,
+              "end": 122
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "dhulkifl",
+      "name": "Dhul-Kifl",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "dhulkifl_sabr_walon_mein_zikr",
+          "title": "Sabr walon mein zikr",
+          "scene": "scrolls",
+          "roman": "Quran Ismail, Idris aur Dhul-Kifl ko sabr karne walon mein shamil karta hai. In ayaat se unki paidaish, shehar ya peshe ki mazeed kahani nahi banayi gayi.",
+          "english": "The Quran names Dhul-Kifl with Ismail and Idris among the patient. It does not supply a detailed biography in these passages.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 85,
+              "end": 85
+            }
+          ]
+        },
+        {
+          "id": "dhulkifl_neki_aur_rahmat",
+          "title": "Neki aur rahmat",
+          "scene": "sunrise",
+          "roman": "Allah ne unhein apni rahmat mein dakhil kiya aur nek logon mein shumar kiya. Surah Sad mein bhi Dhul-Kifl ka zikr achhe logon ke saath aata hai.",
+          "english": "He is included among the righteous admitted into Allah’s mercy, and is named among the outstanding in Surah Sad.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 86,
+              "end": 86
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 48,
+              "end": 48
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "dawud",
+      "name": "Dawud",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "dawud_jalut_ke_muqable_mein",
+          "title": "Jalut ke muqable mein",
+          "scene": "mountain",
+          "roman": "Talut ke lashkar aur Jalut ki fauj ka muqabla hua. Allah ke izn se Dawud ne Jalut ko qatl kiya. Allah ne Dawud ko hukumat, hikmat aur ilm ata kiya.",
+          "english": "In the battle between Talut’s force and Jalut’s army, Dawud killed Jalut by Allah’s permission. Allah granted him rule, wisdom and knowledge.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 249,
+              "end": 251
+            }
+          ]
+        },
+        {
+          "id": "dawud_zabur_ki_ata",
+          "title": "Zabur ki ata",
+          "scene": "scrolls",
+          "roman": "Allah ne Dawud ko Zabur ata ki. Quran unhein wahi pane wale Anbiya mein zikr karta hai.",
+          "english": "Allah gave Dawud the Zabur. The Quran names him among the prophets who received revelation.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 4,
+              "start": 163,
+              "end": 163
+            },
+            {
+              "kind": "quran",
+              "surah": 17,
+              "start": 55,
+              "end": 55
+            }
+          ]
+        },
+        {
+          "id": "dawud_tasbeeh_aur_qudrat",
+          "title": "Tasbeeh aur qudrat",
+          "scene": "mountain",
+          "roman": "Allah ne paharon aur parindon ko Dawud ke saath tasbeeh mein musakhkhar kiya. Yeh Allah ki ata thi.",
+          "english": "Allah subjected mountains and birds to glorify Him with Dawud. This was a gift from Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 79,
+              "end": 79
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 18,
+              "end": 19
+            }
+          ]
+        },
+        {
+          "id": "dawud_zirah_ka_hunar",
+          "title": "Zirah ka hunar",
+          "scene": "armour",
+          "roman": "Allah ne Dawud ko zirah banana sikhaya aur loha unke liye narm kiya. Unhein achhe amal ki hidayat di gayi.",
+          "english": "Allah taught Dawud the making of armour and softened iron for him, commanding righteous work.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 80,
+              "end": 80
+            },
+            {
+              "kind": "quran",
+              "surah": 34,
+              "start": 10,
+              "end": 11
+            }
+          ]
+        },
+        {
+          "id": "dawud_insaf_aur_rujoo",
+          "title": "Insaf aur rujoo",
+          "scene": "palace",
+          "roman": "Dawud ke paas do fareeq faisle ke liye aaye. Quran unki azmaish, maghfirat ki talab aur Allah ki taraf rujoo ka zikr karta hai; ghair-sabit ilzami kahaniyan nahi jorta.",
+          "english": "Two disputants came before Dawud. The Quran records his test, plea for forgiveness and return to Allah, without the unestablished scandalous tales.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 21,
+              "end": 25
+            }
+          ]
+        },
+        {
+          "id": "dawud_adl_ka_hukm",
+          "title": "Adl ka hukm",
+          "scene": "sunrise",
+          "roman": "Allah ne Dawud ko zameen mein khalifah banakar haq ke saath faisla karne aur khwahish ki pairwi se bachne ko kaha.",
+          "english": "Allah appointed Dawud as a vicegerent and commanded him to judge justly rather than follow personal desire.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 26,
+              "end": 26
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "sulayman",
+      "name": "Sulayman",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "sulayman_dawud_ke_baad_nemat",
+          "title": "Dawud ke baad nemat",
+          "scene": "palace",
+          "roman": "Sulayman ko Dawud ki wirasat mili. Unhon ne Allah ki ata ki hui nematon ka iqrar kiya. Quran unhein Allah ki taraf rujoo karne wala behtareen banda kehta hai.",
+          "english": "Sulayman inherited from Dawud and acknowledged Allah’s gifts. The Quran praises him as an excellent servant who turned to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 15,
+              "end": 16
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 30,
+              "end": 30
+            }
+          ]
+        },
+        {
+          "id": "sulayman_samajh_aur_faisla",
+          "title": "Samajh aur faisla",
+          "scene": "scrolls",
+          "roman": "Ek kheti ke muamle mein Dawud aur Sulayman ne faisla kiya. Allah ne Sulayman ko us muamle ki samajh di aur dono ko hikmat aur ilm diya.",
+          "english": "Dawud and Sulayman judged a case involving a field. Allah gave Sulayman understanding and granted both wisdom and knowledge.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 78,
+              "end": 79
+            }
+          ]
+        },
+        {
+          "id": "sulayman_cheentiyon_ki_waadi",
+          "title": "Cheentiyon ki waadi",
+          "scene": "valley",
+          "roman": "Sulayman ne cheenti ki baat samjhi aur apne Rabb se nematon ka shukr aur nek amal ki dua ki.",
+          "english": "Hearing the ant in the valley, Sulayman prayed for gratitude and righteous action.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 17,
+              "end": 19
+            }
+          ]
+        },
+        {
+          "id": "sulayman_saba_ki_khabar",
+          "title": "Saba ki khabar",
+          "scene": "city",
+          "roman": "Hudhud Saba se khabar laya ke wahan ek aurat hukumat karti hai aur log suraj ko sajda karte hain. Sulayman ne unhein Allah ki farmanbardari ki taraf paigham bheja.",
+          "english": "The hoopoe brought news of a queen and people worshipping the sun in Saba. Sulayman sent a message calling them to submit to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 20,
+              "end": 31
+            }
+          ]
+        },
+        {
+          "id": "sulayman_tohfa_aur_paigham",
+          "title": "Tohfa aur paigham",
+          "scene": "gifts",
+          "roman": "Malika ne mashwara kiya aur tohfa bheja. Sulayman ne Allah ki ata ko unke maal se behtar bataya aur apne paigham par qaim rahe.",
+          "english": "The queen consulted her advisers and sent a gift. Sulayman valued Allah’s gifts above their wealth and stood by his message.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 32,
+              "end": 37
+            }
+          ]
+        },
+        {
+          "id": "sulayman_takht_aur_shukr",
+          "title": "Takht aur shukr",
+          "scene": "throne",
+          "roman": "Malika ke aane se pehle uska takht laya gaya. Sulayman ne is nemat ko shukr ya nashukri ki azmaish kaha.",
+          "english": "Before the queen arrived, her throne was brought. Sulayman recognized this favour as a test of gratitude.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 38,
+              "end": 40
+            }
+          ]
+        },
+        {
+          "id": "sulayman_malika_ka_iqrar",
+          "title": "Malika ka iqrar",
+          "scene": "palace",
+          "roman": "Malika ne nishaniyan dekhin aur Sulayman ke saath Allah, Rabb-ul-alameen ki farmanbardari ka iqrar kiya. Quran is waqia mein uska naam nahi batata.",
+          "english": "After witnessing the signs, the queen declared submission with Sulayman to Allah, Lord of the worlds. The Quran does not name her.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 27,
+              "start": 41,
+              "end": 44
+            }
+          ]
+        },
+        {
+          "id": "sulayman_ikhtiyar_bhi_allah_ki_ata",
+          "title": "Ikhtiyar bhi Allah ki ata",
+          "scene": "ocean",
+          "roman": "Allah ne hawa aur kaam karne walon ko Sulayman ke liye musakhkhar kiya. Unki wafat ka waqia yeh bhi wazeh karta hai ke jinn ghaib nahi jaante.",
+          "english": "Allah subjected the wind and workers to Sulayman. The account of his death also makes clear that the jinn did not know the unseen.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 34,
+              "start": 12,
+              "end": 14
+            },
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 35,
+              "end": 40
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "ilyas",
+      "name": "Ilyas",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "ilyas_rasool_ki_dawat",
+          "title": "Rasool ki dawat",
+          "scene": "city",
+          "roman": "Quran Ilyas alayhis salam ko rasoolon mein se batata hai. Unhon ne apni qaum se Allah ka taqwa ikhtiyar karne ko kaha.",
+          "english": "The Quran names Ilyas among the messengers. He called his people to be mindful of Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 123,
+              "end": 124
+            }
+          ]
+        },
+        {
+          "id": "ilyas_baal_ki_ibadat_se_rokna",
+          "title": "Baal ki ibadat se rokna",
+          "scene": "mountain",
+          "roman": "Ilyas ne qaum ko Baal ko pukarne aur behtareen paida karne wale Allah ko chhorne par toka. Unhon ne Allah ko apna aur pehle logon ka Rabb bataya.",
+          "english": "Ilyas challenged the people for calling upon Baal and abandoning Allah, the best of creators and Lord of their ancestors.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 125,
+              "end": 126
+            }
+          ]
+        },
+        {
+          "id": "ilyas_mukhlis_bandon_ka_rasta",
+          "title": "Mukhlis bandon ka rasta",
+          "scene": "sunrise",
+          "roman": "Qaum ne jhutlaya, magar Allah ke mukhlis bande alag rahe. Quran Ilyas ke liye baad walon mein achha zikr aur salam bayan karta hai.",
+          "english": "The people rejected him, except Allah’s sincere servants. The Quran preserves honourable remembrance and peace for Ilyas.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 127,
+              "end": 132
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "alyasa",
+      "name": "Al-Yasa",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "alyasa_hidayat_pane_walon_mein",
+          "title": "Hidayat pane walon mein",
+          "scene": "scrolls",
+          "roman": "Al-Yasa alayhis salam ka naam Quran mein Ismail, Yunus aur Lut ke saath aata hai. Allah ne unhein fazilat ata ki. Unki zindagi ki mazeed tafseel in ayaat mein nahi milti.",
+          "english": "Al-Yasa is named with Ismail, Yunus and Lut among those whom Allah favoured. These verses do not provide a detailed life narrative.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 6,
+              "start": 86,
+              "end": 86
+            }
+          ]
+        },
+        {
+          "id": "alyasa_nek_logon_mein_zikr",
+          "title": "Nek logon mein zikr",
+          "scene": "sunrise",
+          "roman": "Surah Sad mein Ismail, Al-Yasa aur Dhul-Kifl ka zikr hai aur sab ko achhe logon mein bataya gaya hai. Hum isi sabit zikr tak mehdood rehte hain.",
+          "english": "Surah Sad names Ismail, Al-Yasa and Dhul-Kifl among the outstanding. This account stays within that established description.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 48,
+              "end": 48
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "yunus",
+      "name": "Yunus",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "yunus_paigham_aur_rawangi",
+          "title": "Paigham aur rawangi",
+          "scene": "city",
+          "roman": "Yunus alayhis salam rasoolon mein se the. Quran unke chale jane aur bhari hui kashti tak pahunchne ka zikr karta hai. Is rawangi ki ghair-sabit jagah ya tareekh nahi jori gayi.",
+          "english": "Yunus was among the messengers. The Quran describes his departure and boarding a laden ship, without supplying a detailed date or itinerary.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 139,
+              "end": 140
+            },
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 87,
+              "end": 87
+            }
+          ]
+        },
+        {
+          "id": "yunus_samandar_ki_azmaish",
+          "title": "Samandar ki azmaish",
+          "scene": "ocean",
+          "roman": "Kashti mein qura dala gaya aur Yunus usmein aa gaye. Phir machhli ne unhein nigal liya.",
+          "english": "Lots were drawn aboard the ship, and Yunus was among those selected. A fish swallowed him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 141,
+              "end": 142
+            }
+          ]
+        },
+        {
+          "id": "yunus_andheron_mein_dua",
+          "title": "Andheron mein dua",
+          "scene": "night",
+          "roman": "Yunus ne andheron mein Allah ki pakizgi bayan ki aur apni ghalati ka iqrar kiya. Allah ne unki dua qubool ki aur unhein gham se nijat di.",
+          "english": "In the darkness, Yunus glorified Allah and acknowledged his wrongdoing. Allah answered him and delivered him from distress.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 87,
+              "end": 88
+            }
+          ]
+        },
+        {
+          "id": "yunus_kinara_aur_hifazat",
+          "title": "Kinara aur hifazat",
+          "scene": "shore",
+          "roman": "Yunus ko kamzori ki halat mein khule kinare par dala gaya. Allah ne un par beldar paudha ugaya. Unki hifazat aur bahali Allah ki rahmat thi.",
+          "english": "Yunus was cast onto the open shore in a weakened state. Allah caused a gourd plant to grow over him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 143,
+              "end": 146
+            }
+          ]
+        },
+        {
+          "id": "yunus_qaum_ka_iman",
+          "title": "Qaum ka iman",
+          "scene": "sunrise",
+          "roman": "Yunus ki qaum ne iman laya to Allah ne unse ruswai ka azab hata diya aur ek muddat tak unhein fayda uthana diya.",
+          "english": "When the people of Yunus believed, Allah removed the punishment of disgrace and allowed them enjoyment for a time.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 10,
+              "start": 98,
+              "end": 98
+            },
+            {
+              "kind": "quran",
+              "surah": 37,
+              "start": 147,
+              "end": 148
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "zakariya",
+      "name": "Zakariya",
+      "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
+      "pages": [
+        {
+          "id": "zakariya_maryam_ki_kifalat",
+          "title": "Maryam ki kifalat",
+          "scene": "palace",
+          "roman": "Zakariya alayhis salam ko Maryam ki dekhbhal mili. Jab woh unke paas ibadat ki jagah jate, unke paas rizq pate. Maryam ne bataya ke yeh Allah ki taraf se hai.",
+          "english": "Zakariya was entrusted with Maryam’s care. He found provision with her in the sanctuary, and she said it was from Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 37,
+              "end": 37
+            }
+          ]
+        },
+        {
+          "id": "zakariya_chhupi_hui_dua",
+          "title": "Chhupi hui dua",
+          "scene": "night",
+          "roman": "Barhape mein Zakariya ne apne Rabb ko chupke se pukara. Unhon ne apni kamzori aur apni biwi ke be-aulad hone ka zikr karke nek waris manga.",
+          "english": "In old age, Zakariya quietly prayed to his Lord, describing his weakness and his wife’s barrenness and asking for an heir.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 2,
+              "end": 6
+            }
+          ]
+        },
+        {
+          "id": "zakariya_yahya_ki_khushkhabri",
+          "title": "Yahya ki khushkhabri",
+          "scene": "sunrise",
+          "roman": "Allah ne Yahya ki khushkhabri di. Namaz ki halat mein farishton ne unhein ek nek Nabi bete ki basharat sunayi.",
+          "english": "Allah announced Yahya. While Zakariya stood in prayer, angels brought news of a righteous son who would be a prophet.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 7,
+              "end": 9
+            },
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 38,
+              "end": 40
+            }
+          ]
+        },
+        {
+          "id": "zakariya_nishani_aur_tasbeeh",
+          "title": "Nishani aur tasbeeh",
+          "scene": "scrolls",
+          "roman": "Zakariya ne nishani mangi. Unhein kuch muddat logon se baat na kar pane ki nishani di gayi, jabke woh tandurust the. Unhon ne logon ko subah-shaam tasbeeh ka ishara kiya.",
+          "english": "Zakariya was given a sign: for a period he could not speak to people despite being sound. He signalled them to glorify Allah morning and evening.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 10,
+              "end": 11
+            }
+          ]
+        },
+        {
+          "id": "zakariya_dua_ki_qubooliyat",
+          "title": "Dua ki qubooliyat",
+          "scene": "garden",
+          "roman": "Allah ne Zakariya ki dua qubool karke Yahya ata kiye aur unki biwi ko durust kar diya. Quran unke nek kaamon, umeed, khauf aur khushu ka zikr karta hai.",
+          "english": "Allah answered Zakariya, granted Yahya and restored his wife’s ability to bear a child. The family is praised for goodness and humble devotion.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 89,
+              "end": 90
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here."
+    },
+    {
+      "id": "yahya",
+      "name": "Yahya",
+      "birthNote": "Yahya ki paidaish ki khushkhabri Quran mein naam ke saath di gayi. Exact tareekh aur shehar yahan muqarrar nahi kiye gaye.",
+      "pages": [
+        {
+          "id": "yahya_naam_ke_saath_basharat",
+          "title": "Naam ke saath basharat",
+          "scene": "sunrise",
+          "roman": "Zakariya ko Yahya naam ke bete ki khushkhabri mili. Yeh unki dua ki qubooliyat thi aur Allah ki qudrat ki nishani.",
+          "english": "Zakariya was given glad tidings of a son named Yahya, an answer to his prayer and a sign of Allah’s power.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 7,
+              "end": 9
+            }
+          ]
+        },
+        {
+          "id": "yahya_bachpan_mein_hikmat",
+          "title": "Bachpan mein hikmat",
+          "scene": "scrolls",
+          "roman": "Yahya ko kitab mazbooti se thamne ka hukm diya gaya. Allah ne unhein bachpan mein hikmat aur apni taraf se narmi aur pakizgi ata ki.",
+          "english": "Yahya was commanded to hold firmly to the Scripture. Allah granted him wisdom as a child, tenderness and purity.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 12,
+              "end": 13
+            }
+          ]
+        },
+        {
+          "id": "yahya_walidain_ke_saath_neki",
+          "title": "Walidain ke saath neki",
+          "scene": "garden",
+          "roman": "Quran Yahya ko parhezgar aur apne walidain ke saath nek batata hai. Woh sarkash aur nafarman nahi the.",
+          "english": "The Quran describes Yahya as devout and dutiful to his parents, neither arrogant nor disobedient.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 13,
+              "end": 14
+            }
+          ]
+        },
+        {
+          "id": "yahya_paidaish_aur_anjaam_par_salam",
+          "title": "Paidaish aur anjaam par salam",
+          "scene": "sunrise",
+          "roman": "Quran Yahya ke paida hone, wafat aur dobara uthaye jane ke din salam ka zikr karta hai. Unki wafat ki ghair-sabit tafseeli kahani yahan shamil nahi.",
+          "english": "The Quran speaks of peace upon Yahya at birth, death and resurrection. Unestablished details about how he died are not added.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 15,
+              "end": 15
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "Yahya’s birth is announced by name in the Quran; no exact date or city is asserted here."
+    },
+    {
+      "id": "isa",
+      "name": "Isa",
+      "birthNote": "Isa ibn Maryam ki ghair-mamooli paidaish Quran mein tafseel se bayan hai. Exact saal ya calendar date yahan claim nahi ki gayi.",
+      "pages": [
+        {
+          "id": "isa_maryam_ko_khushkhabri",
+          "title": "Maryam ko khushkhabri",
+          "scene": "palace",
+          "roman": "Farishton ne Maryam ko Allah ki taraf se Isa ibn Maryam ki khushkhabri di. Woh hairan huin ke unhein kisi mard ne chhua nahi; Allah jo chahta hai paida karta hai.",
+          "english": "Maryam received glad tidings of Isa ibn Maryam. She asked how she could have a child without a man touching her; Allah creates what He wills.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 45,
+              "end": 47
+            }
+          ]
+        },
+        {
+          "id": "isa_alag_jagah_aur_paidaish",
+          "title": "Alag jagah aur paidaish",
+          "scene": "palm",
+          "roman": "Maryam alag jagah gayin. Dard-e-zah unhein khajoor ke tane tak le aaya. Unhein tasalli, pani aur khajoor ki taraf rehnumai mili.",
+          "english": "Maryam withdrew to a distant place. Labour brought her to a palm trunk, where she received reassurance and provision.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 22,
+              "end": 26
+            }
+          ]
+        },
+        {
+          "id": "isa_god_mein_bachche_ka_paigham",
+          "title": "God mein bachche ka paigham",
+          "scene": "sunrise",
+          "roman": "Maryam bachche ko lekar apni qaum ke paas aayin. Unhon ne bachche ki taraf ishara kiya. Isa ne Allah ka banda hone, kitab aur nabuwat milne ka bayan kiya.",
+          "english": "Maryam brought the child to her people and pointed to him. Isa spoke of being Allah’s servant, receiving Scripture and being made a prophet.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 19,
+              "start": 27,
+              "end": 33
+            }
+          ]
+        },
+        {
+          "id": "isa_kitab_aur_hikmat",
+          "title": "Kitab aur hikmat",
+          "scene": "scrolls",
+          "roman": "Allah ne Isa ko kitab, hikmat, Taurat aur Injil sikhayi. Woh Bani Israil ki taraf rasool banaye gaye.",
+          "english": "Allah taught Isa Scripture, wisdom, the Torah and the Gospel, and sent him as a messenger to the Children of Israel.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 48,
+              "end": 49
+            }
+          ]
+        },
+        {
+          "id": "isa_allah_ke_izn_se_nishaniyan",
+          "title": "Allah ke izn se nishaniyan",
+          "scene": "garden",
+          "roman": "Isa ko Allah ke izn se nishaniyan di gayin: bemaron ko shifa aur murdon ko zinda karna bhi unmein tha. Quran har nishani ko Allah ke izn se jorta hai.",
+          "english": "Isa was granted signs by Allah’s permission, including healing the sick and raising the dead. The Quran repeatedly stresses Allah’s permission.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 49,
+              "end": 49
+            },
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 110,
+              "end": 110
+            }
+          ]
+        },
+        {
+          "id": "isa_ek_allah_ki_ibadat",
+          "title": "Ek Allah ki ibadat",
+          "scene": "sunrise",
+          "roman": "Isa ne apne Rabb aur logon ke Rabb, Allah ki ibadat ki dawat di. Unhon ne apne paigham ko seedha rasta bataya.",
+          "english": "Isa called people to worship Allah, his Lord and their Lord, describing this as the straight path.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 50,
+              "end": 51
+            },
+            {
+              "kind": "quran",
+              "surah": 43,
+              "start": 63,
+              "end": 64
+            }
+          ]
+        },
+        {
+          "id": "isa_hawariyon_ki_madad",
+          "title": "Hawariyon ki madad",
+          "scene": "valley",
+          "roman": "Isa ne Allah ke raste mein madadgar pooche to hawariyon ne iman aur farmanbardari ka iqrar kiya. Unhon ne Allah se gawahon mein likhe jane ki dua ki.",
+          "english": "When Isa sought helpers in Allah’s cause, the disciples affirmed faith and submission, asking Allah to count them among the witnesses.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 52,
+              "end": 53
+            }
+          ]
+        },
+        {
+          "id": "isa_aasmani_dastarkhwan_ki_darkhwast",
+          "title": "Aasmani dastarkhwan ki darkhwast",
+          "scene": "table",
+          "roman": "Hawariyon ne aasman se dastarkhwan mangne ki darkhwast ki. Isa ne Allah se rizq aur nishani ki dua ki. Allah ne utarne ke baad inkar par sakht tanbeeh ki.",
+          "english": "The disciples asked for a table from heaven. Isa prayed for provision and a sign, and Allah warned against disbelief after it.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 112,
+              "end": 115
+            }
+          ]
+        },
+        {
+          "id": "isa_hifazat_aur_allah_ki_taraf_uthaya_jana",
+          "title": "Hifazat aur Allah ki taraf uthaya jana",
+          "scene": "night",
+          "roman": "Quran ke mutabiq dushmanon ne Isa ko na qatl kiya na sooli di, balki Allah ne unhein apni taraf utha liya. Hum is se aage man-gharat tasveer ya tafseel nahi jorte.",
+          "english": "The Quran states that his enemies neither killed nor crucified Isa; Allah raised him to Himself. No invented visual of this event is used.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 4,
+              "start": 157,
+              "end": 158
+            }
+          ]
+        },
+        {
+          "id": "isa_aane_wale_rasool_ki_basharat",
+          "title": "Aane wale rasool ki basharat",
+          "scene": "sunrise",
+          "roman": "Isa ne apne baad Ahmad naam ke rasool ki khushkhabri di. Quran unke paigham ko pehle ki Taurat ki tasdeeq aur Allah ki taraf dawat se jorta hai.",
+          "english": "Isa confirmed the Torah before him and announced a messenger to come after him named Ahmad.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 61,
+              "start": 6,
+              "end": 6
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran describes Isa’s extraordinary birth. No exact calendar date is asserted here."
+    },
+    {
+      "id": "muhammad",
+      "name": "Muhammad ﷺ",
+      "birthNote": "Is book mein exact birth date claim nahi ki gayi. Quran aapke yateem hone aur Allah ki hifazat ka zikr karta hai; sahih hadees se wahi aur zindagi ke waqiat aage aate hain.",
+      "pages": [
+        {
+          "id": "muhammad_paidaish_ka_din",
+          "title": "Paidaish ka din",
+          "scene": "sunrise",
+          "roman": "Rasool Allah ﷺ ne Monday ke roze ke bare mein bataya ke isi din aap paida hue aur isi din wahi nazil hui. Yeh din sahih hadees se sabit hai; exact calendar date yahan claim nahi ki gayi.",
+          "english": "Asked about fasting on Monday, the Messenger explained that he was born on that day and revelation came on it. No exact calendar birth date is asserted here.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "muslim",
+              "number": 2750,
+              "editionLabel": "1162e"
+            }
+          ]
+        },
+        {
+          "id": "muhammad_shuruati_zindagi_aur_allah_ki_hifazat",
+          "title": "Shuruati zindagi aur Allah ki hifazat",
+          "scene": "city",
+          "roman": "Quran yaad dilata hai ke Allah ne aapko yateem paya aur panah di. Aapke bachpan ki ghair-sabit moajizati kahaniyan ya muqarrar birth date yahan shamil nahi ki gayi.",
+          "english": "The Quran recalls that Allah found you an orphan and gave shelter. This account does not invent a birth date or unestablished childhood miracles.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 93,
+              "start": 6,
+              "end": 8
+            }
+          ]
+        },
+        {
+          "id": "muhammad_hira_mein_pehli_wahi",
+          "title": "Hira mein pehli wahi",
+          "scene": "cave",
+          "roman": "Sahih Bukhari ke mutabiq aap par wahi chalis saal ki umar mein shuru hui. Rasool Allah ﷺ Hira mein ibadat ke liye tanhai ikhtiyar karte the. Wahi ke farishte aaye aur parhne ka hukm diya. Surah Al-Alaq ki ibtidai ayaat nazil huin.",
+          "english": "Sahih Bukhari places the beginning of revelation at age forty. The Messenger of Allah would withdraw to Hira for worship. The angel brought the command to recite, and the opening verses of Al-Alaq were revealed.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3
+            },
+            {
+              "kind": "quran",
+              "surah": 96,
+              "start": 1,
+              "end": 5
+            },
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3902
+            }
+          ]
+        },
+        {
+          "id": "muhammad_khadija_ki_tasalli",
+          "title": "Khadija ki tasalli",
+          "scene": "night",
+          "roman": "Pehli wahi ke baad aap Khadija ke paas lote. Unhon ne aapke nek akhlaq, rishtedaron ki madad aur zarooratmandon ka saath dene ko yaad dilakar tasalli di.",
+          "english": "After the first revelation, Khadija reassured him by recalling his care for relatives, the needy, guests and those in difficulty.",
+          "sources": [
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3
+            }
+          ]
+        },
+        {
+          "id": "muhammad_uthkar_khabardar_karna",
+          "title": "Uthkar khabardar karna",
+          "scene": "city",
+          "roman": "Allah ne uthkar khabardar karne, apne Rabb ki barai bayan karne aur pakizgi ki hidayat di. Rishtedaron ko bhi khabardar karne ka hukm aaya.",
+          "english": "Allah commanded him to arise and warn, magnify his Lord and maintain purity. He was also instructed to warn his close relatives.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 74,
+              "start": 1,
+              "end": 7
+            },
+            {
+              "kind": "quran",
+              "surah": 26,
+              "start": 214,
+              "end": 214
+            }
+          ]
+        },
+        {
+          "id": "muhammad_mushkil_mein_sabr",
+          "title": "Mushkil mein sabr",
+          "scene": "valley",
+          "roman": "Allah ne apne Rasool ko pichhle rasoolon ki tarah sabr ki hidayat di. Aapka kaam paigham pahunchana tha; dilon ki hidayat Allah ke ikhtiyar mein hai.",
+          "english": "Allah instructed His Messenger to be patient like earlier messengers. His duty was to convey the message; ultimate guidance belongs to Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 46,
+              "start": 35,
+              "end": 35
+            },
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 56,
+              "end": 56
+            }
+          ]
+        },
+        {
+          "id": "muhammad_isra_ka_waqia",
+          "title": "Isra ka waqia",
+          "scene": "night",
+          "roman": "Allah ne apne bande ko raat mein Masjid al-Haram se Masjid al-Aqsa tak safar karaya, taake apni nishaniyan dikhaye.",
+          "english": "Allah took His servant by night from the Sacred Mosque to the Farthest Mosque to show His signs.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 17,
+              "start": 1,
+              "end": 1
+            }
+          ]
+        },
+        {
+          "id": "muhammad_hijrat_mein_ghaar_ki_hifazat",
+          "title": "Hijrat mein ghaar ki hifazat",
+          "scene": "cave",
+          "roman": "Ghaar mein do saathiyon ke waqia ko Quran yaad dilata hai. Rasool Allah ﷺ ne saathi ko gham na karne aur Allah ke saath hone ki tasalli di.",
+          "english": "The Quran recalls the two companions in the cave, where the Messenger reassured his companion that Allah was with them.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 9,
+              "start": 40,
+              "end": 40
+            }
+          ]
+        },
+        {
+          "id": "muhammad_madinah_mein_bhai_chara",
+          "title": "Madinah mein bhai-chara",
+          "scene": "city",
+          "roman": "Quran pehle hijrat karne walon aur unki madad karne walon ki tareef karta hai. Ansar ne muhajireen se muhabbat aur apni zaroorat ke bawajood unhein tarjeeh di.",
+          "english": "The Quran honours the early emigrants and their helpers. The Ansar loved the emigrants and preferred them even when themselves in need.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 9,
+              "start": 100,
+              "end": 100
+            },
+            {
+              "kind": "quran",
+              "surah": 59,
+              "start": 9,
+              "end": 9
+            }
+          ]
+        },
+        {
+          "id": "muhammad_badr_mein_madad",
+          "title": "Badr mein madad",
+          "scene": "mountain",
+          "roman": "Quran Badr mein Allah ki madad yaad dilata hai jab momineen kamzor halat mein the. Madad ko shukr aur taqwa ke saath jora gaya.",
+          "english": "The Quran recalls Allah’s help at Badr when the believers were weak, calling them to gratitude and mindfulness of Him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 123,
+              "end": 126
+            }
+          ]
+        },
+        {
+          "id": "muhammad_uhud_ki_azmaish",
+          "title": "Uhud ki azmaish",
+          "scene": "valley",
+          "roman": "Uhud ke waqia mein Quran Allah ke hukm, sabr aur itaat ki ahmiyat samjhata hai. Ghalati aur mushkil ke baad bhi Allah ki maafi aur rahmat ka zikr hai.",
+          "english": "The account of Uhud teaches obedience and steadfastness. Alongside mistakes and hardship, the Quran speaks of Allah’s pardon and mercy.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 152,
+              "end": 155
+            }
+          ]
+        },
+        {
+          "id": "muhammad_khandaq_ke_dino_mein_azmaish",
+          "title": "Khandaq ke dino mein azmaish",
+          "scene": "storm",
+          "roman": "Ahzab ke waqt momineen sakht azmaish mein aaye. Allah ne hawa aur aise lashkar bheje jo nazar na aaye. Quran is nemat ko yaad dilata hai.",
+          "english": "During the siege by the confederates, the believers were severely tested. Allah sent wind and forces they did not see.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 33,
+              "start": 9,
+              "end": 11
+            },
+            {
+              "kind": "quran",
+              "surah": 33,
+              "start": 25,
+              "end": 25
+            }
+          ]
+        },
+        {
+          "id": "muhammad_sulh_aur_khuli_fatah",
+          "title": "Sulh aur khuli fatah",
+          "scene": "scrolls",
+          "roman": "Surah Al-Fath mein khuli fatah aur darakht ke neeche bayat karne walon par Allah ki raza ka zikr hai. Sabr aur aman ke muahide ka yeh aham marhala tha.",
+          "english": "Surah Al-Fath announces a clear victory and Allah’s pleasure with those who pledged beneath the tree, an important stage of steadfastness and peace.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 48,
+              "start": 1,
+              "end": 4
+            },
+            {
+              "kind": "quran",
+              "surah": 48,
+              "start": 18,
+              "end": 21
+            }
+          ]
+        },
+        {
+          "id": "muhammad_makkah_ki_fatah_aur_tawazu",
+          "title": "Makkah ki fatah aur tawazu",
+          "scene": "kaaba",
+          "roman": "Jab Allah ki madad aur fatah aaye aur log girohon mein deen mein dakhil hon, Quran Rabb ki tasbeeh, hamd aur maghfirat ki hidayat deta hai.",
+          "english": "When Allah’s help and victory come and people enter the religion in crowds, the Quran commands praise and seeking forgiveness.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 110,
+              "start": 1,
+              "end": 3
+            }
+          ]
+        },
+        {
+          "id": "muhammad_deen_ki_takmeel",
+          "title": "Deen ki takmeel",
+          "scene": "mountain",
+          "roman": "Quran mein deen mukammal karne aur nemat poori karne ka elan hai. Sahih Bukhari batati hai ke yeh ayat Jumuah ke din Arafat mein nazil hui.",
+          "english": "The Quran announces the completion of religion and Allah’s favour. Sahih Bukhari reports that this verse was revealed on a Friday at Arafat.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 3,
+              "end": 3
+            },
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 45
+            }
+          ]
+        },
+        {
+          "id": "muhammad_rahmat_aur_behtareen_misaal",
+          "title": "Rahmat aur behtareen misaal",
+          "scene": "sunrise",
+          "roman": "Allah ne Muhammad ﷺ ko jahanon ke liye rahmat banaya aur momineen ke liye aapki zindagi mein behtareen misaal batayi. Aapke akhlaq ki Quran tareef karta hai.",
+          "english": "Allah sent Muhammad as mercy to the worlds and made him an excellent example for believers. The Quran praises his great character.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 21,
+              "start": 107,
+              "end": 107
+            },
+            {
+              "kind": "quran",
+              "surah": 33,
+              "start": 21,
+              "end": 21
+            },
+            {
+              "kind": "quran",
+              "surah": 68,
+              "start": 4,
+              "end": 4
+            }
+          ]
+        },
+        {
+          "id": "muhammad_wafat_aur_paigham_ka_baqi_rehna",
+          "title": "Wafat aur paigham ka baqi rehna",
+          "scene": "scrolls",
+          "roman": "Sahih Bukhari ke mutabiq aapki wafat tirsath saal ki umar mein hui. Rasool Allah ﷺ ki wafat ke baad Abu Bakr ne Allah ki ibadat aur Muhammad ﷺ ke Allah ke rasool hone ki yaad dilayi. Unhon ne Surah Aal-e-Imran ki ayat parhi.",
+          "english": "Sahih Bukhari reports his death at age sixty-three. After the Messenger’s death, Abu Bakr reminded the people to worship Allah and recited the verse affirming Muhammad’s messengership and the mortality of messengers.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 144,
+              "end": 144
+            },
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 1241
+            },
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 3902
+            }
+          ]
+        }
+      ],
+      "birthNoteEnglish": "The Quran recalls his orphanhood. This book does not assert an exact birth date; established reports of revelation and later life follow."
+    }
+  ]
+}

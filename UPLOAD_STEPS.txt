@@ -1,20 +1,28 @@
-Hadith coloured-category + clean-preview fix
+LEARN ISLAM + UPDATED PUBSPEC
 
-Upload these 5 Dart files to the same paths in the repository. Build/install
-a new APK. No Firebase backend deployment is needed for this Hadith patch.
+Extract this ZIP. Upload these FIVE files to the matching repository paths:
+1. pubspec.yaml — repository root; correct spelling is .yaml, not .yml.
+2. lib/screens/home_screen.dart
+3. lib/screens/prayers_home_screen.dart
+4. lib/services/app_strings.dart
+5. lib/screens/prophet_stories_screen.dart
 
-Flow: pastel book cover -> light green Sahih / light peach Zaeef categories
--> chapters of that category -> original expandable hadith cards.
-Bukhari and Muslim entries all appear under Sahih. The Zaeef tile is empty
-for those collections. Browse all chapters retains access to Hasan/unclear
-source grades in the other books without incorrectly calling them weak.
+Upload this update LAST after the earlier Ask Islam Connect and Qasas-ul-Anbiya
+ZIPs. Keep this latest Home file; it preserves Ask Islam Connect above the
+timetable and places Prophet Stories inside Learn Islam instead of a second
+separate Home story card.
 
-Preview shows the short Sahih/Zaeef badge and reference. Scholar names and
-detailed source gradings appear ONLY after Tap to read in full, including
-a single supplied grade. No hadith text or original grading data is removed.
+Navigation: Home bottom tab Learn Islam -> Prophet Stories -> all 25 books.
+Other existing namaz, duas, zakat and learning content remain inside Learn Islam.
 
-Checks: Dart syntax, navigation/scoping, exact-number search under category,
-and hiding preview scholar details. Flutter build/device visual tests pending.
+The pubspec only adds the two prophet-story asset folder entries. Existing
+dependencies, fonts and version 1.0.0+17 from the file you supplied are retained.
+For a future Play release, use a version code higher than your published one;
+this file is prepared for the current testing build.
 
-This supersedes the Hadith_Classic_Layout_Improved.zip UI files. Keep the
-separate ownership-transfer fix and daily/Roman files already uploaded.
+All earlier new story/search Dart files, stories.json and the 34 .webp images
+from the previous ZIPs are still required; they are not duplicated here.
+No Firebase deploy is required. Commit all files and build the latest Android APK.
+
+Validation: YAML parses; only two asset lines differ from the supplied original
+pubspec; all three changed Dart files parse. Flutter/phone testing not run here.

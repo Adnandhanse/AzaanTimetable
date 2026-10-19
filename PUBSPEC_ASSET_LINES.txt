@@ -1,0 +1,16 @@
+Add the following TWO entries inside your EXISTING flutter -> assets list:
+
+    - assets/prophet_stories/
+    - assets/prophet_stories/scenes/
+
+Example placement (keep all the existing entries below/above these):
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/prophet_stories/
+    - assets/prophet_stories/scenes/
+    - assets/quran/quran_en.json
+
+The example is NOT a replacement pubspec.yaml. Do not duplicate flutter: or assets:.
+Keep your current app version, fonts, dependencies and all existing assets.
