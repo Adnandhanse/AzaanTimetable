@@ -1,7 +1,7 @@
 name: masjid_alarm_app
 description: "Islam Connect - prayer times, azan alarm, Qur'an, Hadith and duas."
 publish_to: 'none'
-version: 1.0.0+18
+version: 1.0.0+17
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -113,6 +113,7 @@ flutter:
     - assets/images/kaaba_dial.webp
     - assets/images/quran_header.webp
     - assets/icon/app_icon.png
+    - assets/learn_illustrations/
     - assets/prophet_stories/
     - assets/prophet_stories/scenes/
     - assets/quran/quran_en.json

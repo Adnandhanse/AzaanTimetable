@@ -1,28 +1,28 @@
-LEARN ISLAM + UPDATED PUBSPEC
+LEARN ISLAM - ILLUSTRATED CARDS
 
-Extract this ZIP. Upload these FIVE files to the matching repository paths:
-1. pubspec.yaml — repository root; correct spelling is .yaml, not .yml.
-2. lib/screens/home_screen.dart
-3. lib/screens/prayers_home_screen.dart
-4. lib/services/app_strings.dart
-5. lib/screens/prophet_stories_screen.dart
+Apply this update LAST, after your Ask Islam Connect, 25 Prophet Stories,
+and Learn Islam naming updates. It replaces the older Learn screen/pubspec.
 
-Upload this update LAST after the earlier Ask Islam Connect and Qasas-ul-Anbiya
-ZIPs. Keep this latest Home file; it preserves Ask Islam Connect above the
-timetable and places Prophet Stories inside Learn Islam instead of a second
-separate Home story card.
+1. Extract this ZIP. Do not upload the ZIP itself into GitHub.
+2. Replace lib/screens/prayers_home_screen.dart in that exact folder.
+3. Replace pubspec.yaml at the repository root (not pubspec.yml).
+4. Upload all 8 .webp files into assets/learn_illustrations/.
+5. Keep the existing Prophet Stories code and assets from the earlier bundle.
+6. Commit changes, then run your Android build workflow and install its APK.
+   No Firebase deployment and no new dependency are needed.
 
-Navigation: Home bottom tab Learn Islam -> Prophet Stories -> all 25 books.
-Other existing namaz, duas, zakat and learning content remain inside Learn Islam.
+Changes: 8 pastel illustrated cards, readable titles, preserved destinations,
+Urdu labels, responsive layout and larger text support. Titles are Flutter text,
+not baked into images. No people or animals in the artwork.
 
-The pubspec only adds the two prophet-story asset folder entries. Existing
-dependencies, fonts and version 1.0.0+17 from the file you supplied are retained.
-For a future Play release, use a version code higher than your published one;
-this file is prepared for the current testing build.
+Checks completed: Dart source syntax, YAML parsing, image decoding, asset paths,
+route preservation and ZIP integrity. Flutter SDK is unavailable here, so an
+APK build and device visual/tap test are still required before release.
 
-All earlier new story/search Dart files, stories.json and the 34 .webp images
-from the previous ZIPs are still required; they are not duplicated here.
-No Firebase deploy is required. Commit all files and build the latest Android APK.
+Test: open Learn Islam; tap Shahada, Namaz, Roza, Zakat, Hajj & Umrah, Umrah,
+Daily Duas and Prophet Stories. Check Urdu, large text, scrolling and dark mode.
 
-Validation: YAML parses; only two asset lines differ from the supplied original
-pubspec; all three changed Dart files parse. Flutter/phone testing not run here.
+Version remains 1.0.0+17 as supplied. For Play Store release, use a versionCode
+higher than your highest uploaded version in your release build configuration.
+
+ARTWORK_PROMPTS.json records the built-in image generation prompts and paths.

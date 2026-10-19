@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/ibadat_content.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
-import '../widgets/ornaments.dart';
 import 'pillar_detail_screen.dart';
 import 'dua_home_screen.dart';
 import 'namaz_home_screen.dart';
@@ -96,146 +95,127 @@ class PrayersHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pillars = _pillars;
-    final also = _also;
-
+    final items = [..._pillars, ..._also,
+      <String, dynamic>{
+        'title': S.isUrdu ? 'انبیاء کے واقعات' : 'Prophet Stories',
+        'subtitle': S.isUrdu ? 'نبیوں کی کہانیاں' : 'Nabiyon ki kahaniyan',
+        'stories': true,
+      },
+    ];
+    const images = ['shahada', 'namaz', 'roza', 'zakat', 'hajj',
+      'umrah', 'duas', 'stories'];
+    // Keep the existing destinations; only the presentation changes.
+    items[6]['title'] = S.isUrdu ? 'روزمرہ کی دعائیں' : 'Daily Duas';
     return Scaffold(
       appBar: AppBar(title: Text(S.prayers)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-        children: [
-          Card(margin: const EdgeInsets.only(bottom: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: AppColors.goldRule)),
-            child: ListTile(contentPadding: const EdgeInsets.all(16),
-              leading: Icon(Icons.auto_stories_outlined, color: AppColors.emerald, size: 32),
-              title: Text(S.isUrdu ? 'انبیاء کے واقعات' : 'Prophet Stories', style: AppText.rowTitle),
-              subtitle: Text(S.isUrdu ? 'قصص الانبیاء · 25 کتابیں' : 'Nabiyon ki kahaniyan · 25 books'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => const ProphetStoriesScreen())))),
-          SectionRule(label: S.fivePillars, trailingDiamond: true),
-          const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemCount: pillars.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              // Room for the medallion, two lines of title and two of
-              // subtitle. The Hadith grid clipped at 0.80 — no reason to
-              // relearn that here.
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, i) => _PillarCard(pillar: pillars[i]),
-          ),
-          const SizedBox(height: 20),
-          SectionRule(
-              label: S.isUrdu ? 'مزید' : 'Also', trailingDiamond: true),
-          const SizedBox(height: 14),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemCount: also.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemBuilder: (context, i) => _PillarCard(pillar: also[i]),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        child: LayoutBuilder(builder: (context, constraints) {
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          final columns = constraints.maxWidth >= 720 ? 3
+              : constraints.maxWidth < 340 || scale > 1.5 ? 1 : 2;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+            child: Column(children: [
+              Text(S.isUrdu ? 'سیکھیں، سمجھیں، عمل کریں'
+                  : 'Seekhein, samjhein, amal karein',
+                textAlign: TextAlign.center,
+                style: (S.isUrdu ? AppText.urduText : AppText.body)
+                    .copyWith(color: AppColors.textMuted)),
+              const SizedBox(height: 20),
+              // Rows size naturally to their longest title, including Urdu and
+              // accessibility text sizes, instead of clipping a fixed grid.
+              for (var row = 0; row < items.length; row += columns)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: IntrinsicHeight(child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var col = 0; col < columns; col++) ...[
+                        if (col > 0) const SizedBox(width: 12),
+                        Expanded(child: row + col < items.length
+                          ? _LearningCard(item: items[row + col],
+                              image: images[row + col])
+                          : const SizedBox.shrink()),
+                      ],
+                    ],
+                  )),
+                ),
+            ]),
+          );
+        }),
       ),
     );
   }
 }
 
-class _PillarCard extends StatelessWidget {
-  const _PillarCard({required this.pillar});
+class _LearningCard extends StatelessWidget {
+  const _LearningCard({required this.item, required this.image});
+  final Map<String, dynamic> item;
+  final String image;
 
-  final Map<String, dynamic> pillar;
+  void _open(BuildContext context) {
+    final Widget destination;
+    if (item['stories'] == true) {
+      destination = const ProphetStoriesScreen();
+    } else if (item['namaz'] == true) {
+      destination = NamazHomeScreen(description: item['description'] as String);
+    } else if (item['duas'] == true) {
+      destination = const DuaHomeScreen();
+    } else if (item['zakat'] == true) {
+      destination = ZakatHomeScreen(description: item['description'] as String);
+    } else {
+      destination = PillarDetailScreen(title: item['title'] as String,
+        description: item['description'] as String,
+        guide: item['guide'] as IbadatGuide?);
+    }
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => destination));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final IbadatGuide? guide = pillar['guide'] as IbadatGuide?;
-
-    return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(4),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(4),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => pillar['namaz'] == true
-                ? NamazHomeScreen(
-                    description: pillar['description'] as String)
-                : pillar['duas'] == true
-                    ? const DuaHomeScreen()
-                    : pillar['zakat'] == true
-                        ? ZakatHomeScreen(
-                            description: pillar['description'] as String)
-                        : PillarDetailScreen(
-                    title: pillar['title'] as String,
-                    description: pillar['description'] as String,
-                    guide: guide,
-                  ),
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: AppColors.goldRule),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Medallion(icon: pillar['icon'] as IconData, size: 40),
-              const SizedBox(height: 12),
-              Text(
-                pillar['title'] as String,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    AppText.rowTitle.copyWith(fontSize: 17, color: AppColors.text),
+    final radius = BorderRadius.circular(20);
+    return Semantics(
+      button: true,
+      child: Material(
+        color: AppColors.white,
+        shape: RoundedRectangleBorder(borderRadius: radius,
+          side: BorderSide(color: AppColors.goldRule)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _open(context),
+          child: Column(children: [
+            ExcludeSemantics(child: AspectRatio(
+              aspectRatio: 1.45,
+              child: Ink.image(
+                image: AssetImage('assets/learn_illustrations/$image.webp'),
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 4),
-              Text(
-                pillar['subtitle'] as String,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.caption.copyWith(color: AppColors.emerald),
-              ),
-              const SizedBox(height: 8),
-              Container(width: 22, height: 1, color: AppColors.goldRule),
-              const SizedBox(height: 8),
-              Text(
-                pillar['namaz'] == true
-                    ? (S.isUrdu ? 'طریقہ، جنازہ، عیدین' : 'Tareeqa, Janaza, Eidain')
-                    : pillar['zakat'] == true
-                        ? (S.isUrdu ? 'کیلکولیٹر + احادیث' : 'Calculator + hadith')
-                        : pillar['duas'] == true
-                            ? (S.isUrdu ? '132 باب' : '132 chapters')
-                            : guide == null
-                                ? S.comingSoon
-                                : S.stepByStep,
-                style: AppText.caption.copyWith(
-                  color: guide == null &&
-                          pillar['zakat'] != true &&
-                          pillar['duas'] != true
-                      ? AppColors.textFaint
-                      : AppColors.gold,
-                ),
-              ),
-            ],
-          ),
+            )),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 12, 10, 14),
+              child: Column(children: [
+                Text(item['title'] as String, textAlign: TextAlign.center,
+                  style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
+                    .copyWith(fontSize: S.isUrdu ? 20 : 22,
+                      color: AppColors.text)),
+                if (item['stories'] == true) ...[
+                  const SizedBox(height: 5),
+                  Text(item['subtitle'] as String, textAlign: TextAlign.center,
+                    style: (S.isUrdu ? AppText.urduText : AppText.caption)
+                      .copyWith(color: AppColors.textMuted)),
+                ],
+                const SizedBox(height: 9),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Container(width: 22, height: 1, color: AppColors.goldRule),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 7),
+                    child: Icon(Icons.diamond_outlined, size: 10,
+                      color: AppColors.gold)),
+                  Container(width: 22, height: 1, color: AppColors.goldRule),
+                ]),
+              ]),
+            ),
+          ]),
         ),
       ),
     );
