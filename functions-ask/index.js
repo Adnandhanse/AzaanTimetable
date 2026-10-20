@@ -4,16 +4,13 @@ const {defineSecret} = require('firebase-functions/params');
 const {initializeApp} = require('firebase-admin/app');
 const {getFirestore,Timestamp} = require('firebase-admin/firestore');
 const {reserveQuota} = require('./quota');
-const {gunzipSync} = require('node:zlib');
-const fs = require('node:fs');
 const path = require('node:path');
-const {prepareCorpus,runAsk} = require('./core');
+const {runAsk} = require('./core');
+const {createCorpusLoader} = require('./corpus-loader');
+const {classifyFailure} = require('./failure');
 initializeApp();
 const apiKey=defineSecret('ASK_GEMINI_API_KEY');
-let corpus;
-function documents() {
-  return corpus ||= prepareCorpus(JSON.parse(gunzipSync(fs.readFileSync(path.join(__dirname,'corpus.json.gz')))));
-}
+const documents=createCorpusLoader(path.join(__dirname,'corpus.ndjson.gz'));
 // Atomic shared counters bound provider calls across instances. Store no
 // questions, audio or answers. This collection MUST be closed to client writes.
 async function reserve(uid) {
@@ -23,21 +20,28 @@ async function reserve(uid) {
     limited:()=>new HttpsError('resource-exhausted','AI limit reached. Please try later or use Library search.')});
 }
 exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSeconds:120,
-  memory:'1GiB',maxInstances:2,concurrency:4},async request=>{
+  memory:'2GiB',maxInstances:2,concurrency:1},async request=>{
   if (!request.auth) throw new HttpsError('unauthenticated','Enable anonymous sign-in for Ask Islam Connect.');
   if (process.env.ASK_AI_ENABLED === 'false') throw new HttpsError('unavailable','AI is temporarily disabled. Use Library search.');
   const data=request.data;
   if (!data || typeof data.question!=='string' || data.question.trim().length<3 || data.question.length>500 ||
       !['all','quran','hadith','story'].includes(data.kind)) throw new HttpsError('invalid-argument','Enter a question of 3–500 characters.');
-  await reserve(request.auth.uid);
+  let stage = 'quota';
   try {
-    return await runAsk({question:data.question.trim(),kind:data.kind,docs:documents(),key:apiKey.value(),
+    await reserve(request.auth.uid);
+    stage = 'corpus';
+    const docs = await documents();
+    stage = 'gemini';
+    return await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
       model:process.env.ASK_GEMINI_MODEL || 'gemini-2.5-flash'});
   } catch (e) {
-    // Do not log questions, source passages, provider bodies, tokens or keys.
-    console.error('ask-ai-failed',{type:e.name,status:e.status || null});
-    if(e.status===429)throw new HttpsError('resource-exhausted','AI provider limit reached. Use Library search or try later.');
-    if(e.status===401 || e.status===403)throw new HttpsError('failed-precondition','AI provider key/access needs configuration.');
-    throw new HttpsError('unavailable','AI could not complete this request. Use Library search or try again.');
+    if (e instanceof HttpsError) throw e;
+    const failure = classifyFailure(e, stage);
+    console.error('ask-ai-failed', {stage, supportCode: failure.supportCode,
+      type:e.name, status:e.status || null});
+    throw new HttpsError(failure.code,
+      failure.supportCode === 'AI-LIMIT' ? 'AI usage limit reached. Please try later.' :
+      'AI search could not complete. Share the support code with the platform admin.',
+      {supportCode:failure.supportCode});
   }
 });

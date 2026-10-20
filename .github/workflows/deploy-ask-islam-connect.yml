@@ -27,6 +27,8 @@ jobs:
         run: npm --prefix functions-ask ci --ignore-scripts
       - name: Build library from current app assets
         run: npm --prefix functions-ask run build:corpus
+      - name: Check full library loading and search within memory budget
+        run: node --max-old-space-size=512 functions-ask/check-corpus.js
       - name: Test AI orchestration and citation validation
         run: npm --prefix functions-ask test
       - name: Store provider key in Firebase Secret Manager

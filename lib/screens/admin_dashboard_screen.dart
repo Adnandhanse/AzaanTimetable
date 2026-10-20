@@ -6,6 +6,7 @@ import 'announcement_admin_screen.dart';
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import 'update_prayer_times_screen.dart';
+import 'transfer_administration_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final String adminMobile;
@@ -183,11 +184,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         icon: const Icon(Icons.swap_horiz_rounded, size: 22),
-                        label: const Text('Transfer ownership — Coming soon',
+                        label: const Text('Transfer ownership',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w600)),
-                        // Enable after the ownership transfer service is verified.
-                        onPressed: null,
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => TransferAdministrationScreen(masjid: masjid))),
                       ),
                     ),
                   ],

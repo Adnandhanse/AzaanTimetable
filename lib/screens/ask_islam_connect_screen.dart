@@ -150,6 +150,21 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       return 'AI session nahi ban saka. Internet check karke dobara koshish karein.';
     }
     if (error is FirebaseFunctionsException) {
+      if (error.code == 'unauthenticated') return 'AI session verify nahi ho saka. Platform admin AI service ki Cloud Run access setting check karein. [AI-AUTH]';
+      if (error.code == 'permission-denied') return 'AI service access deny ho raha hai. Platform admin server permissions check karein. [AI-ACCESS]';
+      if (error.code == 'deadline-exceeded') return 'Search mein zyada waqt lag raha hai. Kuch der baad dobara koshish karein. [AI-TIMEOUT]';
+      final details = error.details;
+      final support = details is Map ? details['supportCode'] : null;
+      const messages = <String, String>{
+        'AI-DATABASE': 'AI server database access check karna hai.',
+        'AI-PROVIDER-REQUEST': 'Gemini request configuration check karna hai.',
+        'AI-MODEL': 'Configured Gemini model available nahi hai.',
+        'AI-KEY': 'Gemini API key ya access check karna hai.',
+        'AI-OUTPUT': 'Gemini ka response complete ya valid nahi tha. Dobara koshish karein.',
+        'AI-CORPUS': 'AI ki reference library server par load nahi ho saki.',
+      };
+      if (support is String && messages.containsKey(support)) return '${messages[support]} [$support]';
+      if (error.code == 'internal' || error.code == 'unavailable') return 'AI server search poori nahi kar saka. Platform admin server logs check karein. [AI-SERVER]';
       if (error.code == 'not-found') return 'Gemini service abhi available nahi. Platform admin deployment check karein.';
       if (error.code == 'failed-precondition') return 'Gemini ki API key ya server setup check karna hai. Platform admin se rabta karein.';
       if (error.code == 'resource-exhausted') return 'Abhi AI ki usage limit aa gayi hai. Kuch der baad dobara koshish karein; daily limit ho to agle din try karein.';

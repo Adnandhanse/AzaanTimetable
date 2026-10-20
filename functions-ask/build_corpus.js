@@ -2,7 +2,10 @@
 // Run from any cwd. Build ONLY from the existing reviewed repository assets.
 const fs = require('node:fs');
 const path = require('node:path');
-const {gzipSync} = require('node:zlib');
+const {createGzip} = require('node:zlib');
+const {Readable} = require('node:stream');
+const {pipeline} = require('node:stream/promises');
+const {normalize} = require('./core');
 const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 const load = name => JSON.parse(fs.readFileSync(path.join(root, 'assets', name), 'utf8'));
@@ -37,9 +40,24 @@ for (const b of load('prophet_stories/stories.json').books) {
     image: `assets/prophet_stories/scenes/${p.scene}.webp`, context: `${b.id} ${b.name} ${p.title}`}));
 }
 if (docs.length < 40000 || new Set(docs.map(d => d.id)).size !== docs.length) throw Error('Corpus is incomplete or has duplicate IDs');
-const raw = Buffer.from(JSON.stringify(docs));
-fs.writeFileSync(path.join(__dirname,'corpus.json.gz'), gzipSync(raw));
-const manifest = {count: docs.length, sha256: crypto.createHash('sha256').update(raw).digest('hex'),
-  kinds: Object.fromEntries(['quran','hadith','story'].map(k => [k,docs.filter(d => d.kind === k).length]))};
-fs.writeFileSync(path.join(__dirname,'corpus_manifest.json'), JSON.stringify(manifest,null,2));
-console.log(manifest);
+async function build() {
+  const hash=crypto.createHash('sha256');
+  async function* records() {
+    for (const d of docs) {
+      // Work is done once in CI, not at each Cloud Run cold start.
+      d.normalized=` ${normalize(`${d.en} ${d.ur} ${d.roman || ''} ${d.context || ''} ${d.title} ${d.chapter || ''}`)} `;
+      const line=JSON.stringify(d)+'\n';
+      hash.update(line);
+      yield line;
+    }
+  }
+  await pipeline(Readable.from(records()),createGzip(),
+    fs.createWriteStream(path.join(__dirname,'corpus.ndjson.gz')));
+  // A stale legacy array file should never be uploaded alongside the stream.
+  fs.rmSync(path.join(__dirname,'corpus.json.gz'),{force:true});
+  const manifest={format:'normalized-ndjson-v1',count:docs.length,sha256:hash.digest('hex'),
+    kinds:Object.fromEntries(['quran','hadith','story'].map(k=>[k,docs.filter(d=>d.kind===k).length]))};
+  fs.writeFileSync(path.join(__dirname,'corpus_manifest.json'),JSON.stringify(manifest,null,2));
+  console.log(manifest);
+}
+build().catch(error=>{console.error(error);process.exitCode=1;});
