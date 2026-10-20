@@ -1,7 +1,7 @@
 'use strict';
 const {createHash}=require('node:crypto');
-async function reserveQuota({db,uid,now=Date.now(),userLimit=20,globalLimit=200,timestamp,limited}) {
-  const date=new Date(now).toISOString().slice(0,10), hash=createHash('sha256').update(uid).digest('hex');
+async function reserveQuota({db,uid,now=Date.now(),userLimit=5,globalLimit=250,timestamp,limited}) {
+  const date=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now)), hash=createHash('sha256').update(uid).digest('hex');
   const user=db.collection('_askAiUsage').doc(`${date}-${hash}`), global=db.collection('_askAiUsage').doc(`${date}-global`);
   await db.runTransaction(async tx=>{
     const [u,g]=await Promise.all([tx.get(user),tx.get(global)]);

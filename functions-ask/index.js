@@ -9,7 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {prepareCorpus,runAsk} = require('./core');
 initializeApp();
-const apiKey=defineSecret('ASK_OPENAI_API_KEY');
+const apiKey=defineSecret('ASK_GEMINI_API_KEY');
 let corpus;
 function documents() {
   return corpus ||= prepareCorpus(JSON.parse(gunzipSync(fs.readFileSync(path.join(__dirname,'corpus.json.gz')))));
@@ -19,7 +19,7 @@ function documents() {
 async function reserve(uid) {
   const limit=(name,fallback) => Math.max(1,Math.min(5000,Number(process.env[name]) || fallback));
   await reserveQuota({db:getFirestore(),uid,timestamp:Timestamp.fromMillis,
-    userLimit:limit('ASK_USER_DAILY_LIMIT',20),globalLimit:limit('ASK_GLOBAL_DAILY_LIMIT',200),
+    userLimit:limit('ASK_USER_DAILY_LIMIT',5),globalLimit:Math.min(250,limit('ASK_GLOBAL_DAILY_LIMIT',250)),
     limited:()=>new HttpsError('resource-exhausted','AI limit reached. Please try later or use Library search.')});
 }
 exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSeconds:120,
@@ -32,7 +32,7 @@ exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSec
   await reserve(request.auth.uid);
   try {
     return await runAsk({question:data.question.trim(),kind:data.kind,docs:documents(),key:apiKey.value(),
-      model:process.env.ASK_AI_MODEL || 'gpt-4.1-mini'});
+      model:process.env.ASK_GEMINI_MODEL || 'gemini-2.5-flash'});
   } catch (e) {
     // Do not log questions, source passages, provider bodies, tokens or keys.
     console.error('ask-ai-failed',{type:e.name,status:e.status || null});

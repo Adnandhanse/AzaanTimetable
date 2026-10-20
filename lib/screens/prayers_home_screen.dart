@@ -105,6 +105,7 @@ class PrayersHomeScreen extends StatelessWidget {
     const images = ['shahada', 'namaz', 'roza', 'zakat', 'hajj',
       'umrah', 'duas', 'stories'];
     // Keep the existing destinations; only the presentation changes.
+    items[4]['title'] = S.isUrdu ? 'حج' : 'Hajj';
     items[6]['title'] = S.isUrdu ? 'روزمرہ کی دعائیں' : 'Daily Duas';
     return Scaffold(
       appBar: AppBar(title: Text(S.prayers)),
@@ -186,35 +187,21 @@ class _LearningCard extends StatelessWidget {
           onTap: () => _open(context),
           child: Column(children: [
             ExcludeSemantics(child: AspectRatio(
-              aspectRatio: 1.45,
+              aspectRatio: image == 'stories' ? 1.5 : 900 / 620,
               child: Ink.image(
                 image: AssetImage('assets/learn_illustrations/$image.webp'),
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 12, 10, 14),
-              child: Column(children: [
-                Text(item['title'] as String, textAlign: TextAlign.center,
-                  style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
-                    .copyWith(fontSize: S.isUrdu ? 20 : 22,
-                      color: AppColors.text)),
-                if (item['stories'] == true) ...[
-                  const SizedBox(height: 5),
-                  Text(item['subtitle'] as String, textAlign: TextAlign.center,
-                    style: (S.isUrdu ? AppText.urduText : AppText.caption)
-                      .copyWith(color: AppColors.textMuted)),
-                ],
-                const SizedBox(height: 9),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Container(width: 22, height: 1, color: AppColors.goldRule),
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 7),
-                    child: Icon(Icons.diamond_outlined, size: 10,
-                      color: AppColors.gold)),
-                  Container(width: 22, height: 1, color: AppColors.goldRule),
-                ]),
-              ]),
-            ),
+            Expanded(child: Container(
+              alignment: Alignment.center,
+              constraints: const BoxConstraints(minHeight: 64),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Text(item['title'] as String, textAlign: TextAlign.center,
+                style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
+                  .copyWith(fontSize: S.isUrdu ? 18 : 18,
+                    height: S.isUrdu ? 1.8 : 1.25, color: AppColors.text)),
+            )),
           ]),
         ),
       ),

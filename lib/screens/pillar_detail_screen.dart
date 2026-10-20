@@ -68,7 +68,7 @@ class PillarDetailScreen extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: AppColors.warningBg,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.gold),
             ),
             padding: const EdgeInsets.all(13),
@@ -117,10 +117,10 @@ class _StepCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.goldRule),
       ),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -136,24 +136,28 @@ class _StepCard extends StatelessWidget {
                     Text(step.title,
                         style: AppText.rowTitle
                             .copyWith(fontSize: 17, color: AppColors.text)),
-                    const SizedBox(height: 3),
-                    if (step.method != null)
-                      Text(step.method!,
-                          style: AppText.body.copyWith(color: AppColors.text)),
+
                   ],
                 ),
               ),
             ],
           ),
 
+          if (step.method != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Text(step.method!, style: AppText.body.copyWith(
+              color: AppColors.text, height: 1.55)),
+          ],
+
           if (step.arabic != null) ...<Widget>[
             const SizedBox(height: 12),
             Container(height: 1, color: AppColors.goldRuleFaint),
             const SizedBox(height: 10),
-            Directionality(
-              textDirection: TextDirection.rtl,
+            SizedBox(
+              width: double.infinity,
               child: Text(
                 step.arabic!,
+                textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: AppText.arabicVerse.copyWith(color: AppColors.emerald),
               ),
@@ -164,10 +168,11 @@ class _StepCard extends StatelessWidget {
               const SizedBox(height: 8),
               Builder(builder: (context) {
                 final bool urdu = S.isUrdu && step.translationUr != null;
-                return Directionality(
-                  textDirection: urdu ? TextDirection.rtl : TextDirection.ltr,
+                return SizedBox(
+                  width: double.infinity,
                   child: Text(
                     urdu ? step.translationUr! : (step.translation ?? ''),
+                    textDirection: urdu ? TextDirection.rtl : TextDirection.ltr,
                     textAlign: urdu ? TextAlign.right : TextAlign.left,
                     style: urdu
                         ? AppText.urduText.copyWith(color: AppColors.textMid)
@@ -185,7 +190,7 @@ class _StepCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 color: AppColors.emerald.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.goldRule),
               ),
               padding: const EdgeInsets.all(12),

@@ -1,32 +1,14 @@
-ASK ISLAM CONNECT — AI LANGUAGE UNDERSTANDING
+LEARNING LAYOUT FIX - ONLY TWO CHANGED APP FILES
 
-Apply AFTER Ask_And_Prophet_Stories_Improved_Update.zip.
-Only changed/new files are supplied. Extract; upload into matching repo paths.
+Extract and replace these files in the same repository folders:
+lib/screens/prayers_home_screen.dart
+lib/screens/pillar_detail_screen.dart
 
-REPLACE / ADD APP FILES:
-lib/screens/ask_islam_connect_screen.dart
-lib/services/ask_connect_ai.dart (new)
+Apply after your earlier Learning illustrated cards update. Keep the existing illustration assets. No pubspec/dependency/backend changes required.
 
-ADD SERVER / CONFIG:
-functions-ask/ (all supplied files, including its test folder/package files)
-firebase.ask.json (repository root)
-.github/workflows/deploy-ask-islam-connect.yml
-ASK_AI_SETUP.md (setup instructions)
+Learning cards: complete image using its original aspect ratio and contain fit, compact centred title strip, no decorative whitespace, equal card heights within each row. Hajj and Umrah are labelled separately while existing routes remain.
+Guide: rounded cards, consistent padding, step method below heading, full-width right-aligned Arabic and correctly aligned translation. Existing religious content and source links are unchanged.
 
-Then complete ASK_AI_SETUP.md:
-- Your OpenAI API key goes ONLY in the ASK_OPENAI_API_KEY GitHub Actions secret.
-- Enable Firebase Anonymous authentication; protect the usage-counter collection
-  and configure the necessary server/deployer access described in the setup.
-- Run Deploy Ask Islam Connect AI, then Build Android APK and test the new APK.
+Commit, run Build Android APK for the latest commit, download and install that APK. Check the Learning grid and Namaz guide in Urdu/English, large text and dark mode.
 
-This is actual AI integration code, NOT an already-live service.
-No API key was provided here, and no live model call/cloud deployment was made.
-An APK build by itself will not activate it. No Flutter package/pubspec change.
-
-The backend test/package files are needed by the deployment workflow. They do
-not become a new screen or feature inside the APK. Generated search corpus is
-built automatically from your existing repository assets; it is not in this ZIP.
-
-Update the privacy policy/Data Safety for the new optional question-processing
-flow before publicly releasing the AI-enabled APK. Details and a factual policy
-paragraph are in ASK_AI_SETUP.md.
+Dart syntax parsed successfully. Flutter SDK/device not available here, so no APK build or device visual test was performed.

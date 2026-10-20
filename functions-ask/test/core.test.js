@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {prepareCorpus,retrieve,validatePlan,validateAnswer,runAsk,openAIJson,contextFor}=require('../core');
+const {prepareCorpus,retrieve,validatePlan,validateSelection,runAsk,contextFor}=require('../core');
 const docs=prepareCorpus([
  {id:'hadith:bukhari:1',kind:'hadith',book:'bukhari',number:1,title:'Bukhari',en:'During prayer he placed his right hand over his left forearm.',ur:'',grades:[]},
  {id:'hadith:muslim:2',kind:'hadith',book:'muslim',number:2,title:'Muslim',en:'He raised his hands when beginning prayer.',ur:'',grades:[]},
@@ -17,10 +17,11 @@ test('grounded pipeline uses retrieved IDs and returns trusted corpus text',asyn
  const calls=[];
  const result=await runAsk({question:'Namaz mein haath kahan rakhna hai?',docs,key:'test',call:async req=>{
   calls.push(req);
-  return calls.length===1?structuredClone(plan):{status:'answered',followup:'',speech_urdu:'ہاتھ',speech_english:'Hands',paragraphs:[{text:'Riwayat mein daayein haath ka zikr hai.',source_ids:['hadith:bukhari:1']}]};
+  return calls.length===1?structuredClone(plan):{status:'selected',source_ids:['hadith:bukhari:1']};
  }});
  assert.equal(calls.length,2);assert.equal(calls[1].input.excerpts.length,1);
  assert.equal(result.hits[0].en,docs[0].en);assert.equal(result.hits[0].normalized,undefined);
+ assert.deepEqual(result.paragraphs,[]);assert.equal(result.speech_urdu,'');assert.equal(result.answerMode,'sources-only');
 });
 test('missing evidence stops before answer-model call',async()=>{
  let count=0;const result=await runAsk({question:'unknown',docs,key:'test',call:async()=>{count++;return {intent:'search',understood:'unknown',clarification:'',searches:[{must:[['nonexistenttopic']],boost:[]}]};}});
@@ -28,7 +29,7 @@ test('missing evidence stops before answer-model call',async()=>{
 });
 test('forged, uncited and empty evidence are rejected',()=>{
  const candidates=retrieve(docs,plan);
- for(const ids of [[],['hadith:invented:99']])assert.throws(()=>validateAnswer({status:'answered',followup:'',speech_urdu:'',speech_english:'',paragraphs:[{text:'Claim',source_ids:ids}]},candidates));
+ for(const ids of [[],['hadith:invented:99']])assert.throws(()=>validateSelection({status:'selected',source_ids:ids},candidates));
 });
 test('clarification and unrelated questions do not trigger retrieval/answer generation',async()=>{
  for(const intent of ['clarify','out_of_scope']) {
@@ -36,22 +37,17 @@ test('clarification and unrelated questions do not trigger retrieval/answer gene
   assert.equal(count,1);assert.equal(r.status,intent);assert.deepEqual(r.hits,[]);
  }
 });
-test('HTTP contract uses Responses structured outputs, no storage and bounded tokens',async()=>{
- let payload;
- const out=await openAIJson({key:'test-only',model:'gpt-4.1-mini',schema:{type:'object'},name:'test_schema',instructions:'test',input:{question:'question'},maxTokens:12,
- fetcher:async(url,req)=>{payload=JSON.parse(req.body);assert.equal(url,'https://api.openai.com/v1/responses');return {ok:true,json:async()=>({status:'completed',output:[{content:[{type:'output_text',text:'{"ok":true}'}]}]})};}});
- assert.equal(payload.store,false);assert.equal(payload.text.format.strict,true);assert.equal(payload.max_output_tokens,12);assert.equal(out.ok,true);
-});
-test('refusals, truncated responses and provider failures are not shown as answers',async()=>{
- for(const data of [{status:'incomplete',output:[]},{status:'completed',output:[{content:[{type:'refusal',refusal:'no'}]}]}]) {
-  await assert.rejects(openAIJson({key:'test',model:'test',schema:{},name:'test',instructions:'',input:{},maxTokens:1,fetcher:async()=>({ok:true,json:async()=>data})}));
- }
- await assert.rejects(openAIJson({key:'test',model:'test',schema:{},name:'test',instructions:'',input:{},maxTokens:1,fetcher:async()=>({ok:false,status:401})}));
-});
 test('context size is bounded',()=>{
  const c=Array.from({length:12},(_,i)=>({doc:{id:String(i),en:'x'.repeat(40000),grades:[]},terms:['x']}));
  assert.ok(contextFor(c).reduce((n,x)=>n+x.text.length,0)<=24000);
 });
 test('an invalid essential concept cannot be dropped to broaden a query',()=>{
  assert.throws(()=>validatePlan({intent:'search',understood:'hands',clarification:'',searches:[{must:[['prayer'],['']],boost:[]}]}),/empty-essential-concept/);
+});
+
+test('model prose and forged source bodies are never forwarded',async()=>{
+ let calls=0;
+ const r=await runAsk({question:'hand position',docs,call:async()=>++calls===1?structuredClone(plan):
+   {status:'selected',source_ids:['hadith:bukhari:1'],answer:'Invented claim',en:'Forged scripture',paragraphs:[{text:'Fabricated'}]}});
+ assert.deepEqual(r.paragraphs,[]);assert.equal(r.hits[0].en,docs[0].en);assert.equal(r.answer,undefined);
 });
