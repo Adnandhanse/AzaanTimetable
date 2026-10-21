@@ -8,6 +8,7 @@ const path = require('node:path');
 const {runAsk} = require('./core');
 const {DEFAULT_MODEL} = require('./gemini-client');
 const {createAnswerCache} = require('./answer-cache');
+const {createSharedAnswerCache,optionalCache} = require('./shared-answer-cache');
 const answers=createAnswerCache();
 const stats=require('./database_stats.json');
 const {createCorpusLoader} = require('./corpus-loader');
@@ -34,15 +35,21 @@ exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSec
   try {
     await reserve(request.auth.uid);
     const model=process.env.ASK_GEMINI_MODEL || DEFAULT_MODEL;
-    const cacheKey=answers.key(`${model}:guides=${data.acceptGuides===true}`,data.kind,data.question);
+    const cacheKey=answers.key(`${model}:${stats.corpusSha256}:v2:guides=${data.acceptGuides===true}`,data.kind,data.question);
     const cached=answers.get(cacheKey);
-    if(cached)return cached;
+    if(cached){console.info('ask-cache-hit',{layer:'memory'});return cached;}
+    const shared=createSharedAnswerCache({db:getFirestore(),secret:apiKey.value(),
+      version:`${model}:${stats.corpusSha256}:v2:guides=${data.acceptGuides===true}`,
+      timestamp:Timestamp.fromMillis});
+    const saved=await optionalCache(()=>shared.get(cacheKey));
+    if(saved){console.info('ask-cache-hit',{layer:'shared'});answers.put(cacheKey,saved);return saved;}
     stage = 'corpus';
     const docs = async()=>{stage='corpus';const loaded=await documents();stage='gemini';return loaded;};
     stage = 'gemini';
     const result=await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
       model,stats,allowGuides:data.acceptGuides===true});
     answers.put(cacheKey,result);
+    await optionalCache(()=>shared.put(cacheKey,result));
     return result;
   } catch (e) {
     if (e instanceof HttpsError) throw e;
