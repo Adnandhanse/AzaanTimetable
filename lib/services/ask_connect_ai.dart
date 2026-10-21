@@ -21,7 +21,7 @@ class AskConnectAi {
       final response = await FirebaseFunctions.instanceFor(app: app, region: 'us-central1')
         .httpsCallable('askIslamConnect', options: HttpsCallableOptions(
           timeout: const Duration(seconds: 115)))
-        .call<dynamic>({'question': question, 'kind': kind});
+        .call<dynamic>({'question': question, 'kind': kind, 'acceptGuides': true});
       return _map(response.data);
     } catch (_) { _session = null; rethrow; }
   }

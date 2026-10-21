@@ -51,3 +51,14 @@ test('model prose and forged source bodies are never forwarded',async()=>{
    {status:'selected',source_ids:['hadith:bukhari:1'],answer:'Invented claim',en:'Forged scripture',paragraphs:[{text:'Fabricated'}]}});
  assert.deepEqual(r.paragraphs,[]);assert.equal(r.hits[0].en,docs[0].en);assert.equal(r.answer,undefined);
 });
+test('broad worship method opens the existing guide with one call and no generated teaching',async()=>{
+ for(const [question,guide] of [['namaz ka tarika','namaz'],['how to pray step by step','namaz'],['eid ki namaz ka tarika','eidain'],['umrah kaise karein','umrah']]){
+  let count=0;const r=await runAsk({question,docs,allowGuides:true,call:async()=>{count++;return {intent:'search',understood:question,clarification:'',guide_id:guide,searches:[]};}});
+  assert.equal(count,1);assert.equal(r.hits[0].kind,'guide');assert.equal(r.hits[0].guideId,guide);assert.deepEqual(r.paragraphs,[]);
+ }
+});
+test('unknown guide IDs are rejected and specific questions retain source retrieval',async()=>{
+ assert.throws(()=>validatePlan({intent:'search',understood:'x',clarification:'',guide_id:'invented',searches:[]}),/invalid-plan-guide/);
+ let n=0;const r=await runAsk({question:'namaz mein haath kahan baandhein',docs,call:async()=>++n===1?{...structuredClone(plan),guide_id:''}:{status:'selected',source_ids:['hadith:bukhari:1']}});
+ assert.equal(n,2);assert.equal(r.hits[0].kind,'hadith');
+});

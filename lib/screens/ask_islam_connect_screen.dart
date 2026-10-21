@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/hadith.dart';
 import '../data/daily_hadith.dart';
+import '../data/ibadat_content.dart';
+import 'pillar_detail_screen.dart';
 import '../data/daily_quran_ayah.dart';
 import '../services/ask_connect_ai.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -156,6 +158,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       final details = error.details;
       final support = details is Map ? details['supportCode'] : null;
       const messages = <String, String>{
+        'AI-TIMEOUT': 'Jawab aane mein zyada waqt lag gaya. Kuch der baad dobara koshish karein.',
         'AI-DATABASE': 'AI server database access check karna hai.',
         'AI-PROVIDER-REQUEST': 'Gemini request configuration check karna hai.',
         'AI-MODEL': 'Configured Gemini model available nahi hai.',
@@ -176,7 +179,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   String _body(Map<String, dynamic> h) => h['kind'] == 'story'
       ? (h[_translation == 'urdu' ? 'roman' : 'en'] as String? ?? '')
       : (h[_translation == 'urdu' ? 'ur' : 'en'] as String? ?? '');
-  String _reference(Map<String, dynamic> h) => h['kind'] == 'story'
+  String _reference(Map<String, dynamic> h) => h['kind'] == 'guide' ? h['title'] as String : h['kind'] == 'story'
       ? '${h['title']} · ${h['chapter']}' : h['kind'] == 'quran'
       ? 'Quran · ${h['title']} ${h['surah']}:${h['number']}'
       : '${h['title']} · Hadith ${h['number']}';
@@ -209,7 +212,17 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   Future<void> _open(Map<String, dynamic> h) async {
     await _stop();
     if (!mounted) return;
-    if (h['kind'] == 'story') {
+    if (h['kind'] == 'guide') {
+      const guides = <String, IbadatGuide>{'namaz': IbadatContent.namaz,
+        'shahadah': IbadatContent.shahadah, 'roza': IbadatContent.roza,
+        'zakat': IbadatContent.zakat, 'hajj': IbadatContent.hajj,
+        'umrah': IbadatContent.umrah, 'janaza': IbadatContent.janaza,
+        'eidain': IbadatContent.eidain};
+      final guide = guides[h['guideId']];
+      if (guide == null) { _notice('Guide abhi available nahi.'); return; }
+      await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) =>
+        PillarDetailScreen(title: h['title'] as String, description: '', guide: guide)));
+    } else if (h['kind'] == 'story') {
       try {
         final books = await ProphetStoriesRepository.load();
         final story = books.firstWhere((b) => b.id == h['storyId']);
@@ -387,17 +400,17 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
     ]));
 
   Widget _result(Map<String, dynamic> h, int position) {
-    final urdu = _translation == 'urdu' && h['kind'] != 'story';
+    final urdu = _translation == 'urdu' && h['kind'] != 'story' && h['kind'] != 'guide';
     final text = _body(h);
     return Card(margin: const EdgeInsets.only(bottom: 16), shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppColors.goldRule)),
       child: Padding(padding: const EdgeInsets.all(18), child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text('$position. ${h['kind'] == 'story' ? 'ANBIYA KI KAHANI' : h['kind'] == 'quran' ? 'QURAN AYAT' : 'HADEES'}',
+          Text('$position. ${h['kind'] == 'guide' ? 'LEARNING GUIDE' : h['kind'] == 'story' ? 'ANBIYA KI KAHANI' : h['kind'] == 'quran' ? 'QURAN AYAT' : 'HADEES'}',
             style: AppText.caption.copyWith(color: AppColors.emerald, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8), Row(children: [
             Expanded(child: Text(_reference(h), style: AppText.rowTitle)),
-            if (h['kind'] != 'story') IconButton(tooltip: 'Reference aur wazahat',
+            if (h['kind'] != 'story' && h['kind'] != 'guide') IconButton(tooltip: 'Reference aur wazahat',
               onPressed: () => _details(h), icon: const Icon(Icons.info_outline, size: 20)),
           ]),
           if ((h['ar'] as String? ?? '').isNotEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
@@ -418,11 +431,11 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
           ],
           const SizedBox(height: 8),
           Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            TextButton.icon(onPressed: text.isEmpty ? null : () => _speak(h),
+            TextButton.icon(onPressed: text.isEmpty || h['kind'] == 'guide' ? null : () => _speak(h),
               icon: Icon(_speaking == _id(h) ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
               label: Text(_speaking == _id(h) ? 'Rokein' : h['kind'] == 'story' ? 'English mein sunein' : 'Sunein')),
             TextButton.icon(onPressed: () => _open(h), icon: const Icon(Icons.menu_book_outlined),
-              label: Text(h['kind'] == 'story' ? 'Poori story parhein' : 'Poora parhein')),
+              label: Text(h['kind'] == 'guide' ? 'Qadam-ba-qadam seekhein' : h['kind'] == 'story' ? 'Poori story parhein' : 'Poora parhein')),
           ]),
         ])));
   }

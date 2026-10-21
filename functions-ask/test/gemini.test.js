@@ -44,3 +44,11 @@ test('explicit legacy models retain their compatible thinking budget',async()=>{
   }});
  }
 });
+test('provider timeouts keep their type and are never retried',async()=>{
+ let count=0;
+ await assert.rejects(geminiJson({...base,name:'islam_search_plan',fetcher:async(_url,request)=>{
+  count++;assert.ok(request.signal instanceof AbortSignal);
+  throw new DOMException('test timeout','TimeoutError');
+ }}),e=>e.name==='TimeoutError');
+ assert.equal(count,1);
+});

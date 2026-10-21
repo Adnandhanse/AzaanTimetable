@@ -18,3 +18,6 @@ test('fixed diagnostic payload never includes arbitrary error contents',()=>{
   const result=classifyFailure(new Error('private secret question database path'),'corpus');
   assert.deepEqual(result,{code:'failed-precondition',supportCode:'AI-CORPUS'});
 });
+test('provider timeout reports a retryable timeout instead of server setup failure',()=>{
+ for(const name of ['TimeoutError','AbortError'])assert.deepEqual(classifyFailure({name},'gemini'),{code:'deadline-exceeded',supportCode:'AI-TIMEOUT'});
+});

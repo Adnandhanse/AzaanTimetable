@@ -2,6 +2,8 @@
 // Only fixed support codes cross the callable boundary. Never include provider
 // response bodies, user questions, credentials or database paths.
 function classifyFailure(error, stage) {
+  if (error.name === 'TimeoutError' || error.name === 'AbortError' || [408,504].includes(error.status))
+    return {code:'deadline-exceeded',supportCode:'AI-TIMEOUT'};
   if (error.status === 429) return {code:'resource-exhausted',supportCode:'AI-LIMIT'};
   if ([401,403].includes(error.status)) return {code:'failed-precondition',supportCode:'AI-KEY'};
   if (error.status === 400) return {code:'failed-precondition',supportCode:'AI-PROVIDER-REQUEST'};

@@ -2,10 +2,13 @@
 // Gemini Developer API only. No OpenAI/paid-provider fallback and no retries.
 const DEFAULT_MODEL='gemini-3.5-flash-lite';
 const MODELS=new Set([DEFAULT_MODEL,'gemini-2.5-flash','gemini-2.5-flash-lite']);
-async function geminiJson({key,model=DEFAULT_MODEL,schema,instructions,input,maxTokens,fetcher=fetch}) {
+async function geminiJson({key,model=DEFAULT_MODEL,schema,instructions,input,maxTokens,name,fetcher=fetch}) {
   if(!MODELS.has(model))throw Error('unsupported-gemini-model');
-  const response=await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
-    method:'POST',signal:AbortSignal.timeout(40000),
+  const started=Date.now();
+  const phase=name==='islam_search_plan'?'plan':name==='islam_source_selection'?'selection':'check';
+  let response;
+  try { response=await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
+    method:'POST',signal:AbortSignal.timeout(25000),
     headers:{'x-goog-api-key':key,'Content-Type':'application/json'},
     body:JSON.stringify({
       systemInstruction:{parts:[{text:instructions}]},
@@ -17,6 +20,11 @@ async function geminiJson({key,model=DEFAULT_MODEL,schema,instructions,input,max
       // No Google Search grounding: all evidence comes from our own corpus.
     }),
   });
+  } catch(e) {
+    console.warn('gemini-request-failed',{phase,durationMs:Date.now()-started,type:e.name});
+    throw e;
+  }
+  console.info('gemini-request-complete',{phase,durationMs:Date.now()-started,status:response.status||200});
   if(!response.ok){const e=new Error('gemini-unavailable');e.status=response.status;throw e;}
   const data=await response.json();
   const candidate=data.candidates?.[0];

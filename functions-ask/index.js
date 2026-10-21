@@ -7,6 +7,8 @@ const {reserveQuota} = require('./quota');
 const path = require('node:path');
 const {runAsk} = require('./core');
 const {DEFAULT_MODEL} = require('./gemini-client');
+const {createAnswerCache} = require('./answer-cache');
+const answers=createAnswerCache();
 const {createCorpusLoader} = require('./corpus-loader');
 const {classifyFailure} = require('./failure');
 initializeApp();
@@ -30,11 +32,17 @@ exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSec
   let stage = 'quota';
   try {
     await reserve(request.auth.uid);
+    const model=process.env.ASK_GEMINI_MODEL || DEFAULT_MODEL;
+    const cacheKey=answers.key(`${model}:guides=${data.acceptGuides===true}`,data.kind,data.question);
+    const cached=answers.get(cacheKey);
+    if(cached)return cached;
     stage = 'corpus';
     const docs = await documents();
     stage = 'gemini';
-    return await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
-      model:process.env.ASK_GEMINI_MODEL || DEFAULT_MODEL});
+    const result=await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
+      model,allowGuides:data.acceptGuides===true});
+    answers.put(cacheKey,result);
+    return result;
   } catch (e) {
     if (e instanceof HttpsError) throw e;
     const failure = classifyFailure(e, stage);
