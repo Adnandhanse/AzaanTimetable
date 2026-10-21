@@ -6,6 +6,7 @@ const {getFirestore,Timestamp} = require('firebase-admin/firestore');
 const {reserveQuota} = require('./quota');
 const path = require('node:path');
 const {runAsk} = require('./core');
+const {DEFAULT_MODEL} = require('./gemini-client');
 const {createCorpusLoader} = require('./corpus-loader');
 const {classifyFailure} = require('./failure');
 initializeApp();
@@ -33,7 +34,7 @@ exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSec
     const docs = await documents();
     stage = 'gemini';
     return await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
-      model:process.env.ASK_GEMINI_MODEL || 'gemini-2.5-flash'});
+      model:process.env.ASK_GEMINI_MODEL || DEFAULT_MODEL});
   } catch (e) {
     if (e instanceof HttpsError) throw e;
     const failure = classifyFailure(e, stage);

@@ -1,5 +1,5 @@
 'use strict';
-const {geminiJson}=require('./gemini-client');
+const {geminiJson,DEFAULT_MODEL}=require('./gemini-client');
 const normalize = text => String(text).normalize('NFKC').toLowerCase()
   .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'')
   .replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\s+/g,' ');
@@ -86,7 +86,7 @@ function validateSelection(selection,candidates) {
   if(!ids.length || ids.length>4 || ids.some(id=>typeof id!=='string' || !allowed.has(id)))throw Error('invalid-citation');
   return ids;
 }
-async function runAsk({question,kind='all',docs,key,model='gemini-2.5-flash',call=geminiJson}) {
+async function runAsk({question,kind='all',docs,key,model=DEFAULT_MODEL,call=geminiJson}) {
   const plan=validatePlan(await call({key,model,schema:PLAN_SCHEMA,name:'islam_search_plan',
     instructions:PLAN_PROMPT,input:{question},maxTokens:1000}));
   const empty={paragraphs:[],speech_urdu:'',speech_english:'',hits:[],understood:plan.understood,answerMode:'sources-only'};
