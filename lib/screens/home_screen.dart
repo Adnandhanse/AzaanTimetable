@@ -606,7 +606,7 @@ class _HomeScreenState extends State<HomeScreen>
             Text('Ask Islam Connect', style: AppText.rowTitle.copyWith(
               color: AppColors.text, fontSize: 22)),
             const SizedBox(height: 5),
-            Text('Apna sawal boliye ya likhiye',
+            Text('Sawal aapka, talaash hamari',
               style: AppText.body.copyWith(color: AppColors.textMuted, fontSize: 13)),
             const SizedBox(height: 4),
             Text('Quran, hadees aur Prophet Stories',

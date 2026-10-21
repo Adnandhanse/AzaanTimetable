@@ -129,12 +129,12 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
     if (prefs.getBool('ask_gemini_data_notice_v1') == true) return true;
     if (!mounted) return false;
     final allowed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('AI se poochhein'),
+      title: const Text('Ask Islam Connect'),
       content: const Text('Aapka sawal aur related Quran, hadees ya story passages Google Gemini ko bheje jaayenge. '
         'Free tier par Google is data ko apni services improve karne ke liye use kar sakta hai. '
         'Audio, phone number aur location Gemini ko nahi bheje jaate. Sawal mein personal details na likhein.'),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Abhi nahi')),
-        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('AI se poochhein'))]));
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Jaari rakhein'))]));
     if (allowed == true) await prefs.setBool('ask_gemini_data_notice_v1', true);
     return allowed == true;
   }
@@ -337,16 +337,16 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
         icon: const Icon(Icons.tune_rounded)),
     ]),
     body: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 32), children: [
-      Text('Aap kya jaanna chahte hain?',
+      Text('Har sawal, ilm ki taraf ek qadam.',
         style: AppText.rowTitle.copyWith(fontSize: 26, height: 1.3)),
       const SizedBox(height: 8),
-      Text('Quran, hadees aur Nabi ki kahaniyon se asal references.',
+      Text('Apna sawal likhein ya boliye. Quran, hadees aur Anbiya ki kahaniyon mein references talaash karein.',
         style: AppText.body.copyWith(color: AppColors.textMuted)),
       const SizedBox(height: 24),
-      TextField(controller: _query, maxLength: 500, minLines: 3, maxLines: 6,
+      TextField(controller: _query, maxLength: 500, minLines: 2, maxLines: 6,
         enabled: !_busy && !_voiceBusy,
         textInputAction: TextInputAction.newline,
-        decoration: InputDecoration(hintText: 'Apna poora sawal likhein ya boliye…',
+        decoration: InputDecoration(hintText: 'Aaj aap kya jaanna chahte hain?' ,
           counterText: '', filled: true, fillColor: AppColors.white,
           contentPadding: const EdgeInsets.all(18),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
@@ -359,11 +359,11 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       const SizedBox(height: 12),
       FilledButton.icon(style: FilledButton.styleFrom(
         backgroundColor: AppColors.goldRule.withOpacity(.55), foregroundColor: AppColors.text,
-        minimumSize: const Size.fromHeight(54),
+        minimumSize: const Size.fromHeight(54), elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
         onPressed: _busy || _voiceBusy ? null : _search,
         icon: const Icon(Icons.auto_awesome_outlined, size: 20),
-        label: Text(_voiceBusy ? 'Sun rahe hain…' : 'Poochhein')),
+        label: Text(_voiceBusy ? 'Sun rahe hain…' : 'References talaash karein')),
       const SizedBox(height: 24),
       if (_busy) ...[
         const LinearProgressIndicator(), const SizedBox(height: 12),
@@ -380,20 +380,20 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
             'Is sawal ka wazeh reference nahi mila. Sawal thoda aur saaf karke poochhein.',
             style: AppText.body))
         else ...[
-          Text('$_total related references', style: AppText.caption),
-          const SizedBox(height: 12), ..._hits.map(_result),
+          Text('Aapke sawal se mutalliq · $_total references', style: AppText.rowTitle),
+          const SizedBox(height: 12), for (var i = 0; i < _hits.length; i++) _result(_hits[i], i + 1),
         ],
       ],
     ]));
 
-  Widget _result(Map<String, dynamic> h) {
+  Widget _result(Map<String, dynamic> h, int position) {
     final urdu = _translation == 'urdu' && h['kind'] != 'story';
     final text = _body(h);
     return Card(margin: const EdgeInsets.only(bottom: 16), shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppColors.goldRule)),
       child: Padding(padding: const EdgeInsets.all(18), child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(h['kind'] == 'story' ? 'PROPHET STORY · SOURCED RETELLING' : h['kind'] == 'quran' ? 'QURAN AYAT' : 'HADEES',
+          Text('$position. ${h['kind'] == 'story' ? 'ANBIYA KI KAHANI' : h['kind'] == 'quran' ? 'QURAN AYAT' : 'HADEES'}',
             style: AppText.caption.copyWith(color: AppColors.emerald, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8), Row(children: [
             Expanded(child: Text(_reference(h), style: AppText.rowTitle)),
@@ -407,8 +407,17 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
             maxLines: 5, overflow: TextOverflow.ellipsis,
             textDirection: urdu ? TextDirection.rtl : TextDirection.ltr,
             style: urdu ? AppText.urduText.copyWith(fontSize: 18, height: 2) : AppText.body),
+          if (h['kind'] == 'story') ...[
+            const SizedBox(height: 12),
+            for (final raw in (h['sources'] as List? ?? const []))
+              Padding(padding: const EdgeInsets.only(bottom: 8),
+                child: Text(raw['kind'] == 'quran'
+                  ? 'Quran ${raw['surah']}:${raw['start']}${raw['end'] != raw['start'] ? '–${raw['end']}' : ''}'
+                  : '${raw['book'] == 'muslim' ? 'Sahih Muslim' : 'Sahih al-Bukhari'} ${raw['editionLabel'] ?? raw['number']}',
+                  style: AppText.caption.copyWith(color: AppColors.emerald))),
+          ],
           const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 4, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             TextButton.icon(onPressed: text.isEmpty ? null : () => _speak(h),
               icon: Icon(_speaking == _id(h) ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
               label: Text(_speaking == _id(h) ? 'Rokein' : h['kind'] == 'story' ? 'English mein sunein' : 'Sunein')),

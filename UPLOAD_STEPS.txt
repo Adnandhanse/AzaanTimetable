@@ -1,13 +1,8 @@
-GEMINI MODEL 404 FIX
+Upload these four files to the SAME repository paths and commit. Do not upload the ZIP itself.
 
-Apply on top of AI_Memory_Fix_And_Transfer_Enable.zip (the previous memory fix).
+1. Run Build Android APK on the latest commit, download and install that new APK to see UI and story changes.
+2. Run Deploy Ask Islam Connect AI (Gemini Flash) on the latest commit too, so AI story results use the updated respectful names.
 
-1. Extract this ZIP. Upload its files to the SAME paths in your repository. Do not upload the ZIP itself.
-2. If you previously set ASK_GEMINI_MODEL in Cloud Run / functions environment files, change its value to gemini-3.5-flash-lite. Otherwise no setting is needed.
-3. Commit changes, then GitHub > Actions > Deploy Ask Islam Connect AI (Gemini Flash) > Run workflow > main. Start a NEW workflow run; rerunning an old run can use old code.
-4. The new Check Gemini model access before deployment step makes one test API call. It must pass before deployment. This tests the API key and structured-output request, not the full app.
-5. After the entire deployment is green, reopen the existing APK and test a question. No APK rebuild is needed for this server-only patch.
+Changes: numbered vertical result cards; each story reference and action on a separate line; refreshed heading and button wording; updated Home subtitle; all 25 prophet display names and story prose use Alaihis Salam (Muhammad ﷺ). Stable IDs, sources and reading progress preserved. Story redesign is deferred until your reference.
 
-Changes: default model 3.5 Flash-Lite; remove 2.5-only thinkingBudget for the new model; shared model default; live deployment compatibility check; regression tests.
-No new permissions or API key are normally required. Current project quota still applies. No automatic provider fallback.
-Local validation: 28 Node tests passed; workflow YAML parsed; backend syntax checked. Live Gemini/Firebase execution requires your workflow credentials and has not been performed locally.
+Validation: JSON parsed; 25 names checked; story/page IDs, scenes and source references unchanged. Flutter SDK is not available here: APK compilation and device visual verification must run through your build workflow.

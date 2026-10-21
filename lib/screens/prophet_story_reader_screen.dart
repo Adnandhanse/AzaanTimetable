@@ -223,8 +223,8 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
               if (i == 0) Padding(padding: const EdgeInsets.only(bottom: 12),
                 child: Text(_english ? _story.birthNoteEnglish : _story.birthNote,
                   style: AppText.caption.copyWith(height: 1.7))),
-              Wrap(spacing: 8, runSpacing: 4, children: p.sources.map((source) =>
-                ActionChip(avatar: const Icon(Icons.open_in_new, size: 15),
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: p.sources.map((source) =>
+                TextButton.icon(icon: const Icon(Icons.open_in_new, size: 15),
                   label: Text(source.label), onPressed: _opening ? null : () => _source(source))).toList()),
               if (_opening) const LinearProgressIndicator(),
             ]),
