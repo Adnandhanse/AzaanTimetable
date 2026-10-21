@@ -62,3 +62,10 @@ test('unknown guide IDs are rejected and specific questions retain source retrie
  let n=0;const r=await runAsk({question:'namaz mein haath kahan baandhein',docs,call:async()=>++n===1?{...structuredClone(plan),guide_id:''}:{status:'selected',source_ids:['hadith:bukhari:1']}});
  assert.equal(n,2);assert.equal(r.hits[0].kind,'hadith');
 });
+test('short answer must be an exact passage from a selected source',async()=>{
+ for(const quote of ['During prayer he placed his right hand over his left forearm.','Invented instruction from model']){
+  let n=0;const r=await runAsk({question:'where to place hands',docs,call:async()=>++n===1?structuredClone(plan):
+   {status:'selected',source_ids:['hadith:bukhari:1'],answer_source_id:'hadith:bukhari:1',answer_quote:quote}});
+  if(quote.startsWith('During'))assert.equal(r.answer.text,quote);else assert.equal(r.answer,undefined);
+ }
+});

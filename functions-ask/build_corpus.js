@@ -58,6 +58,10 @@ async function build() {
   const manifest={format:'normalized-ndjson-v1',count:docs.length,sha256:hash.digest('hex'),
     kinds:Object.fromEntries(['quran','hadith','story'].map(k=>[k,docs.filter(d=>d.kind===k).length]))};
   fs.writeFileSync(path.join(__dirname,'corpus_manifest.json'),JSON.stringify(manifest,null,2));
+  const quranDocs=docs.filter(d=>d.kind==='quran');
+  fs.writeFileSync(path.join(__dirname,'database_stats.json'),JSON.stringify({
+    quranSurahs:new Set(quranDocs.map(d=>d.surah)).size,
+    quranVerses:quranDocs.length,corpusSha256:manifest.sha256}));
   console.log(manifest);
 }
 build().catch(error=>{console.error(error);process.exitCode=1;});

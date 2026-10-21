@@ -8,6 +8,11 @@ const {normalize,retrieve,contextFor}=require('./core');
   const docs=await readCorpus(path.join(__dirname,'corpus.ndjson.gz'));
   const manifest=require('./corpus_manifest.json');
   assert.equal(docs.length,manifest.count);
+  const stats=require('./database_stats.json');
+  const quran=docs.filter(d=>d.kind==='quran');
+  assert.equal(stats.quranVerses,quran.length);
+  assert.equal(stats.quranSurahs,new Set(quran.map(d=>d.surah)).size);
+  assert.equal(stats.corpusSha256,manifest.sha256);
   assert.ok(docs.length>=40000);
   assert.equal(new Set(docs.map(d=>d.id)).size,docs.length);
   for (const d of [docs[0],docs[7000],docs[docs.length-1]])

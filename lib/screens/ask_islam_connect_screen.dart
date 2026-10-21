@@ -34,6 +34,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   String? _speaking;
   bool _confirmingAi = false;
   String? _aiFollowup;
+  Map<String, dynamic>? _directAnswer;
   int _searchVersion = 0, _audioVersion = 0, _total = 0;
   String? _searchedQuery;
   List<Map<String, dynamic>> _hits = [];
@@ -106,7 +107,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
     final version = ++_searchVersion;
     final query = _query.text.trim();
     setState(() { _busy = true; _hits = []; _searchedQuery = query; _total = 0; _searchError = null;
-      _aiFollowup = null;
+      _aiFollowup = null; _directAnswer = null;
  });
     try {
       final reply = await AskConnectAi.ask(query, _kind);
@@ -118,6 +119,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
         _hits = (reply['hits'] as List).map((h) => Map<String, dynamic>.from(h as Map)).toList();
         _total = reply['total'] as int? ?? _hits.length;
         _aiFollowup = reply['followup'] as String?;
+        _directAnswer = reply['answer'] is Map ? Map<String, dynamic>.from(reply['answer'] as Map) : null;
       });
     } catch (error) {
       if (mounted && version == _searchVersion) setState(() =>
@@ -388,11 +390,24 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
           label: const Text('Dobara koshish karein')),
       ],
       if (_searchedQuery != null && !_busy && _searchError == null) ...[
-        if (_hits.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
+        if (_directAnswer != null) Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(padding: const EdgeInsets.all(20), child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text(_directAnswer!['type'] == 'database' ? 'Database se jawab' : 'Reference se mukhtasar jawab',
+                style: AppText.caption.copyWith(color: AppColors.emerald)),
+              const SizedBox(height: 12),
+              SelectableText(_directAnswer!['text'] as String,
+                style: AppText.body.copyWith(fontSize: 19, height: 1.7)),
+              const SizedBox(height: 12),
+              Text(_directAnswer!['reference'] as String, style: AppText.caption),
+            ]))),
+        if (_hits.isEmpty && _directAnswer == null) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(_aiFollowup?.isNotEmpty == true ? _aiFollowup! :
             'Is sawal ka wazeh reference nahi mila. Sawal thoda aur saaf karke poochhein.',
-            style: AppText.body))
-        else ...[
+            style: AppText.body)),
+        if (_hits.isNotEmpty) ...[
           Text('Aapke sawal se mutalliq · $_total references', style: AppText.rowTitle),
           const SizedBox(height: 12), for (var i = 0; i < _hits.length; i++) _result(_hits[i], i + 1),
         ],

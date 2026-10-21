@@ -9,6 +9,7 @@ const {runAsk} = require('./core');
 const {DEFAULT_MODEL} = require('./gemini-client');
 const {createAnswerCache} = require('./answer-cache');
 const answers=createAnswerCache();
+const stats=require('./database_stats.json');
 const {createCorpusLoader} = require('./corpus-loader');
 const {classifyFailure} = require('./failure');
 initializeApp();
@@ -37,10 +38,10 @@ exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSec
     const cached=answers.get(cacheKey);
     if(cached)return cached;
     stage = 'corpus';
-    const docs = await documents();
+    const docs = async()=>{stage='corpus';const loaded=await documents();stage='gemini';return loaded;};
     stage = 'gemini';
     const result=await runAsk({question:data.question.trim(),kind:data.kind,docs,key:apiKey.value(),
-      model,allowGuides:data.acceptGuides===true});
+      model,stats,allowGuides:data.acceptGuides===true});
     answers.put(cacheKey,result);
     return result;
   } catch (e) {
