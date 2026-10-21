@@ -31,11 +31,13 @@ class ProphetStoryPage {
 
 class ProphetStory {
   const ProphetStory({required this.id, required this.name,
-    required this.birthNote, required this.birthNoteEnglish, required this.pages, this.teaser = ''});
-  final String id, name, birthNote, birthNoteEnglish, teaser;
+    required this.birthNote, required this.birthNoteEnglish, required this.pages, this.teaser = '', this.openingRoman = '', this.openingEnglish = ''});
+  final String id, name, birthNote, birthNoteEnglish, teaser, openingRoman, openingEnglish;
   final List<ProphetStoryPage> pages;
   factory ProphetStory.fromJson(Map<String, dynamic> j) => ProphetStory(
     id: j['id'] as String, name: j['name'] as String, teaser: j['teaser'] as String? ?? '',
+    openingRoman: j['openingRoman'] as String? ?? '',
+    openingEnglish: j['openingEnglish'] as String? ?? '',
     birthNote: j['birthNote'] as String,
     birthNoteEnglish: j['birthNoteEnglish'] as String,
     pages: (j['pages'] as List).map((v) =>

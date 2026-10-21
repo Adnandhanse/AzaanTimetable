@@ -202,7 +202,20 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
 
   Widget _chapter(int i) {
     final p = _story.pages[i];
+    final opening = _english ? _story.openingEnglish : _story.openingRoman;
     return Column(key: _chapters[i], crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      if (i == 0 && opening.isNotEmpty) Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(_english ? 'The story begins' : 'Kahani ka aaghaz',
+            style: AppText.caption.copyWith(color: AppColors.emerald)),
+          const SizedBox(height: 10),
+          Text(opening, style: AppText.body.copyWith(fontSize: 20, height: 1.8)),
+          const SizedBox(height: 12),
+          Text(_english ? 'An introduction to the events referenced in the chapters below.'
+            : 'Neeche ke chapters mein diye gaye waqiat ka mukhtasar taaruf.',
+            style: AppText.caption),
+        ])),
       Padding(padding: const EdgeInsets.symmetric(horizontal: 14),
         child: ClipRRect(borderRadius: BorderRadius.circular(22),
           child: ProphetStoryArtwork(image: p.image, title: _story.name))),

@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "books": [
     {
       "id": "adam",
@@ -10,8 +10,8 @@
           "id": "adam_mitti_se_takhleeq",
           "title": "Mitti se takhleeq",
           "scene": "clay",
-          "roman": "Allah ne Adam Alaihis Salam ko mitti se paida kiya. Quran unki takhleeq ko Allah ki qudrat ki nishani batata hai.",
-          "english": "Allah created Adam Alaihis Salam from dust. The Quran presents his creation as a sign of Allah’s power; it does not give a birth date.",
+          "roman": "Insaan ki ibtida Allah ki takhleeq se hui. Allah ne Adam Alaihis Salam ko mitti se paida kiya. Quran is takhleeq ko Allah ki qudrat ki nishani ke taur par bayan karta hai.\n\nAdam Alaihis Salam ki kahani aam insani paidaish se shuru nahi hoti. Unhein Allah ne paida kiya, aur unki zindagi ke aage ke waqiat mein ilm, zimmedari aur hidayat ki ahmiyat samne aati hai.",
+          "english": "Human life begins with Allah’s creation. Allah created Adam Alaihis Salam from dust; the Quran presents this as a sign of His power.\n\nThis is not an account of an ordinary human birth. The events that follow introduce knowledge, responsibility and guidance.",
           "sources": [
             {
               "kind": "quran",
@@ -47,8 +47,8 @@
           "id": "adam_ilm_ki_nemat",
           "title": "Ilm ki nemat",
           "scene": "scrolls",
-          "roman": "Allah ki is rehnumai mein ilm ki nemat bhi thi. Allah ne Adam Alaihis Salam ko naam sikhaye. Farishton ne apne ilm ki had tasleem ki. Adam Alaihis Salam ke waqia mein ilm Allah ki ata ke taur par samne aata hai.",
-          "english": "Allah taught Adam Alaihis Salam the names. The angels acknowledged that they knew only what Allah had taught them.",
+          "roman": "Zameen mein khalifah ke zikr ke saath Quran Adam Alaihis Salam ko diye gaye ilm ka waqia sunata hai. Allah ne unhein naam sikhaye aur phir un cheezon ko farishton ke samne pesh kiya.\n\nFarishton ne apne ilm ki had tasleem ki: unke paas wahi ilm tha jo Allah ne unhein sikhaya tha. Adam Alaihis Salam ne Allah ke sikhaye hue naam bataye. Yeh ilm unki apni quwwat ka dawa nahi, unke Rabb ki ata thi.",
+          "english": "Alongside the account of responsibility on earth, the Quran describes the knowledge Allah gave Adam Alaihis Salam. Allah taught him the names and presented the things to the angels.\n\nThe angels acknowledged that they knew only what Allah had taught them. Adam Alaihis Salam then told them the names. His knowledge was a gift from his Lord.",
           "sources": [
             {
               "kind": "quran",
@@ -62,7 +62,7 @@
           "id": "adam_iblis_ka_takabbur",
           "title": "Iblis ka takabbur",
           "scene": "night",
-          "roman": "Lekin takabbur ka rawaiya bhi isi waqie mein samne aata hai. Farishton ko Adam Alaihis Salam ke samne sajde ka hukm diya gaya. Iblis ne inkar kiya aur takabbur dikhaya. Us ne apni paidaish ka muqabla karke khud ko behtar samjha.",
+          "roman": "Lekin takabbur ka rawaiya bhi isi waqie mein samne aata hai. Farishton ko Adam Alaihis Salam ke samne sajde ka hukm diya gaya.\n\nIblis ne inkar kiya aur takabbur dikhaya. Us ne apni paidaish ka muqabla karke khud ko behtar samjha.",
           "english": "The angels were commanded to prostrate before Adam Alaihis Salam. Iblis refused out of arrogance and claimed superiority.",
           "sources": [
             {
@@ -83,8 +83,8 @@
           "id": "adam_jannat_aur_mana_kiya_gaya_darakht",
           "title": "Jannat aur mana kiya gaya darakht",
           "scene": "garden",
-          "roman": "Adam Alaihis Salam aur unki biwi ko Jannat mein rehne ki ijazat mili. Unhein ek darakht ke qareeb jane se mana kiya gaya. Quran darakht ki qisam nahi batata.",
-          "english": "Adam Alaihis Salam and his wife were permitted to live in the Garden, but were forbidden to approach one tree. Its species is not named.",
+          "roman": "Adam Alaihis Salam aur unki biwi ko Jannat mein rehne ki ijazat mili. Wahan unhein khane ki farakhi di gayi, lekin ek darakht ke qareeb jane se mana kiya gaya.\n\nIs ijazat ke saath ek wazeh had bhi thi. Aage ka waqia isi hukm aur Shaitan ke behkane se jurta hai. Quran darakht ki qisam nahi batata; isliye yahan uska koi naam muqarrar nahi kiya gaya.",
+          "english": "Adam Alaihis Salam and his wife were permitted to live and eat freely in Paradise, with one clear restriction: they were not to approach a particular tree.\n\nThe next episode concerns that command and the temptation of Satan. The Quran does not identify the kind of tree, so no name is added here.",
           "sources": [
             {
               "kind": "quran",
@@ -104,8 +104,8 @@
           "id": "adam_waswasa_aur_apni_ghalati_ka_iqrar",
           "title": "Waswasa aur apni ghalati ka iqrar",
           "scene": "valley",
-          "roman": "Mana kiye gaye darakht ke waqie mein phir azmaish pesh aayi. Shaitan ne unhein behkaya. Jab unhon ne mana kiye gaye darakht se khaya, to apni ghalati samajh li. Unhon ne Allah se maghfirat aur rahmat mangi.",
-          "english": "Satan tempted them. After eating from the forbidden tree, they acknowledged their wrongdoing and asked Allah for forgiveness and mercy.",
+          "roman": "Shaitan ne Adam Alaihis Salam aur unki biwi ko behkaya. Unhon ne us darakht se kha liya jiske qareeb jane se mana kiya gaya tha. Phir un par apni halat zahir hui aur woh Jannat ke patton se apne aap ko dhakne lage.\n\nApne Rabb ke samne unhon ne apni ghalati ka iqrar kiya aur maghfirat aur rahmat mangi. Kahani yahan sirf ghalati par nahi rukti: iske saath taubah ki qubooliyat ka waqia bhi aata hai.",
+          "english": "Satan tempted Adam Alaihis Salam and his wife, and they ate from the forbidden tree. Their nakedness became apparent to them, and they began covering themselves with leaves from Paradise.\n\nBefore their Lord they acknowledged their wrongdoing and asked for forgiveness and mercy. The account continues beyond the mistake to the acceptance of repentance.",
           "sources": [
             {
               "kind": "quran",
@@ -134,7 +134,7 @@
           "id": "adam_do_beton_ki_qurbani",
           "title": "Do beton ki qurbani",
           "scene": "garden",
-          "roman": "Quran Adam Alaihis Salam ke gharane ka ek aur waqia bhi sunata hai. Quran Adam Alaihis Salam ke do beton ka waqia bayan karta hai. Donon ne qurbani pesh ki; ek ki qubool hui aur doosre ki nahi. Jawab mein Allah ke haan taqwa ki ahmiyat batayi gayi. In ayaat mein beton ke naam nahi diye gaye.",
+          "roman": "Quran Adam Alaihis Salam ke do beton ka waqia bhi sunata hai.\n\nDonon ne qurbani pesh ki; ek ki qubool hui aur doosre ki nahi. Jawab mein Allah ke haan taqwa ki ahmiyat batayi gayi. In ayaat mein beton ke naam nahi diye gaye.",
           "english": "The Quran relates that Adam Alaihis Salam’s two sons offered sacrifices. One was accepted and the other was not. Acceptance is linked to mindfulness of Allah; the sons are not named in these verses.",
           "sources": [
             {
@@ -149,7 +149,7 @@
           "id": "adam_na_haq_qatl_ka_zulm",
           "title": "Na-haq qatl ka zulm",
           "scene": "mountain",
-          "roman": "Qurbani ke is waqie mein bhaiyon ka rawaiya mukhtalif tha. Ek bhai ne doosre ko qatl ki dhamki di. Doosre ne Allah ka khauf zahir kiya. Phir uske bhai ne use qatl kar diya aur nuqsan uthane walon mein ho gaya.",
+          "roman": "Qurbani ke is waqie mein bhaiyon ka rawaiya mukhtalif tha. Ek bhai ne doosre ko qatl ki dhamki di.\n\nDoosre ne Allah ka khauf zahir kiya. Phir uske bhai ne use qatl kar diya aur nuqsan uthane walon mein ho gaya.",
           "english": "One brother threatened to kill the other, who expressed fear of Allah. His brother then killed him and became one of the losers.",
           "sources": [
             {
@@ -177,7 +177,9 @@
         }
       ],
       "birthNoteEnglish": "Adam Alaihis Salam’s account begins with his creation by Allah, rather than a human birth.",
-      "teaser": "Takhleeq, ilm aur taubah—insani zindagi ki ibtida."
+      "teaser": "Insani kahani Adam Alaihis Salam ki takhleeq se shuru hoti hai.",
+      "openingRoman": "Insani kahani Adam Alaihis Salam ki takhleeq se shuru hoti hai. Ilm ki nemat, Iblis ka takabbur aur taubah ki qubooliyat—yeh waqiat batate hain ke Allah ki hidayat insaan ki zindagi mein kitni aham hai.",
+      "openingEnglish": "The human story begins with the creation of Adam Alaihis Salam. The gift of knowledge, the arrogance of Iblis and the acceptance of repentance introduce the need for Allah’s guidance."
     },
     {
       "id": "idris",
@@ -222,7 +224,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Quran mein sachchai, sabr aur buland maqam ka zikr."
+      "teaser": "Idris Alaihis Salam ki zindagi ka lamba safarnama Quran mein nahi aata.",
+      "openingRoman": "Idris Alaihis Salam ki zindagi ka lamba safarnama Quran mein nahi aata. Jo pehchan milti hai, woh bahut qeemti hai: sachchai, nabuwat, sabr aur Allah ki taraf se buland maqam.",
+      "openingEnglish": "The Quran does not give a long biography of Idris Alaihis Salam. It preserves his truthfulness, prophethood, patience and the high station Allah granted him."
     },
     {
       "id": "nuh",
@@ -284,8 +288,8 @@
           "id": "nuh_kashti_banane_ka_hukm",
           "title": "Kashti banane ka hukm",
           "scene": "ark_dry",
-          "roman": "Qaum ke inkar ke darmiyan Allah ki taraf se hukm aaya. Allah ne Nuh Alaihis Salam ko apni nigrani aur wahi ke mutabiq kashti banane ka hukm diya. Qaum ke sardaar guzarte hue unka mazaq urate rahe.",
-          "english": "Allah instructed Nuh Alaihis Salam to build the ark under His care and revelation. Passing leaders mocked him as he worked.",
+          "roman": "Lambi dawat ke bawajood qaum ke inkar ka silsila jari raha. Allah ne Nuh Alaihis Salam ko apni nigrani aur wahi ke mutabiq kashti banane ka hukm diya.\n\nNuh Alaihis Salam kashti bana rahe the aur qaum ke sardaar guzarte hue mazaq urate the. Isi kashti ke saath aage iman walon ki nijat ka waqia jura hai.",
+          "english": "Despite the long call, the people continued to reject the message. Allah instructed Nuh Alaihis Salam to build the ark under His care and revelation.\n\nAs he built, leaders of his people passed by and mocked him. This same ark would become part of the account of the believers’ rescue.",
           "sources": [
             {
               "kind": "quran",
@@ -314,8 +318,8 @@
           "id": "nuh_beta_aur_pahad",
           "title": "Beta aur pahad",
           "scene": "storm",
-          "roman": "Toofan ke isi waqie mein ek baap aur bete ka manzar bhi hai. Nuh Alaihis Salam ne apne bete ko kashti mein aane ke liye pukara. Us ne pahad par bachne ka khayal kiya. Lehren darmiyan aa gayin aur woh doob gaya.",
-          "english": "Nuh Alaihis Salam called his son to board. His son thought a mountain would protect him, but a wave separated them and he drowned.",
+          "roman": "Kashti lehron ke darmiyan chal rahi thi. Nuh Alaihis Salam ne apne bete ko pukara ke woh unke saath sawar ho jaye aur inkar karne walon ke saath na rahe.\n\nBete ne pahad par panah lene ka khayal zahir kiya. Nuh Alaihis Salam ne bataya ke Allah ke faisle se uski rahmat ke siwa koi bachane wala nahi. Phir donon ke darmiyan lehar aa gayi aur beta doobne walon mein ho gaya.",
+          "english": "The ark was moving among the waves. Nuh Alaihis Salam called to his son to board with them rather than remain with the disbelievers.\n\nHis son thought a mountain would shelter him. Nuh Alaihis Salam explained that no one could protect against Allah’s decree except through His mercy. A wave separated them, and the son was among those drowned.",
           "sources": [
             {
               "kind": "quran",
@@ -329,7 +333,7 @@
           "id": "nuh_pani_utar_gaya",
           "title": "Pani utar gaya",
           "scene": "mountain",
-          "roman": "Toofan ka anjaam bhi Allah ke hukm se hua. Allah ke hukm se zameen ne pani nigal liya aur aasman tham gaya. Kashti Judi par thehar gayi. Nuh Alaihis Salam ko salamati aur barkaton ke saath utarne ko kaha gaya.",
+          "roman": "Toofan ka anjaam bhi Allah ke hukm se hua. Allah ke hukm se zameen ne pani nigal liya aur aasman tham gaya.\n\nKashti Judi par thehar gayi. Nuh Alaihis Salam ko salamati aur barkaton ke saath utarne ko kaha gaya.",
           "english": "At Allah’s command, the waters receded and the ark rested on Judi. Nuh Alaihis Salam was told to disembark in peace and blessing.",
           "sources": [
             {
@@ -342,7 +346,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Lambi dawat, ek kashti aur toofan ke darmiyan nijat."
+      "teaser": "Ek Nabi apni qaum ko baar-baar Allah ki taraf bulate rahe.",
+      "openingRoman": "Ek Nabi apni qaum ko baar-baar Allah ki taraf bulate rahe. Nuh Alaihis Salam ki kahani lambi dawat se kashti aur toofan tak pahunchti hai—jahan nijat ka faisla quwwat ya rishtedari se nahi hua.",
+      "openingEnglish": "Nuh Alaihis Salam repeatedly called his people to Allah. His story moves from a long mission to the ark and the flood, when strength and family ties could not secure safety."
     },
     {
       "id": "hud",
@@ -374,7 +380,7 @@
           "id": "hud_quwwat_par_ghuroor",
           "title": "Quwwat par ghuroor",
           "scene": "mountain",
-          "roman": "Magar qaum ko apni quwwat par ghuroor tha. Aad ko quwwat aur imkanat mile the. Hud Alaihis Salam ne unhein Allah ki nematein yaad dilayin aur takabbur se roka. Qaum ne apni taqat par ghuroor kiya.",
+          "roman": "Magar qaum ko apni quwwat par ghuroor tha. Aad ko quwwat aur imkanat mile the.\n\nHud Alaihis Salam ne unhein Allah ki nematein yaad dilayin aur takabbur se roka. Qaum ne apni taqat par ghuroor kiya.",
           "english": "Aad had strength and resources. Hud Alaihis Salam reminded them of Allah’s gifts, while they arrogantly boasted of their power.",
           "sources": [
             {
@@ -395,7 +401,7 @@
           "id": "hud_badal_aur_tez_hawa",
           "title": "Badal aur tez hawa",
           "scene": "storm",
-          "roman": "Phir woh manzar aaya jise qaum ne barish ki umeed samjha. Unhon ne badal dekha to use barish lane wala samjha. Woh azab wali hawa thi. Quran us tez hawa ka zikr karta hai jo un par musallat hui.",
+          "roman": "Phir woh manzar aaya jise qaum ne barish ki umeed samjha. Unhon ne badal dekha to use barish lane wala samjha.\n\nWoh azab wali hawa thi. Quran us tez hawa ka zikr karta hai jo un par musallat hui.",
           "english": "They saw a cloud and expected rain, but it brought the wind of punishment. The Quran describes a fiercely destructive wind.",
           "sources": [
             {
@@ -429,7 +435,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Ek taqatwar qaum ko apni quwwat par ghuroor tha."
+      "teaser": "Aad ko apni taqat par naaz tha.",
+      "openingRoman": "Aad ko apni taqat par naaz tha. Hud Alaihis Salam ne unhein unke Rabb ki yaad dilayi. Is kahani mein quwwat ke ghuroor aur Allah par iman ka anjaam samne aata hai.",
+      "openingEnglish": "The people of Aad were proud of their strength. Hud Alaihis Salam reminded them of their Lord. Their story contrasts pride in power with faith in Allah."
     },
     {
       "id": "salih",
@@ -461,7 +469,7 @@
           "id": "salih_allah_ki_nishani",
           "title": "Allah ki nishani",
           "scene": "valley",
-          "roman": "Isi qaum ke samne Allah ki ek nishani pesh hui. Qaum ke liye oontni ek nishani thi. Salih Alaihis Salam ne usko nuqsan na pahunchane ko kaha. Pani ke liye uska aur qaum ka muqarrar hissa tha.",
+          "roman": "Isi qaum ke samne Allah ki ek nishani pesh hui. Qaum ke liye oontni ek nishani thi.\n\nSalih Alaihis Salam ne usko nuqsan na pahunchane ko kaha. Pani ke liye uska aur qaum ka muqarrar hissa tha.",
           "english": "A she-camel was a sign for the people. Salih Alaihis Salam warned them not to harm her, and water was to be shared on appointed turns.",
           "sources": [
             {
@@ -517,7 +525,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Paharon ke ghar aur Allah ki nishani ka imtihan."
+      "teaser": "Paharon mein tarashe hue ghar Thamud ke hunar ki nishani the.",
+      "openingRoman": "Paharon mein tarashe hue ghar Thamud ke hunar ki nishani the. Salih Alaihis Salam ne unhein Allah ki ibadat ki taraf bulaya; phir oontni ki nishani unke liye ita-at ki azmaish bani.",
+      "openingEnglish": "The rock-carved homes of Thamud displayed their skill. Salih Alaihis Salam called them to worship Allah, and the she-camel became a sign and a test of obedience."
     },
     {
       "id": "ibrahim",
@@ -543,7 +553,7 @@
           "id": "ibrahim_walid_ko_narmi_se_samjhana",
           "title": "Walid ko narmi se samjhana",
           "scene": "city",
-          "roman": "Ibrahim Alaihis Salam ki dawat apne walid tak bhi pahunchi. Unhon ne adab aur narmi se aisi cheezon ki ibadat par sawal kiya jo na sun sakti thin, na dekh sakti thin aur na madad kar sakti thin. Woh apne walid ko hidayat ki taraf bula rahe the. Haq ki baat kehne ke saath unke andaaz mein narmi bhi thi.",
+          "roman": "Ibrahim Alaihis Salam ki dawat apne walid tak bhi pahunchi. Unhon ne adab aur narmi se aisi cheezon ki ibadat par sawal kiya jo na sun sakti thin, na dekh sakti thin aur na madad kar sakti thin.\n\nWoh apne walid ko hidayat ki taraf bula rahe the. Haq ki baat kehne ke saath unke andaaz mein narmi bhi thi.",
           "english": "Ibrahim Alaihis Salam respectfully questioned his father about worshipping what could neither hear nor see, and invited him to guidance.",
           "sources": [
             {
@@ -558,7 +568,7 @@
           "id": "ibrahim_sitara_chand_aur_suraj",
           "title": "Sitara, chand aur suraj",
           "scene": "night",
-          "roman": "Qaumi aqeede par sawal sirf buton tak mehdood nahi tha. Sitara, chand aur suraj—sab dhal jate hain. Ibrahim Alaihis Salam ne isi baat ko apni qaum ke samne daleel banaya. Unhon ne apna rukh us zaat ki taraf kiya jis ne aasman aur zameen ko paida kiya. Dhal jane wali cheezein unka Rabb nahi thin.",
+          "roman": "Qaumi aqeede par sawal sirf buton tak mehdood nahi tha. Sitara, chand aur suraj—sab dhal jate hain.\n\nIbrahim Alaihis Salam ne isi baat ko apni qaum ke samne daleel banaya. Unhon ne apna rukh us zaat ki taraf kiya jis ne aasman aur zameen ko paida kiya. Dhal jane wali cheezein unka Rabb nahi thin.",
           "english": "Ibrahim Alaihis Salam’s argument drew attention to the setting star, moon and sun. He turned toward the Creator of the heavens and earth.",
           "sources": [
             {
@@ -573,7 +583,7 @@
           "id": "ibrahim_buton_ke_bare_mein_sawal",
           "title": "Buton ke bare mein sawal",
           "scene": "city",
-          "roman": "Ibrahim Alaihis Salam ne qaum ke buton ke bare mein bhi sawal uthaye. Phir unhon ne unhein tor diya aur bade but ko chhor diya. Logon ko apne hi aqeede par ghaur karne ka mauqa mila: jinhein woh pukarte hain, kya woh apna bhi bachao kar sakte hain? Yeh waqia qaum ko sochne ki taraf bulata hai.",
+          "roman": "Ibrahim Alaihis Salam ne qaum ke buton ke bare mein bhi sawal uthaye. Phir unhon ne unhein tor diya aur bade but ko chhor diya.\n\nLogon ko apne hi aqeede par ghaur karne ka mauqa mila: jinhein woh pukarte hain, kya woh apna bhi bachao kar sakte hain? Yeh waqia qaum ko sochne ki taraf bulata hai.",
           "english": "Ibrahim Alaihis Salam challenged his people’s idols and broke them except the largest, prompting them to confront their beliefs.",
           "sources": [
             {
@@ -588,7 +598,7 @@
           "id": "ibrahim_aag_se_hifazat",
           "title": "Aag se hifazat",
           "scene": "fire",
-          "roman": "Qaumi jawab daleel ko qabool karna nahi tha. Unhon ne Ibrahim Alaihis Salam ko jalane ka irada kiya. Lekin aag bhi Allah ke hukm ke taabe thi: Allah ne use Ibrahim Alaihis Salam ke liye thandi aur salamati wali hone ka hukm diya. Unke khilaf ki gayi tadbeer nakaam hui aur Allah ne unki hifazat ki.",
+          "roman": "Qaumi jawab daleel ko qabool karna nahi tha. Unhon ne Ibrahim Alaihis Salam ko jalane ka irada kiya.\n\nLekin aag bhi Allah ke hukm ke taabe thi: Allah ne use Ibrahim Alaihis Salam ke liye thandi aur salamati wali hone ka hukm diya. Unke khilaf ki gayi tadbeer nakaam hui aur Allah ne unki hifazat ki.",
           "english": "His people intended to burn Ibrahim Alaihis Salam. Allah commanded the fire to be cool and safe for him, and their plot failed.",
           "sources": [
             {
@@ -603,7 +613,7 @@
           "id": "ibrahim_rabb_ke_bare_mein_daleel",
           "title": "Rabb ke bare mein daleel",
           "scene": "palace",
-          "roman": "Ibrahim Alaihis Salam ki zindagi ka ek aur waqia ek hukmaran ke samne haq bayan karne ka hai. Ibrahim Alaihis Salam ne apne Rabb ko zindagi aur maut dene wala bataya. Phir unhon ne suraj ke mashriq se nikalne ki daleel rakhi. Inkar karne wala is daleel ka jawab na de saka.",
+          "roman": "Ibrahim Alaihis Salam ki zindagi ka ek aur waqia ek hukmaran ke samne haq bayan karne ka hai. Ibrahim Alaihis Salam ne apne Rabb ko zindagi aur maut dene wala bataya.\n\nPhir unhon ne suraj ke mashriq se nikalne ki daleel rakhi. Inkar karne wala is daleel ka jawab na de saka.",
           "english": "Ibrahim Alaihis Salam argued with a ruler about the Lord who gives life and death, then challenged him concerning the rising sun. The disbeliever was confounded.",
           "sources": [
             {
@@ -618,7 +628,7 @@
           "id": "ibrahim_dil_ka_itminan",
           "title": "Dil ka itminan",
           "scene": "mountain",
-          "roman": "Apne Rabb par iman ke saath Ibrahim Alaihis Salam ne dil ke mazeed itminan ki darkhwast bhi ki. Unhon ne Allah se murdon ko zinda karne ki kaifiyat ke bare mein poocha. Unka sawal iman ke inkar ka nahi tha; woh dil ka itminan chahte the. Allah ne unhein apni qudrat ki nishani dikhayi.",
+          "roman": "Apne Rabb par iman ke saath Ibrahim Alaihis Salam ne dil ke mazeed itminan ki darkhwast bhi ki. Unhon ne Allah se murdon ko zinda karne ki kaifiyat ke bare mein poocha.\n\nUnka sawal iman ke inkar ka nahi tha; woh dil ka itminan chahte the. Allah ne unhein apni qudrat ki nishani dikhayi.",
           "english": "Ibrahim Alaihis Salam asked to see how Allah gives life to the dead. He affirmed his belief and sought reassurance of the heart; Allah showed him a sign.",
           "sources": [
             {
@@ -633,7 +643,7 @@
           "id": "ibrahim_hijrat_aur_nek_aulaad_ki_dua",
           "title": "Hijrat aur nek aulaad ki dua",
           "scene": "sunrise",
-          "roman": "Ibrahim Alaihis Salam ki kahani mein dua ka silsila bhi chalta hai. Unhon ne apne Rabb ki taraf jane ka irada zahir kiya aur nek aulaad mangi. Allah ne unhein ek burdbar bete ki khushkhabri di. Yeh nemat unki zindagi mein ita-at ki ek badi azmaish ke zikr ke saath aati hai.",
+          "roman": "Ibrahim Alaihis Salam ki kahani mein dua ka silsila bhi chalta hai. Unhon ne apne Rabb ki taraf jane ka irada zahir kiya aur nek aulaad mangi.\n\nAllah ne unhein ek burdbar bete ki khushkhabri di. Yeh nemat unki zindagi mein ita-at ki ek badi azmaish ke zikr ke saath aati hai.",
           "english": "Ibrahim Alaihis Salam declared that he was going to his Lord and prayed for a righteous child. He received glad tidings of a forbearing son.",
           "sources": [
             {
@@ -648,8 +658,8 @@
           "id": "ibrahim_hajar_aur_ismail_ki_waadi",
           "title": "Hajar aur Ismail Alaihis Salam ki waadi",
           "scene": "valley",
-          "roman": "Ab kahani Makkah ki us waadi tak aati hai jahan pani aur abadi na thi. Ibrahim Alaihis Salam, Hajar aur doodh peete Ismail Alaihis Salam ko wahan laye. Khajoor aur pani ki ek mashk unke paas chhori gayi. Jab Hajar ko maloom hua ke yeh Allah ka hukm hai, unhon ne us par bharosa kiya. Isi waadi mein aage Zamzam ka waqia pesh aata hai.",
-          "english": "Ibrahim Alaihis Salam brought Hajar and the infant Ismail Alaihis Salam to the waterless valley of Makkah, leaving dates and a water-skin. Hajar trusted Allah’s command.",
+          "roman": "Ibrahim Alaihis Salam Hajar aur doodh peete Ismail Alaihis Salam ko Makkah ki waadi mein laye. Us waqt wahan na abadi thi aur na pani. Unke paas khajoor aur pani ki ek mashk chhor di gayi.\n\nJab Hajar ko maloom hua ke yeh Allah ka hukm hai, unhon ne Allah par bharosa kiya. Is be-aab waadi mein unke aur unke bachche ke saamne ab pani ki zaroorat thi—aur isi se Safa aur Marwa ki talaash ka waqia jurta hai.",
+          "english": "Ibrahim Alaihis Salam brought Hajar and the nursing Ismail Alaihis Salam to the valley of Makkah. No one lived there, and there was no water. Dates and a small waterskin were left with them.\n\nWhen Hajar learned that this was Allah’s command, she trusted Him. The need for water in that valley leads into her search between Safa and Marwa.",
           "sources": [
             {
               "kind": "hadith",
@@ -668,8 +678,8 @@
           "id": "ibrahim_safa_se_talaash",
           "title": "Safa se talaash",
           "scene": "safa",
-          "roman": "Pani khatam hua to Hajar madad ki talaash mein niklin. Woh Safa par charhin aur waadi ki taraf dekha, lekin koi nazar na aaya. Unke saath ek doodh peeta bachcha tha aur madad ki zaroorat thi. Bharose ke saath unki koshish bhi jari rahi.",
-          "english": "When the water ran out, Hajar climbed Safa and looked across the valley for help, but saw no one.",
+          "roman": "Mashk ka pani khatam hua to Hajar pani aur madad ki talaash mein niklin. Qareeb ke paharon mein Safa par charhkar unhon ne waadi ki taraf dekha ke shayad koi nazar aaye.\n\nWahan koi nazar nahi aaya. Talaash ka yeh pehla marhala tha; Hajar ne ab waadi ke doosre kinare, Marwa ki taraf rukh kiya.",
+          "english": "When the waterskin was empty, Hajar went to look for help. She climbed Safa, the nearest hill, and searched the valley for anyone she could see.\n\nNo one was visible. Her search did not end there: she descended towards the valley and continued towards Marwa.",
           "sources": [
             {
               "kind": "hadith",
@@ -682,8 +692,8 @@
           "id": "ibrahim_safa_aur_marwa_ke_darmiyan",
           "title": "Safa aur Marwa ke darmiyan",
           "scene": "marwa",
-          "roman": "Safa par koi nazar na aaya to talaash wahin khatam nahi hui. Hajar waadi se guzarkar Marwa par pahunchin aur wahan se bhi dekha. Safa aur Marwa ke darmiyan yeh aana-jana saat martaba hua. Madad ki talaash mein unki koshish jari thi.",
-          "english": "Hajar crossed the valley to Marwa and looked again. The report describes seven traversals between the two hills.",
+          "roman": "Safa se utarkar Hajar waadi se guzrin aur Marwa par charhin. Wahan se bhi unhon ne dekha, lekin koi nazar na aaya.\n\nMadad ki talaash mein Safa aur Marwa ke darmiyan unka aana-jana saat martaba hua. Is koshish ke baad waqia us jagah ki taraf aata hai jahan Allah ne pani ata kiya.",
+          "english": "Hajar descended from Safa, crossed the valley and climbed Marwa. From there too, she looked for someone, but saw no one.\n\nShe made the journey between Safa and Marwa seven times. The account then turns to the place where Allah provided water.",
           "sources": [
             {
               "kind": "hadith",
@@ -696,8 +706,8 @@
           "id": "ibrahim_zamzam_ka_pani",
           "title": "Zamzam ka pani",
           "scene": "spring",
-          "roman": "Phir us be-aab waadi mein pani nikal aaya. Hajar ne Zamzam ki jagah farishte ko zameen khodte dekha; sahih riwayat mein erhi ya par ka zikr aata hai. Unhon ne pani ko jama kiya aur apni mashk bhari. Jahan pani ki zaroorat thi, Allah ne wahin Zamzam ata kiya.",
-          "english": "The report describes an angel digging at Zamzam with a heel or wing, after which water emerged. Hajar gathered it and filled her water-skin.",
+          "roman": "Hajar ne Zamzam ki jagah farishte ko zameen khodte dekha. Sahih riwayat mein farishte ki erhi ya par ka zikr aata hai. Wahan pani zahir hua.\n\nHajar ne pani ko jama karna shuru kiya aur apni mashk bhari. Jis waadi mein pani na tha, usi mein ab Zamzam mil gaya tha. Aage isi pani ke qareeb logon ki abadi ka zikr aata hai.",
+          "english": "Hajar saw an angel at the place of Zamzam, digging with his heel or wing, as the authentic narration describes. Water began to flow there.\n\nShe gathered it and filled her waterskin. The valley that had held no water now had Zamzam. The next part of the account describes people settling beside it.",
           "sources": [
             {
               "kind": "hadith",
@@ -710,8 +720,8 @@
           "id": "ibrahim_waadi_mein_abadkari",
           "title": "Waadi mein abadkari",
           "scene": "valley",
-          "roman": "Zamzam ka pani mila to waadi ki kahani ek naye marhale mein dakhil hui. Jurhum ke log wahan rehne lage. Ismail Alaihis Salam unke darmiyan barhe aur unki zaban seekhi. Jo waadi pehle be-aab thi, pani ke sabab wahan abadi hone lagi.",
-          "english": "After water became available, people of Jurhum settled there. Ismail Alaihis Salam grew up among them and learned their language.",
+          "roman": "Zamzam ke pani ke sabab waadi mein rehne ka imkan paida hua. Jurhum ke log wahan aaye aur Hajar ki ijazat se qareeb rehne lage.\n\nIsmail Alaihis Salam unke darmiyan barhe aur unse Arabi seekhi. Be-aab waadi, jahan ek maa aur bachcha the, ab logon ki abadi ka maqam ban gayi thi.",
+          "english": "The water of Zamzam made settlement possible in the valley. People of Jurhum arrived and, with Hajar’s permission, settled nearby.\n\nIsmail Alaihis Salam grew up among them and learned Arabic from them. The once uninhabited valley had become a place where families lived.",
           "sources": [
             {
               "kind": "hadith",
@@ -724,7 +734,7 @@
           "id": "ibrahim_khwaab_aur_ita_at_ki_azmaish",
           "title": "Khwaab aur ita-at ki azmaish",
           "scene": "mountain",
-          "roman": "Ibrahim Alaihis Salam ki ita-at ki ek badi azmaish Quran qurbani ke waqie mein bayan karta hai. Unhon ne apne bete ko khwaab mein qurbani dekhne ki baat batayi. Donon ne Allah ki ita-at ikhtiyar ki. Allah ne is azmaish ke anjaam par badi qurbani ka fidya diya. In ayaat mein bete ka naam nahi diya gaya.",
+          "roman": "Ibrahim Alaihis Salam ki ita-at ki ek badi azmaish Quran qurbani ke waqie mein bayan karta hai. Unhon ne apne bete ko khwaab mein qurbani dekhne ki baat batayi.\n\nDonon ne Allah ki ita-at ikhtiyar ki. Allah ne is azmaish ke anjaam par badi qurbani ka fidya diya. In ayaat mein bete ka naam nahi diya gaya.",
           "english": "Ibrahim Alaihis Salam told his son of the sacrificial dream. Both submitted to Allah, and Allah provided a great sacrifice in ransom. These verses do not name the son.",
           "sources": [
             {
@@ -739,7 +749,7 @@
           "id": "ibrahim_ishaq_ki_khushkhabri",
           "title": "Ishaq Alaihis Salam ki khushkhabri",
           "scene": "palace",
-          "roman": "Quran Ibrahim Alaihis Salam ke ghar ek aur khushkhabri ka zikr bhi karta hai. Farishton ne Ishaq Alaihis Salam aur uske baad Yaqub Alaihis Salam ki basharat di. Ibrahim Alaihis Salam ki biwi ne apni aur shohar ki bari umar dekhkar hairat ki. Lekin jis Rabb ka yeh faisla tha, uske liye yeh mushkil nahi tha.",
+          "roman": "Quran Ibrahim Alaihis Salam ke ghar ek aur khushkhabri ka zikr bhi karta hai. Farishton ne Ishaq Alaihis Salam aur uske baad Yaqub Alaihis Salam ki basharat di.\n\nIbrahim Alaihis Salam ki biwi ne apni aur shohar ki bari umar dekhkar hairat ki. Lekin jis Rabb ka yeh faisla tha, uske liye yeh mushkil nahi tha.",
           "english": "Angelic messengers announced Ishaq Alaihis Salam and, after him, Yaqub Alaihis Salam. Ibrahim Alaihis Salam’s wife was astonished in old age, but this was Allah’s decree.",
           "sources": [
             {
@@ -754,8 +764,8 @@
           "id": "ibrahim_kaaba_ki_bunyadein",
           "title": "Kaaba ki bunyadein",
           "scene": "kaaba",
-          "roman": "Makkah ki waadi se jura ek aur aham manzar Allah ke ghar ki tameer ka hai. Ibrahim Alaihis Salam aur Ismail Alaihis Salam milkar uski bunyadein utha rahe the. Is amal ke saath unki dua bhi jari thi: Allah unki mehnat qubool kare aur unhein apna farmanbardar banaye. Amal aur qubooliyat ki dua saath-saath the.",
-          "english": "Ibrahim Alaihis Salam and Ismail Alaihis Salam raised the foundations of the House, praying for acceptance and for themselves and their descendants to submit to Allah.",
+          "roman": "Makkah ki isi waadi se Allah ke ghar ki tameer ka azeem waqia bhi jura hai. Ibrahim Alaihis Salam aur Ismail Alaihis Salam milkar Kaaba ki bunyadein utha rahe the.\n\nUnki mehnat ke saath dua bhi thi: apne Rabb se is amal ki qubooliyat mang rahe the. Unhon ne apne liye aur apni aulaad mein ek ummat ke liye Allah ki farmanbardari ki dua ki.",
+          "english": "Another great event linked to this valley is the building of Allah’s House. Ibrahim Alaihis Salam and Ismail Alaihis Salam raised the foundations of the Kaaba together.\n\nTheir work was accompanied by supplication: they asked their Lord to accept it. They also prayed for submission to Allah for themselves and for a community among their descendants.",
           "sources": [
             {
               "kind": "quran",
@@ -769,7 +779,7 @@
           "id": "ibrahim_aman_aur_ibadat_ki_dua",
           "title": "Aman aur ibadat ki dua",
           "scene": "sunrise",
-          "roman": "Ibrahim Alaihis Salam ki dua mein shehar ka aman bhi tha aur apni aulaad ka deen bhi. Unhon ne but-parasti se hifazat, namaz qayam rakhne aur maghfirat ki darkhwast ki. Unki kahani mein tawheed, ita-at aur dua baar-baar samne aate hain. Nematon ke darmiyan bhi unka rujoo apne Rabb hi ki taraf tha.",
+          "roman": "Ibrahim Alaihis Salam ki dua mein shehar ka aman bhi tha aur apni aulaad ka deen bhi. Unhon ne but-parasti se hifazat, namaz qayam rakhne aur maghfirat ki darkhwast ki.\n\nUnki kahani mein tawheed, ita-at aur dua baar-baar samne aate hain. Nematon ke darmiyan bhi unka rujoo apne Rabb hi ki taraf tha.",
           "english": "Ibrahim Alaihis Salam prayed for the city’s safety, protection from idol worship, steadfast prayer and forgiveness. His story centres on worship and submission to Allah.",
           "sources": [
             {
@@ -782,7 +792,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Aag ki azmaish se Makkah ki waadi aur Zamzam tak."
+      "teaser": "Ibrahim Alaihis Salam ki kahani tawheed ki dawat, hijrat, dua aur ita-at ke waqiat ko jorti hai.",
+      "openingRoman": "Ibrahim Alaihis Salam ki kahani tawheed ki dawat, hijrat, dua aur ita-at ke waqiat ko jorti hai. Qaum ke buton se Makkah ki be-aab waadi aur Kaaba ki bunyadon tak, unka rujoo apne Rabb hi ki taraf raha.",
+      "openingEnglish": "The story of Ibrahim Alaihis Salam brings together the call to worship Allah alone, migration, prayer and obedience. Its scenes extend from his people’s idols to the valley of Makkah and the foundations of the Kaaba."
     },
     {
       "id": "lut",
@@ -814,7 +826,7 @@
           "id": "lut_mehmanon_ki_amad",
           "title": "Mehmanon ki amad",
           "scene": "palace",
-          "roman": "Qaumi rawaiye ka ek aur manzar mehmanon ki amad par samne aaya. Farishtay Lut Alaihis Salam ke paas mehmanon ki surat mein aaye. Lut Alaihis Salam ko apni qaum ke rawaiye ka khauf hua. Farishton ne bataya ke woh Allah ke bheje hue hain.",
+          "roman": "Qaumi rawaiye ka ek aur manzar mehmanon ki amad par samne aaya. Farishtay Lut Alaihis Salam ke paas mehmanon ki surat mein aaye.\n\nLut Alaihis Salam ko apni qaum ke rawaiye ka khauf hua. Farishton ne bataya ke woh Allah ke bheje hue hain.",
           "english": "Angelic messengers came to Lut Alaihis Salam as guests. Distressed by his people’s behaviour, he was reassured that the visitors were messengers from Allah.",
           "sources": [
             {
@@ -850,7 +862,7 @@
           "id": "lut_nijat_aur_basti_ka_anjaam",
           "title": "Nijat aur basti ka anjaam",
           "scene": "valley",
-          "roman": "Yeh rawangi nijat ka sabab bani. Allah ne Lut Alaihis Salam aur unke iman wale ghar walon ko bachaya. Basti par azab aaya. Quran is waqia ko baad mein guzarne walon ke liye nishani batata hai.",
+          "roman": "Yeh rawangi nijat ka sabab bani. Allah ne Lut Alaihis Salam aur unke iman wale ghar walon ko bachaya.\n\nBasti par azab aaya. Quran is waqia ko baad mein guzarne walon ke liye nishani batata hai.",
           "english": "Allah saved Lut Alaihis Salam and his believing household. Punishment overtook the town, leaving a sign for those who would pass by.",
           "sources": [
             {
@@ -869,7 +881,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Qaumi zulm ke darmiyan naseehat aur nijat ka waqia."
+      "teaser": "Lut Alaihis Salam ne apni qaum ko bad-amali se roka.",
+      "openingRoman": "Lut Alaihis Salam ne apni qaum ko bad-amali se roka. Mehmanon ki amad aur raat ki rawangi ke waqiat ke saath yeh kahani Allah ki hifazat aur zulm ke anjaam ko bayan karti hai.",
+      "openingEnglish": "Lut Alaihis Salam warned his people against wrongdoing. The arrival of visitors and the departure by night lead into an account of Allah’s protection and the consequences of oppression."
     },
     {
       "id": "ismail",
@@ -929,7 +943,7 @@
           "id": "ismail_abadi_aur_jawani",
           "title": "Abadi aur jawani",
           "scene": "spring",
-          "roman": "Zamzam ke baad waadi mein abadi ka silsila hua. Jurhum ke log pani ke qareeb abad hue. Ismail Alaihis Salam unke darmiyan barhe, Arabi seekhi aur bade hokar unmein shadi ki. Riwayat inki zindagi ka yeh hissa bayan karti hai.",
+          "roman": "Zamzam ke baad waadi mein abadi ka silsila hua. Jurhum ke log pani ke qareeb abad hue.\n\nIsmail Alaihis Salam unke darmiyan barhe, Arabi seekhi aur bade hokar unmein shadi ki. Riwayat inki zindagi ka yeh hissa bayan karti hai.",
           "english": "People of Jurhum settled near the water. Ismail Alaihis Salam grew up among them, learned Arabic and later married into their community.",
           "sources": [
             {
@@ -971,7 +985,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran recalls Ibrahim Alaihis Salam’s prayer and the gift of children. Sahih Bukhari relates Ismail Alaihis Salam’s infancy in Makkah.",
-      "teaser": "Be-aab waadi se Allah ke ghar ki tameer tak."
+      "teaser": "Ismail Alaihis Salam ki shuruati zindagi Makkah ki be-aab waadi se jurti hai.",
+      "openingRoman": "Ismail Alaihis Salam ki shuruati zindagi Makkah ki be-aab waadi se jurti hai. Zamzam ke pani, waadi ki abadi aur apne walid ke saath Kaaba ki tameer ke waqiat mein Allah ki nemat aur bandon ki ita-at samne aati hai.",
+      "openingEnglish": "The early life of Ismail Alaihis Salam is linked to the valley of Makkah. Zamzam, the settlement of the valley and the raising of the Kaaba’s foundations connect Allah’s gifts with obedience."
     },
     {
       "id": "ishaq",
@@ -1025,7 +1041,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran announces Ishaq Alaihis Salam’s birth, but does not provide a precise date or detailed childhood here.",
-      "teaser": "Barhape mein mili woh khushkhabri jo Allah ki ata thi."
+      "teaser": "Barhape mein ek bete ki khushkhabri—aur uske saath Allah ki qudrat ka izhar.",
+      "openingRoman": "Barhape mein ek bete ki khushkhabri—aur uske saath Allah ki qudrat ka izhar. Quran Ishaq Alaihis Salam ko nabuwat, neki aur barkat ke zikr ke saath yaad karta hai.",
+      "openingEnglish": "The good news of a son in old age displayed Allah’s power. The Quran remembers Ishaq Alaihis Salam through prophethood, righteousness and blessing."
     },
     {
       "id": "yaqub",
@@ -1072,7 +1090,7 @@
           "id": "yaqub_judai_aur_sabr",
           "title": "Judai aur sabr",
           "scene": "valley",
-          "roman": "Phir judai ka gham unki zindagi mein aaya. Yusuf Alaihis Salam ke bhai ghalat khabar aur khoon laga qamees laye. Yaqub Alaihis Salam ne sabr-e-jameel ikhtiyar kiya. Gham ke bawajood unhon ne Allah se umeed na chhori.",
+          "roman": "Phir judai ka gham unki zindagi mein aaya. Yusuf Alaihis Salam ke bhai ghalat khabar aur khoon laga qamees laye.\n\nYaqub Alaihis Salam ne sabr-e-jameel ikhtiyar kiya. Gham ke bawajood unhon ne Allah se umeed na chhori.",
           "english": "Yusuf Alaihis Salam’s brothers brought a bloodstained shirt and a false account. Yaqub Alaihis Salam chose beautiful patience and continued to hope in Allah.",
           "sources": [
             {
@@ -1121,7 +1139,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran announces Yaqub Alaihis Salam after Ishaq Alaihis Salam. It does not provide a detailed childhood account here.",
-      "teaser": "Judai ka gham, sabr aur Allah se umeed."
+      "teaser": "Yaqub Alaihis Salam ki kahani ek walid ki naseehat, judai ke sabr aur Allah se umeed ki kahani hai.",
+      "openingRoman": "Yaqub Alaihis Salam ki kahani ek walid ki naseehat, judai ke sabr aur Allah se umeed ki kahani hai. Yusuf Alaihis Salam ka khwaab aur baad ki mulaqat is safar ke aham manzar hain.",
+      "openingEnglish": "The story of Yaqub Alaihis Salam includes a father’s counsel, patience through separation and hope in Allah. The dream of Yusuf Alaihis Salam and their later reunion are important scenes in that account."
     },
     {
       "id": "yusuf",
@@ -1132,7 +1152,7 @@
           "id": "yusuf_bachpan_ka_khwaab",
           "title": "Bachpan ka khwaab",
           "scene": "night",
-          "roman": "Yusuf Alaihis Salam ki kahani ek khwaab se shuru hoti hai. Unhon ne gyarah sitaron, suraj aur chand ko apne samne sajda karte dekha aur apne walid ko bataya. Yaqub Alaihis Salam ne unhein yeh khwaab bhaiyon ke samne bayan na karne ki naseehat ki. Is khwaab ki tabeer kahani ke aakhri hisse mein samne aati hai.",
+          "roman": "Yusuf Alaihis Salam ki kahani ek khwaab se shuru hoti hai. Unhon ne gyarah sitaron, suraj aur chand ko apne samne sajda karte dekha aur apne walid ko bataya.\n\nYaqub Alaihis Salam ne unhein yeh khwaab bhaiyon ke samne bayan na karne ki naseehat ki. Is khwaab ki tabeer kahani ke aakhri hisse mein samne aati hai.",
           "english": "Young Yusuf Alaihis Salam told his father of a dream in which eleven stars, the sun and moon bowed to him. His father advised discretion.",
           "sources": [
             {
@@ -1147,7 +1167,7 @@
           "id": "yusuf_bhaiyon_ki_tadbeer",
           "title": "Bhaiyon ki tadbeer",
           "scene": "valley",
-          "roman": "Bhaiyon ke dil mein Yusuf Alaihis Salam ke liye hasad tha. Unhon ne walid se Yusuf Alaihis Salam ko apne saath le jane ki ijazat li. Lekin saath le jane ke baad unhein kuen mein daal diya. Ghar se nikla hua bachcha ab apne ghar walon se juda tha.",
+          "roman": "Bhaiyon ke dil mein Yusuf Alaihis Salam ke liye hasad tha. Unhon ne walid se Yusuf Alaihis Salam ko apne saath le jane ki ijazat li.\n\nLekin saath le jane ke baad unhein kuen mein daal diya. Ghar se nikla hua bachcha ab apne ghar walon se juda tha.",
           "english": "Yusuf Alaihis Salam’s brothers acted out of jealousy. They obtained permission to take him with them and then cast him into a well.",
           "sources": [
             {
@@ -1162,8 +1182,8 @@
           "id": "yusuf_kuen_se_nikalna",
           "title": "Kuen se nikalna",
           "scene": "well",
-          "roman": "Kuen par ek qafila pahuncha. Pani nikalne wale ko Yusuf Alaihis Salam mile. Lekin unhein apne ghar pahunchane ke bajaye maal-e-tijarat samjha gaya aur kam qeemat par bech diya gaya. Kuen se nikalne ke baad unki zindagi ka agla marhala Misr mein tha.",
-          "english": "A caravan’s water-drawer found Yusuf Alaihis Salam. He was treated as merchandise and sold for a small price.",
+          "roman": "Bhai Yusuf Alaihis Salam ko kuen mein chhor gaye the. Wahan ek qafila aaya aur usne pani lane wala bheja. Usne dol dala to Yusuf Alaihis Salam ka pata chala.\n\nKuen se nikalne ke bawajood ghar ki judai khatam nahi hui. Unhein maal-e-tijarat samjha gaya aur kam qeemat par bech diya gaya. Ab unki kahani Misr ke ek naye ghar tak pahunchti hai.",
+          "english": "The brothers had left Yusuf Alaihis Salam in the well. A caravan arrived and sent its water carrier, who lowered his bucket and discovered him.\n\nLeaving the well did not end his separation from home. He was treated as merchandise and sold for a small price. The story now moves towards a new household in Egypt.",
           "sources": [
             {
               "kind": "quran",
@@ -1177,7 +1197,7 @@
           "id": "yusuf_misr_mein_nayi_zindagi",
           "title": "Misr mein nayi zindagi",
           "scene": "palace",
-          "roman": "Misr mein jis shakhs ne Yusuf Alaihis Salam ko khareeda, us ne apni biwi ko unhein izzat se rakhne ko kaha. Yusuf Alaihis Salam ab ek naye ghar mein the. Allah ne unhein zameen mein jagah di aur ilm ata kiya. Judai aur beche jane ke darmiyan bhi un par Allah ki ata ka silsila tha.",
+          "roman": "Misr mein jis shakhs ne Yusuf Alaihis Salam ko khareeda, us ne apni biwi ko unhein izzat se rakhne ko kaha. Yusuf Alaihis Salam ab ek naye ghar mein the.\n\nAllah ne unhein zameen mein jagah di aur ilm ata kiya. Judai aur beche jane ke darmiyan bhi un par Allah ki ata ka silsila tha.",
           "english": "An Egyptian man bought Yusuf Alaihis Salam and instructed his wife to treat him honourably. Allah established Yusuf Alaihis Salam and granted him knowledge and judgment.",
           "sources": [
             {
@@ -1192,7 +1212,7 @@
           "id": "yusuf_gunah_se_panah",
           "title": "Gunah se panah",
           "scene": "door",
-          "roman": "Isi ghar mein Yusuf Alaihis Salam ko ek sakht azmaish pesh aayi. Ghar ki aurat ne unhein gunah ki taraf bulaya, lekin unhon ne Allah ki panah mangi. Darwaze tak pahunchne aur qamees phatne ka waqia hua. Isi qamees ka haal unki begunahi ki daleel bana.",
+          "roman": "Isi ghar mein Yusuf Alaihis Salam ko ek sakht azmaish pesh aayi. Ghar ki aurat ne unhein gunah ki taraf bulaya, lekin unhon ne Allah ki panah mangi.\n\nDarwaze tak pahunchne aur qamees phatne ka waqia hua. Isi qamees ka haal unki begunahi ki daleel bana.",
           "english": "The woman of the house tried to seduce Yusuf Alaihis Salam. He sought refuge in Allah, and the torn shirt became evidence supporting his innocence.",
           "sources": [
             {
@@ -1207,7 +1227,7 @@
           "id": "yusuf_qaid_ka_intikhab",
           "title": "Qaid ka intikhab",
           "scene": "prison",
-          "roman": "Azmaish ke samne Yusuf Alaihis Salam ne apne Rabb se hifazat mangi. Gunah ki taraf bulaye jane ke muqable mein unhon ne qaid ko pasand kiya. Phir unhein ek muddat ke liye qaid kar diya gaya. Unki kahani ka agla hissa ab qaidkhane mein pesh aata hai.",
+          "roman": "Azmaish ke samne Yusuf Alaihis Salam ne apne Rabb se hifazat mangi. Gunah ki taraf bulaye jane ke muqable mein unhon ne qaid ko pasand kiya.\n\nPhir unhein ek muddat ke liye qaid kar diya gaya. Unki kahani ka agla hissa ab qaidkhane mein pesh aata hai.",
           "english": "Yusuf Alaihis Salam preferred imprisonment to the wrongdoing being urged upon him and prayed for protection. He was later imprisoned for a time.",
           "sources": [
             {
@@ -1222,8 +1242,8 @@
           "id": "yusuf_qaid_mein_dawat",
           "title": "Qaid mein dawat",
           "scene": "prison_window",
-          "roman": "Qaidkhane mein bhi Yusuf Alaihis Salam ki dawat jari rahi. Do saathiyon ne unse apne khwaabon ki tabeer poochhi. Jawab dene se pehle Yusuf Alaihis Salam ne ek Allah ki ibadat ki taraf tawajjuh dilayi. Phir Allah ke sikhaye hue ilm se unke khwaabon ki tabeer batayi.",
-          "english": "Two fellow prisoners asked about dreams. Yusuf Alaihis Salam first explained worship of Allah alone, then interpreted their dreams using knowledge Allah had taught him.",
+          "roman": "Qaidkhane mein Yusuf Alaihis Salam ke saath do jawan bhi the. Donon ne apne khwaab bataye aur unki tabeer poochhi.\n\nYusuf Alaihis Salam ne jawab ke saath unhein ek Allah ki ibadat ki taraf bulaya. Unhon ne wazeh kiya ke unka ilm unke Rabb ki ata hai. Phir donon ko unke khwaabon ki tabeer batayi. Qaid mein bhi unka paigham tawheed hi tha.",
+          "english": "Two young men were in prison with Yusuf Alaihis Salam. Each described a dream and asked him to explain its meaning.\n\nYusuf Alaihis Salam called them to worship Allah alone and made clear that his knowledge was a gift from his Lord. He then explained their dreams. Even in prison, his message remained the worship of Allah alone.",
           "sources": [
             {
               "kind": "quran",
@@ -1237,7 +1257,7 @@
           "id": "yusuf_badshah_ka_khwaab",
           "title": "Badshah ka khwaab",
           "scene": "night",
-          "roman": "Phir badshah ke khwaab ka sawal Yusuf Alaihis Salam tak pahuncha. Unhon ne saat saal kasrat se kheti, uske baad saat sakht saal aur phir farakhi ki khabar di. Qaid mein maujood Yusuf Alaihis Salam ne aane wale saalon ke liye tadbeer bhi samjhayi. Unka ilm ek badi zaroorat ke waqt samne aaya.",
+          "roman": "Phir badshah ke khwaab ka sawal Yusuf Alaihis Salam tak pahuncha. Unhon ne saat saal kasrat se kheti, uske baad saat sakht saal aur phir farakhi ki khabar di.\n\nQaid mein maujood Yusuf Alaihis Salam ne aane wale saalon ke liye tadbeer bhi samjhayi. Unka ilm ek badi zaroorat ke waqt samne aaya.",
           "english": "Yusuf Alaihis Salam interpreted the king’s dream: seven years of cultivation, followed by seven hard years, then a year of relief.",
           "sources": [
             {
@@ -1252,7 +1272,7 @@
           "id": "yusuf_begunahi_wazeh_hui",
           "title": "Begunahi wazeh hui",
           "scene": "palace",
-          "roman": "Riha hone ka mauqa aaya, lekin Yusuf Alaihis Salam ne pehle apne upar lage ilzam ki tehqeeq mangi. Auraton ne unki begunahi tasleem ki. Aziz ki biwi ne bhi apni ghalati ka iqrar kiya. Yusuf Alaihis Salam ka qaid se nikalna unki begunahi wazeh hone ke saath tha.",
+          "roman": "Riha hone ka mauqa aaya, lekin Yusuf Alaihis Salam ne pehle apne upar lage ilzam ki tehqeeq mangi. Auraton ne unki begunahi tasleem ki.\n\nAziz ki biwi ne bhi apni ghalati ka iqrar kiya. Yusuf Alaihis Salam ka qaid se nikalna unki begunahi wazeh hone ke saath tha.",
           "english": "Before leaving prison, Yusuf Alaihis Salam requested an investigation. The women acknowledged his innocence, and the wife of the Aziz admitted her wrongdoing.",
           "sources": [
             {
@@ -1267,7 +1287,7 @@
           "id": "yusuf_amanat_ki_zimmedari",
           "title": "Amanat ki zimmedari",
           "scene": "scrolls",
-          "roman": "Badshah ne Yusuf Alaihis Salam ko maqam aur aitimad diya. Yusuf Alaihis Salam ne zameen ke khazanon ki zimmedari mangi aur apni hifazat aur ilm ka zikr kiya. Allah ne unhein ikhtiyar ata kiya. Qaidkhane se unki zindagi ab zimmedari ke ek naye marhale tak pahunchi.",
+          "roman": "Badshah ne Yusuf Alaihis Salam ko maqam aur aitimad diya. Yusuf Alaihis Salam ne zameen ke khazanon ki zimmedari mangi aur apni hifazat aur ilm ka zikr kiya.\n\nAllah ne unhein ikhtiyar ata kiya. Qaidkhane se unki zindagi ab zimmedari ke ek naye marhale tak pahunchi.",
           "english": "The king honoured Yusuf Alaihis Salam. Yusuf Alaihis Salam asked to oversee the storehouses, citing his trustworthiness and knowledge, and Allah established him in authority.",
           "sources": [
             {
@@ -1282,7 +1302,7 @@
           "id": "yusuf_bhaiyon_se_dobara_mulaqat",
           "title": "Bhaiyon se dobara mulaqat",
           "scene": "palace",
-          "roman": "Qahat ke dino mein ghalla lene kuch log Misr aaye—yeh Yusuf Alaihis Salam ke bhai the. Unhon ne Yusuf Alaihis Salam ko na pehchana, magar Yusuf Alaihis Salam unhein pehchan gaye. Baad ke safar mein unka saga bhai bhi saath aaya. Bachpan ki judai se jura waqia ab dobara ghar walon ki taraf laut raha tha.",
+          "roman": "Qahat ke dino mein ghalla lene kuch log Misr aaye—yeh Yusuf Alaihis Salam ke bhai the. Unhon ne Yusuf Alaihis Salam ko na pehchana, magar Yusuf Alaihis Salam unhein pehchan gaye.\n\nBaad ke safar mein unka saga bhai bhi saath aaya. Bachpan ki judai se jura waqia ab dobara ghar walon ki taraf laut raha tha.",
           "english": "Yusuf Alaihis Salam’s brothers came for provisions without recognizing him, though he recognized them. On a later visit, his brother also came.",
           "sources": [
             {
@@ -1297,7 +1317,7 @@
           "id": "yusuf_pehchan_aur_maafi",
           "title": "Pehchan aur maafi",
           "scene": "sunrise",
-          "roman": "Aakhir Yusuf Alaihis Salam ne apni pehchan zahir kar di. Bhaiyon ne apni ghalati tasleem ki. Yusuf Alaihis Salam ne un par us din malamat na karne ki baat kahi aur Allah se maghfirat ki dua ki. Badla lene ke is mauqe par unki taraf se maafi samne aayi.",
+          "roman": "Aakhir Yusuf Alaihis Salam ne apni pehchan zahir kar di. Bhaiyon ne apni ghalati tasleem ki.\n\nYusuf Alaihis Salam ne un par us din malamat na karne ki baat kahi aur Allah se maghfirat ki dua ki. Badla lene ke is mauqe par unki taraf se maafi samne aayi.",
           "english": "Yusuf Alaihis Salam revealed his identity. His brothers admitted their wrongdoing, and he declined to reproach them, praying for their forgiveness.",
           "sources": [
             {
@@ -1312,7 +1332,7 @@
           "id": "yusuf_ghar_walon_ki_mulaqat",
           "title": "Ghar walon ki mulaqat",
           "scene": "palace",
-          "roman": "Yusuf Alaihis Salam ne apni qamees walid ke paas bheji. Phir ghar wale Misr pahunche aur judai ke baad mulaqat hui. Yusuf Alaihis Salam ne apne bachpan ke khwaab ki tabeer poori hone ko pehchana. Kuen, qaid aur lambi judai ke baad unhon ne is anjaam ko apne Rabb ki meherbani kaha.",
+          "roman": "Yusuf Alaihis Salam ne apni qamees walid ke paas bheji. Phir ghar wale Misr pahunche aur judai ke baad mulaqat hui.\n\nYusuf Alaihis Salam ne apne bachpan ke khwaab ki tabeer poori hone ko pehchana. Kuen, qaid aur lambi judai ke baad unhon ne is anjaam ko apne Rabb ki meherbani kaha.",
           "english": "Yusuf Alaihis Salam sent his shirt to his father, and the family came to Egypt. He recognized the fulfilment of his childhood dream as Allah’s kindness.",
           "sources": [
             {
@@ -1325,7 +1345,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Ek khwaab, kuen ki judai aur aakhir mein mulaqat."
+      "teaser": "Ek khwaab, ghar se judai, Misr mein azmaish aur phir mulaqat.",
+      "openingRoman": "Ek khwaab, ghar se judai, Misr mein azmaish aur phir mulaqat. Yusuf Alaihis Salam ki kahani ke marhale ek doosre se jurte hain, aur aakhir mein bachpan ke khwaab ki tabeer samne aati hai.",
+      "openingEnglish": "A dream, separation from home, trials in Egypt and a reunion form the connected story of Yusuf Alaihis Salam. Its later events reveal the fulfilment of his childhood dream."
     },
     {
       "id": "ayyub",
@@ -1406,7 +1428,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Takleef mein dua aur Allah ki rahmat se shifa."
+      "teaser": "Takleef ke waqt Ayyub Alaihis Salam ne apne Rabb ko pukara.",
+      "openingRoman": "Takleef ke waqt Ayyub Alaihis Salam ne apne Rabb ko pukara. Quran ki mukhtasar magar gehri riwayat mein dua, shifa aur Allah ki rahmat ka zikr hai.",
+      "openingEnglish": "In affliction, Ayyub Alaihis Salam called upon his Lord. The Quran’s concise account brings together supplication, healing and Allah’s mercy."
     },
     {
       "id": "shuayb",
@@ -1481,7 +1505,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Naap-tol mein insaf aur haq ki dawat."
+      "teaser": "Shuayb Alaihis Salam ki dawat ibadat ke saath logon ke huqooq se bhi juri thi.",
+      "openingRoman": "Shuayb Alaihis Salam ki dawat ibadat ke saath logon ke huqooq se bhi juri thi. Madyan ke logon ko naap-tol poora karne aur zameen mein fasad se bachne ki naseehat ki gayi.",
+      "openingEnglish": "The call of Shuayb Alaihis Salam concerned worship and people’s rights. The people of Madyan were told to give full measure and weight and avoid corruption."
     },
     {
       "id": "musa",
@@ -1492,7 +1518,7 @@
           "id": "musa_zulm_ke_daur_mein_paidaish",
           "title": "Zulm ke daur mein paidaish",
           "scene": "river",
-          "roman": "Musa Alaihis Salam ki kahani zulm ke daur mein shuru hoti hai. Firaun logon ko girohon mein baantkar ek giroh ke beton ko qatl karwata tha. Isi khatre ke darmiyan Allah ne Musa Alaihis Salam ki walida ko unhein doodh pilane aur khatra ho to darya mein rakhne ki hidayat di. Unki hifazat ka waqia yahin se aage barhta hai.",
+          "roman": "Musa Alaihis Salam ki kahani zulm ke daur mein shuru hoti hai. Firaun logon ko girohon mein baantkar ek giroh ke beton ko qatl karwata tha.\n\nIsi khatre ke darmiyan Allah ne Musa Alaihis Salam ki walida ko unhein doodh pilane aur khatra ho to darya mein rakhne ki hidayat di. Unki hifazat ka waqia yahin se aage barhta hai.",
           "english": "Pharaoh oppressed a group of people and killed their sons. Allah guided Musa Alaihis Salam’s mother to nurse him and, when afraid, place him in the river.",
           "sources": [
             {
@@ -1507,7 +1533,7 @@
           "id": "musa_darya_se_mahal_tak",
           "title": "Darya se mahal tak",
           "scene": "palace",
-          "roman": "Sanduq mein rakhe Musa Alaihis Salam darya tak pahunche. Phir Firaun ke ghar walon ne unhein utha liya. Firaun ki biwi ne unhein qatl na karne ko kaha. Jis daur mein bachchon ki jaan ko khatra tha, Musa Alaihis Salam Firaun ke ghar tak pahunchaye gaye.",
+          "roman": "Sanduq mein rakhe Musa Alaihis Salam darya tak pahunche. Phir Firaun ke ghar walon ne unhein utha liya.\n\nFiraun ki biwi ne unhein qatl na karne ko kaha. Jis daur mein bachchon ki jaan ko khatra tha, Musa Alaihis Salam Firaun ke ghar tak pahunchaye gaye.",
           "english": "Musa Alaihis Salam was placed in a chest in the river and taken in by Pharaoh’s household. Pharaoh’s wife pleaded that he should not be killed.",
           "sources": [
             {
@@ -1528,7 +1554,7 @@
           "id": "musa_walida_ki_god_mein_wapsi",
           "title": "Walida ki god mein wapsi",
           "scene": "river",
-          "roman": "Udhar Musa Alaihis Salam ki behen door se unki khabar leti rahi. Allah ne Musa Alaihis Salam ko doosri doodh pilane waliyon se roka. Phir aisa sabab bana ke woh apni walida tak wapas pahunch gaye. Allah ne unki walida ki aankh thandi ki; judai ke baad bachcha phir unki god mein tha.",
+          "roman": "Udhar Musa Alaihis Salam ki behen door se unki khabar leti rahi. Allah ne Musa Alaihis Salam ko doosri doodh pilane waliyon se roka.\n\nPhir aisa sabab bana ke woh apni walida tak wapas pahunch gaye. Allah ne unki walida ki aankh thandi ki; judai ke baad bachcha phir unki god mein tha.",
           "english": "Musa Alaihis Salam’s sister watched from a distance. Allah prevented him from accepting other wet nurses and reunited him with his mother.",
           "sources": [
             {
@@ -1543,7 +1569,7 @@
           "id": "musa_jawani_aur_ek_ghalati",
           "title": "Jawani aur ek ghalati",
           "scene": "city",
-          "roman": "Musa Alaihis Salam ko jawani mein hikmat aur ilm ata hua. Ek din shehar mein jhagra dekha to unhon ne ek shakhs ko mukka mara aur woh mar gaya. Musa Alaihis Salam ne apni ghalati par Allah se maafi mangi. Unki zindagi ab ek aur mushkil mor par thi.",
+          "roman": "Musa Alaihis Salam ko jawani mein hikmat aur ilm ata hua. Ek din shehar mein jhagra dekha to unhon ne ek shakhs ko mukka mara aur woh mar gaya.\n\nMusa Alaihis Salam ne apni ghalati par Allah se maafi mangi. Unki zindagi ab ek aur mushkil mor par thi.",
           "english": "As an adult, Musa Alaihis Salam received wisdom and knowledge. During a quarrel he struck a man who died, then sought Allah’s forgiveness.",
           "sources": [
             {
@@ -1558,7 +1584,7 @@
           "id": "musa_madyan_ki_taraf_safar",
           "title": "Madyan ki taraf safar",
           "scene": "valley",
-          "roman": "Jab khatre ki khabar mili to Musa Alaihis Salam shehar se nikal gaye. Unhon ne Allah se zalim logon se nijat aur seedhe raste ki dua ki. Unka safar Madyan ki taraf tha. Peechhe khatra tha aur aage ke safar mein unka rujoo apne Rabb ki taraf tha.",
+          "roman": "Jab khatre ki khabar mili to Musa Alaihis Salam shehar se nikal gaye. Unhon ne Allah se zalim logon se nijat aur seedhe raste ki dua ki.\n\nUnka safar Madyan ki taraf tha. Peechhe khatra tha aur aage ke safar mein unka rujoo apne Rabb ki taraf tha.",
           "english": "Warned of danger, Musa Alaihis Salam left the city and prayed for deliverance and guidance as he travelled toward Madyan.",
           "sources": [
             {
@@ -1573,7 +1599,7 @@
           "id": "musa_pani_par_madad",
           "title": "Pani par madad",
           "scene": "well",
-          "roman": "Madyan ke pani par Musa Alaihis Salam ne do auraton ko dekha aur unki madad ki. Unke liye pani pilane ke baad woh saaye mein aa gaye. Wahan unhon ne Allah se apni zaroorat ki dua ki. Zaroorat ke is waqt bhi unhon ne pehle doosron ka kaam kiya.",
+          "roman": "Madyan ke pani par Musa Alaihis Salam ne do auraton ko dekha aur unki madad ki. Unke liye pani pilane ke baad woh saaye mein aa gaye.\n\nWahan unhon ne Allah se apni zaroorat ki dua ki. Zaroorat ke is waqt bhi unhon ne pehle doosron ka kaam kiya.",
           "english": "At Madyan’s water, Musa Alaihis Salam helped two women water their flock. He then rested in the shade and prayed to Allah in need.",
           "sources": [
             {
@@ -1588,7 +1614,7 @@
           "id": "musa_aman_aur_ghar_ki_zindagi",
           "title": "Aman aur ghar ki zindagi",
           "scene": "palace",
-          "roman": "Un auraton ke walid ne Musa Alaihis Salam ko aman ki khabar di. Yahan unki shadi aur aath ya das saal ki khidmat ka muahida hua. Shehar se nikle Musa Alaihis Salam ko ab aman aur ghar ki zindagi mili. Quran un buzurg ka naam nahi batata.",
+          "roman": "Un auraton ke walid ne Musa Alaihis Salam ko aman ki khabar di. Yahan unki shadi aur aath ya das saal ki khidmat ka muahida hua.\n\nShehar se nikle Musa Alaihis Salam ko ab aman aur ghar ki zindagi mili. Quran un buzurg ka naam nahi batata.",
           "english": "Their father reassured Musa Alaihis Salam. An agreement involved marriage and eight or ten years of service. The Quran does not name this elder.",
           "sources": [
             {
@@ -1603,7 +1629,7 @@
           "id": "musa_aag_ke_paas_nida",
           "title": "Aag ke paas nida",
           "scene": "fire",
-          "roman": "Muddat poori hui to Musa Alaihis Salam apne ghar walon ke saath rawana hue. Raste mein aag dekhi aur uski taraf gaye. Yahin Allah ki nida aayi aur unhein nabuwat ki zimmedari aur nishaniyan di gayin. Safar ka yeh marhala Allah ke paigham ki zimmedari ka marhala ban gaya.",
+          "roman": "Muddat poori hui to Musa Alaihis Salam apne ghar walon ke saath rawana hue. Raste mein aag dekhi aur uski taraf gaye.\n\nYahin Allah ki nida aayi aur unhein nabuwat ki zimmedari aur nishaniyan di gayin. Safar ka yeh marhala Allah ke paigham ki zimmedari ka marhala ban gaya.",
           "english": "After completing the term, Musa Alaihis Salam travelled with his family. Seeing a fire, he approached and received Allah’s call and signs.",
           "sources": [
             {
@@ -1624,7 +1650,7 @@
           "id": "musa_harun_ki_madad_ki_dua",
           "title": "Harun Alaihis Salam ki madad ki dua",
           "scene": "mountain",
-          "roman": "Is zimmedari ke liye Musa Alaihis Salam ne apne Rabb se madad mangi. Unhon ne seena kholne, kaam aasaan karne aur zaban ki girah kholne ki dua ki. Apne bhai Harun Alaihis Salam ko madadgar banane ki darkhwast bhi ki. Allah ne unki yeh darkhwast qubool ki.",
+          "roman": "Is zimmedari ke liye Musa Alaihis Salam ne apne Rabb se madad mangi. Unhon ne seena kholne, kaam aasaan karne aur zaban ki girah kholne ki dua ki.\n\nApne bhai Harun Alaihis Salam ko madadgar banane ki darkhwast bhi ki. Allah ne unki yeh darkhwast qubool ki.",
           "english": "Musa Alaihis Salam prayed for ease, clear speech and help from his brother Harun Alaihis Salam. Allah granted his request.",
           "sources": [
             {
@@ -1639,7 +1665,7 @@
           "id": "musa_firaun_ke_samne_dawat",
           "title": "Firaun ke samne dawat",
           "scene": "palace",
-          "roman": "Ab Musa Alaihis Salam aur Harun Alaihis Salam ko Firaun ke paas jana tha. Hukm yeh tha ke usse narmi se baat karein. Unhon ne Allah ki nishaniyan pesh kin aur Bani Israil ko apne saath jane dene ka mutalaba kiya. Zulm ke samne Allah ka paigham pahunchaya gaya.",
+          "roman": "Ab Musa Alaihis Salam aur Harun Alaihis Salam ko Firaun ke paas jana tha. Hukm yeh tha ke usse narmi se baat karein.\n\nUnhon ne Allah ki nishaniyan pesh kin aur Bani Israil ko apne saath jane dene ka mutalaba kiya. Zulm ke samne Allah ka paigham pahunchaya gaya.",
           "english": "Musa Alaihis Salam and Harun Alaihis Salam were sent to address Pharaoh gently, ask him to release the Israelites and present Allah’s signs.",
           "sources": [
             {
@@ -1654,7 +1680,7 @@
           "id": "musa_jadugaron_ka_iman",
           "title": "Jadugaron ka iman",
           "scene": "city",
-          "roman": "Muqable ka waqt aaya to Musa Alaihis Salam ki nishani ne jadugaron ka banaya hua dhoka mita diya. Jadugar Allah par iman le aaye. Firaun ne unhein dhamkiyan din, lekin woh apne iman par qaim rahe. Muqable ke is manzar mein haq ko pehchanne walon ka faisla samne aa gaya.",
+          "roman": "Muqable ka waqt aaya to Musa Alaihis Salam ki nishani ne jadugaron ka banaya hua dhoka mita diya. Jadugar Allah par iman le aaye.\n\nFiraun ne unhein dhamkiyan din, lekin woh apne iman par qaim rahe. Muqable ke is manzar mein haq ko pehchanne walon ka faisla samne aa gaya.",
           "english": "At the contest, the sign given to Musa Alaihis Salam overcame the magicians’ deception. They believed and remained firm despite Pharaoh’s threats.",
           "sources": [
             {
@@ -1669,7 +1695,7 @@
           "id": "musa_sakhti_aur_nishaniyan",
           "title": "Sakhti aur nishaniyan",
           "scene": "storm",
-          "roman": "Firaun ki qaum par nishaniyan aur sakhtiyan aati rahin. Woh azab hatne par apna wada tor dete the. Aakhir Bani Israil ko raat mein nikalne ka hukm mila. Ab qaum ko zulm se nikalne ka safar darpesh tha.",
+          "roman": "Firaun ki qaum par nishaniyan aur sakhtiyan aati rahin. Woh azab hatne par apna wada tor dete the.\n\nAakhir Bani Israil ko raat mein nikalne ka hukm mila. Ab qaum ko zulm se nikalne ka safar darpesh tha.",
           "english": "Pharaoh’s people experienced signs and afflictions, yet broke their promises after relief. The Israelites were eventually commanded to depart by night.",
           "sources": [
             {
@@ -1690,7 +1716,7 @@
           "id": "musa_samandar_mein_rasta",
           "title": "Samandar mein rasta",
           "scene": "sea",
-          "roman": "Safar mein ek sakht manzar samne aaya: peechhe Firaun ka lashkar tha aur aage samandar. Musa Alaihis Salam ne apne Rabb ki rehnumai par yaqeen zahir kiya. Allah ke hukm se samandar phata aur rasta ban gaya. Jahan rasta nazar nahi aa raha tha, Allah ne rasta ata kiya.",
+          "roman": "Safar mein ek sakht manzar samne aaya: peechhe Firaun ka lashkar tha aur aage samandar. Musa Alaihis Salam ne apne Rabb ki rehnumai par yaqeen zahir kiya.\n\nAllah ke hukm se samandar phata aur rasta ban gaya. Jahan rasta nazar nahi aa raha tha, Allah ne rasta ata kiya.",
           "english": "With Pharaoh’s army behind and the sea ahead, Musa Alaihis Salam trusted Allah’s guidance. At Allah’s command the sea parted and a path opened.",
           "sources": [
             {
@@ -1705,7 +1731,7 @@
           "id": "musa_nijat_aur_firaun_ka_anjaam",
           "title": "Nijat aur Firaun ka anjaam",
           "scene": "sunrise",
-          "roman": "Allah ne Musa Alaihis Salam aur unke saath walon ko bacha liya. Unke peechhe aane walon ko gharaq kar diya gaya. Samandar ke waqie mein nijat aur Firaun ka anjaam dono samne aaye. Quran ise ek badi nishani ke taur par bayan karta hai.",
+          "roman": "Allah ne Musa Alaihis Salam aur unke saath walon ko bacha liya. Unke peechhe aane walon ko gharaq kar diya gaya.\n\nSamandar ke waqie mein nijat aur Firaun ka anjaam dono samne aaye. Quran ise ek badi nishani ke taur par bayan karta hai.",
           "english": "Allah saved Musa Alaihis Salam and those with him, while the pursuing forces drowned. The Quran describes this as a sign.",
           "sources": [
             {
@@ -1741,7 +1767,7 @@
           "id": "musa_bachhre_ki_azmaish",
           "title": "Bachhre ki azmaish",
           "scene": "city",
-          "roman": "Musa Alaihis Salam ki ghair-hazri mein qaum ke kuch log bachhre ki ibadat mein par gaye. Harun Alaihis Salam ne unhein is se roka tha. Musa Alaihis Salam wapas aaye to qaum ki is sarkashi par sakht ranj zahir kiya. Allah ki nishaniyan dekhne ke baad bhi qaum ek badi azmaish mein pari.",
+          "roman": "Musa Alaihis Salam ki ghair-hazri mein qaum ke kuch log bachhre ki ibadat mein par gaye. Harun Alaihis Salam ne unhein is se roka tha.\n\nMusa Alaihis Salam wapas aaye to qaum ki is sarkashi par sakht ranj zahir kiya. Allah ki nishaniyan dekhne ke baad bhi qaum ek badi azmaish mein pari.",
           "english": "During Musa Alaihis Salam’s absence, some people worshipped the calf. Harun Alaihis Salam had warned them, and Musa Alaihis Salam returned deeply distressed by their wrongdoing.",
           "sources": [
             {
@@ -1756,7 +1782,7 @@
           "id": "musa_safar_mein_pani_aur_rizq",
           "title": "Safar mein pani aur rizq",
           "scene": "water_rock",
-          "roman": "Quran isi qaum par Allah ki nematon ka zikr bhi karta hai. Pani manga gaya to chattan se barah chashme nikle. Har giroh ne apna pani peene ka maqam pehchan liya. Unke safar mein pani aur rizq bhi Allah ki ata the.",
+          "roman": "Quran isi qaum par Allah ki nematon ka zikr bhi karta hai. Pani manga gaya to chattan se barah chashme nikle.\n\nHar giroh ne apna pani peene ka maqam pehchan liya. Unke safar mein pani aur rizq bhi Allah ki ata the.",
           "english": "Allah provided for Musa Alaihis Salam’s people. When they sought water, twelve springs emerged from the rock and each group knew its drinking place.",
           "sources": [
             {
@@ -1771,7 +1797,7 @@
           "id": "musa_ilm_ke_safar_ki_seekh",
           "title": "Ilm ke safar ki seekh",
           "scene": "ocean",
-          "roman": "Musa Alaihis Salam ki zindagi ka ilm se jura ek aur safar Surah Al-Kahf mein aata hai. Woh Allah ke ek bande ke saath chale. Kashti, ek ladke aur deewar ke waqiat pesh aaye, jin ki hikmat baad mein kholi gayi. Yeh safar yaad dilata hai ke insaan ka ilm mehdood hai.",
+          "roman": "Musa Alaihis Salam ki zindagi ka ilm se jura ek aur safar Surah Al-Kahf mein aata hai. Woh Allah ke ek bande ke saath chale.\n\nKashti, ek ladke aur deewar ke waqiat pesh aaye, jin ki hikmat baad mein kholi gayi. Yeh safar yaad dilata hai ke insaan ka ilm mehdood hai.",
           "english": "Musa Alaihis Salam journeyed with a servant of Allah to learn. The reasons behind events involving a boat, a boy and a wall were explained afterward.",
           "sources": [
             {
@@ -1786,7 +1812,7 @@
           "id": "musa_maut_aur_qurb_ki_dua",
           "title": "Maut aur qurb ki dua",
           "scene": "mountain",
-          "roman": "Sahih Bukhari Musa Alaihis Salam ki wafat ke waqie ka zikr karti hai. Maut ka waqt aaya to unhon ne Allah se muqaddas sarzameen ke qareeb pahunchane ki dua ki. Riwayat unki qabr ko surkh retili pahari ke qareeb batati hai. Unki kahani mein azmaishon aur zimmedariyon ke saath apne Rabb ki taraf rujoo baar-baar nazar aata hai.",
+          "roman": "Sahih Bukhari Musa Alaihis Salam ki wafat ke waqie ka zikr karti hai. Maut ka waqt aaya to unhon ne Allah se muqaddas sarzameen ke qareeb pahunchane ki dua ki.\n\nRiwayat unki qabr ko surkh retili pahari ke qareeb batati hai. Unki kahani mein azmaishon aur zimmedariyon ke saath apne Rabb ki taraf rujoo baar-baar nazar aata hai.",
           "english": "Sahih Bukhari recounts Musa Alaihis Salam’s death and his prayer to be brought near the sacred land. The report describes his grave near a red sandy hill.",
           "sources": [
             {
@@ -1798,7 +1824,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran describes Musa Alaihis Salam’s birth and early life. No exact calendar date is supplied here.",
-      "teaser": "Darya ke sanduq se samandar mein khulne wale raste tak."
+      "teaser": "Musa Alaihis Salam ki kahani ek bachche ki hifazat se shuru hoti hai aur Firaun ke samne Allah ka paigham pahunchane tak barhti hai.",
+      "openingRoman": "Musa Alaihis Salam ki kahani ek bachche ki hifazat se shuru hoti hai aur Firaun ke samne Allah ka paigham pahunchane tak barhti hai. Hijrat, samandar ka rasta aur qaum ki rehnumai is safar ke aham marhale hain.",
+      "openingEnglish": "The story of Musa Alaihis Salam begins with the protection of a child and develops into a mission before Pharaoh. Leaving Egypt, the passage through the sea and guiding his people form major stages."
     },
     {
       "id": "harun",
@@ -1888,7 +1916,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Bhai ki madad aur qaum mein rehnumai ki zimmedari."
+      "teaser": "Musa Alaihis Salam ne apne bhai Harun Alaihis Salam ko madadgar banane ki dua ki.",
+      "openingRoman": "Musa Alaihis Salam ne apne bhai Harun Alaihis Salam ko madadgar banane ki dua ki. Donon ki dawat aur qaum ke darmiyan Harun Alaihis Salam ki zimmedari is kahani ka markaz hain.",
+      "openingEnglish": "Musa Alaihis Salam asked Allah to appoint his brother Harun Alaihis Salam as a helper. Their shared mission and the responsibility of Harun Alaihis Salam among the people are central to this account."
     },
     {
       "id": "dhulkifl",
@@ -1934,7 +1964,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Sabr aur neki ke saath Quran mein yaad kiye gaye."
+      "teaser": "Dhul-Kifl Alaihis Salam ke bare mein Quran tafseeli waqiat nahi sunata.",
+      "openingRoman": "Dhul-Kifl Alaihis Salam ke bare mein Quran tafseeli waqiat nahi sunata. Unka zikr sabr, neki aur Allah ki rahmat ke saath aata hai; isi sabit zikr tak yeh mukhtasar kahani mehdood hai.",
+      "openingEnglish": "The Quran gives no detailed life narrative of Dhul-Kifl Alaihis Salam. This short account stays with its references to patience, righteousness and Allah’s mercy."
     },
     {
       "id": "dawud",
@@ -2051,7 +2083,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Hikmat, Zabur aur insaf ki zimmedari."
+      "teaser": "Jalut ke muqable ke zikr se Dawud Alaihis Salam ki kahani hukumat, hikmat aur ibadat ki taraf barhti hai.",
+      "openingRoman": "Jalut ke muqable ke zikr se Dawud Alaihis Salam ki kahani hukumat, hikmat aur ibadat ki taraf barhti hai. Zabur ki ata aur insaf ki zimmedari un par Allah ki nematon ka hissa thin.",
+      "openingEnglish": "From the account of Jalut, the story of Dawud Alaihis Salam turns to kingship, wisdom and worship. The gift of the Zabur and the responsibility to judge fairly were among Allah’s favours."
     },
     {
       "id": "sulayman",
@@ -2143,7 +2177,7 @@
           "id": "sulayman_takht_aur_shukr",
           "title": "Takht aur shukr",
           "scene": "throne",
-          "roman": "Malika ke aane se pehle ek aur nishani samne aayi. Malika ke aane se pehle uska takht laya gaya. Sulayman Alaihis Salam ne is nemat ko shukr ya nashukri ki azmaish kaha.",
+          "roman": "Malika ke aane se pehle uska takht Sulayman Alaihis Salam ke paas laya gaya. Sulayman Alaihis Salam ne is nemat ko shukr ya nashukri ki azmaish kaha.",
           "english": "Before the queen arrived, her throne was brought. Sulayman Alaihis Salam recognized this favour as a test of gratitude.",
           "sources": [
             {
@@ -2192,7 +2226,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Badi saltanat ke darmiyan shukr aur Allah ki ita-at."
+      "teaser": "Sulayman Alaihis Salam ko ilm aur ikhtiyar ki khaas nematein milin.",
+      "openingRoman": "Sulayman Alaihis Salam ko ilm aur ikhtiyar ki khaas nematein milin. Cheentiyon ki waadi, Saba ka paigham aur malika ki amad ke waqiat mein woh in nematon ko shukr ki azmaish ke taur par pehchante hain.",
+      "openingEnglish": "Sulayman Alaihis Salam received special gifts of knowledge and authority. The valley of the ants, the message to Saba and the queen’s arrival reveal his recognition of these gifts as a test of gratitude."
     },
     {
       "id": "ilyas",
@@ -2246,7 +2282,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Apni qaum ko ek Allah ki taraf bulane wale rasool."
+      "teaser": "Ilyas Alaihis Salam ne apni qaum ko Baal ko pukarne ke bajaye Allah ki ibadat ki taraf bulaya.",
+      "openingRoman": "Ilyas Alaihis Salam ne apni qaum ko Baal ko pukarne ke bajaye Allah ki ibadat ki taraf bulaya. Quran unki dawat aur un par salam ka zikr mehfooz rakhta hai.",
+      "openingEnglish": "Ilyas Alaihis Salam called his people to worship Allah rather than invoke Baal. The Quran preserves his call and a greeting of peace upon him."
     },
     {
       "id": "alyasa",
@@ -2286,7 +2324,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Quran mein hidayat aur neki ke saath zikr."
+      "teaser": "Al-Yasa Alaihis Salam ke tafseeli waqiat Quran mein bayan nahi hue.",
+      "openingRoman": "Al-Yasa Alaihis Salam ke tafseeli waqiat Quran mein bayan nahi hue. Unka naam hidayat, fazilat aur neki ke zikr mein aata hai. Yahan isi pehchan ko parhein.",
+      "openingEnglish": "The Quran does not narrate detailed events from the life of Al-Yasa Alaihis Salam. It records his name among those granted guidance, distinction and righteousness."
     },
     {
       "id": "yunus",
@@ -2333,8 +2373,8 @@
           "id": "yunus_andheron_mein_dua",
           "title": "Andheron mein dua",
           "scene": "night",
-          "roman": "Andheron ke darmiyan Yunus Alaihis Salam ne apne Rabb ko pukara. Unhon ne Allah ki pakizgi bayan ki aur apni ghalati ka iqrar kiya. Allah ne unki dua qubool ki aur unhein gham se nijat di. Quran is waqie mein dua aur nijat ko saath bayan karta hai.",
-          "english": "In the darkness, Yunus Alaihis Salam glorified Allah and acknowledged his wrongdoing. Allah answered him and delivered him from distress.",
+          "roman": "Samandar ki azmaish aur machhli ke nigal lene ke baad Quran Yunus Alaihis Salam ki dua ka zikr karta hai. Andheron mein unhon ne Allah ko pukara, uski pakizgi bayan ki aur apni ghalati ka iqrar kiya.\n\nAllah ne unki pukar qubool ki aur unhein gham se nijat di. Yeh dua usi kahani ka hissa hai jo kashti se shuru hokar aage khule kinare tak pahunchti hai.",
+          "english": "After the trial at sea and the fish swallowing him, the Quran describes the supplication of Yunus Alaihis Salam. In darkness he called upon Allah, declared His perfection and acknowledged his wrongdoing.\n\nAllah answered him and delivered him from distress. The same account that began with the ship continues towards his arrival on the open shore.",
           "sources": [
             {
               "kind": "quran",
@@ -2363,7 +2403,7 @@
           "id": "yunus_qaum_ka_iman",
           "title": "Qaum ka iman",
           "scene": "sunrise",
-          "roman": "Yunus Alaihis Salam ki qaum ka waqia bhi umeed ka paigham rakhta hai. Woh iman le aaye to Allah ne unse ruswai ka azab hata diya. Unhein ek muddat tak fayda uthane diya gaya. Yunus Alaihis Salam ki kahani mein dua ki qubooliyat ke saath qaum ke iman ka zikr bhi hai.",
+          "roman": "Yunus Alaihis Salam ki qaum ka waqia bhi umeed ka paigham rakhta hai. Woh iman le aaye to Allah ne unse ruswai ka azab hata diya.\n\nUnhein ek muddat tak fayda uthane diya gaya. Yunus Alaihis Salam ki kahani mein dua ki qubooliyat ke saath qaum ke iman ka zikr bhi hai.",
           "english": "When the people of Yunus Alaihis Salam believed, Allah removed the punishment of disgrace and allowed them enjoyment for a time.",
           "sources": [
             {
@@ -2382,7 +2422,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Samandar ke andheron mein ki gayi dua aur nijat."
+      "teaser": "Kashti se samandar ki azmaish tak, phir andheron mein ek dua.",
+      "openingRoman": "Kashti se samandar ki azmaish tak, phir andheron mein ek dua. Yunus Alaihis Salam ki kahani mein apne Rabb ko pukarne aur Allah ki taraf se nijat milne ka zikr hai.",
+      "openingEnglish": "From a ship to a trial at sea, then a supplication in darkness: the story of Yunus Alaihis Salam tells of calling upon Allah and being delivered by Him."
     },
     {
       "id": "zakariya",
@@ -2408,14 +2450,20 @@
           "id": "zakariya_chhupi_hui_dua",
           "title": "Chhupi hui dua",
           "scene": "night",
-          "roman": "Zakariya Alaihis Salam ki kahani mein apni aulaad ki dua ka zikr bhi hai. Barhape mein Zakariya Alaihis Salam ne apne Rabb ko chupke se pukara. Unhon ne apni kamzori aur apni biwi ke be-aulad hone ka zikr karke nek waris manga.",
-          "english": "In old age, Zakariya Alaihis Salam quietly prayed to his Lord, describing his weakness and his wife’s barrenness and asking for an heir.",
+          "roman": "Maryam ke paas Allah ka ata kiya hua rizq dekhne ke waqie mein Zakariya Alaihis Salam ki dua ka bhi zikr aata hai. Unhon ne apne Rabb se nek aulaad mangi.\n\nSurah Maryam unki chupke se ki gayi pukar bayan karti hai. Barhape aur apni biwi ke be-aulad hone ke bawajood woh Allah ki ata ke umeedwar the. Unki pukar ka jawab aage Yahya Alaihis Salam ki khushkhabri mein aata hai.",
+          "english": "The account of Maryam receiving provision from Allah also mentions the supplication of Zakariya Alaihis Salam for righteous offspring.\n\nSurah Maryam describes his quiet call to his Lord. Despite his old age and his wife’s barrenness, he sought Allah’s gift. The answer appears in the good news of Yahya Alaihis Salam.",
           "sources": [
             {
               "kind": "quran",
               "surah": 19,
               "start": 2,
               "end": 6
+            },
+            {
+              "kind": "quran",
+              "surah": 3,
+              "start": 37,
+              "end": 38
             }
           ]
         },
@@ -2444,7 +2492,7 @@
           "id": "zakariya_nishani_aur_tasbeeh",
           "title": "Nishani aur tasbeeh",
           "scene": "scrolls",
-          "roman": "Basharat ke saath Zakariya Alaihis Salam ne ek nishani mangi. Zakariya Alaihis Salam ne nishani mangi. Unhein kuch muddat logon se baat na kar pane ki nishani di gayi, jabke woh tandurust the. Unhon ne logon ko subah-shaam tasbeeh ka ishara kiya.",
+          "roman": "Is khushkhabri par Zakariya Alaihis Salam ne apne Rabb se ek nishani mangi.\n\nUnhein kuch muddat logon se baat na kar pane ki nishani di gayi, jabke woh tandurust the. Unhon ne logon ko subah-shaam tasbeeh ka ishara kiya.",
           "english": "Zakariya Alaihis Salam was given a sign: for a period he could not speak to people despite being sound. He signalled them to glorify Allah morning and evening.",
           "sources": [
             {
@@ -2472,7 +2520,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
-      "teaser": "Barhape ki khamosh dua aur Yahya Alaihis Salam ki khushkhabri."
+      "teaser": "Maryam ki kifalat ke waqie ke saath Zakariya Alaihis Salam ki dua ki kahani bhi aati hai.",
+      "openingRoman": "Maryam ki kifalat ke waqie ke saath Zakariya Alaihis Salam ki dua ki kahani bhi aati hai. Barhape mein ki gayi pukar ka jawab Yahya Alaihis Salam ki khushkhabri se mila.",
+      "openingEnglish": "Alongside his care for Maryam, the Quran tells of the supplication of Zakariya Alaihis Salam. His call in old age was answered with the good news of Yahya Alaihis Salam."
     },
     {
       "id": "yahya",
@@ -2542,7 +2592,9 @@
         }
       ],
       "birthNoteEnglish": "Yahya Alaihis Salam’s birth is announced by name in the Quran; no exact date or city is asserted here.",
-      "teaser": "Bachpan ki hikmat aur walidain ke saath neki."
+      "teaser": "Yahya Alaihis Salam ka naam unki paidaish ki khushkhabri mein hi diya gaya.",
+      "openingRoman": "Yahya Alaihis Salam ka naam unki paidaish ki khushkhabri mein hi diya gaya. Quran unke bachpan ki hikmat, pakizgi aur walidain ke saath neki ki pehchan karata hai.",
+      "openingEnglish": "Yahya Alaihis Salam was named in the announcement of his birth. The Quran describes wisdom in childhood, purity and kindness to his parents."
     },
     {
       "id": "isa",
@@ -2568,7 +2620,7 @@
           "id": "isa_alag_jagah_aur_paidaish",
           "title": "Alag jagah aur paidaish",
           "scene": "palm",
-          "roman": "Is basharat ke baad Quran paidaish ka waqia bayan karta hai. Maryam alag jagah gayin. Dard-e-zah unhein khajoor ke tane tak le aaya. Unhein tasalli, pani aur khajoor ki taraf rehnumai mili.",
+          "roman": "Is basharat ke baad Quran paidaish ka waqia bayan karta hai. Maryam alag jagah gayin.\n\nDard-e-zah unhein khajoor ke tane tak le aaya. Unhein tasalli, pani aur khajoor ki taraf rehnumai mili.",
           "english": "Maryam withdrew to a distant place. Labour brought her to a palm trunk, where she received reassurance and provision.",
           "sources": [
             {
@@ -2583,8 +2635,8 @@
           "id": "isa_god_mein_bachche_ka_paigham",
           "title": "God mein bachche ka paigham",
           "scene": "sunrise",
-          "roman": "Phir Maryam apne bachche ko lekar qaum ke paas aayin. Maryam bachche ko lekar apni qaum ke paas aayin. Unhon ne bachche ki taraf ishara kiya. Isa Alaihis Salam ne Allah ka banda hone, kitab aur nabuwat milne ka bayan kiya.",
-          "english": "Maryam brought the child to her people and pointed to him. Isa Alaihis Salam spoke of being Allah’s servant, receiving Scripture and being made a prophet.",
+          "roman": "Maryam apne bachche ko lekar apni qaum ke paas aayin. Logon ne unse sawal kiye to unhon ne bachche ki taraf ishara kiya. Log hairan the ke god ke bachche se kaise baat karein.\n\nIsa Alaihis Salam ne apne aap ko Allah ka banda bataya aur kitab aur nabuwat ki ata ka zikr kiya. Unki paidaish ke waqie ke saath hi unke paigham ki buniyad wazeh hoti hai: bandagi Allah ki hai.",
+          "english": "Maryam brought her child to her people. When they questioned her, she pointed to him. They wondered how they could speak to a child in the cradle.\n\nIsa Alaihis Salam declared himself Allah’s servant and spoke of the gift of scripture and prophethood. The account of his birth thus also makes clear the foundation of his message: servitude to Allah.",
           "sources": [
             {
               "kind": "quran",
@@ -2670,7 +2722,7 @@
           "id": "isa_aasmani_dastarkhwan_ki_darkhwast",
           "title": "Aasmani dastarkhwan ki darkhwast",
           "scene": "table",
-          "roman": "Hawariyon se jura ek aur waqia dastarkhwan ki darkhwast ka hai. Hawariyon ne aasman se dastarkhwan mangne ki darkhwast ki. Isa Alaihis Salam ne Allah se rizq aur nishani ki dua ki. Allah ne utarne ke baad inkar par sakht tanbeeh ki.",
+          "roman": "Hawariyon se jura ek aur waqia dastarkhwan ki darkhwast ka hai. Hawariyon ne aasman se dastarkhwan mangne ki darkhwast ki.\n\nIsa Alaihis Salam ne Allah se rizq aur nishani ki dua ki. Allah ne utarne ke baad inkar par sakht tanbeeh ki.",
           "english": "The disciples asked for a table from heaven. Isa Alaihis Salam prayed for provision and a sign, and Allah warned against disbelief after it.",
           "sources": [
             {
@@ -2714,7 +2766,9 @@
         }
       ],
       "birthNoteEnglish": "The Quran describes Isa Alaihis Salam’s extraordinary birth. No exact calendar date is asserted here.",
-      "teaser": "Maryam ki basharat aur Allah ke izn se nishaniyan."
+      "teaser": "Maryam ko di gayi khushkhabri se Isa Alaihis Salam ki ghair-mamooli paidaish ka zikr shuru hota hai.",
+      "openingRoman": "Maryam ko di gayi khushkhabri se Isa Alaihis Salam ki ghair-mamooli paidaish ka zikr shuru hota hai. Unki rasalat aur nishaniyon ke saath Quran baar-baar Allah ke izn aur ek Allah ki ibadat ko wazeh karta hai.",
+      "openingEnglish": "The announcement to Maryam introduces the extraordinary birth of Isa Alaihis Salam. In describing his mission and signs, the Quran repeatedly makes clear Allah’s permission and the call to worship Allah alone."
     },
     {
       "id": "muhammad",
@@ -2756,7 +2810,7 @@
           "id": "muhammad_hira_mein_pehli_wahi",
           "title": "Hira mein pehli wahi",
           "scene": "cave",
-          "roman": "Phir zindagi ka woh marhala aaya jab wahi shuru hui. Sahih Bukhari ke mutabiq aap par wahi chalis saal ki umar mein shuru hui. Rasool Allah ﷺ Hira mein ibadat ke liye tanhai ikhtiyar karte the. Wahi ke farishte aaye aur parhne ka hukm diya. Surah Al-Alaq ki ibtidai ayaat nazil huin.",
+          "roman": "Phir zindagi ka woh marhala aaya jab wahi shuru hui. Sahih Bukhari ke mutabiq aap par wahi chalis saal ki umar mein shuru hui.\n\nRasool Allah ﷺ Hira mein ibadat ke liye tanhai ikhtiyar karte the. Wahi ke farishte aaye aur parhne ka hukm diya. Surah Al-Alaq ki ibtidai ayaat nazil huin.",
           "english": "Sahih Bukhari places the beginning of revelation at age forty. The Messenger of Allah would withdraw to Hira for worship. The angel brought the command to recite, and the opening verses of Al-Alaq were revealed.",
           "sources": [
             {
@@ -2888,7 +2942,7 @@
           "id": "muhammad_badr_mein_madad",
           "title": "Badr mein madad",
           "scene": "mountain",
-          "roman": "Quran Badr ki madad ko bhi yaad dilata hai. Quran Badr mein Allah ki madad yaad dilata hai jab momineen kamzor halat mein the. Madad ko shukr aur taqwa ke saath jora gaya.",
+          "roman": "Badr ke mauqe par momineen kamzor halat mein the. Quran unhein us waqt Allah ki madad yaad dilata hai. Madad ko shukr aur taqwa ke saath jora gaya.",
           "english": "The Quran recalls Allah’s help at Badr when the believers were weak, calling them to gratitude and mindfulness of Him.",
           "sources": [
             {
@@ -2918,7 +2972,7 @@
           "id": "muhammad_khandaq_ke_dino_mein_azmaish",
           "title": "Khandaq ke dino mein azmaish",
           "scene": "storm",
-          "roman": "Ahzab ke waqt bhi momineen azmaish se guzre. Ahzab ke waqt momineen sakht azmaish mein aaye. Allah ne hawa aur aise lashkar bheje jo nazar na aaye. Quran is nemat ko yaad dilata hai.",
+          "roman": "Ahzab ke waqt momineen ek sakht azmaish se guzre.\n\nAllah ne hawa aur aise lashkar bheje jo nazar na aaye. Quran is nemat ko yaad dilata hai.",
           "english": "During the siege by the confederates, the believers were severely tested. Allah sent wind and forces they did not see.",
           "sources": [
             {
@@ -2975,7 +3029,7 @@
           "id": "muhammad_deen_ki_takmeel",
           "title": "Deen ki takmeel",
           "scene": "mountain",
-          "roman": "Deen ki takmeel ka elan bhi Quran mein aata hai. Quran mein deen mukammal karne aur nemat poori karne ka elan hai. Sahih Bukhari batati hai ke yeh ayat Jumuah ke din Arafat mein nazil hui.",
+          "roman": "Quran mein deen mukammal karne aur nemat poori karne ka elan aaya. Sahih Bukhari batati hai ke yeh ayat Jumuah ke din Arafat mein nazil hui.",
           "english": "The Quran announces the completion of religion and Allah’s favour. Sahih Bukhari reports that this verse was revealed on a Friday at Arafat.",
           "sources": [
             {
@@ -3022,7 +3076,7 @@
           "id": "muhammad_wafat_aur_paigham_ka_baqi_rehna",
           "title": "Wafat aur paigham ka baqi rehna",
           "scene": "scrolls",
-          "roman": "Phir Rasool Allah ki dunyawi zindagi ki wafat ka waqt aaya. Sahih Bukhari ke mutabiq aapki wafat tirsath saal ki umar mein hui. Rasool Allah ﷺ ki wafat ke baad Abu Bakr ne Allah ki ibadat aur Muhammad ﷺ ke Allah ke rasool hone ki yaad dilayi. Unhon ne Surah Aal-e-Imran ki ayat parhi.",
+          "roman": "Phir Rasool Allah ﷺ ki wafat ka waqt aaya. Sahih Bukhari ke mutabiq aapki wafat tirsath saal ki umar mein hui.\n\nRasool Allah ﷺ ki wafat ke baad Abu Bakr ne Allah ki ibadat aur Muhammad ﷺ ke Allah ke rasool hone ki yaad dilayi. Unhon ne Surah Aal-e-Imran ki ayat parhi.",
           "english": "Sahih Bukhari reports his death at age sixty-three. After the Messenger’s death, Abu Bakr reminded the people to worship Allah and recited the verse affirming Muhammad ﷺ’s messengership and the mortality of messengers.",
           "sources": [
             {
@@ -3045,7 +3099,15 @@
         }
       ],
       "birthNoteEnglish": "The Quran recalls his orphanhood. This book does not assert an exact birth date; established reports of revelation and later life follow.",
-      "teaser": "Pehli wahi se hijrat, rehnumai aur rahmat ka paigham."
+      "teaser": "Muhammad ﷺ ki zindagi ke yeh marhale pehli wahi se dawat, hijrat aur deen ki takmeel tak pahunchte hain.",
+      "openingRoman": "Muhammad ﷺ ki zindagi ke yeh marhale pehli wahi se dawat, hijrat aur deen ki takmeel tak pahunchte hain. Quran aur sahih hadees ki roshni mein rehmat, sabr aur Allah ki taraf bulane ka paigham parhein.",
+      "openingEnglish": "These episodes from the life of Muhammad ﷺ extend from the first revelation to the mission, migration and completion of the religion. They present mercy, patience and the call to Allah through Quranic passages and authentic hadith."
     }
-  ]
+  ],
+  "editorialPolicy": {
+    "basis": "Quran and cited Sahih al-Bukhari / Sahih Muslim narrations",
+    "format": "Original sourced retellings, not quotations from a modern translation",
+    "historicalOrder": "Chapter order is for reading continuity; chronology is not asserted where the sources do not establish it.",
+    "referenceWork": "Ibn Kathir, Qasas al-Anbiya (background structure only; unverified reports are excluded)"
+  }
 }
