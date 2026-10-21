@@ -31,6 +31,10 @@ jobs:
         run: node --max-old-space-size=512 functions-ask/check-corpus.js
       - name: Test AI orchestration and citation validation
         run: npm --prefix functions-ask test
+      - name: Check Gemini model access before deployment
+        env:
+          AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+        run: node functions-ask/check-gemini.js
       - name: Store provider key in Firebase Secret Manager
         env:
           AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}

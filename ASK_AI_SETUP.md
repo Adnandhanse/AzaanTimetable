@@ -5,7 +5,7 @@ Apply it last, after Ask_And_Prophet_Stories_Improved_Update.zip. You do not nee
 to upload the old OpenAI AI ZIP first. Keep the earlier Prophet Stories/Learn
 assets and voice plugin. Only AI feature files/configuration are supplied here.
 
-The local code now calls **gemini-2.5-flash** using the Gemini Developer API.
+The local code now calls **gemini-3.5-flash-lite** using the Gemini Developer API.
 It does not call OpenAI, attach Google Search tools or switch providers on error.
 No actual Gemini key was supplied here; this has NOT been deployed or live-tested.
 
@@ -28,7 +28,7 @@ limit is reached earlier, AI requests stop with a clear limit message. Other app
 2. Create a SEPARATE project for AI, e.g. **Islam Connect AI Free**. Do not link
    a billing account to this new AI project. Check that its tier says **Free**.
    Do not disable/unlink billing from the existing Firebase app project.
-3. In that AI project's Usage / Rate limits page, find **Gemini 2.5 Flash**.
+3. In that AI project's Usage / Rate limits page, find **Gemini 3.5 Flash-Lite**.
    Verify that the model is available and has a nonzero quota. Record RPM/RPD/TPM.
    Do not buy credits or upgrade this project as part of the free pilot.
 4. Create an API key for that FREE AI project. Do not send the key in chat,
@@ -119,8 +119,8 @@ count includes narrations/variants and does not mean that many unique sayings.
 ASK_AI_ENABLED=false disables AI. ASK_USER_DAILY_LIMIT defaults to 5;
 ASK_GLOBAL_DAILY_LIMIT defaults to 250 questions, hard-clamped to at most 250
 in this free pilot. Quota day follows America/Los_Angeles (Pacific, DST-aware).
-ASK_GEMINI_MODEL defaults to gemini-2.5-flash. The client adapter also accepts
-an explicitly configured gemini-2.5-flash-lite; it never switches automatically.
+ASK_GEMINI_MODEL defaults to gemini-3.5-flash-lite. The client adapter also accepts
+explicit legacy gemini-2.5-flash / gemini-2.5-flash-lite for accounts that still have access; it never switches automatically.
 An unavailable model/key requires checking the actual account quota first.
 
 Quota counters contain hashed anonymous UIDs, counts, request time and expiresAt;
@@ -171,3 +171,5 @@ https://firebase.google.com/docs/firestore/security/rules-structure
 
 ## Clean page update
 The page now has one editable question field, microphone and Poochhein button. Voice and translation options are in the top settings icon. Library mode, topic chips and repeated notices were removed. All questions go to the Gemini callable; missing deployment, disabled Anonymous auth and API setup failures show distinct messages. No silent offline fallback.
+
+The deployment workflow makes one constant structured-output Gemini request before deploying. It counts against your provider quota. If ASK_GEMINI_MODEL is overridden in Cloud Run or a functions environment file, update it to gemini-3.5-flash-lite too; the default applies only when no override exists.

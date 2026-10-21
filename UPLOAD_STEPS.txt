@@ -1,18 +1,13 @@
-AI MEMORY FIX + TRANSFER ENABLE - LATEST COMBINED PATCH
+GEMINI MODEL 404 FIX
 
-This ZIP supersedes Transfer_Enable_And_AI_Diagnostics.zip. It includes that patch plus the memory fix. Upload these 10 changed/new files into the same repository paths; do not upload the ZIP itself. No complete repo or generated corpus bundled.
+Apply on top of AI_Memory_Fix_And_Transfer_Enable.zip (the previous memory fix).
 
-1. Upload all files into matching paths, including the updated .github/workflows/deploy-ask-islam-connect.yml. Apply this ZIP LAST if files overlap previous updates.
-2. Run Actions > Deploy Ask Islam Connect AI (Gemini Flash) > Run workflow > main.
-3. The updated workflow builds corpus.ndjson.gz from existing app assets, checks the full library under a 512 MiB Node heap budget, runs tests and deploys the Ask service. Do NOT use the old build_corpus.js with the new index.js: format changed together.
-4. If you already installed the APK containing the last diagnostics patch and enabled transfer button, no new APK is needed for this backend memory fix. Otherwise run Build Android APK on the latest main and install it for the enabled transfer button and detailed errors.
-5. Test one AI question. Memory crash attempts may already have consumed the existing daily application quota; repeated failed retries do not bypass limits. If a new error appears, send its support code and latest ask-ai-failed log.
+1. Extract this ZIP. Upload its files to the SAME paths in your repository. Do not upload the ZIP itself.
+2. If you previously set ASK_GEMINI_MODEL in Cloud Run / functions environment files, change its value to gemini-3.5-flash-lite. Otherwise no setting is needed.
+3. Commit changes, then GitHub > Actions > Deploy Ask Islam Connect AI (Gemini Flash) > Run workflow > main. Start a NEW workflow run; rerunning an old run can use old code.
+4. The new Check Gemini model access before deployment step makes one test API call. It must pass before deployment. This tests the API key and structured-output request, not the full app.
+5. After the entire deployment is green, reopen the existing APK and test a question. No APK rebuild is needed for this server-only patch.
 
-Confirmed user log: 1024 MiB limit exceeded at 1069 MiB. Previous loader inflated and parsed the whole multilingual array then built normalized search strings at runtime.
-Fix: CI prepares normalized records, streaming gzip NDJSON loader parses one record at a time, shared initialization promise prevents duplicate loads, memory 2 GiB and concurrency 1 per instance, maxInstances remains 2. Sources, retrieval rules, model calls and quotas unchanged. Allocated cloud memory is higher, so Firebase runtime charges may differ; Gemini project pricing/quota is unchanged.
-
-App Check: supplied log is a malformed-token WARNING. This code does not enable enforceAppCheck or add a client App Check provider. Per Firebase callable documentation, invalid App Check is rejected automatically only with enforcement enabled. Do not disable existing Firebase product enforcement globally. The token/provider warning itself is not fixed by this memory patch. If requests return App Check 401 after memory fix, inspect app registration/provider configuration and actual deployed callable settings before changing enforcement. Firebase Authentication remains required.
-
-Transfer: dashboard button is enabled. User must confirm Cloud Run transfermasjidadministration > Security > Allow public access is saved. Server still verifies current owner and new-admin phone OTP/session. Run only an intended transfer on a test masjid first; successful transfer changes admin access. Check same masjid ID, followers, prayer times, audio/media, B login and A access removal before publishing.
-
-Validation: 25 AI tests pass; full current corpus 40,758 records loads and three representative retrieval plans return candidates within a 512 MiB Node heap. Peak local process RSS 405 MiB (loader/search only, not the full deployed Firebase process). Node syntax checks pass. Existing 9 transfer validation/token tests passed in the preceding patch. Live Firebase/Gemini/device tests remain unperformed here.
+Changes: default model 3.5 Flash-Lite; remove 2.5-only thinkingBudget for the new model; shared model default; live deployment compatibility check; regression tests.
+No new permissions or API key are normally required. Current project quota still applies. No automatic provider fallback.
+Local validation: 28 Node tests passed; workflow YAML parsed; backend syntax checked. Live Gemini/Firebase execution requires your workflow credentials and has not been performed locally.
