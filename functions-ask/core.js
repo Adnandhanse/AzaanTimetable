@@ -5,7 +5,7 @@ const normalize = text => String(text).normalize('NFKC').toLowerCase()
   .replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\s+/g,' ');
 const {countIntent,databaseAnswer}=require('./database-facts');
 const {answerForFact}=require('./quick-answer');
-const GUIDES={namaz:'Namaz ka tarika',shahadah:'Shahadah',roza:'Roza',zakat:'Zakat',hajj:'Hajj',umrah:'Umrah',janaza:'Namaz-e-Janaza',eidain:'Eid ki namaz'};
+const {localAnswer,GUIDES,guideAnswer}=require('./local-route');
 const strings = {type:'array', items:{type:'string'}};
 const PLAN_SCHEMA = {type:'object',additionalProperties:false,required:['intent','understood','clarification','searches'], properties:{
   basic_id:{type:'string'},
@@ -134,7 +134,7 @@ function validateSelection(selection,candidates) {
   return ids;
 }
 async function runAsk({question,kind='all',docs,key,model=DEFAULT_MODEL,allowGuides=false,stats,quickData,call=geminiJson}) {
-  const direct=(kind==='all'||kind==='quran')?databaseAnswer(countIntent(question),stats):null;
+  const direct=localAnswer({question,kind,quickData,stats,allowGuides});
   if(direct)return direct;
   const plan=validatePlan(await call({key,model,schema:PLAN_SCHEMA,name:'islam_search_plan',
     instructions:PLAN_PROMPT,input:{question,availableGuideIds:allowGuides && kind==='all'?Object.keys(GUIDES):[],availableBasicAnswers:(quickData?.facts||[]).map(f=>({id:f.id,questions:f.questions.slice(0,2)}))},maxTokens:1000}));
@@ -147,17 +147,24 @@ async function runAsk({question,kind='all',docs,key,model=DEFAULT_MODEL,allowGui
   }
   const counted=(kind==='all'||kind==='quran')?databaseAnswer(plan.operation,stats):null;
   if(counted)return counted;
-  if(allowGuides && plan.guide_id && kind==='all')return {...empty,status:'answered',hits:[{
-    id:`guide:${plan.guide_id}`,kind:'guide',guideId:plan.guide_id,number:1,title:GUIDES[plan.guide_id],
-    en:'Open the step-by-step Learning guide. Each step includes its existing references.',
-    ur:'Learning mein qadam-ba-qadam tarika parhein. Har step ke saath references maujood hain.',ar:'',grades:[]}]};
+  if(allowGuides && plan.guide_id && kind==='all')return {...empty,...guideAnswer(plan.guide_id)};
   docs=typeof docs==='function'?await docs():docs;
   const candidates=retrieve(docs,plan,kind),context=contextFor(candidates);
   const sent=new Set(context.map(c=>c.id)), available=candidates.filter(c=>sent.has(c.doc.id));
   const clean = d => {const {normalized,...data}=d;return data;};
   if(!context.length)return {...empty,status:'insufficient',followup:'AI ne sawal samjha, lekin is library mein kaafi supporting references nahi mile. Sawal ki tafseel wazeh karein ya Library search use karein.'};
-  const selection=await call({key,model,schema:SELECTION_SCHEMA,name:'islam_source_selection',
+  let selection;
+  try { selection=await call({key,model,schema:SELECTION_SCHEMA,name:'islam_source_selection',
     instructions:SELECTION_PROMPT,input:{question,understood:plan.understood,excerpts:context},maxTokens:650});
+  } catch(error) {
+    // Return source matches as explicitly UNVERIFIED reading suggestions only.
+    // Never turn keyword overlap into a religious answer when selection fails.
+    if(!['TimeoutError','AbortError'].includes(error.name) && ![429,500,502,503,504].includes(error.status))throw error;
+    console.warn('ask-source-selection-unavailable',{type:error.name,status:error.status||null});
+    return {...empty,status:'references',answerMode:'sources-only',verification:'not-verified',
+      followup:'Jawab verify nahi ho saka. Neeche sawal se milte-julte library references hain; inhein final jawab na samjhein.',
+      hits:available.slice(0,3).map(c=>clean(c.doc))};
+  }
   const ids=validateSelection(selection,available);
   if(!ids.length)return {...empty,status:'insufficient',followup:'Is sawal ka jawab dene ke liye is library mein kaafi wazeh references nahi mile. Koi jawab apni taraf se nahi jora gaya.'};
   const hits=ids.map(id=>clean(available.find(c=>c.doc.id===id).doc));

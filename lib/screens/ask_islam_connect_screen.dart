@@ -30,6 +30,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   final _query = TextEditingController();
   bool _busy = false, _voiceBusy = false;
   String? _searchError;
+  bool _unverified = false;
   String _locale = 'hi-IN', _translation = 'urdu', _kind = 'all';
   String? _speaking;
   bool _confirmingAi = false;
@@ -107,7 +108,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
     final version = ++_searchVersion;
     final query = _query.text.trim();
     setState(() { _busy = true; _hits = []; _searchedQuery = query; _total = 0; _searchError = null;
-      _aiFollowup = null; _directAnswer = null;
+      _aiFollowup = null; _directAnswer = null; _unverified = false;
  });
     try {
       final reply = await AskConnectAi.ask(query, _kind);
@@ -119,6 +120,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
         _hits = (reply['hits'] as List).map((h) => Map<String, dynamic>.from(h as Map)).toList();
         _total = reply['total'] as int? ?? _hits.length;
         _aiFollowup = reply['followup'] as String?;
+        _unverified = reply['verification'] == 'not-verified';
         _directAnswer = reply['answer'] is Map ? Map<String, dynamic>.from(reply['answer'] as Map) : null;
       });
     } catch (error) {
@@ -130,22 +132,22 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
 
   Future<bool> _allowAi() async {
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('ask_gemini_data_notice_v1') == true) return true;
+    if (prefs.getBool('ask_provider_data_notice_v2') == true) return true;
     if (!mounted) return false;
     final allowed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
       title: const Text('Ask Islam Connect'),
-      content: const Text('Aapka sawal aur related Quran, hadees ya story passages Google Gemini ko bheje jaayenge. '
+      content: const Text('Aapka sawal aur related Quran, hadees ya story passages configured AI provider (Google Gemini ya OpenAI) ko bheje jaayenge. '
         'Free tier par Google is data ko apni services improve karne ke liye use kar sakta hai. '
-        'Audio, phone number aur location Gemini ko nahi bheje jaate. Sawal mein personal details na likhein.'),
+        'Audio, phone number aur location AI provider ko nahi bheje jaate. Sawal mein personal details na likhein.'),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Abhi nahi')),
         TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Jaari rakhein'))]));
-    if (allowed == true) await prefs.setBool('ask_gemini_data_notice_v1', true);
+    if (allowed == true) await prefs.setBool('ask_provider_data_notice_v2', true);
     return allowed == true;
   }
 
   String _aiError(Object error) {
     if (error is StateError && error.message == 'ai-backend-update-needed') {
-      return 'Gemini service ka naya version deploy karna baaki hai. Platform admin se rabta karein.';
+      return 'AI service ka naya version deploy karna baaki hai. Platform admin se rabta karein.';
     }
     if (error is FirebaseAuthException) {
       if (error.code == 'operation-not-allowed' || error.code == 'admin-restricted-operation') {
@@ -160,22 +162,22 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       final details = error.details;
       final support = details is Map ? details['supportCode'] : null;
       const messages = <String, String>{
-        'AI-LIMIT': 'Gemini provider ki limit aa gayi hai. Basic database jawab aur saved results use kar sakte hain; AI search kuch der baad try karein.',
+        'AI-LIMIT': 'AI provider ki limit aa gayi hai. Basic database jawab aur saved results use kar sakte hain; AI search kuch der baad try karein.',
         'AI-COOLDOWN': 'Agla AI sawal bhejne se pehle 5 seconds rukhein.',
         'AI-USER-LIMIT': 'Aaj ki personal AI search limit poori ho gayi. Basic database jawab aur saved results phir bhi available hain.',
         'AI-PROJECT-LIMIT': 'Aaj ka shared AI budget poora ho gaya. Basic database jawab aur saved results available hain.',
         'AI-TIMEOUT': 'Jawab aane mein zyada waqt lag gaya. Kuch der baad dobara koshish karein.',
         'AI-DATABASE': 'AI server database access check karna hai.',
-        'AI-PROVIDER-REQUEST': 'Gemini request configuration check karna hai.',
-        'AI-MODEL': 'Configured Gemini model available nahi hai.',
-        'AI-KEY': 'Gemini API key ya access check karna hai.',
-        'AI-OUTPUT': 'Gemini ka response complete ya valid nahi tha. Dobara koshish karein.',
+        'AI-PROVIDER-REQUEST': 'AI request configuration check karna hai.',
+        'AI-MODEL': 'Configured AI model available nahi hai.',
+        'AI-KEY': 'AI API key ya access check karna hai.',
+        'AI-OUTPUT': 'AI ka response complete ya valid nahi tha. Dobara koshish karein.',
         'AI-CORPUS': 'AI ki reference library server par load nahi ho saki.',
       };
       if (support is String && messages.containsKey(support)) return '${messages[support]} [$support]';
       if (error.code == 'internal' || error.code == 'unavailable') return 'AI server search poori nahi kar saka. Platform admin server logs check karein. [AI-SERVER]';
-      if (error.code == 'not-found') return 'Gemini service abhi available nahi. Platform admin deployment check karein.';
-      if (error.code == 'failed-precondition') return 'Gemini ki API key ya server setup check karna hai. Platform admin se rabta karein.';
+      if (error.code == 'not-found') return 'AI service abhi available nahi. Platform admin deployment check karein.';
+      if (error.code == 'failed-precondition') return 'AI ki API key ya server setup check karna hai. Platform admin se rabta karein.';
       if (error.code == 'resource-exhausted') return 'Abhi AI ki usage limit aa gayi hai. Kuch der baad dobara koshish karein; daily limit ho to agle din try karein.';
     }
     return 'Search poori nahi ho saki. Internet check karke dobara koshish karein.';
@@ -415,6 +417,9 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
             'Wazeh reference nahi mila. Sawal mein thodi tafseel jodkar try karein.',
             style: const TextStyle(fontFamily: 'Inter', fontSize: 14, height: 1.6))),
         if (_hits.isNotEmpty) ...[
+          if (_unverified) Padding(padding: const EdgeInsets.only(bottom: 12),
+            child: Text(_aiFollowup ?? 'Yeh sirf milte-julte references hain; jawab verify nahi hua.',
+              style: const TextStyle(fontSize: 14, height: 1.7, fontWeight: FontWeight.w600))),
           Text('References · $_total', style: TextStyle(fontFamily: 'Inter', fontSize: 13,
             fontWeight: FontWeight.w600, color: AppColors.textMuted)),
           const SizedBox(height: 10),

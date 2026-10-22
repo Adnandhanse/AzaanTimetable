@@ -23,6 +23,7 @@ String askRomanTranscript(String input) => input.replaceAllMapped(
   });
 
 const _words = <String, String>{
+ 'आखिरी':'aakhri','आख़िरी':'aakhri','आखरी':'aakhri','अंतिम':'aakhri','नबी':'nabi','नाम':'naam','पैगंबर':'paigambar','रकातें':'rakatein','रकाते':'rakate','फज्र':'fajr','फ़ज्र':'fajr',
  'आग':'aag','फिरौन':'firaun','फ़िरऔन':'firaun','फिरऔन':'firaun',
  'कुआं':'kuan','कुएं':'kuen','कुआँ':'kuan','ख्वाब':'khwaab','ख़्वाब':'khwaab',
  'जेल':'jail','कैद':'qaid','क़ैद':'qaid','कश्ती':'kashti','समंदर':'samandar',

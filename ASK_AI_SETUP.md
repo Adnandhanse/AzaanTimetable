@@ -1,3 +1,5 @@
+> New provider and story update: see [UPDATE_README.md](UPDATE_README.md). The workflow now lets you explicitly select Gemini or OpenAI; Gemini remains the default.
+
 # Ask Islam Connect — Gemini Flash free-tier setup
 
 This bundle REPLACES Ask_Islam_Connect_Real_AI_Update.zip (the OpenAI version).

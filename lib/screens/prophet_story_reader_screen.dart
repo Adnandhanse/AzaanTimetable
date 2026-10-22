@@ -6,7 +6,6 @@ import '../services/prophet_stories_repository.dart';
 import '../services/quran_repository.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/prophet_story_artwork.dart';
 import 'surah_detail_screen.dart';
 
 class ProphetStoryReaderScreen extends StatefulWidget {
@@ -203,52 +202,60 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
   Widget _chapter(int i) {
     final p = _story.pages[i];
     final opening = _english ? _story.openingEnglish : _story.openingRoman;
-    return Column(key: _chapters[i], crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (i == 0 && opening.isNotEmpty) Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_english ? 'The story begins' : 'Kahani ka aaghaz',
-            style: AppText.caption.copyWith(color: AppColors.emerald)),
-          const SizedBox(height: 10),
-          Text(opening, style: AppText.body.copyWith(fontSize: 20, height: 1.8)),
-          const SizedBox(height: 12),
-          Text(_english ? 'An introduction to the events referenced in the chapters below.'
-            : 'Neeche ke chapters mein diye gaye waqiat ka mukhtasar taaruf.',
-            style: AppText.caption),
-        ])),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: ClipRRect(borderRadius: BorderRadius.circular(22),
-          child: ProphetStoryArtwork(image: p.image, title: _story.name))),
-      Padding(padding: const EdgeInsets.fromLTRB(24, 20, 24, 30), child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text('${i + 1}. ${p.title}', style: AppText.rowTitle.copyWith(fontSize: 25, height: 1.35)),
-          const SizedBox(height: 16),
-          Text(_english ? p.english : p.roman,
-            style: AppText.body.copyWith(fontSize: 20, height: 1.9)),
-          const SizedBox(height: 12),
-          // Keep evidence available without interrupting every story paragraph.
-          ExpansionTile(tilePadding: EdgeInsets.zero, childrenPadding: const EdgeInsets.only(bottom: 12),
-            title: Text(_english ? 'Sources and notes' : 'References aur tafseel', style: AppText.caption),
-            children: [
-              if (!_english && p.noteRoman != null) Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(p.noteRoman!, style: AppText.caption.copyWith(height: 1.7))),
-              if (i == 0) Padding(padding: const EdgeInsets.only(bottom: 12),
-                child: Text(_english ? _story.birthNoteEnglish : _story.birthNote,
-                  style: AppText.caption.copyWith(height: 1.7))),
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: p.sources.map((source) =>
-                TextButton.icon(icon: const Icon(Icons.open_in_new, size: 15),
-                  label: Text(source.label), onPressed: _opening ? null : () => _source(source))).toList()),
-              if (_opening) const LinearProgressIndicator(),
-            ]),
-          if (i < _story.pages.length - 1) Padding(padding: const EdgeInsets.only(top: 16),
-            child: Row(children: [
-              Expanded(child: Divider(color: AppColors.goldRule)),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.gold)),
-              Expanded(child: Divider(color: AppColors.goldRule)),
+    return Padding(key: _chapters[i], padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      child: ClipRRect(borderRadius: BorderRadius.circular(24), child: Stack(children: [
+        // The complete scene remains visible at its original ratio. The same
+        // scene softly continues behind long text; no fixed-height text box.
+        Positioned.fill(child: Image.asset(p.image, fit: BoxFit.cover,
+          cacheWidth: 900, excludeFromSemantics: true,
+          errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF172A2B)))),
+        Positioned.fill(child: ColoredBox(color: Colors.black.withOpacity(.76))),
+        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          AspectRatio(aspectRatio: 1.5, child: Stack(fit: StackFit.expand, children: [
+            Image.asset(p.image, fit: BoxFit.contain, cacheWidth: 900,
+              excludeFromSemantics: true,
+              errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF172A2B))),
+            const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Color(0xEA101B1D)]))),
+            Positioned(left: 22, right: 22, bottom: 24, child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('${i + 1} / ${_story.pages.length} · ${_story.name}',
+                  style: const TextStyle(fontFamily: 'Inter', color: Color(0xFFF0D492), fontSize: 12, height: 1.5)),
+                const SizedBox(height: 8),
+                Text(p.title, style: const TextStyle(fontFamily: 'Inter', color: Colors.white,
+                  fontSize: 24, height: 1.35, fontWeight: FontWeight.w600)),
+              ])),
+          ])),
+          Padding(padding: const EdgeInsets.fromLTRB(22, 0, 22, 24), child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              if (i == 0 && opening.isNotEmpty) ...[
+                Text(opening, style: const TextStyle(fontFamily: 'Inter',
+                  color: Color(0xFFF0D492), fontSize: 16, height: 1.85)),
+                const SizedBox(height: 20),
+              ],
+              Text(_english ? p.english : p.roman,
+                style: const TextStyle(fontFamily: 'Inter', color: Colors.white,
+                  fontSize: 17, height: 1.9)),
+              const SizedBox(height: 20),
+              Theme(data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(tilePadding: EdgeInsets.zero,
+                  collapsedIconColor: const Color(0xFFF0D492), iconColor: const Color(0xFFF0D492),
+                  title: Text(_english ? 'Sources and notes' : 'References aur tafseel',
+                    style: const TextStyle(color: Color(0xFFF0D492), fontSize: 13)),
+                  children: [
+                    if ((_english ? p.noteEnglish : p.noteRoman) != null) Text((_english ? p.noteEnglish : p.noteRoman)!,
+                      style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.7)),
+                    if (i == 0) Text(_english ? _story.birthNoteEnglish : _story.birthNote,
+                      style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.7)),
+                    for (final source in p.sources) Align(alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(style: TextButton.styleFrom(foregroundColor: const Color(0xFFF0D492)),
+                        icon: const Icon(Icons.open_in_new, size: 15), label: Text(source.label),
+                        onPressed: _opening ? null : () => _source(source))),
+                    if (_opening) const LinearProgressIndicator(),
+                  ])),
             ])),
-        ])),
-    ]);
+        ]),
+      ])));
   }
 }

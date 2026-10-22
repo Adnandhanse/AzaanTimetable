@@ -17,14 +17,14 @@ class ProphetStorySource {
 class ProphetStoryPage {
   const ProphetStoryPage({required this.id, required this.title,
     required this.scene, required this.roman, required this.english,
-    required this.sources, this.noteRoman});
+    required this.sources, this.noteRoman, this.noteEnglish});
   final String id, title, scene, roman, english;
-  final String? noteRoman;
+  final String? noteRoman, noteEnglish;
   final List<ProphetStorySource> sources;
   String get image => 'assets/prophet_stories/scenes/$scene.webp';
   factory ProphetStoryPage.fromJson(Map<String, dynamic> j) => ProphetStoryPage(
     id: j['id'] as String, title: j['title'] as String, scene: j['scene'] as String,
-    roman: j['roman'] as String, english: j['english'] as String, noteRoman: j['noteRoman'] as String?,
+    roman: j['roman'] as String, english: j['english'] as String, noteRoman: j['noteRoman'] as String?, noteEnglish: j['noteEnglish'] as String?,
     sources: (j['sources'] as List).map((v) =>
       ProphetStorySource.fromJson(Map<String, dynamic>.from(v as Map))).toList());
 }

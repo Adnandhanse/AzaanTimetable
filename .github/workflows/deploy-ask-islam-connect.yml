@@ -1,11 +1,22 @@
-name: Deploy Ask Islam Connect AI (Gemini Flash)
+name: Deploy Ask Islam Connect AI (Gemini / OpenAI)
 on:
   workflow_dispatch:
+    inputs:
+      provider:
+        description: 'AI provider (OpenAI requires API billing and ASK_OPENAI_API_KEY secret)'
+        required: true
+        type: choice
+        default: gemini
+        options:
+          - gemini
+          - openai
 permissions:
   contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      ASK_AI_PROVIDER: ${{ inputs.provider || 'gemini' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,10 +25,12 @@ jobs:
       - name: Check required repository secrets
         env:
           DEPLOY_CREDENTIALS: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
-          AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+          GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
         run: |
+          if [ "$ASK_AI_PROVIDER" = "openai" ]; then AI_KEY="$OPENAI_KEY"; else AI_KEY="$GEMINI_KEY"; fi
           if [ -z "$DEPLOY_CREDENTIALS" ] || [ -z "$AI_KEY" ]; then
-            echo 'Configure FIREBASE_DEPLOY_CREDENTIALS and ASK_GEMINI_API_KEY repository secrets. Read ASK_AI_SETUP.md.'
+            echo 'Configure FIREBASE_DEPLOY_CREDENTIALS and the selected provider API key repository secret. Read ASK_AI_SETUP.md.'
             exit 1
           fi
       - uses: google-github-actions/auth@v2
@@ -25,24 +38,42 @@ jobs:
           credentials_json: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
       - name: Install backend dependencies
         run: npm --prefix functions-ask ci --ignore-scripts
+      - name: Validate story assets and reference targets
+        run: python3 scripts/check_prophet_stories.py
       - name: Build library from current app assets
         run: npm --prefix functions-ask run build:corpus
       - name: Check full library loading and search within memory budget
         run: node --max-old-space-size=512 functions-ask/check-corpus.js
       - name: Test AI orchestration and citation validation
         run: npm --prefix functions-ask test
-      - name: Check Gemini model access before deployment
+      - name: Check selected provider access before deployment
         env:
-          AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
-        run: node functions-ask/check-gemini.js
+          GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
+        run: |
+          if [ "$ASK_AI_PROVIDER" = "openai" ]; then export AI_KEY="$OPENAI_KEY"; else export AI_KEY="$GEMINI_KEY"; fi
+          node functions-ask/check-provider.js
       - name: Store provider key in Firebase Secret Manager
         env:
-          AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+          GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
         run: |
+          if [ "$ASK_AI_PROVIDER" = "openai" ]; then
+            export AI_KEY="$OPENAI_KEY"
+            secret_name="ASK_OPENAI_API_KEY"
+          else
+            export AI_KEY="$GEMINI_KEY"
+            secret_name="ASK_GEMINI_API_KEY"
+          fi
           umask 077
           key_file="$RUNNER_TEMP/islam-connect-ai-key"
           trap 'rm -f "$key_file"' EXIT
           printf '%s' "$AI_KEY" > "$key_file"
-          npx --yes firebase-tools@14 --project actual-masjid-prayer-time functions:secrets:set ASK_GEMINI_API_KEY --data-file "$key_file" --non-interactive
+          npx --yes firebase-tools@14 --project actual-masjid-prayer-time functions:secrets:set "$secret_name" --data-file "$key_file" --non-interactive
+      - name: Configure selected provider
+        run: |
+          touch functions-ask/.env.actual-masjid-prayer-time
+          sed -i '/^ASK_AI_PROVIDER=/d' functions-ask/.env.actual-masjid-prayer-time
+          printf '\nASK_AI_PROVIDER=%s\n' "$ASK_AI_PROVIDER" >> functions-ask/.env.actual-masjid-prayer-time
       - name: Deploy only the Ask AI service
         run: npx --yes firebase-tools@14 --config firebase.ask.json deploy --only functions:ask-islam-connect --project actual-masjid-prayer-time --non-interactive --force

@@ -3,6 +3,7 @@ import '../models/prophet_story.dart';
 import '../services/prophet_stories_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/prophet_story_artwork.dart';
+import '../widgets/prophet_places_map.dart';
 import 'prophet_story_reader_screen.dart';
 
 class ProphetStoriesScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class _ProphetStoriesScreenState extends State<ProphetStoriesScreen> {
   List<ProphetStory>? _books;
   final _progress = <String, Map<String, dynamic>>{};
   String _query = '';
-  bool _failed = false, _navigating = false;
+  bool _failed = false, _navigating = false, _showMap = true;
   @override
   void initState() { super.initState(); _load(); }
   Future<void> _load() async {
@@ -46,14 +47,19 @@ class _ProphetStoriesScreenState extends State<ProphetStoriesScreen> {
       }, child: const Text('Library nahi khuli · Dobara koshish karein')))
       : books == null ? const Center(child: CircularProgressIndicator())
       : ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 32), children: [
-        ClipRRect(borderRadius: BorderRadius.circular(24),
-          child: ProphetStoryArtwork(
-            image: 'assets/prophet_stories/scenes/valley.webp',
-            title: 'Nabiyon ki kahaniyan',
-            subtitle: '25 Anbiya · Quran aur sahih hadees se sabit waqiat')),
-        const SizedBox(height: 16),
-        const Text('Bachon aur badon ke liye. Har page par asal reference. '
-          'Tasveeron mein sirf manazir aur cheezein hain; kisi jandar ki tasveer nahi.'),
+        Wrap(spacing: 10, children: [
+          ChoiceChip(label: const Text('Naqsha'), selected: _showMap,
+            onSelected: (_) => setState(() => _showMap = true)),
+          ChoiceChip(label: const Text('Sabhi kahaniyan'), selected: !_showMap,
+            onSelected: (_) => setState(() => _showMap = false)),
+        ]),
+        const SizedBox(height: 18),
+        if (_showMap && _query.isEmpty) ...[
+          ProphetPlacesMap(stories: _books!, onOpen: _open),
+          const SizedBox(height: 24),
+        ],
+        const Text('25 Anbiya · Quran aur sahih hadees ke waqiat',
+          style: TextStyle(fontSize: 14, height: 1.6)),
         const SizedBox(height: 14),
         TextField(decoration: const InputDecoration(prefixIcon: Icon(Icons.search),
           hintText: 'Nabi ka naam talaash karein', border: OutlineInputBorder()),
@@ -62,7 +68,7 @@ class _ProphetStoriesScreenState extends State<ProphetStoriesScreen> {
         if (books.isEmpty) const Text('Is naam se book nahi mili.'),
         ...books.map((b) {
           final saved = _progress[b.id] ?? {};
-          final done = saved['completed'] == true;
+          final done = saved['completed'] == true && saved['contentVersion'] == 4;
           final index = b.pages.indexWhere((p) => p.id == saved['page']);
           return Card(margin: const EdgeInsets.only(bottom: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),
@@ -73,7 +79,7 @@ class _ProphetStoriesScreenState extends State<ProphetStoriesScreen> {
               ProphetStoryArtwork(image: b.pages.first.image, title: b.name),
               Padding(padding: const EdgeInsets.fromLTRB(18, 14, 18, 18), child: Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  if (b.id != 'muhammad') Text('Alayhis salam', style: AppText.caption),
+
                   if (b.teaser.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(b.teaser, style: AppText.body.copyWith(height: 1.6)),

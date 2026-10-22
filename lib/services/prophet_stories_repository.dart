@@ -33,7 +33,8 @@ class ProphetStoryProgress {
     final prefs = await SharedPreferences.getInstance();
     final old = await read(id);
     final ok = await prefs.setString(_key(id), jsonEncode({
-      'page': pageId, 'completed': completed || old['completed'] == true,
+      'page': pageId, 'contentVersion': 4,
+      'completed': completed || (old['contentVersion'] == 4 && old['completed'] == true),
     }));
     if (!ok) throw StateError('Progress not saved');
   }

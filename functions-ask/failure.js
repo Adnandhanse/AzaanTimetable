@@ -11,7 +11,7 @@ function classifyFailure(error, stage) {
   if (stage === 'quota' && [7,'7','permission-denied'].includes(error.code))
     return {code:'failed-precondition',supportCode:'AI-DATABASE'};
   if (stage === 'corpus') return {code:'failed-precondition',supportCode:'AI-CORPUS'};
-  if (error instanceof SyntaxError || /^(gemini-blocked-or-incomplete|invalid-plan|invalid-selection|invalid-citation|empty-essential-concept)/.test(error.message || ''))
+  if (error instanceof SyntaxError || /^(gemini-blocked-or-incomplete|invalid-provider-output|invalid-plan|invalid-selection|invalid-citation|empty-essential-concept)/.test(error.message || ''))
     return {code:'unavailable',supportCode:'AI-OUTPUT'};
   return {code:'unavailable',supportCode:'AI-SERVER'};
 }

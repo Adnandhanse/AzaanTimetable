@@ -1,7 +1,8 @@
 'use strict';
+const {romanQuestion}=require('./question-language');
 // Counts are calculated during CI from the bundled Quran, never guessed by AI.
 function countIntent(question) {
- const q=question.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+ const q=romanQuestion(question).normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
  if(!/(?:qur[ae]?a?n|قرآن|कुरान|क़ुरआन)/u.test(q))return null;
  if(!/(?:kitn|total|count|how many|number of|کتن|कितन|कुल)/u.test(q))return null;
  // Avoid answering a total when asked about a subset, a surah, or a topic.
