@@ -1,0 +1,514 @@
+{
+  "version": 2,
+  "facts": [
+    {
+      "id": "fajr_rakat",
+      "answer": "Fajr ki farz namaz 2 rakaat hai. Isse pehle 2 rakaat Sunnah hain—yani aam tartib 2 Sunnah, phir 2 farz. Donon ko mila kar 4 kehne se farz aur Sunnah ka farq wazeh rehna chahiye.",
+      "sources": [
+        618,
+        663
+      ],
+      "questions": [
+        "fajr me kitni rakate hai",
+        "fajar ki total rakaat batao",
+        "subah ki namaz kitni rakat hoti hai",
+        "how many rakats are there in fajr",
+        "fajr farz aur sunnat kitni hain",
+        "fajr prayer total rakah"
+      ]
+    },
+    {
+      "id": "fajr_fard",
+      "answer": "Fajr ki farz namaz 2 rakaat hai. Isse pehle padhi jaane wali 2 rakaat Sunnah alag hain.",
+      "sources": [
+        663,
+        618
+      ],
+      "questions": [
+        "fajr ki farz kitni rakaat hain",
+        "fajar farz rakat count",
+        "how many fard rakats in fajr",
+        "subah ki namaz mein farz kitne hain"
+      ]
+    },
+    {
+      "id": "fajr_sunnah",
+      "answer": "Fajr ki farz namaz se pehle 2 rakaat Sunnah hain.",
+      "sources": [
+        618
+      ],
+      "questions": [
+        "fajr ki sunnat kitni rakaat hain",
+        "fajar sunnah rakat count",
+        "how many sunnah rakats before fajr",
+        "subah ki namaz ki sunnat kitni hain"
+      ]
+    },
+    {
+      "id": "ibrahim_family",
+      "answer": "Sahih al-Bukhari mein Ibrahim Alaihis Salam ki biwi ka naam Sarah aata hai. Hajar ka zikr bhi unke gharane mein hai; woh Ismail Alaihis Salam ki walida thin. Agar aap Ismail Alaihis Salam ki walida ka naam pooch rahe hain, to jawab Hajar hai.",
+      "sources": [
+        3358,
+        3364
+      ],
+      "questions": [
+        "ibrahim alaisalam ki biwi ka kya naam tha",
+        "ibraheem ki wife ka naam",
+        "what is the name of abraham wife",
+        "ibrahim ki begum ka naam batao",
+        "ibrahim ki wife kaun thi"
+      ]
+    },
+    {
+      "id": "daily_prayers",
+      "answer": "Din aur raat mein 5 farz namazein hain.",
+      "sources": [
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 46
+        }
+      ],
+      "questions": [
+        "din mein kitni namaz farz hain",
+        "roz kitni namazein hoti hain",
+        "how many daily obligatory prayers are there",
+        "daily farz namaz count",
+        "ek din mein farz namaz kitni hain"
+      ]
+    },
+    {
+      "id": "quran_language",
+      "answer": "Quran Arabi zaban mein nazil hua.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 12,
+          "number": 2
+        }
+      ],
+      "questions": [
+        "quran kis zaban mein nazil hua",
+        "quran ki language kya hai",
+        "what language was the quran revealed in",
+        "quran kaunsi bhasha mein hai",
+        "quran language batao"
+      ]
+    },
+    {
+      "id": "quran_month",
+      "answer": "Quran ke nuzool ka zikr Ramadan ke mahine ke saath aata hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 185
+        }
+      ],
+      "questions": [
+        "quran kis mahine mein nazil hua",
+        "which month was quran revealed in",
+        "quran ka nuzool kis month mein hua",
+        "quran revelation month kya hai"
+      ]
+    },
+    {
+      "id": "fasting_month",
+      "answer": "Ramadan farz rozon ka mahina hai. Safar aur bimari ki surat mein Quran mein rukhsat aur baad mein ginti poori karne ka zikr hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 185
+        },
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 46
+        }
+      ],
+      "questions": [
+        "roze kis mahine mein farz hain",
+        "which month do muslims fast",
+        "farz fasting ka month kya hai",
+        "ramzan ke roze farz hain kya"
+      ]
+    },
+    {
+      "id": "qibla",
+      "answer": "Namaz mein rukh Masjid al-Haram ki taraf kiya jata hai; hamara Qibla Kaaba hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 144
+        }
+      ],
+      "questions": [
+        "hamara qibla kya hai",
+        "namaz mein kis taraf rukh karein",
+        "what is the qibla",
+        "muslims face which direction in prayer",
+        "namaz mein kahan muh karein"
+      ]
+    },
+    {
+      "id": "last_prophet",
+      "answer": "Muhammad ﷺ Allah ke Rasool aur aakhri Nabi hain.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 33,
+          "number": 40
+        }
+      ],
+      "questions": [
+        "aakhri nabi kaun hain",
+        "last prophet ka naam kya hai",
+        "who is the last prophet",
+        "sabse aakhri paigambar kaun hai",
+        "khatam un nabiyyin kaun hain"
+      ]
+    },
+    {
+      "id": "allah_one",
+      "answer": "Allah ek hai. Surah Al-Ikhlas ki pehli ayat is tawheed ko wazeh karti hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 112,
+          "number": 1
+        }
+      ],
+      "questions": [
+        "allah kitne hain",
+        "is allah one",
+        "allah ek hai kya",
+        "tawheed ka matlab kya hai",
+        "what is tawheed"
+      ]
+    },
+    {
+      "id": "isa_mother",
+      "answer": "Isa Alaihis Salam ki walida ka naam Maryam hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 3,
+          "number": 45
+        }
+      ],
+      "questions": [
+        "isa ki maa ka naam kya hai",
+        "isa alaihis salam ki walida kaun thin",
+        "who is the mother of jesus",
+        "isa mother name",
+        "hazrat esa ki ammi ka naam"
+      ]
+    },
+    {
+      "id": "yahya_father",
+      "answer": "Yahya Alaihis Salam, Zakariya Alaihis Salam ko ata kiye gaye bete the.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 19,
+          "number": 7
+        }
+      ],
+      "questions": [
+        "yahya ke walid kaun hain",
+        "yahya ke father ka naam kya hai",
+        "who is the father of yahya",
+        "zakariya ke bete ka naam kya tha",
+        "zakariya son name"
+      ]
+    },
+    {
+      "id": "ibrahim_fire",
+      "answer": "Allah ne aag ko Ibrahim Alaihis Salam ke liye thandi aur salamati wali hone ka hukm diya.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 21,
+          "number": 69
+        }
+      ],
+      "questions": [
+        "kis nabi ke liye aag thandi hui",
+        "which prophet was saved from fire",
+        "aag kis prophet ke liye thandi hui",
+        "aag kis nabi ko nahi jala saki"
+      ]
+    },
+    {
+      "id": "yunus_fish",
+      "answer": "Yunus Alaihis Salam ko machhli ne nigal liya tha. Quran unki dua aur Allah ki taraf se nijat ka bhi zikr karta hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 37,
+          "number": 139
+        },
+        {
+          "kind": "quran",
+          "surah": 37,
+          "number": 142
+        },
+        {
+          "kind": "quran",
+          "surah": 21,
+          "number": 87
+        },
+        {
+          "kind": "quran",
+          "surah": 21,
+          "number": 88
+        }
+      ],
+      "questions": [
+        "kis nabi ko machhli ne nigla",
+        "which prophet was swallowed by a fish",
+        "machli ke pet mein kaun nabi the",
+        "fish ne kis prophet ko nigla tha"
+      ]
+    },
+    {
+      "id": "nuh_ark",
+      "answer": "Allah ne Nuh Alaihis Salam ko apni nigrani aur wahi ke mutabiq kashti banane ka hukm diya.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 11,
+          "number": 37
+        }
+      ],
+      "questions": [
+        "kis nabi ne kashti banayi",
+        "which prophet built the ark",
+        "nuh ki kashti kisne banayi",
+        "kashti banane wale nabi ka naam"
+      ]
+    },
+    {
+      "id": "kaaba_builders",
+      "answer": "Ibrahim Alaihis Salam aur Ismail Alaihis Salam ne milkar Kaaba ki bunyadein uthayin aur Allah se qubooliyat ki dua ki.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 127
+        }
+      ],
+      "questions": [
+        "kaaba ki bunyadein kisne uthayin",
+        "kaaba kisne banaya",
+        "who raised the foundations of the kaaba",
+        "kaaba banane wale nabi kaun the"
+      ]
+    },
+    {
+      "id": "first_house",
+      "answer": "Quran ke mutabiq logon ke liye ibadat ka pehla ghar Bakkah, yani Makkah mein muqarrar hua.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 3,
+          "number": 96
+        }
+      ],
+      "questions": [
+        "ibadat ka pehla ghar kahan tha",
+        "where was the first house of worship",
+        "pehla house of worship kahan hai",
+        "sabse pehla ibadat ka ghar"
+      ]
+    },
+    {
+      "id": "ismail_mother",
+      "answer": "Ismail Alaihis Salam ki walida Hajar thin. Unke Makkah mein rehne aur Zamzam ke waqie ka zikr Sahih al-Bukhari mein hai.",
+      "sources": [
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 3358
+        },
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 3364
+        }
+      ],
+      "questions": [
+        "ismail ki maa ka naam kya hai",
+        "ismail ki walida kaun thin",
+        "who is the mother of ismail",
+        "ismail mother name",
+        "hazrat ismail ki ammi ka naam"
+      ]
+    },
+    {
+      "id": "zamzam_place",
+      "answer": "Zamzam ka pani Makkah ki waadi mein zahir hua. Hajar aur Ismail Alaihis Salam se jura yeh waqia Sahih al-Bukhari mein aata hai.",
+      "sources": [
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 3364
+        }
+      ],
+      "questions": [
+        "zamzam kahan hai",
+        "where is zamzam",
+        "zamzam ka pani kahan nikla",
+        "zamzam water location kya hai"
+      ]
+    },
+    {
+      "id": "safa_marwa_seven",
+      "answer": "Hajar ne Safa aur Marwa ke darmiyan pani aur madad ki talaash mein saat martaba aana-jana kiya. Sahih riwayat is waqie ko saee se jorti hai.",
+      "sources": [
+        {
+          "kind": "hadith",
+          "book": "bukhari",
+          "number": 3364
+        }
+      ],
+      "questions": [
+        "hajar ne safa marwa ke kitne chakkar lagaye",
+        "safa marwa saee kitni martaba hai",
+        "how many journeys between safa and marwa",
+        "saee ke chakkar kitne hain"
+      ]
+    },
+    {
+      "id": "adam_creation",
+      "answer": "Allah ne Adam Alaihis Salam ko mitti se paida kiya. Quran is takhleeq ko Allah ki qudrat ki nishani ke taur par bayan karta hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 3,
+          "number": 59
+        },
+        {
+          "kind": "quran",
+          "surah": 15,
+          "number": 26
+        }
+      ],
+      "questions": [
+        "adam ko kis cheez se paida kiya",
+        "adam ki takhleeq kis se hui",
+        "what was adam created from",
+        "hazrat adam ko kaise banaya gaya"
+      ]
+    },
+    {
+      "id": "revelation_angel",
+      "answer": "Jibril ne Allah ke izn se Quran Muhammad ﷺ ke dil par utara.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 97
+        }
+      ],
+      "questions": [
+        "quran kaun farishta lekar aaya",
+        "which angel brought the quran",
+        "wahi lane wale farishte ka naam kya hai",
+        "quran jibril laye the kya"
+      ]
+    },
+    {
+      "id": "parents_kindness",
+      "answer": "Quran walidain ke saath ihsan ka hukm deta hai. Unhein uff tak na kehne aur izzat ke saath baat karne ki hidayat hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 17,
+          "number": 23
+        }
+      ],
+      "questions": [
+        "walidain ke saath kaisa sulook karein",
+        "maa baap ke saath kaise pesh aayein",
+        "how should we treat parents",
+        "parents ke bare mein quran kya kehta hai"
+      ]
+    },
+    {
+      "id": "salam_reply",
+      "answer": "Salam ka jawab usse behtar ya kam az kam usi tarah dene ki hidayat Quran mein hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 4,
+          "number": 86
+        }
+      ],
+      "questions": [
+        "salam ka jawab kaise dein",
+        "how should we return a greeting",
+        "salam ke jawab ke bare mein quran kya kehta hai",
+        "greeting ka jawab kya hona chahiye"
+      ]
+    },
+    {
+      "id": "patience_help",
+      "answer": "Quran sabr aur namaz ke zariye madad talab karne ki hidayat deta hai. Allah sabr karne walon ke saath hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 2,
+          "number": 153
+        }
+      ],
+      "questions": [
+        "sabr ke bare mein quran kya kehta hai",
+        "quran madad kis se mangne ko kehta hai",
+        "what does quran say about patience",
+        "sabr aur namaz se madad"
+      ]
+    },
+    {
+      "id": "hardship_ease",
+      "answer": "Quran ka paigham hai ke mushkil ke saath aasani hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 94,
+          "number": 5
+        },
+        {
+          "kind": "quran",
+          "surah": 94,
+          "number": 6
+        }
+      ],
+      "questions": [
+        "mushkil ke saath aasani hai kya",
+        "what does quran say about hardship and ease",
+        "inna maal usri yusra ka matlab",
+        "mushkil aur aasani wali ayat ka matlab"
+      ]
+    },
+    {
+      "id": "mercy_hope",
+      "answer": "Allah ki rahmat se mayoos na hon. Quran gunah karne walon ko bhi Allah ki rahmat ki umeed dilata hai.",
+      "sources": [
+        {
+          "kind": "quran",
+          "surah": 39,
+          "number": 53
+        }
+      ],
+      "questions": [
+        "allah ki rahmat se mayoos hona chahiye kya",
+        "what does quran say about despair of mercy",
+        "kya allah ki mercy se umeed rakhni chahiye",
+        "allah ki rahmat ki umeed"
+      ]
+    }
+  ]
+}

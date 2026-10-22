@@ -585,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _askIslamConnectButton() => Material(
     color: AppColors.white,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18),
       side: BorderSide(color: AppColors.goldRule)),
     clipBehavior: Clip.antiAlias,
     child: InkWell(
@@ -595,21 +595,21 @@ class _HomeScreenState extends State<HomeScreen>
         decoration: BoxDecoration(gradient: LinearGradient(
           colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
           begin: Alignment.topLeft, end: Alignment.bottomRight)),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Row(children: [
-          Container(padding: const EdgeInsets.all(13),
+          Container(padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: AppColors.goldRule.withOpacity(.5),
               borderRadius: BorderRadius.circular(18)),
-            child: Icon(Icons.mic_none_rounded, size: 28, color: AppColors.text)),
+            child: Icon(Icons.mic_none_rounded, size: 24, color: AppColors.text)),
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Ask Islam Connect', style: AppText.rowTitle.copyWith(
-              color: AppColors.text, fontSize: 22)),
+            Text('Ask Islam Connect', style: TextStyle(fontFamily: 'Inter',
+              fontWeight: FontWeight.w600, color: AppColors.text, fontSize: 17)),
             const SizedBox(height: 5),
-            Text('Sawal aapka, talaash hamari',
+            Text('Apna sawal likhein ya boliye',
               style: AppText.body.copyWith(color: AppColors.textMuted, fontSize: 13)),
             const SizedBox(height: 4),
-            Text('Quran, hadees aur Prophet Stories',
+            Text('Quran aur hadees · References ke saath',
               style: AppText.caption.copyWith(color: AppColors.textMuted)),
           ])),
           const SizedBox(width: 6),

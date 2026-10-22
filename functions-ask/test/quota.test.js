@@ -33,3 +33,13 @@ test('250 reserved questions bound the two-call flow to at most 500 calls',async
  for(let i=0;i<250;i++)await call('u'+i,now);
  await assert.rejects(call('extra-user',now),/limited/);
 });
+test('unsuccessful requests refund the personal quota once but never the provider budget',async()=>{
+ const {call,store}=fixture(),now=Date.UTC(2026,0,1,12);
+ const reservation=await call('u',now,{userLimit:1,globalLimit:2});
+ await reservation.refund();await reservation.refund();
+ const entries=[...store.entries()];assert.equal(entries.find(([id])=>id.endsWith('-global'))[1].count,1);
+ assert.equal(entries.find(([id])=>!id.endsWith('-global'))[1].count,0);
+ await assert.rejects(call('u',now+1000,{userLimit:1}),/limited/);
+ await call('u',now+6000,{userLimit:1,globalLimit:2});
+ await assert.rejects(call('another',now+12000,{globalLimit:2}),/limited/);
+});

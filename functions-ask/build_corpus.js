@@ -59,7 +59,17 @@ async function build() {
     kinds:Object.fromEntries(['quran','hadith','story'].map(k=>[k,docs.filter(d=>d.kind===k).length]))};
   fs.writeFileSync(path.join(__dirname,'corpus_manifest.json'),JSON.stringify(manifest,null,2));
   const quranDocs=docs.filter(d=>d.kind==='quran');
+  const reviewed=load('ai/reviewed_facts.json');
+  const quick={facts:reviewed.facts.map(f=>({...f,hits:f.sources.map(ref=>{
+    const r=typeof ref==='number'?{kind:'hadith',book:'bukhari',number:ref}:ref;
+    const d=docs.find(d=>d.kind===r.kind&&d.number===r.number&&(r.kind==='quran'?d.surah===r.surah:d.book===r.book));
+    if(!d)throw Error('Missing reviewed fact source');
+    const {normalized,...hit}=d;return hit;
+  })}))};
+  const quickJson=JSON.stringify(quick);
+  fs.writeFileSync(path.join(__dirname,'quick_answers.json'),quickJson);
   fs.writeFileSync(path.join(__dirname,'database_stats.json'),JSON.stringify({
+    quickAnswerSha256:crypto.createHash('sha256').update(quickJson).digest('hex'),
     quranSurahs:new Set(quranDocs.map(d=>d.surah)).size,
     quranVerses:quranDocs.length,corpusSha256:manifest.sha256}));
   console.log(manifest);

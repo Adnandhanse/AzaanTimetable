@@ -13,6 +13,13 @@ const {normalize,retrieve,contextFor}=require('./core');
   assert.equal(stats.quranVerses,quran.length);
   assert.equal(stats.quranSurahs,new Set(quran.map(d=>d.surah)).size);
   assert.equal(stats.corpusSha256,manifest.sha256);
+  const fs=require('node:fs'),crypto=require('node:crypto');
+  const quickJson=fs.readFileSync(path.join(__dirname,'quick_answers.json'),'utf8');
+  assert.equal(stats.quickAnswerSha256,crypto.createHash('sha256').update(quickJson).digest('hex'));
+  for(const fact of JSON.parse(quickJson).facts)for(const hit of fact.hits){
+    const source=docs.find(d=>d.id===hit.id);assert.ok(source);
+    assert.equal(hit.en,source.en);assert.equal(hit.ur,source.ur);assert.equal(hit.ar,source.ar);
+  }
   assert.ok(docs.length>=40000);
   assert.equal(new Set(docs.map(d=>d.id)).size,docs.length);
   for (const d of [docs[0],docs[7000],docs[docs.length-1]])

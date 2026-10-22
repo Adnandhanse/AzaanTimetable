@@ -160,6 +160,10 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       final details = error.details;
       final support = details is Map ? details['supportCode'] : null;
       const messages = <String, String>{
+        'AI-LIMIT': 'Gemini provider ki limit aa gayi hai. Basic database jawab aur saved results use kar sakte hain; AI search kuch der baad try karein.',
+        'AI-COOLDOWN': 'Agla AI sawal bhejne se pehle 5 seconds rukhein.',
+        'AI-USER-LIMIT': 'Aaj ki personal AI search limit poori ho gayi. Basic database jawab aur saved results phir bhi available hain.',
+        'AI-PROJECT-LIMIT': 'Aaj ka shared AI budget poora ho gaya. Basic database jawab aur saved results available hain.',
         'AI-TIMEOUT': 'Jawab aane mein zyada waqt lag gaya. Kuch der baad dobara koshish karein.',
         'AI-DATABASE': 'AI server database access check karna hai.',
         'AI-PROVIDER-REQUEST': 'Gemini request configuration check karna hai.',
@@ -347,111 +351,168 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Ask Islam Connect'), actions: [
+    appBar: AppBar(title: const Text('Ask Islam Connect',
+      style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w600)), actions: [
       IconButton(tooltip: 'Zaban ki settings', onPressed: _busy || _voiceBusy ? null : _settings,
-        icon: const Icon(Icons.tune_rounded)),
+        icon: const Icon(Icons.tune_rounded, size: 22)),
     ]),
-    body: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 32), children: [
-      Text('Har sawal, ilm ki taraf ek qadam.',
-        style: AppText.rowTitle.copyWith(fontSize: 26, height: 1.3)),
-      const SizedBox(height: 8),
-      Text('Apna sawal likhein ya boliye. Quran, hadees aur Anbiya ki kahaniyon mein references talaash karein.',
-        style: AppText.body.copyWith(color: AppColors.textMuted)),
-      const SizedBox(height: 24),
-      TextField(controller: _query, maxLength: 500, minLines: 2, maxLines: 6,
+    body: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 28), children: [
+      Text('Quran aur hadees se, references ke saath.',
+        style: TextStyle(fontFamily: 'Inter', fontSize: 13, height: 1.5, color: AppColors.textMuted)),
+      const SizedBox(height: 16),
+      TextField(controller: _query, maxLength: 500, minLines: 2, maxLines: 4,
         enabled: !_busy && !_voiceBusy,
+        onChanged: (_) => setState(() {}),
+        style: TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.5, color: AppColors.text),
         textInputAction: TextInputAction.newline,
-        decoration: InputDecoration(hintText: 'Aaj aap kya jaanna chahte hain?' ,
+        decoration: InputDecoration(hintText: 'Apna sawal likhein ya boliye…',
+          hintStyle: TextStyle(fontFamily: 'Inter', fontSize: 15, color: AppColors.textMuted),
           counterText: '', filled: true, fillColor: AppColors.white,
-          contentPadding: const EdgeInsets.all(18),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20),
+          contentPadding: const EdgeInsets.all(16),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: AppColors.goldRule)),
           suffixIcon: IconButton(tooltip: 'Sawal boliye',
             onPressed: _busy || _voiceBusy ? null : _listen,
             icon: Icon(_voiceBusy ? Icons.hearing_rounded : Icons.mic_none_rounded,
-              color: AppColors.text)))),
-      const SizedBox(height: 12),
+              color: AppColors.emerald, size: 23)))),
+      const SizedBox(height: 10),
       FilledButton.icon(style: FilledButton.styleFrom(
         backgroundColor: AppColors.goldRule.withOpacity(.55), foregroundColor: AppColors.text,
-        minimumSize: const Size.fromHeight(54), elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-        onPressed: _busy || _voiceBusy ? null : _search,
-        icon: const Icon(Icons.auto_awesome_outlined, size: 20),
-        label: Text(_voiceBusy ? 'Sun rahe hain…' : 'References talaash karein')),
-      const SizedBox(height: 24),
-      if (_busy) ...[
-        const LinearProgressIndicator(), const SizedBox(height: 12),
-        Text('Aapke sawal se related references dhoondh rahe hain…', style: AppText.caption),
+        minimumSize: const Size.fromHeight(46), elevation: 0,
+        textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+        onPressed: _busy || _voiceBusy || _query.text.trim().isEmpty ? null : _search,
+        icon: _busy ? const SizedBox(width: 17, height: 17,
+          child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.search_rounded, size: 20),
+        label: Text(_voiceBusy ? 'Sun rahe hain…' : _busy ? 'Talaash jaari hai…' : 'Jawab dhoondhein')),
+      if (_searchedQuery == null) ...[
+        const SizedBox(height: 20),
+        Text('Yahan se shuru karein', style: TextStyle(fontFamily: 'Inter',
+          fontSize: 12, color: AppColors.textMuted)),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 4, children: [
+          _suggestion('Fajr ki rakaat', 'Fajr mein kitni rakaat hain?'),
+          _suggestion('Quran ki aayatein', 'Quran mein kitni aayatein hain?'),
+          _suggestion('Namaz ka tarika', 'Namaz ka tarika batao'),
+        ]),
       ],
-      if (_searchError != null && !_busy) ...[
-        Text(_searchError!, style: AppText.body),
-        TextButton.icon(onPressed: _search, icon: const Icon(Icons.refresh),
-          label: const Text('Dobara koshish karein')),
-      ],
+      const SizedBox(height: 20),
+      if (_busy) Text('Sources check kar rahe hain…',
+        style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: AppColors.textMuted)),
+      if (_searchError != null && !_busy) Card(
+        elevation: 0, child: Padding(padding: const EdgeInsets.all(16), child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(_searchError!, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, height: 1.6)),
+            TextButton.icon(onPressed: _search, icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Dobara try karein')),
+          ]))),
       if (_searchedQuery != null && !_busy && _searchError == null) ...[
-        if (_directAnswer != null) Card(
-          margin: const EdgeInsets.only(bottom: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(padding: const EdgeInsets.all(20), child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Text(_directAnswer!['type'] == 'database' ? 'Database se jawab' : 'Reference se mukhtasar jawab',
-                style: AppText.caption.copyWith(color: AppColors.emerald)),
-              const SizedBox(height: 12),
-              SelectableText(_directAnswer!['text'] as String,
-                style: AppText.body.copyWith(fontSize: 19, height: 1.7)),
-              const SizedBox(height: 12),
-              Text(_directAnswer!['reference'] as String, style: AppText.caption),
-            ]))),
-        if (_hits.isEmpty && _directAnswer == null) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
+        if (_directAnswer != null) _answerCard(),
+        if (_hits.isEmpty && _directAnswer == null) Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(_aiFollowup?.isNotEmpty == true ? _aiFollowup! :
-            'Is sawal ka wazeh reference nahi mila. Sawal thoda aur saaf karke poochhein.',
-            style: AppText.body)),
+            'Wazeh reference nahi mila. Sawal mein thodi tafseel jodkar try karein.',
+            style: const TextStyle(fontFamily: 'Inter', fontSize: 14, height: 1.6))),
         if (_hits.isNotEmpty) ...[
-          Text('Aapke sawal se mutalliq · $_total references', style: AppText.rowTitle),
-          const SizedBox(height: 12), for (var i = 0; i < _hits.length; i++) _result(_hits[i], i + 1),
+          Text('References · $_total', style: TextStyle(fontFamily: 'Inter', fontSize: 13,
+            fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+          const SizedBox(height: 10),
+          for (var i = 0; i < _hits.length; i++) _result(_hits[i], i + 1),
         ],
       ],
     ]));
 
+  Widget _suggestion(String label, String question) => ActionChip(
+    label: Text(label, style: const TextStyle(fontFamily: 'Inter', fontSize: 12)),
+    backgroundColor: AppColors.white,
+    side: BorderSide(color: AppColors.goldRule),
+    onPressed: _busy || _voiceBusy ? null : () => setState(() => _query.text = question));
+
+  Widget _answerCard() => Card(
+    elevation: 0, margin: const EdgeInsets.only(bottom: 20),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: AppColors.goldRule)),
+    child: Padding(padding: const EdgeInsets.all(16), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Icon(Icons.auto_awesome_outlined, size: 17, color: AppColors.emerald),
+          const SizedBox(width: 8),
+          Expanded(child: Text(_directAnswer!['type'] == 'source-extract' ? 'Asal reference se' : 'Jawab',
+            style: TextStyle(fontFamily: 'Inter', fontSize: 13,
+              fontWeight: FontWeight.w600, color: AppColors.emerald))),
+          IconButton(tooltip: 'Jawab copy karein', visualDensity: VisualDensity.compact,
+            onPressed: () { Clipboard.setData(ClipboardData(
+              text: "${_directAnswer!['text']}\n\n${_directAnswer!['reference']}"));
+              _notice('Jawab copy ho gaya.'); },
+            icon: const Icon(Icons.copy_outlined, size: 17)),
+        ]),
+        const SizedBox(height: 8),
+        SelectableText(_directAnswer!['text'] as String,
+          style: TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.65, color: AppColors.text)),
+        const SizedBox(height: 12),
+        for (final reference in (_directAnswer!['reference'] as String).split('\n'))
+          Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(reference,
+            style: TextStyle(fontFamily: 'Inter', fontSize: 12, height: 1.5, color: AppColors.textMuted))),
+      ])));
+
   Widget _result(Map<String, dynamic> h, int position) {
     final urdu = _translation == 'urdu' && h['kind'] != 'story' && h['kind'] != 'guide';
     final text = _body(h);
-    return Card(margin: const EdgeInsets.only(bottom: 16), shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppColors.goldRule)),
-      child: Padding(padding: const EdgeInsets.all(18), child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text('$position. ${h['kind'] == 'guide' ? 'LEARNING GUIDE' : h['kind'] == 'story' ? 'ANBIYA KI KAHANI' : h['kind'] == 'quran' ? 'QURAN AYAT' : 'HADEES'}',
-            style: AppText.caption.copyWith(color: AppColors.emerald, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8), Row(children: [
-            Expanded(child: Text(_reference(h), style: AppText.rowTitle)),
-            if (h['kind'] != 'story' && h['kind'] != 'guide') IconButton(tooltip: 'Reference aur wazahat',
-              onPressed: () => _details(h), icon: const Icon(Icons.info_outline, size: 20)),
-          ]),
-          if ((h['ar'] as String? ?? '').isNotEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(h['ar'] as String, maxLines: 3, overflow: TextOverflow.ellipsis,
-              textDirection: TextDirection.rtl, style: AppText.arabic.copyWith(fontSize: 22))),
+    final kind = h['kind'] == 'guide' ? 'LEARNING' : h['kind'] == 'story' ? 'ANBIYA KI KAHANI'
+      : h['kind'] == 'quran' ? 'QURAN' : 'HADEES';
+    final bodyStyle = urdu ? AppText.urduText.copyWith(fontSize: 17, height: 1.9)
+      : TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.65, color: AppColors.text);
+    return Card(elevation: 0, margin: const EdgeInsets.only(bottom: 10),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.goldRule)),
+      child: ExpansionTile(key: ValueKey('${_searchedQuery}_${_id(h)}'),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('$position · $kind', style: TextStyle(fontFamily: 'Inter', fontSize: 10,
+            fontWeight: FontWeight.w600, color: AppColors.emerald)),
+          const SizedBox(height: 5),
+          Text(_reference(h), style: TextStyle(fontFamily: 'Inter', fontSize: 14,
+            height: 1.4, fontWeight: FontWeight.w600, color: AppColors.text)),
+        ]),
+        subtitle: Padding(padding: const EdgeInsets.only(top: 8), child: Text(
+          text.isEmpty ? 'Translation available nahi.' : text,
+          maxLines: 2, overflow: TextOverflow.ellipsis,
+          textDirection: urdu ? TextDirection.rtl : TextDirection.ltr, style: bodyStyle)),
+        children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if ((h['ar'] as String? ?? '').isNotEmpty) Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12), child: Text(h['ar'] as String,
+              maxLines: 4, overflow: TextOverflow.ellipsis,
+              textDirection: TextDirection.rtl, style: AppText.arabic.copyWith(fontSize: 20, height: 1.8))),
+          const SizedBox(height: 8),
           Text(text.isEmpty ? 'Is zaban mein translation available nahi.' : text,
-            maxLines: 5, overflow: TextOverflow.ellipsis,
-            textDirection: urdu ? TextDirection.rtl : TextDirection.ltr,
-            style: urdu ? AppText.urduText.copyWith(fontSize: 18, height: 2) : AppText.body),
+            maxLines: 8, overflow: TextOverflow.ellipsis,
+            textDirection: urdu ? TextDirection.rtl : TextDirection.ltr, style: bodyStyle),
           if (h['kind'] == 'story') ...[
             const SizedBox(height: 12),
             for (final raw in (h['sources'] as List? ?? const []))
-              Padding(padding: const EdgeInsets.only(bottom: 8),
-                child: Text(raw['kind'] == 'quran'
-                  ? 'Quran ${raw['surah']}:${raw['start']}${raw['end'] != raw['start'] ? '–${raw['end']}' : ''}'
-                  : '${raw['book'] == 'muslim' ? 'Sahih Muslim' : 'Sahih al-Bukhari'} ${raw['editionLabel'] ?? raw['number']}',
-                  style: AppText.caption.copyWith(color: AppColors.emerald))),
+              Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(raw['kind'] == 'quran'
+                ? 'Quran ${raw['surah']}:${raw['start']}${raw['end'] != raw['start'] ? '–${raw['end']}' : ''}'
+                : '${raw['book'] == 'muslim' ? 'Sahih Muslim' : 'Sahih al-Bukhari'} ${raw['editionLabel'] ?? raw['number']}',
+                style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: AppColors.textMuted))),
           ],
           const SizedBox(height: 8),
-          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            TextButton.icon(onPressed: text.isEmpty || h['kind'] == 'guide' ? null : () => _speak(h),
-              icon: Icon(_speaking == _id(h) ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
-              label: Text(_speaking == _id(h) ? 'Rokein' : h['kind'] == 'story' ? 'English mein sunein' : 'Sunein')),
-            TextButton.icon(onPressed: () => _open(h), icon: const Icon(Icons.menu_book_outlined),
-              label: Text(h['kind'] == 'guide' ? 'Qadam-ba-qadam seekhein' : h['kind'] == 'story' ? 'Poori story parhein' : 'Poora parhein')),
+          Wrap(spacing: 4, runSpacing: 2, children: [
+            if (h['kind'] != 'guide') TextButton.icon(
+              onPressed: text.isEmpty ? null : () => _speak(h),
+              icon: Icon(_speaking == _id(h) ? Icons.stop_circle_outlined : Icons.volume_up_outlined, size: 18),
+              label: Text(_speaking == _id(h) ? 'Rokein' : 'Sunein',
+                style: const TextStyle(fontFamily: 'Inter', fontSize: 12))),
+            TextButton.icon(onPressed: () => _open(h), icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: Text(h['kind'] == 'guide' ? 'Guide kholein' : 'Poora parhein',
+                style: const TextStyle(fontFamily: 'Inter', fontSize: 12))),
+            if (h['kind'] != 'story' && h['kind'] != 'guide') IconButton(
+              tooltip: 'Reference aur wazahat', onPressed: () => _details(h),
+              icon: const Icon(Icons.info_outline, size: 18)),
           ]),
-        ])));
+        ])],
+      ));
   }
 }
