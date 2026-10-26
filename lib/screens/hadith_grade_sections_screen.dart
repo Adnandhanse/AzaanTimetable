@@ -50,7 +50,7 @@ class _HadithGradeSectionsScreenState extends State<HadithGradeSectionsScreen> {
       body: _failed
           ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
               Text(_urdu ? 'کتاب لوڈ نہیں ہو سکی' : 'Could not load this book.'),
-              TextButton(onPressed: _load, child: Text(_urdu ? 'دوبارہ کوشش کریں' : 'Try again')),
+              TextButton(onPressed: _load, child: Text(_urdu ? 'دوبارہ کوشش کریں' : 'Try Again')),
             ]))
           : _collection == null ? const Center(child: CircularProgressIndicator())
           : ListView(padding: const EdgeInsets.all(20), children: [

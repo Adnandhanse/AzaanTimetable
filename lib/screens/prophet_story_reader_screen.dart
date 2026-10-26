@@ -182,7 +182,7 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextButton.icon(onPressed: _listen,
               icon: Icon(_speaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
-              label: Text(_speaking ? 'Stop audio' : 'Listen to this part in English')),
+              label: Text(_speaking ? 'Stop Audio' : 'Listen to this part in English')),
             Row(children: [
               Expanded(child: OutlinedButton(onPressed: _page == 0 ? null : () => _go(_page - 1),
                 child: const Text('Pichhla hissa'))),

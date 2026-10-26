@@ -365,7 +365,7 @@ class _HadithChaptersScreenState extends State<HadithChaptersScreen> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 textStyle: AppText.body,
               ),
-              child: const Text('Try again'),
+              child: const Text('Try Again'),
             ),
           ],
         ),

@@ -194,7 +194,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
             onChanged: (v) { if (v != null) { setState(() => _replyLanguage = v); update(() {}); } }),
           const SizedBox(height: 18),
           DropdownButtonFormField<String>(value: _locale,
-            decoration: const InputDecoration(labelText: 'Voice input'),
+            decoration: const InputDecoration(labelText: 'Voice Input'),
             items: const [DropdownMenuItem(value: 'hi-IN', child: Text('Hindi / Hinglish')),
               DropdownMenuItem(value: 'ur-PK', child: Text('Urdu')), DropdownMenuItem(value: 'en-IN', child: Text('English'))],
             onChanged: (v) { if (v != null) { setState(() => _locale = v); update(() {}); } }),

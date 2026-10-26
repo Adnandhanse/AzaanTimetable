@@ -155,7 +155,7 @@ class ArtworkHeader extends StatelessWidget {
                             const SizedBox(height: 8),
                             _GlassButton(
                               icon: Icons.directions_outlined,
-                              label: 'Get directions',
+                              label: 'Get Directions',
                               onTap: onDirectionsTap!,
                             ),
                           ],

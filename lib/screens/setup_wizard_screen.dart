@@ -123,7 +123,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 20, 22, 28),
           children: <Widget>[
-            Text('Set up prayer alarms',
+            Text('Set Up Prayer Alarms',
                 style: AppText.displayName
                     .copyWith(fontSize: 26, color: AppColors.emerald)),
             const SizedBox(height: 6),
@@ -137,7 +137,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
 
             _Step(
               number: 1,
-              title: 'Allow notifications',
+              title: 'Allow Notifications',
               detail:
                   'One tap. Without this the alarm has no way to reach you.',
               done: notif,
@@ -146,7 +146,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
             ),
             _Step(
               number: 2,
-              title: 'Allow alarms & reminders',
+              title: 'Allow Alarms & Reminders',
               detail:
                   'Lets the alarm fire at an exact minute rather than whenever Android feels like it. Android gives no dialog for this one, so it opens a settings screen — and on newer phones it is often already on.',
               done: exact,

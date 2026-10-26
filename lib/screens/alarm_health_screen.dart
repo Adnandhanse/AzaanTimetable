@@ -79,7 +79,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alarm health'),
+        title: const Text('Alarm Health'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, size: 20),
@@ -137,7 +137,7 @@ class _AlarmHealthScreenState extends State<AlarmHealthScreen> {
                     ),
                   ),
                   icon: const Icon(Icons.checklist_rtl, size: 17),
-                  label: const Text('Run setup again'),
+                  label: const Text('Run Setup Again'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.emerald,
                     side: BorderSide(color: AppColors.gold),

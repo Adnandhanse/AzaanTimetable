@@ -235,7 +235,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 textStyle: AppText.body,
               ),
-              child: const Text('Try again'),
+              child: const Text('Try Again'),
             ),
           ],
         ),

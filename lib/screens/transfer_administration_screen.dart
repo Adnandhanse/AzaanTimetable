@@ -92,7 +92,7 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
     if (!form.currentState!.validate() || !verified || verifiedKey != identityKey) return;
     final pending = !country.isIndia || widget.masjid.adminCountryIso != 'IN';
     final yes = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-      title: Text(pending ? 'Request transfer approval' : 'Confirm transfer'),
+      title: Text(pending ? 'Request Transfer Approval' : 'Confirm Transfer'),
       content: Text(pending
         ? 'Send a transfer request for ${widget.masjid.name} to Platform Admin? Current ownership stays unchanged until approval.'
         : 'Transfer ${widget.masjid.name} to ${name.text.trim()}? Your admin access will end. All timings, followers and masjid data will be preserved.'),
@@ -122,37 +122,37 @@ class _TransferAdministrationScreenState extends State<TransferAdministrationScr
   void dispose() { attempt++; unawaited(recipient.dispose()); name.dispose(); mobile.dispose(); email.dispose(); code.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) => PopScope(canPop: !busy, child: Scaffold(
-    appBar: AppBar(title: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request transfer approval' : 'Transfer administration')),
+    appBar: AppBar(title: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request Transfer Approval' : 'Transfer Administration')),
     body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
       Text(widget.masjid.name, style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
       const Text('Complete this on the current admin’s phone with the new admin present. Indian admins verify by SMS. International admins use an email/password account and Platform Admin approval. No new masjid registration is needed.'),
       const SizedBox(height: 20),
       AdminCountryPicker(value: country, enabled: !busy, onChanged: (v) => setState(() { country = v; mobile.clear(); reset(); })),
-      TextFormField(controller: name, enabled: !busy, decoration: const InputDecoration(labelText: 'New admin name'),
+      TextFormField(controller: name, enabled: !busy, decoration: const InputDecoration(labelText: 'New Admin Name'),
         validator: (v) => (v ?? '').trim().isEmpty ? 'Enter a name' : null),
       TextFormField(controller: mobile, enabled: !busy, keyboardType: TextInputType.phone,
         onChanged: (_) => setState(reset), validator: country.validate,
-        decoration: InputDecoration(labelText: 'New admin mobile', prefixText: '${country.dialCode} ')),
+        decoration: InputDecoration(labelText: 'New Admin Mobile', prefixText: '${country.dialCode} ')),
       TextFormField(controller: email, enabled: !busy, keyboardType: TextInputType.emailAddress,
         onChanged: (_) => setState(reset),
-        decoration: InputDecoration(labelText: country.isIndia ? 'New admin email (optional)' : 'New admin email'),
+        decoration: InputDecoration(labelText: country.isIndia ? 'New Admin Email (Optional)' : 'New Admin Email'),
         validator: (v) => (!country.isIndia || (v ?? '').trim().isNotEmpty) && !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim()) ? 'Enter a valid email address' : null),
       if (!country.isIndia) const Padding(padding: EdgeInsets.symmetric(vertical: 12),
         child: Text('No OTP required. Email and mobile are contact details; Platform Admin must approve the transfer.')),
       const SizedBox(height: 16),
       if (error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
       if (!verified) FilledButton(onPressed: !ready || busy ? null : requestCode,
-        child: Text(country.isIndia ? 'Send SMS code' : 'Continue with new admin account')),
+        child: Text(country.isIndia ? 'Send SMS Code' : 'Continue With New Admin Account')),
       if (verificationId != null && !verified) ...[
         TextFormField(controller: code, enabled: !busy, keyboardType: TextInputType.number,
           decoration: const InputDecoration(labelText: '6-digit SMS code'), maxLength: 6),
-        FilledButton(onPressed: busy ? null : verifySms, child: const Text('Verify phone')),
+        FilledButton(onPressed: busy ? null : verifySms, child: const Text('Verify Phone')),
       ],
       if (verified) ...[
         Text(country.isIndia ? 'New admin phone verified' : 'New admin account ready — approval required'),
-        TextButton(onPressed: busy ? null : requestCode, child: const Text('Verify again')),
-        FilledButton(onPressed: busy ? null : transfer, child: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request transfer approval' : 'Transfer administration')),
+        TextButton(onPressed: busy ? null : requestCode, child: const Text('Verify Again')),
+        FilledButton(onPressed: busy ? null : transfer, child: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request Transfer Approval' : 'Transfer Administration')),
       ],
       if (busy) const Center(child: CircularProgressIndicator()),
     ])),

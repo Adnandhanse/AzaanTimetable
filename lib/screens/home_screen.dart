@@ -474,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 tapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Text('Fix this now',
+                              child: Text('Fix This Now',
                                   style: AppText.body.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.warningFg)),

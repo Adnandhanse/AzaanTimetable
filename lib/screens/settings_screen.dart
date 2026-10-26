@@ -235,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: Icon(Icons.health_and_safety_outlined,
                 color: AppColors.emerald),
-            title: const Text('Alarm health'),
+            title: const Text('Alarm Health'),
             subtitle: const Text(
                 'Check why alarms may not fire, and test one on this phone'),
             trailing: const Icon(Icons.chevron_right, size: 18),

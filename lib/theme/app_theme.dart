@@ -268,7 +268,7 @@ class AppText {
   );
 
   static const TextStyle screenTitle = TextStyle(
-    fontFamily: AppFonts.serif,
+    fontFamily: AppFonts.sans,
     fontSize: 22,
     fontWeight: FontWeight.w600,
     height: 1.15,
@@ -292,7 +292,7 @@ class AppText {
   );
 
   static const TextStyle rowTitle = TextStyle(
-    fontFamily: AppFonts.serif,
+    fontFamily: AppFonts.sans,
     fontSize: 17,
     fontWeight: FontWeight.w600,
     height: 1.2,
@@ -466,7 +466,7 @@ class AppTheme {
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        hintStyle: AppText.body.copyWith(color: AppColors.textFaint),
+        hintStyle: AppText.body.copyWith(color: AppColors.textMuted),
         labelStyle: AppText.body.copyWith(color: AppColors.textMuted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
@@ -493,7 +493,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        titleTextStyle: AppText.screenTitle,
+        titleTextStyle: AppText.screenTitle.copyWith(color: AppColors.text),
         shape: Border(bottom: BorderSide(color: AppColors.goldRule)),
       ),
       textTheme: Typography.material2021().black.apply(

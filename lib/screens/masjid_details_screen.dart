@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/masjid.dart';
+import '../utils/masjid_display.dart';
 
 class MasjidDetailsScreen extends StatelessWidget {
   final Masjid masjid;
@@ -38,7 +39,7 @@ class MasjidDetailsScreen extends StatelessWidget {
     // view at all, which is the other reason this could not stay as-is).
     return Scaffold(
       appBar: AppBar(
-        title: Text(masjid.name),
+        title: Text(MasjidDisplay.name(masjid.name)),
       ),
       body: Column(
         children: [
@@ -53,7 +54,8 @@ class MasjidDetailsScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.location_on, color: Colors.grey),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(masjid.address)),
+                      Expanded(child: Text(MasjidDisplay.address(masjid.address, masjid.city),
+                        style: TextStyle(color: AppColors.textMid, height: 1.45))),
                     ],
                   ),
                   const SizedBox(height: 6),

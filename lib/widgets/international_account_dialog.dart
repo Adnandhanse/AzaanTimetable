@@ -52,7 +52,7 @@ class _AccountDialogState extends State<_AccountDialog> {
   void dispose() { password.dispose(); confirm.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) => PopScope(canPop: !busy, child: AlertDialog(
-    title: Text(create ? 'Create admin login' : 'Admin sign in'),
+    title: Text(create ? 'Create Admin Login' : 'Admin Sign In'),
     content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
       Text(widget.email), const SizedBox(height: 8),
       const Text('No OTP is required. Masjid registration and international transfers need Platform Admin approval.'),
@@ -60,11 +60,11 @@ class _AccountDialogState extends State<_AccountDialog> {
         decoration: InputDecoration(labelText: 'Password', suffixIcon: IconButton(
           onPressed: () => setState(() => hide = !hide), icon: Icon(hide ? Icons.visibility : Icons.visibility_off)))),
       if (create) TextField(controller: confirm, enabled: !busy, obscureText: true,
-        decoration: const InputDecoration(labelText: 'Confirm password')),
+        decoration: const InputDecoration(labelText: 'Confirm Password')),
       if (error != null) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(error!)),
       TextButton(onPressed: busy ? null : () => setState(() { create = !create; error = null; password.clear(); confirm.clear(); }),
         child: Text(create ? 'Already have an account? Sign in' : 'New admin? Create account')),
-      if (!create) TextButton(onPressed: busy ? null : resetPassword, child: const Text('Forgot password?')),
+      if (!create) TextButton(onPressed: busy ? null : resetPassword, child: const Text('Forgot Password?')),
     ])),
     actions: [TextButton(onPressed: busy ? null : () => Navigator.pop(context, false), child: const Text('Cancel')),
       FilledButton(onPressed: busy ? null : submit, child: Text(busy ? 'Please wait...' : 'Continue'))],
