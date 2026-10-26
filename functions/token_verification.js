@@ -5,7 +5,7 @@ async function verifyTransferToken({token, actor, verifyIdToken, makeError, logE
   if (typeof token !== 'string' || !token.trim()) {
     throw makeError('unauthenticated', actor === 'caller'
       ? 'Sign in again as the current administrator.'
-      : 'Verify the new administrator phone again.', {reason: actor + '-session-invalid'});
+      : 'Verify the new administrator again.', {reason: actor + '-session-invalid'});
   }
   try {
     return await verifyIdToken(token, true); // includes revoked/disabled-user checks
@@ -16,7 +16,7 @@ async function verifyTransferToken({token, actor, verifyIdToken, makeError, logE
       'auth/user-not-found', 'auth/invalid-id-token', 'auth/argument-error'].includes(code)) {
       throw makeError('unauthenticated', actor === 'caller'
         ? 'Your current-admin session is no longer valid. Sign in again.'
-        : 'The new-admin session is no longer valid. Verify their phone again.',
+        : 'The new-admin session is no longer valid. Verify them again.',
       {reason: actor + '-session-invalid'});
     }
     if (['auth/insufficient-permission', 'auth/invalid-credential',

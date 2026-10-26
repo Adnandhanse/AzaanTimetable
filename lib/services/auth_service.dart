@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Wraps Firebase Phone Authentication so screens don't need to know
 /// Firebase details directly.
@@ -22,6 +23,16 @@ class AuthService {
 
   static Future<void> signInAdmin(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
+    if (!await isPlatformAdmin()) throw StateError('Platform Admin permission required.');
+  }
+
+  static Future<bool> isPlatformAdmin() async {
+    final user = currentUser;
+    if (user == null || user.isAnonymous) return false;
+    try {
+      return (await FirebaseFirestore.instance.collection('platformAdmins')
+        .doc(user.uid).get().timeout(const Duration(seconds: 10))).data()?['enabled'] == true;
+    } catch (_) { return false; }
   }
 
   /// Signs the admin out, then immediately restores an anonymous session

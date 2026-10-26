@@ -1,22 +1,13 @@
-name: Deploy Ask Islam Connect AI (Gemini / OpenAI)
+name: Deploy Ask Islam Connect AI (Gemini)
 on:
   workflow_dispatch:
-    inputs:
-      provider:
-        description: 'AI provider (OpenAI requires API billing and ASK_OPENAI_API_KEY secret)'
-        required: true
-        type: choice
-        default: gemini
-        options:
-          - gemini
-          - openai
 permissions:
   contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      ASK_AI_PROVIDER: ${{ inputs.provider || 'gemini' }}
+      ASK_AI_PROVIDER: gemini
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,11 +17,10 @@ jobs:
         env:
           DEPLOY_CREDENTIALS: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
           GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
-          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
         run: |
-          if [ "$ASK_AI_PROVIDER" = "openai" ]; then AI_KEY="$OPENAI_KEY"; else AI_KEY="$GEMINI_KEY"; fi
+          AI_KEY="$GEMINI_KEY"
           if [ -z "$DEPLOY_CREDENTIALS" ] || [ -z "$AI_KEY" ]; then
-            echo 'Configure FIREBASE_DEPLOY_CREDENTIALS and the selected provider API key repository secret. Read ASK_AI_SETUP.md.'
+            echo 'Configure FIREBASE_DEPLOY_CREDENTIALS and ASK_GEMINI_API_KEY repository secret. Read ASK_AI_SETUP.md.'
             exit 1
           fi
       - uses: google-github-actions/auth@v2
@@ -44,27 +34,24 @@ jobs:
         run: npm --prefix functions-ask run build:corpus
       - name: Check full library loading and search within memory budget
         run: node --max-old-space-size=512 functions-ask/check-corpus.js
+      - name: Check conversational retrieval memory and evidence
+        run: node --max-old-space-size=768 functions-ask/check-assistant-corpus.js
+      - name: Check natural question retrieval relevance
+        run: node --max-old-space-size=768 functions-ask/check-quality-retrieval.js
       - name: Test AI orchestration and citation validation
         run: npm --prefix functions-ask test
       - name: Check selected provider access before deployment
         env:
           GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
-          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
         run: |
-          if [ "$ASK_AI_PROVIDER" = "openai" ]; then export AI_KEY="$OPENAI_KEY"; else export AI_KEY="$GEMINI_KEY"; fi
+          export AI_KEY="$GEMINI_KEY"
           node functions-ask/check-provider.js
       - name: Store provider key in Firebase Secret Manager
         env:
           GEMINI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
-          OPENAI_KEY: ${{ secrets.ASK_OPENAI_API_KEY }}
         run: |
-          if [ "$ASK_AI_PROVIDER" = "openai" ]; then
-            export AI_KEY="$OPENAI_KEY"
-            secret_name="ASK_OPENAI_API_KEY"
-          else
-            export AI_KEY="$GEMINI_KEY"
-            secret_name="ASK_GEMINI_API_KEY"
-          fi
+          export AI_KEY="$GEMINI_KEY"
+          secret_name="ASK_GEMINI_API_KEY"
           umask 077
           key_file="$RUNNER_TEMP/islam-connect-ai-key"
           trap 'rm -f "$key_file"' EXIT

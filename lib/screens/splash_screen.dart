@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/timing_reminder_service.dart';
 import '../services/app_language.dart';
 import 'home_screen.dart';
 import 'admin_login_screen.dart';
@@ -68,6 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
         );
       }
+      TimingReminderService.markNavigationReady();
     });
   }
 

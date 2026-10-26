@@ -1,0 +1,32 @@
+name: Deploy prayer timing reminders
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check deployment credentials are configured
+        env:
+          DEPLOY_CREDENTIALS: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+        run: |
+          if [ -z "$DEPLOY_CREDENTIALS" ]; then
+            echo 'Add the FIREBASE_DEPLOY_CREDENTIALS repository secret first. See TIMING_REMINDERS_SETUP.md.'
+            exit 1
+          fi
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+      - name: Install backend dependencies
+        run: npm --prefix functions-reminders ci --ignore-scripts
+      - name: Validate 10-day and 5-day reminder policy
+        run: npm --prefix functions-reminders test
+      - name: Deploy reminder service only
+        run: npx --yes firebase-tools@14 --config firebase.reminders.json deploy --only functions:timing-reminders --project actual-masjid-prayer-time --non-interactive --force
+      - name: List functions after deployment
+        run: npx --yes firebase-tools@14 functions:list --project actual-masjid-prayer-time

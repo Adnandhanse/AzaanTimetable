@@ -1,523 +1,298 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/hadith.dart';
-import '../data/daily_hadith.dart';
-import '../data/ibadat_content.dart';
-import 'pillar_detail_screen.dart';
-import '../data/daily_quran_ayah.dart';
-import '../services/ask_connect_ai.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../models/hadith.dart';
+import '../services/ask_connect_ai.dart';
 import '../services/ask_connect_voice.dart';
 import '../services/ask_roman_text.dart';
 import '../services/hadith_link.dart';
 import '../services/quran_repository.dart';
 import '../services/tts_service.dart';
+import '../services/prophet_stories_repository.dart';
 import '../theme/app_theme.dart';
 import 'surah_detail_screen.dart';
 import 'prophet_story_reader_screen.dart';
-import '../services/prophet_stories_repository.dart';
 
 class AskIslamConnectScreen extends StatefulWidget {
   const AskIslamConnectScreen({super.key});
   @override
   State<AskIslamConnectScreen> createState() => _AskIslamConnectScreenState();
 }
-
+class _ChatTurn {
+  _ChatTurn(this.question, this.history);
+  final String question;
+  final List<Map<String, String>> history;
+  Map<String, dynamic>? response;
+  String? error;
+}
 class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
     with WidgetsBindingObserver {
   final _query = TextEditingController();
-  bool _busy = false, _voiceBusy = false;
-  String? _searchError;
-  bool _unverified = false;
-  String _locale = 'hi-IN', _translation = 'urdu', _kind = 'all';
-  String? _speaking;
-  bool _confirmingAi = false;
-  String? _aiFollowup;
-  Map<String, dynamic>? _directAnswer;
-  int _searchVersion = 0, _audioVersion = 0, _total = 0;
-  String? _searchedQuery;
-  List<Map<String, dynamic>> _hits = [];
-
+  final _scroll = ScrollController();
+  final _turns = <_ChatTurn>[];
+  bool _busy = false, _voiceBusy = false, _speaking = false;
+  String _locale = 'hi-IN', _replyLanguage = 'auto';
+  int _version = 0;
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  void _notice(String text) {
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-  Future<void> _stop() async {
-    _audioVersion++;
-    if (mounted) setState(() => _speaking = null);
-    await TtsService.stop();
-  }
-
+  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) _stop();
   }
-
+  Future<void> _stop() async {
+    if (mounted) setState(() => _speaking = false);
+    await TtsService.stop();
+  }
+  void _notice(String text) {
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+  void _bottom() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted && _scroll.hasClients) _scroll.animateTo(_scroll.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 220), curve: Curves.easeOut);
+  });
+  List<Map<String, String>> _history() {
+    final messages = <Map<String, String>>[];
+    for (final turn in _turns.where((t) => t.response != null)) {
+      messages.add({'role': 'user', 'content': turn.question});
+      final answer = (turn.response!['answer'] as Map?)?['text'] as String? ?? '';
+      if (answer.isNotEmpty) messages.add({'role': 'assistant',
+        'content': answer.length > 1000 ? answer.substring(0, 1000) : answer});
+    }
+    return messages.length <= 8 ? messages : messages.sublist(messages.length - 8);
+  }
+  Future<bool> _consent() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('ask_conversation_notice_v1') == true) return true;
+    if (!mounted) return false;
+    final accepted = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+      title: const Text('Ask Islam Connect'),
+      content: const Text('Aapka sawal, recent conversation aur related sources Gemini ko bheje jayenge. '
+        'Google ke free tier par data services improve karne ke liye use ho sakta hai. '
+        'Audio, phone number aur location AI ko nahi bhejte. Personal details share na karein.'),
+      actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Abhi nahi')),
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Jaari rakhein'))]));
+    if (accepted == true) await prefs.setBool('ask_conversation_notice_v1', true);
+    return accepted == true;
+  }
+  Future<void> _send({_ChatTurn? retry}) async {
+    if (_busy || _voiceBusy) return;
+    final question = retry?.question ?? _query.text.trim();
+    if (question.length < 3) return;
+    setState(() => _busy = true);
+    final version = ++_version;
+    try {
+      if (!await _consent() || !mounted) return;
+      FocusScope.of(context).unfocus(); await _stop();
+      if (!mounted) return;
+      final turn = retry ?? _ChatTurn(question, _history());
+      setState(() {
+        if (retry == null) { _turns.add(turn); if (_turns.length > 40) _turns.removeAt(0); _query.clear(); }
+        turn.error = null;
+      });
+      _bottom();
+      try {
+        final response = await AskConnectAi.ask(question, 'all',
+          history: turn.history, replyLanguage: _replyLanguage);
+        if (!mounted || version != _version) return;
+        setState(() => turn.response = response);
+      } catch (error) {
+        if (mounted && version == _version) setState(() => turn.error = _error(error));
+      }
+      _bottom();
+    } catch (error) { if (mounted) _notice(_error(error)); }
+    finally { if (mounted && version == _version) setState(() => _busy = false); }
+  }
+  String _error(Object error) {
+    if (error is TimeoutException) return 'Jawab aane mein zyada waqt laga. Dobara try karein.';
+    if (error is FirebaseAuthException) return 'Session nahi ban saka. Internet check karke dobara try karein.';
+    if (error is StateError) return 'Assistant ka update abhi server par available nahi. Kuch der baad try karein.';
+    if (error is FirebaseFunctionsException) {
+      final details = error.details;
+      final support = details is Map ? details['supportCode'] : null;
+      if (support == 'AI-USER-LIMIT') return 'Aaj ki personal AI limit poori ho gayi. Basic jawab aur saved answers ab bhi mil sakte hain.';
+      if (support == 'AI-PROJECT-LIMIT') return 'Aaj ka shared AI budget poora ho gaya. Basic jawab aur saved answers ab bhi mil sakte hain.';
+      if (support == 'AI-COOLDOWN') return 'Agla sawal bhejne se pehle kuch seconds rukhein.';
+      if (support == 'AI-LIMIT') return 'Gemini ki usage limit aa gayi hai. Kuch der baad try karein.';
+      if (error.code == 'unauthenticated' || error.code == 'permission-denied') return 'Session verify nahi ho saka. Dobara try karein.';
+      if (error.code == 'deadline-exceeded' || support == 'AI-TIMEOUT') return 'Jawab aane mein zyada waqt laga. Dobara try karein.';
+      if (support == 'AI-OUTPUT') return 'Jawab sahi tarah receive nahi hua. Dobara try karein.';
+      if (error.code == 'invalid-argument') return 'Sawal thoda chhota karke dobara bhejein.';
+    }
+    // No generic resource-exhausted => quota mapping: only actual quota codes.
+    return 'Abhi jawab nahi aa saka. Internet check karke kuch der baad try karein.';
+  }
   Future<void> _listen() async {
-    if (_voiceBusy) return;
+    if (_busy || _voiceBusy) return;
     setState(() => _voiceBusy = true);
-    await _stop();
-    if (!mounted) return;
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (!(prefs.getBool('ask_voice_provider_notice_v1') ?? false)) {
+      if (prefs.getBool('ask_voice_provider_notice_v1') != true) {
         if (!mounted) return;
-        final agreed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-          title: const Text('Voice search'),
-          content: const Text('Aapke phone ki speech service awaaz ko text banayegi. '
-            'Woh internet aur apne servers use kar sakti hai. Islam Connect audio save nahi karta. '
-            'Aap text likhkar bhi search kar sakte hain.'),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Text likhein')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Mic kholein'))]));
-        if (agreed != true) return;
+        final ok = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+          title: const Text('Sawal boliye'),
+          content: const Text('Phone ki speech service awaaz ko text banayegi aur apne servers use kar sakti hai. Islam Connect audio save nahi karta.'),
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Abhi nahi')),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Jaari rakhein'))]));
+        if (ok != true) return;
         await prefs.setBool('ask_voice_provider_notice_v1', true);
       }
       if (!mounted) return;
-      final words = await AskConnectVoice.listen(_locale);
-      if (!mounted) return;
-      if (words != null && words.trim().isNotEmpty) {
-        _query.text = askRomanTranscript(words);
+      final text = await AskConnectVoice.listen(_locale);
+      if (mounted && text != null) setState(() {
+        // Keep the recognised script unless Roman was explicitly selected.
+        _query.text = _replyLanguage == 'roman' ? askRomanTranscript(text) : text;
         _query.selection = TextSelection.collapsed(offset: _query.text.length);
-        // Keep the transcript editable. User confirms search after checking it.
-      }
-    } on PlatformException catch (e) {
-      _notice(e.message ?? 'Voice nahi chali. Apna sawal type karein.');
-    } catch (_) {
-      _notice('Voice nahi chali. Apna sawal type karein.');
-    } finally { if (mounted) setState(() => _voiceBusy = false); }
-  }
-
-  Future<void> _search() async {
-    if (_busy || _voiceBusy || _confirmingAi || _query.text.trim().isEmpty) return;
-    {
-      _confirmingAi = true;
-      try { if (!await _allowAi()) return; } finally { _confirmingAi = false; }
-    }
-    if (!mounted) return;
-    FocusScope.of(context).unfocus();
-    await _stop();
-    if (!mounted) return;
-    final version = ++_searchVersion;
-    final query = _query.text.trim();
-    setState(() { _busy = true; _hits = []; _searchedQuery = query; _total = 0; _searchError = null;
-      _aiFollowup = null; _directAnswer = null; _unverified = false;
- });
-    try {
-      final reply = await AskConnectAi.ask(query, _kind);
-      if (!mounted || version != _searchVersion) return;
-      if (reply['answerMode'] != 'sources-only') {
-        throw StateError('ai-backend-update-needed');
-      }
-      setState(() {
-        _hits = (reply['hits'] as List).map((h) => Map<String, dynamic>.from(h as Map)).toList();
-        _total = reply['total'] as int? ?? _hits.length;
-        _aiFollowup = reply['followup'] as String?;
-        _unverified = reply['verification'] == 'not-verified';
-        _directAnswer = reply['answer'] is Map ? Map<String, dynamic>.from(reply['answer'] as Map) : null;
       });
-    } catch (error) {
-      if (mounted && version == _searchVersion) setState(() =>
-        _searchError = _aiError(error));
-    }
-    finally { if (mounted && version == _searchVersion) setState(() => _busy = false); }
+    } catch (_) { _notice('Voice nahi chali. Sawal type kar sakte hain.'); }
+    finally { if (mounted) setState(() => _voiceBusy = false); }
   }
-
-  Future<bool> _allowAi() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('ask_provider_data_notice_v2') == true) return true;
-    if (!mounted) return false;
-    final allowed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Ask Islam Connect'),
-      content: const Text('Aapka sawal aur related Quran, hadees ya story passages configured AI provider (Google Gemini ya OpenAI) ko bheje jaayenge. '
-        'Free tier par Google is data ko apni services improve karne ke liye use kar sakta hai. '
-        'Audio, phone number aur location AI provider ko nahi bheje jaate. Sawal mein personal details na likhein.'),
-      actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Abhi nahi')),
-        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Jaari rakhein'))]));
-    if (allowed == true) await prefs.setBool('ask_provider_data_notice_v2', true);
-    return allowed == true;
+  Future<void> _speak(Map<String, dynamic> response) async {
+    if (_speaking) { await _stop(); return; }
+    final language = response['language'];
+    if (language != 'en' && language != 'ur') return;
+    final text = (response['answer'] as Map?)?['text'] as String? ?? '';
+    setState(() => _speaking = true);
+    final ok = await TtsService.speak(text, language == 'ur' ? TtsLang.urdu : TtsLang.english);
+    if (mounted) { setState(() => _speaking = false); if (!ok) _notice('Is zaban ki voice phone par available nahi.'); }
   }
-
-  String _aiError(Object error) {
-    if (error is StateError && error.message == 'ai-backend-update-needed') {
-      return 'AI service ka naya version deploy karna baaki hai. Platform admin se rabta karein.';
-    }
-    if (error is FirebaseAuthException) {
-      if (error.code == 'operation-not-allowed' || error.code == 'admin-restricted-operation') {
-        return 'AI setup baaki hai: Firebase mein Anonymous sign-in enable karna hai.';
+  Future<void> _open(Map<String, dynamic> ref, String language) async {
+    await _stop(); if (!mounted) return;
+    final raw = ref['source']; if (raw is! Map) return;
+    final h = Map<String, dynamic>.from(raw);
+    try {
+      if (ref['kind'] == 'scholarly') {
+        final uri = Uri.tryParse(ref['url'] as String? ?? '');
+        if (uri != null && uri.scheme == 'https') await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else if (h['kind'] == 'hadith') {
+        await HadithLink.open(context, HadithRef(book: HadithBook.values.firstWhere((b) => b.fileKey == h['book']), number: h['number'] as int),
+          language: language == 'ur' ? HadithLanguage.urdu : HadithLanguage.english);
+      } else if (h['kind'] == 'quran') {
+        final surahs = await QuranRepository.loadSurahs(language == 'ur' ? QuranLanguage.urdu : QuranLanguage.english);
+        final surah = surahs.firstWhere((s) => s.number == h['surah']); if (!mounted) return;
+        await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SurahDetailScreen(surah: surah, initialVerse: h['number'] as int)));
+      } else if (h['kind'] == 'story') {
+        final stories = await ProphetStoriesRepository.load(); final story = stories.firstWhere((s) => s.id == h['storyId']);
+        final page = story.pages.indexWhere((p) => p.id == h['pageId']); if (!mounted) return;
+        await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProphetStoryReaderScreen(story: story, initialPage: page < 0 ? 0 : page)));
       }
-      return 'AI session nahi ban saka. Internet check karke dobara koshish karein.';
-    }
-    if (error is FirebaseFunctionsException) {
-      if (error.code == 'unauthenticated') return 'AI session verify nahi ho saka. Platform admin AI service ki Cloud Run access setting check karein. [AI-AUTH]';
-      if (error.code == 'permission-denied') return 'AI service access deny ho raha hai. Platform admin server permissions check karein. [AI-ACCESS]';
-      if (error.code == 'deadline-exceeded') return 'Search mein zyada waqt lag raha hai. Kuch der baad dobara koshish karein. [AI-TIMEOUT]';
-      final details = error.details;
-      final support = details is Map ? details['supportCode'] : null;
-      const messages = <String, String>{
-        'AI-LIMIT': 'AI provider ki limit aa gayi hai. Basic database jawab aur saved results use kar sakte hain; AI search kuch der baad try karein.',
-        'AI-COOLDOWN': 'Agla AI sawal bhejne se pehle 5 seconds rukhein.',
-        'AI-USER-LIMIT': 'Aaj ki personal AI search limit poori ho gayi. Basic database jawab aur saved results phir bhi available hain.',
-        'AI-PROJECT-LIMIT': 'Aaj ka shared AI budget poora ho gaya. Basic database jawab aur saved results available hain.',
-        'AI-TIMEOUT': 'Jawab aane mein zyada waqt lag gaya. Kuch der baad dobara koshish karein.',
-        'AI-DATABASE': 'AI server database access check karna hai.',
-        'AI-PROVIDER-REQUEST': 'AI request configuration check karna hai.',
-        'AI-MODEL': 'Configured AI model available nahi hai.',
-        'AI-KEY': 'AI API key ya access check karna hai.',
-        'AI-OUTPUT': 'AI ka response complete ya valid nahi tha. Dobara koshish karein.',
-        'AI-CORPUS': 'AI ki reference library server par load nahi ho saki.',
-      };
-      if (support is String && messages.containsKey(support)) return '${messages[support]} [$support]';
-      if (error.code == 'internal' || error.code == 'unavailable') return 'AI server search poori nahi kar saka. Platform admin server logs check karein. [AI-SERVER]';
-      if (error.code == 'not-found') return 'AI service abhi available nahi. Platform admin deployment check karein.';
-      if (error.code == 'failed-precondition') return 'AI ki API key ya server setup check karna hai. Platform admin se rabta karein.';
-      if (error.code == 'resource-exhausted') return 'Abhi AI ki usage limit aa gayi hai. Kuch der baad dobara koshish karein; daily limit ho to agle din try karein.';
-    }
-    return 'Search poori nahi ho saki. Internet check karke dobara koshish karein.';
+    } catch (_) { _notice('Reference abhi nahi khul saka.'); }
   }
-
-  String _id(Map<String, dynamic> h) => '${h['kind']}:${h['storyId'] ?? h['book'] ?? h['surah']}:${h['number']}';
-  String _body(Map<String, dynamic> h) => h['kind'] == 'story'
-      ? (h[_translation == 'urdu' ? 'roman' : 'en'] as String? ?? '')
-      : (h[_translation == 'urdu' ? 'ur' : 'en'] as String? ?? '');
-  String _reference(Map<String, dynamic> h) => h['kind'] == 'guide' ? h['title'] as String : h['kind'] == 'story'
-      ? '${h['title']} · ${h['chapter']}' : h['kind'] == 'quran'
-      ? 'Quran · ${h['title']} ${h['surah']}:${h['number']}'
-      : '${h['title']} · Hadith ${h['number']}';
-
-  Future<void> _speak(Map<String, dynamic> h, {bool meaning = false}) async {
-    final id = _id(h);
-    if (_speaking == id) { await _stop(); return; }
-    await _stop();
-    final version = ++_audioVersion;
-    final text = h['kind'] == 'story' ? h['en'] as String
-        : meaning ? (_meaningAudio(h) ?? '') : _body(h);
-    if (text.trim().isEmpty) { _notice('Is zaban mein translation available nahi.'); return; }
-    if (!mounted) return;
-    setState(() => _speaking = id);
-    bool ok = true;
-    var remaining = text;
-    while (remaining.isNotEmpty && mounted && version == _audioVersion) {
-      var end = remaining.length > 3000 ? remaining.lastIndexOf(' ', 3000) : remaining.length;
-      if (end < 1) end = remaining.length > 3000 ? 3000 : remaining.length;
-      ok = await TtsService.speak(remaining.substring(0, end),
-        _translation == 'urdu' && h['kind'] != 'story' ? TtsLang.urdu : TtsLang.english);
-      if (!ok) break;
-      remaining = remaining.substring(end).trimLeft();
-    }
-    if (!mounted || version != _audioVersion) return;
-    setState(() => _speaking = null);
-    if (!ok) _notice('Is zaban ki voice phone mein available nahi. TTS language install karein ya English chunein.');
-  }
-
-  Future<void> _open(Map<String, dynamic> h) async {
-    await _stop();
-    if (!mounted) return;
-    if (h['kind'] == 'guide') {
-      const guides = <String, IbadatGuide>{'namaz': IbadatContent.namaz,
-        'shahadah': IbadatContent.shahadah, 'roza': IbadatContent.roza,
-        'zakat': IbadatContent.zakat, 'hajj': IbadatContent.hajj,
-        'umrah': IbadatContent.umrah, 'janaza': IbadatContent.janaza,
-        'eidain': IbadatContent.eidain};
-      final guide = guides[h['guideId']];
-      if (guide == null) { _notice('Guide abhi available nahi.'); return; }
-      await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) =>
-        PillarDetailScreen(title: h['title'] as String, description: '', guide: guide)));
-    } else if (h['kind'] == 'story') {
-      try {
-        final books = await ProphetStoriesRepository.load();
-        final story = books.firstWhere((b) => b.id == h['storyId']);
-        final page = story.pages.indexWhere((p) => p.id == h['pageId']);
-        if (!mounted) return;
-        await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) =>
-          ProphetStoryReaderScreen(story: story, initialPage: page < 0 ? 0 : page)));
-      } catch (_) { _notice('Story nahi khul saki. Dobara koshish karein.'); }
-    } else if (h['kind'] == 'hadith') {
-      await HadithLink.open(context, HadithRef(
-        book: HadithBook.values.firstWhere((b) => b.fileKey == h['book']), number: h['number'] as int),
-        language: _translation == 'urdu' ? HadithLanguage.urdu : HadithLanguage.english);
-    } else {
-      try {
-        final surahs = await QuranRepository.loadSurahs(
-          _translation == 'urdu' ? QuranLanguage.urdu : QuranLanguage.english);
-        final surah = surahs.firstWhere((s) => s.number == h['surah']);
-        if (!mounted) return;
-        await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) =>
-          SurahDetailScreen(surah: surah, initialVerse: h['number'] as int)));
-      } catch (_) { _notice('Ayat nahi khul saki. Dobara koshish karein.'); }
-    }
-  }
-
-  String? _meaning(Map<String, dynamic> h) {
-    if (h['kind'] == 'quran') {
-      for (final a in DailyQuranAyah.all) {
-        if (a.surah == h['surah'] && a.ayah == h['number']) return a.roman;
-      }
-    } else {
-      for (final a in DailyHadith.all) {
-        if (a.book.fileKey == h['book'] && a.number == h['number']) return a.textHi;
-      }
-    }
-    return null;
-  }
-
-  String? _meaningAudio(Map<String, dynamic> h) {
-    if (h['kind'] == 'quran') {
-      for (final a in DailyQuranAyah.all) {
-        if (a.surah == h['surah'] && a.ayah == h['number']) {
-          return _translation == 'urdu' ? a.urdu : a.english;
-        }
-      }
-    } else {
-      for (final a in DailyHadith.all) {
-        if (a.book.fileKey == h['book'] && a.number == h['number']) {
-          return _translation == 'urdu' ? a.textUr : a.text;
-        }
-      }
-    }
-    return null;
-  }
-
-  Future<void> _details(Map<String, dynamic> h) async {
-    await _stop();
-    if (!mounted) return;
-    await showModalBottomSheet<void>(context: context, isScrollControlled: true,
-      builder: (ctx) => SafeArea(child: Padding(padding: const EdgeInsets.all(22),
-        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_meaning(h) == null ? 'Reference aur wazahat' : 'Aasaan matlab', style: AppText.rowTitle),
-            const SizedBox(height: 12), Text(_reference(h)), const SizedBox(height: 12),
-            if (_meaning(h) != null) ...[
-              Text(_meaning(h)!, style: AppText.body.copyWith(fontSize: 18)),
-              TextButton.icon(onPressed: () => _speak(h, meaning: true),
-                icon: const Icon(Icons.volume_up_outlined),
-                label: Text(_translation == 'urdu' ? 'Urdu mafoom sunein' : 'English meaning sunein')),
-              TextButton.icon(onPressed: _stop, icon: const Icon(Icons.stop_circle_outlined),
-                label: const Text('Rokein')),
-              const SizedBox(height: 8),
-              const Text('Roman Urdu mein pehle se likha mukhtasar mafoom; poori riwayat ka tafsir ya fatwa nahi.'),
-              const SizedBox(height: 12),
-            ],
-            if (_meaning(h) == null) const Text('Yeh database se mili related riwayat/ayat hai; search result final fatwa nahi. '
-              'Is reference ka reviewed aasaan explanation abhi available nahi. '
-              'Asal translation parhein; ikhtilafi masail mein qualified aalim se poochhein.'),
-            const SizedBox(height: 12),
-            for (final grade in (h['grades'] as List)) Padding(
-              padding: const EdgeInsets.only(bottom: 8), child: Text('Source grading: $grade')),
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Band karein')),
-          ])))));
-    await _stop();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _searchVersion++; _audioVersion++;
-    TtsService.stop(); _query.dispose();
-    super.dispose();
-  }
-
   Future<void> _settings() async {
-    await showModalBottomSheet<void>(context: context, showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, updateSheet) => SafeArea(
-        child: Padding(padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text('Zaban ki settings', style: AppText.rowTitle),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<String>(value: _locale,
-              decoration: const InputDecoration(labelText: 'Bolne ki zaban'),
-              items: const [
-                DropdownMenuItem(value: 'hi-IN', child: Text('Hinglish')),
-                DropdownMenuItem(value: 'ur-PK', child: Text('Urdu')),
-                DropdownMenuItem(value: 'en-IN', child: Text('English'))],
-              onChanged: (v) { if (v == null) return;
-                setState(() => _locale = v); updateSheet(() {}); }),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(value: _translation,
-              decoration: const InputDecoration(labelText: 'Translation aur audio'),
-              items: const [DropdownMenuItem(value: 'urdu', child: Text('Urdu')),
-                DropdownMenuItem(value: 'english', child: Text('English'))],
-              onChanged: (v) { if (v == null) return; _stop();
-                setState(() => _translation = v); updateSheet(() {}); }),
-            const SizedBox(height: 16),
-            const Text('Voice ka text check karke sawal bhejein. Stories ka audio English mein hai.'),
-          ])))));
+    await showModalBottomSheet<void>(context: context, isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, update) => SafeArea(child: Padding(
+        padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
+          DropdownButtonFormField<String>(value: _replyLanguage,
+            decoration: const InputDecoration(labelText: 'Jawab ki zaban'),
+            items: const [DropdownMenuItem(value: 'auto', child: Text('Sawal ki zaban')),
+              DropdownMenuItem(value: 'roman', child: Text('Roman Hindi / Urdu')),
+              DropdownMenuItem(value: 'hi', child: Text('हिंदी')), DropdownMenuItem(value: 'ur', child: Text('اردو')),
+              DropdownMenuItem(value: 'en', child: Text('English'))],
+            onChanged: (v) { if (v != null) { setState(() => _replyLanguage = v); update(() {}); } }),
+          const SizedBox(height: 18),
+          DropdownButtonFormField<String>(value: _locale,
+            decoration: const InputDecoration(labelText: 'Voice input'),
+            items: const [DropdownMenuItem(value: 'hi-IN', child: Text('Hindi / Hinglish')),
+              DropdownMenuItem(value: 'ur-PK', child: Text('Urdu')), DropdownMenuItem(value: 'en-IN', child: Text('English'))],
+            onChanged: (v) { if (v != null) { setState(() => _locale = v); update(() {}); } }),
+          const SizedBox(height: 18),
+          const Text('Recent chat isi screen ke session mein rehti hai. New chat se context reset hoga.', style: TextStyle(fontSize: 12, height: 1.6)),
+        ])))));
   }
-
+  Widget _reference(Map<String, dynamic> ref, int number, String language) {
+    final source = ref['source'] is Map ? Map<String, dynamic>.from(ref['source'] as Map) : <String, dynamic>{};
+    final urdu = source['ur'] as String? ?? '';
+    final body = language == 'ur' && urdu.isNotEmpty ? urdu : source['en'] as String? ?? '';
+    final type = ref['kind'] == 'scholarly' ? 'Scholarly interpretation · editorial summary'
+      : ref['kind'] == 'story' ? 'Historical retelling · sources in story'
+      : ref['kind'] == 'dua' ? 'Dua collection · grade not inferred' : 'Source text';
+    return ExpansionTile(tilePadding: EdgeInsets.zero,
+      title: Text('[$number] ${ref['label']}', style: const TextStyle(fontSize: 13, height: 1.5)),
+      subtitle: Text(type, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+      children: [Align(alignment: AlignmentDirectional.centerStart, child: SelectableText(body,
+        textDirection: language == 'ur' && (source['ur'] as String? ?? '').isNotEmpty ? TextDirection.rtl : TextDirection.ltr,
+        style: const TextStyle(fontSize: 14, height: 1.8))),
+        if ((source['ar'] as String? ?? '').isNotEmpty) ExpansionTile(title: const Text('Arabic', style: TextStyle(fontSize: 12)),
+          children: [SelectableText(source['ar'] as String, textDirection: TextDirection.rtl, style: AppText.arabic.copyWith(fontSize: 22))]),
+        if (ref['kind'] != 'dua') Align(alignment: AlignmentDirectional.centerStart,
+          child: TextButton(onPressed: () => _open(ref, language), child: const Text('Source kholein'))),
+      ]);
+  }
+  Widget _reply(_ChatTurn turn) {
+    if (turn.error != null) return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(turn.error!, style: const TextStyle(fontSize: 14, height: 1.6)),
+      TextButton(onPressed: _busy ? null : () => _send(retry: turn), child: const Text('Dobara try karein'))]);
+    final response = turn.response;
+    if (response == null) return const Padding(padding: EdgeInsets.symmetric(vertical: 14),
+      child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)));
+    final language = response['language'] as String? ?? 'roman';
+    final refs = (response['references'] as List? ?? []).map((r) => Map<String, dynamic>.from(r as Map)).toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final raw in response['statements'] as List? ?? []) ...[
+        SelectableText(raw['text'] as String, textDirection: language == 'ur' ? TextDirection.rtl : TextDirection.ltr,
+          style: TextStyle(fontFamily: language == 'ur' ? 'NotoNastaliqUrdu' : 'Inter', fontSize: 16,
+            height: language == 'ur' ? 2.0 : 1.7, color: AppColors.text)),
+        if ((raw['sourceIds'] as List? ?? []).isNotEmpty) Padding(padding: const EdgeInsets.only(top: 3),
+          child: Text((raw['sourceIds'] as List).map((id) => '[${refs.indexWhere((r) => r['id'] == id) + 1}]').join(' '),
+            style: TextStyle(fontSize: 11, color: AppColors.textMuted))),
+        const SizedBox(height: 12),
+      ],
+      for (final notice in response['notices'] as List? ?? []) Padding(padding: const EdgeInsets.only(bottom: 10),
+        child: Text(notice as String, style: TextStyle(fontSize: 12, height: 1.6, color: AppColors.textMuted))),
+      if (refs.isNotEmpty) ...[
+        const Divider(), const Text('References', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        for (var i = 0; i < refs.length; i++) _reference(refs[i], i + 1, language),
+      ],
+      Wrap(children: [IconButton(tooltip: 'Copy answer', icon: const Icon(Icons.copy_outlined, size: 18),
+        onPressed: () => Clipboard.setData(ClipboardData(text: '${(response['answer'] as Map?)?['text'] ?? ''}\n${refs.map((r) => r['label']).join('\n')}'))),
+        if (language == 'en' || language == 'ur') IconButton(tooltip: 'Listen',
+          onPressed: () => _speak(response), icon: Icon(_speaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined, size: 20)),
+      ]),
+    ]);
+  }
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Ask Islam Connect',
-      style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w600)), actions: [
-      IconButton(tooltip: 'Zaban ki settings', onPressed: _busy || _voiceBusy ? null : _settings,
-        icon: const Icon(Icons.tune_rounded, size: 22)),
+    appBar: AppBar(title: const Text('Ask Islam Connect', style: TextStyle(fontSize: 18)), actions: [
+      IconButton(tooltip: 'New chat', onPressed: _busy ? null : () { _stop(); setState(() => _turns.clear()); }, icon: const Icon(Icons.edit_square, size: 21)),
+      IconButton(tooltip: 'Language', onPressed: _busy ? null : _settings, icon: const Icon(Icons.tune, size: 21)),
     ]),
-    body: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 28), children: [
-      Text('Quran aur hadees se, references ke saath.',
-        style: TextStyle(fontFamily: 'Inter', fontSize: 13, height: 1.5, color: AppColors.textMuted)),
-      const SizedBox(height: 16),
-      TextField(controller: _query, maxLength: 500, minLines: 2, maxLines: 4,
-        enabled: !_busy && !_voiceBusy,
-        onChanged: (_) => setState(() {}),
-        style: TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.5, color: AppColors.text),
-        textInputAction: TextInputAction.newline,
-        decoration: InputDecoration(hintText: 'Apna sawal likhein ya boliye…',
-          hintStyle: TextStyle(fontFamily: 'Inter', fontSize: 15, color: AppColors.textMuted),
-          counterText: '', filled: true, fillColor: AppColors.white,
-          contentPadding: const EdgeInsets.all(16),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.goldRule)),
-          suffixIcon: IconButton(tooltip: 'Sawal boliye',
-            onPressed: _busy || _voiceBusy ? null : _listen,
-            icon: Icon(_voiceBusy ? Icons.hearing_rounded : Icons.mic_none_rounded,
-              color: AppColors.emerald, size: 23)))),
-      const SizedBox(height: 10),
-      FilledButton.icon(style: FilledButton.styleFrom(
-        backgroundColor: AppColors.goldRule.withOpacity(.55), foregroundColor: AppColors.text,
-        minimumSize: const Size.fromHeight(46), elevation: 0,
-        textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w600),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-        onPressed: _busy || _voiceBusy || _query.text.trim().isEmpty ? null : _search,
-        icon: _busy ? const SizedBox(width: 17, height: 17,
-          child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.search_rounded, size: 20),
-        label: Text(_voiceBusy ? 'Sun rahe hain…' : _busy ? 'Talaash jaari hai…' : 'Jawab dhoondhein')),
-      if (_searchedQuery == null) ...[
-        const SizedBox(height: 20),
-        Text('Yahan se shuru karein', style: TextStyle(fontFamily: 'Inter',
-          fontSize: 12, color: AppColors.textMuted)),
-        const SizedBox(height: 8),
-        Wrap(spacing: 8, runSpacing: 4, children: [
-          _suggestion('Fajr ki rakaat', 'Fajr mein kitni rakaat hain?'),
-          _suggestion('Quran ki aayatein', 'Quran mein kitni aayatein hain?'),
-          _suggestion('Namaz ka tarika', 'Namaz ka tarika batao'),
-        ]),
-      ],
-      const SizedBox(height: 20),
-      if (_busy) Text('Sources check kar rahe hain…',
-        style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: AppColors.textMuted)),
-      if (_searchError != null && !_busy) Card(
-        elevation: 0, child: Padding(padding: const EdgeInsets.all(16), child: Column(
+    body: Column(children: [
+      Expanded(child: ListView(controller: _scroll, padding: const EdgeInsets.all(18), children: [
+        if (_turns.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 22), child: Column(
           crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_searchError!, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, height: 1.6)),
-            TextButton.icon(onPressed: _search, icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Dobara try karein')),
-          ]))),
-      if (_searchedQuery != null && !_busy && _searchError == null) ...[
-        if (_directAnswer != null) _answerCard(),
-        if (_hits.isEmpty && _directAnswer == null) Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text(_aiFollowup?.isNotEmpty == true ? _aiFollowup! :
-            'Wazeh reference nahi mila. Sawal mein thodi tafseel jodkar try karein.',
-            style: const TextStyle(fontFamily: 'Inter', fontSize: 14, height: 1.6))),
-        if (_hits.isNotEmpty) ...[
-          if (_unverified) Padding(padding: const EdgeInsets.only(bottom: 12),
-            child: Text(_aiFollowup ?? 'Yeh sirf milte-julte references hain; jawab verify nahi hua.',
-              style: const TextStyle(fontSize: 14, height: 1.7, fontWeight: FontWeight.w600))),
-          Text('References · $_total', style: TextStyle(fontFamily: 'Inter', fontSize: 13,
-            fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-          const SizedBox(height: 10),
-          for (var i = 0; i < _hits.length; i++) _result(_hits[i], i + 1),
+            const Text('Apna sawal poochhein', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10), Text('Seedha jawab, aasaan wazahat aur relevant references.',
+              style: TextStyle(fontSize: 14, height: 1.6, color: AppColors.textMuted)),
+          ])),
+        for (final turn in _turns) ...[
+          Align(alignment: AlignmentDirectional.centerEnd, child: Container(
+            margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: AppColors.goldRule.withOpacity(.35), borderRadius: BorderRadius.circular(16)),
+            child: SelectableText(turn.question, style: const TextStyle(fontSize: 15, height: 1.6)))),
+          Container(margin: const EdgeInsets.only(bottom: 24), padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.goldRule)),
+            child: _reply(turn)),
         ],
-      ],
-    ]));
-
-  Widget _suggestion(String label, String question) => ActionChip(
-    label: Text(label, style: const TextStyle(fontFamily: 'Inter', fontSize: 12)),
-    backgroundColor: AppColors.white,
-    side: BorderSide(color: AppColors.goldRule),
-    onPressed: _busy || _voiceBusy ? null : () => setState(() => _query.text = question));
-
-  Widget _answerCard() => Card(
-    elevation: 0, margin: const EdgeInsets.only(bottom: 20),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: AppColors.goldRule)),
-    child: Padding(padding: const EdgeInsets.all(16), child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          Icon(Icons.auto_awesome_outlined, size: 17, color: AppColors.emerald),
+      ])),
+      SafeArea(top: false, child: Padding(padding: const EdgeInsets.fromLTRB(14, 8, 14, 12), child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Expanded(child: TextField(controller: _query, minLines: 1, maxLines: 5, maxLength: 500,
+            textInputAction: TextInputAction.newline, style: const TextStyle(fontSize: 16),
+            decoration: InputDecoration(hintText: _voiceBusy ? 'Sun rahe hain…' : 'Sawal ya follow-up likhein…', counterText: '',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              suffixIcon: IconButton(onPressed: _busy || _voiceBusy ? null : _listen, tooltip: 'Sawal boliye',
+                icon: Icon(_voiceBusy ? Icons.hearing : Icons.mic_none))))),
           const SizedBox(width: 8),
-          Expanded(child: Text(_directAnswer!['type'] == 'source-extract' ? 'Asal reference se' : 'Jawab',
-            style: TextStyle(fontFamily: 'Inter', fontSize: 13,
-              fontWeight: FontWeight.w600, color: AppColors.emerald))),
-          IconButton(tooltip: 'Jawab copy karein', visualDensity: VisualDensity.compact,
-            onPressed: () { Clipboard.setData(ClipboardData(
-              text: "${_directAnswer!['text']}\n\n${_directAnswer!['reference']}"));
-              _notice('Jawab copy ho gaya.'); },
-            icon: const Icon(Icons.copy_outlined, size: 17)),
-        ]),
-        const SizedBox(height: 8),
-        SelectableText(_directAnswer!['text'] as String,
-          style: TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.65, color: AppColors.text)),
-        const SizedBox(height: 12),
-        for (final reference in (_directAnswer!['reference'] as String).split('\n'))
-          Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(reference,
-            style: TextStyle(fontFamily: 'Inter', fontSize: 12, height: 1.5, color: AppColors.textMuted))),
-      ])));
-
-  Widget _result(Map<String, dynamic> h, int position) {
-    final urdu = _translation == 'urdu' && h['kind'] != 'story' && h['kind'] != 'guide';
-    final text = _body(h);
-    final kind = h['kind'] == 'guide' ? 'LEARNING' : h['kind'] == 'story' ? 'ANBIYA KI KAHANI'
-      : h['kind'] == 'quran' ? 'QURAN' : 'HADEES';
-    final bodyStyle = urdu ? AppText.urduText.copyWith(fontSize: 17, height: 1.9)
-      : TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.65, color: AppColors.text);
-    return Card(elevation: 0, margin: const EdgeInsets.only(bottom: 10),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.goldRule)),
-      child: ExpansionTile(key: ValueKey('${_searchedQuery}_${_id(h)}'),
-        tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('$position · $kind', style: TextStyle(fontFamily: 'Inter', fontSize: 10,
-            fontWeight: FontWeight.w600, color: AppColors.emerald)),
-          const SizedBox(height: 5),
-          Text(_reference(h), style: TextStyle(fontFamily: 'Inter', fontSize: 14,
-            height: 1.4, fontWeight: FontWeight.w600, color: AppColors.text)),
-        ]),
-        subtitle: Padding(padding: const EdgeInsets.only(top: 8), child: Text(
-          text.isEmpty ? 'Translation available nahi.' : text,
-          maxLines: 2, overflow: TextOverflow.ellipsis,
-          textDirection: urdu ? TextDirection.rtl : TextDirection.ltr, style: bodyStyle)),
-        children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          if ((h['ar'] as String? ?? '').isNotEmpty) Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12), child: Text(h['ar'] as String,
-              maxLines: 4, overflow: TextOverflow.ellipsis,
-              textDirection: TextDirection.rtl, style: AppText.arabic.copyWith(fontSize: 20, height: 1.8))),
-          const SizedBox(height: 8),
-          Text(text.isEmpty ? 'Is zaban mein translation available nahi.' : text,
-            maxLines: 8, overflow: TextOverflow.ellipsis,
-            textDirection: urdu ? TextDirection.rtl : TextDirection.ltr, style: bodyStyle),
-          if (h['kind'] == 'story') ...[
-            const SizedBox(height: 12),
-            for (final raw in (h['sources'] as List? ?? const []))
-              Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(raw['kind'] == 'quran'
-                ? 'Quran ${raw['surah']}:${raw['start']}${raw['end'] != raw['start'] ? '–${raw['end']}' : ''}'
-                : '${raw['book'] == 'muslim' ? 'Sahih Muslim' : 'Sahih al-Bukhari'} ${raw['editionLabel'] ?? raw['number']}',
-                style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: AppColors.textMuted))),
-          ],
-          const SizedBox(height: 8),
-          Wrap(spacing: 4, runSpacing: 2, children: [
-            if (h['kind'] != 'guide') TextButton.icon(
-              onPressed: text.isEmpty ? null : () => _speak(h),
-              icon: Icon(_speaking == _id(h) ? Icons.stop_circle_outlined : Icons.volume_up_outlined, size: 18),
-              label: Text(_speaking == _id(h) ? 'Rokein' : 'Sunein',
-                style: const TextStyle(fontFamily: 'Inter', fontSize: 12))),
-            TextButton.icon(onPressed: () => _open(h), icon: const Icon(Icons.menu_book_outlined, size: 18),
-              label: Text(h['kind'] == 'guide' ? 'Guide kholein' : 'Poora parhein',
-                style: const TextStyle(fontFamily: 'Inter', fontSize: 12))),
-            if (h['kind'] != 'story' && h['kind'] != 'guide') IconButton(
-              tooltip: 'Reference aur wazahat', onPressed: () => _details(h),
-              icon: const Icon(Icons.info_outline, size: 18)),
-          ]),
-        ])],
-      ));
+          IconButton.filledTonal(tooltip: 'Bhejein', onPressed: _busy || _voiceBusy ? null : () => _send(),
+            icon: Icon(_busy ? Icons.more_horiz : Icons.arrow_upward)),
+        ]))),
+    ]));
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); _version++;
+    TtsService.stop(); _query.dispose(); _scroll.dispose(); super.dispose();
   }
 }

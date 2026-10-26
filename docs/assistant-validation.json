@@ -1,0 +1,68 @@
+{
+  "records": 41039,
+  "loadMs": 1442,
+  "peakRssMiB": 415,
+  "checks": [
+    {
+      "question": "How should we treat our parents?",
+      "retrievalMs": 158,
+      "ids": [
+        "hadith:muslim:6513",
+        "hadith:muslim:6238"
+      ]
+    },
+    {
+      "question": "ibrahim ki biwi ka naam",
+      "retrievalMs": 583,
+      "ids": [
+        "hadith:bukhari:3364",
+        "hadith:bukhari:3358",
+        "quran:29:32"
+      ]
+    },
+    {
+      "question": "namaz mein haath uthana",
+      "retrievalMs": 772,
+      "ids": [
+        "hadith:abudawud:753",
+        "hadith:ibnmajah:865",
+        "hadith:abudawud:725"
+      ]
+    },
+    {
+      "question": "Does touching my wife break wudu? Hanafi Shafii differences",
+      "retrievalMs": 1478,
+      "ids": [
+        "scholarly:daralifta:2287-ablution",
+        "scholarly:jordan:4044",
+        "hadith:tirmidhi:65"
+      ]
+    },
+    {
+      "question": "dua before sleeping",
+      "retrievalMs": 537,
+      "ids": [
+        "dua:45:143",
+        "hadith:bukhari:6315",
+        "hadith:bukhari:6313"
+      ]
+    },
+    {
+      "question": "What happened to Yusuf in prison?",
+      "retrievalMs": 404,
+      "ids": [
+        "quran:12:42",
+        "hadith:bukhari:6992",
+        "hadith:bukhari:3387"
+      ]
+    }
+  ],
+  "liveGemini": false,
+  "nodeTests": {
+    "passed": 85,
+    "failed": 0
+  },
+  "flutterBuild": false,
+  "semanticHumanReview": "pending live evaluation",
+  "baseCommit": "badbf30"
+}

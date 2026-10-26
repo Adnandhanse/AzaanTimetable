@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
-/// A separate persistent anonymous session keeps the masjid admin's default
-/// phone login untouched. Only the question, not audio/phone/location, is sent.
+/// Keeps the admin's phone/email session untouched. Recent chat is request-only;
+/// no new chat-history records are written by the Flutter client.
 class AskConnectAi {
   static Future<FirebaseApp>? _session;
   static Future<FirebaseApp> _initialize() async {
@@ -15,15 +15,28 @@ class AskConnectAi {
     if (auth.currentUser == null) await auth.signInAnonymously();
     return app;
   }
-  static Future<Map<String, dynamic>> ask(String question, String kind) async {
+  static Future<Map<String, dynamic>> ask(String question, String kind, {
+    List<Map<String, String>> history = const [], String replyLanguage = 'auto',
+  }) async {
+    FirebaseApp app;
     try {
-      final app = await (_session ??= _initialize());
+      app = await (_session ??= _initialize()).timeout(const Duration(seconds: 12));
+    } catch (_) { _session = null; rethrow; }
+    try {
       final response = await FirebaseFunctions.instanceFor(app: app, region: 'us-central1')
         .httpsCallable('askIslamConnect', options: HttpsCallableOptions(
-          timeout: const Duration(seconds: 115)))
-        .call<dynamic>({'question': question, 'kind': kind, 'acceptGuides': true});
-      return _map(response.data);
-    } catch (_) { _session = null; rethrow; }
+          timeout: const Duration(seconds: 70)))
+        .call<dynamic>({'protocol': 2, 'question': question, 'kind': kind,
+          'history': history, 'replyLanguage': replyLanguage});
+      final result = _map(response.data);
+      if (result['answerMode'] != 'conversation-v1') {
+        throw StateError('assistant-backend-update-needed');
+      }
+      return result;
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'unauthenticated') _session = null;
+      rethrow;
+    }
   }
   static Map<String, dynamic> _map(dynamic value) =>
       Map<String, dynamic>.from((value as Map).map((key, value) =>

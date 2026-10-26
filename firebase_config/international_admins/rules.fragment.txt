@@ -1,0 +1,64 @@
+// MERGE into existing service cloud.firestore / match /databases/{database}/documents.
+// NOT a full replacement. Existing Platform Admin permissions stay unchanged.
+match /_adminEmailOtpChallenges/{challenge} { allow read, write: if false; }
+match /_adminEmailOtpLimits/{limit} { allow read, write: if false; }
+match /_masjidRegistrationKeys/{key} { allow read, write: if false; }
+// Explicit false does NOT override a wildcard allow. Remove/restrict broad
+// wildcard grants that would expose these collections. Keep token/reminder
+// collections private too (previous timing-reminder patch).
+
+function internationalMasjidOwner(m) {
+  let method = m.get('adminVerificationMethod', '');
+  let password = request.auth != null && request.auth.token.firebase.sign_in_provider == 'password';
+  return request.auth != null && m.get('adminUid', '') == request.auth.uid &&
+    m.verificationStatus == 'Verified' &&
+    request.auth.token.get('email', '') == m.adminEmail &&
+    ((method == 'email_password' && password) ||
+      (method == 'email' && request.auth.token.get('email_verified', false) == true &&
+        (password || request.auth.token.get('adminEmailOtp', false) == true)));
+}
+function phoneMasjidOwner(m) {
+  let mobile = m.adminMobile;
+  let full = mobile.matches('^\\+.*') ? mobile : '+91' + mobile;
+  return request.auth != null && m.get('adminVerificationMethod', 'phone') == 'phone' &&
+    request.auth.token.get('phone_number', '') == full &&
+    (m.get('adminUid', null) == null || m.adminUid == request.auth.uid);
+}
+// In existing masjid/prayer/announcement owner-write permissions, replace the
+// hardcoded +91 owner comparison with phoneMasjidOwner(m) || internationalMasjidOwner(m).
+// Preserve field allow-lists: regular owners must NEVER change adminUid,
+// adminEmail, adminMobile, verificationStatus, verificationMethod/country flags
+// through client writes. Registration/transfer updates use the Admin SDK.
+// Permit timesConfirmedAt == request.time on legitimate timing confirmations.
+// Storage upload ownership checks must likewise allow the same verified UID/
+// email session by looking up the masjid document. No Storage rules are replaced
+// automatically: current deployed Storage rules were not supplied.
+
+// NEW international takeover requests and platform reviews go through callable
+// functions. Existing phone-only request rules may stay during an old-APK rollout.
+// Once old APK support is retired, change client request/review writes to false;
+// keep Platform Admin's existing read rules.
+
+function internationalOwnerSafeUpdate(before, after) {
+  let changed = after.diff(before).affectedKeys();
+  return internationalMasjidOwner(before) &&
+    changed.hasOnly(['prayerTimes', 'timesUpdatedAt', 'timesConfirmedAt',
+      'customAzanAudioName', 'customAzanAudioUrl', 'about', 'capacity', 'photoUrls']) &&
+    (!changed.hasAny(['timesUpdatedAt']) || after.timesUpdatedAt == request.time) &&
+    (!changed.hasAny(['timesConfirmedAt']) || after.timesConfirmedAt == request.time);
+}
+// This helper can be OR-ed into the CURRENT masjid update permission, while
+// keeping any existing data-shape validation. It never allows changing owner,
+// verification, country, email or number. Platform-admin permissions are separate.
+
+// Optional narrow permission for registration photos before approval. This is
+// NOT permission to edit timings, ownership, contact details or status.
+function pendingInternationalPhotoUpdate(before, after) {
+  return request.auth != null && before.get('adminUid', '') == request.auth.uid &&
+    before.get('adminVerificationMethod', '') == 'email_password' &&
+    before.verificationStatus == 'Pending Verification' &&
+    request.auth.token.firebase.sign_in_provider == 'password' &&
+    request.auth.token.get('email', '') == before.adminEmail &&
+    after.diff(before).affectedKeys().hasOnly(['photoUrls']) &&
+    after.photoUrls is list && after.photoUrls.size() <= 3;
+}

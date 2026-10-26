@@ -1,0 +1,36 @@
+name: Deploy international admin verification
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check required secrets
+        env:
+          DEPLOY: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+        run: |
+          if [ -z "$DEPLOY" ]; then
+            echo 'Configure FIREBASE_DEPLOY_CREDENTIALS. No email service is required. See INTERNATIONAL_ADMINS_SETUP.md.'
+            exit 1
+          fi
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
+      - name: Install dependencies
+        run: |
+          npm --prefix functions-international ci --ignore-scripts
+          npm --prefix functions ci --ignore-scripts
+          npm --prefix functions-reminders ci --ignore-scripts
+      - name: Test approval, country validation, transfer and reminders
+        run: |
+          npm --prefix functions-international test
+          npm --prefix functions test
+          npm --prefix functions-reminders test
+      - name: Deploy international verification and compatible transfer/reminder services
+        run: npx --yes firebase-tools@14 --config firebase.international.json deploy --only functions:international-admins,functions:ownership-transfer,functions:timing-reminders --project actual-masjid-prayer-time --non-interactive --force

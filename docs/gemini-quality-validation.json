@@ -1,0 +1,66 @@
+{
+  "checks": [
+    {
+      "question": "namaz ka tarika batao",
+      "retrievalMs": 820,
+      "ids": [
+        "hadith:bukhari:6667",
+        "hadith:bukhari:6251",
+        "hadith:nasai:1313"
+      ]
+    },
+    {
+      "question": "How do I perform salah step by step?",
+      "retrievalMs": 753,
+      "ids": [
+        "hadith:bukhari:6667",
+        "hadith:bukhari:6251",
+        "hadith:nasai:1313"
+      ]
+    },
+    {
+      "question": "sone se pehle ki dua",
+      "retrievalMs": 579,
+      "ids": [
+        "dua:28:105",
+        "dua:28:104",
+        "dua:28:110"
+      ]
+    },
+    {
+      "question": "maa baap ke huqooq",
+      "retrievalMs": 478,
+      "ids": [
+        "quran:17:23",
+        "hadith:muslim:256",
+        "hadith:muslim:253"
+      ]
+    },
+    {
+      "question": "gussa kaise control karu",
+      "retrievalMs": 430,
+      "ids": [
+        "hadith:muslim:6643",
+        "hadith:bukhari:6114",
+        "hadith:muslim:6644"
+      ]
+    },
+    {
+      "question": "aakhri nabi ka naam kya hai",
+      "retrievalMs": 545,
+      "ids": [
+        "quran:33:40",
+        "hadith:bukhari:5051.2",
+        "hadith:bukhari:7340"
+      ]
+    }
+  ],
+  "peakRssMiB": 545,
+  "liveGemini": false,
+  "aiNodeTestsPassed": 89,
+  "internationalTestsPassed": 12,
+  "transferTestsPassed": 10,
+  "reminderTestsPassed": 9,
+  "androidBuild": false,
+  "humanAnswerReview": "pending live evaluation"
+}

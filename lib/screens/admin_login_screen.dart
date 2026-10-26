@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/admin_contact.dart';
+import '../services/email_admin_verification.dart';
+import '../widgets/admin_country_picker.dart';
+import '../widgets/international_account_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_masjid_screen.dart';
 import 'admin_dashboard_screen.dart';
@@ -17,6 +22,8 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final TextEditingController _mobileController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _email = TextEditingController();
+  AdminCountry _country = AdminCountry.india;
   bool _isChecking = false;
 
   /// Set while checking for a saved session, so the login form does not flash
@@ -49,7 +56,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         // so a removed admin is not let straight back in.
         final matches =
             await MasjidRepository.streamByAdminMobile(saved).first;
-        if (matches.isNotEmpty && mounted && AuthService.currentUser?.phoneNumber == '+91$saved') {
+        if (matches.isNotEmpty && mounted && matches.any((m) => AdminContact.matchesAccount(m, AuthService.currentUser))) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
                 builder: (_) => AdminDashboardScreen(adminMobile: saved)),
@@ -64,44 +71,42 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   Future<void> _openDashboard(String mobile) async {
-    if (AuthService.currentUser?.phoneNumber != '+91$mobile') {
-      throw StateError('Verify this mobile number first.');
-    }
     final matches = await MasjidRepository.streamByAdminMobile(mobile).first;
-    if (matches.isEmpty) throw StateError('This number no longer manages a masjid.');
+    if (matches.isEmpty) throw StateError('No masjid found for this verified admin.');
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, mobile);
+    await prefs.setString(_key, matches.first.adminMobile);
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(
-      builder: (_) => AdminDashboardScreen(adminMobile: mobile)), (route) => false);
+      builder: (_) => AdminDashboardScreen(adminMobile: matches.first.adminMobile)), (route) => false);
   }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-    final mobile = _mobileController.text.trim();
+    final mobile = _country.number(_mobileController.text.trim());
     setState(() => _isChecking = true);
     try {
-      final matches = await MasjidRepository.streamByAdminMobile(mobile).first;
-      if (matches.isEmpty) throw StateError('No masjid found for this number. Register one below.');
-      if (AuthService.currentUser?.phoneNumber == '+91$mobile') {
-        await _openDashboard(mobile);
+      if (!_country.isIndia) {
+        final verified = await openInternationalAccount(context, auth: FirebaseAuth.instance,
+          email: _email.text, create: false);
+        if (verified) await _openDashboard(mobile);
         return;
       }
-      await AuthService.sendOtp(phoneNumber: '+91$mobile',
+      if (AuthService.currentUser?.phoneNumber == mobile) {
+        await _openDashboard(mobile); return;
+      }
+      await AuthService.sendOtp(phoneNumber: mobile,
         onCodeSent: (id, token) {
           if (!mounted) return;
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => OtpScreen(
             phoneNumber: mobile, verificationId: id, resendToken: token,
             onVerified: () => _openDashboard(mobile))));
-        },
-        onError: (error) {
+        }, onError: (error) {
           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
         });
     } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$error')));
-    } finally {
-      if (mounted) setState(() => _isChecking = false);
-    }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(error is StateError ? '${error.message}' : EmailAdminVerification.friendly(error))));
+    } finally { if (mounted) setState(() => _isChecking = false); }
   }
 
   @override
@@ -115,7 +120,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       appBar: AppBar(
         title: const Text('Masjid Admin Login'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
@@ -127,13 +132,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               const SizedBox(height: 16),
               const Text('Admin Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              const Text('Enter the mobile number registered with your masjid', style: TextStyle(color: Colors.grey)),
+              Text(_country.isIndia ? 'Verify your registered mobile number' : 'Sign in with your registered email and password', style: TextStyle(color: Colors.grey)),
               const SizedBox(height: 24),
-              TextFormField(
-                controller: _mobileController,
+              AdminCountryPicker(value: _country, enabled: !_isChecking,
+                onChanged: (country) => setState(() { _country = country; _mobileController.clear(); })),
+              if (_country.isIndia) TextFormField(
+                controller: _mobileController, enabled: !_isChecking,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Mobile Number', prefixIcon: Icon(Icons.phone), border: OutlineInputBorder()),
-                validator: (v) => (v == null || v.length < 10) ? 'Enter a valid mobile number' : null,
+                decoration: InputDecoration(labelText: 'Mobile number', prefixText: '${_country.dialCode} ', border: const OutlineInputBorder()),
+                validator: _country.validate,
+              ) else TextFormField(
+                controller: _email, enabled: !_isChecking, keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Registered email', border: OutlineInputBorder()),
+                validator: (v) => !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim()) ? 'Enter a valid email address' : null,
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -160,7 +171,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

@@ -1,0 +1,7 @@
+{
+  "functions": [
+    {"source":"functions-international","codebase":"international-admins","ignore":["node_modules",".git","*.log",".env*"]},
+    {"source":"functions","codebase":"ownership-transfer","ignore":["node_modules",".git","*.log"]},
+    {"source":"functions-reminders","codebase":"timing-reminders","ignore":["node_modules",".git","*.log"]}
+  ]
+}

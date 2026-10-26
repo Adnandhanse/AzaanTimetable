@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/masjid.dart';
+import '../widgets/timing_review_status.dart';
 import '../services/masjid_repository.dart';
 import '../services/auth_service.dart';
 import 'super_admin_login_screen.dart';
@@ -194,6 +195,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                   const SizedBox(height: 6),
                   Text('${m.address}, ${m.city}', style: const TextStyle(color: Colors.grey)),
                   const SizedBox(height: 4),
+                  TimingReviewStatus(masjid: m),
                   Text('Admin: ${m.adminName} • ${m.adminMobile}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   if (m.registrationNo.isNotEmpty)
                     Text('Reg. No: ${m.registrationNo}', style: const TextStyle(color: Colors.grey, fontSize: 13)),

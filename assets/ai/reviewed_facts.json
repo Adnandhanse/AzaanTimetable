@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "facts": [
     {
       "id": "fajr_rakat",
@@ -15,7 +15,12 @@
         "how many rakats are there in fajr",
         "fajr farz aur sunnat kitni hain",
         "fajr prayer total rakah"
-      ]
+      ],
+      "answers": {
+        "en": "Fajr has 2 obligatory rakahs, preceded by 2 Sunnah rakahs. The usual sequence is 2 Sunnah, then 2 obligatory; the four must not all be called obligatory.",
+        "hi": "फ़ज्र में 2 फ़र्ज़ रकअत हैं। उनसे पहले 2 सुन्नत हैं: पहले 2 सुन्नत, फिर 2 फ़र्ज़। चारों को फ़र्ज़ न समझें।",
+        "ur": "فجر میں 2 فرض رکعتیں ہیں۔ ان سے پہلے 2 سنت ہیں: پہلے 2 سنت، پھر 2 فرض۔ چاروں کو فرض نہ سمجھیں۔"
+      }
     },
     {
       "id": "fajr_fard",
@@ -29,7 +34,12 @@
         "fajar farz rakat count",
         "how many fard rakats in fajr",
         "subah ki namaz mein farz kitne hain"
-      ]
+      ],
+      "answers": {
+        "en": "Fajr has 2 obligatory rakahs. The 2 Sunnah rakahs before them are separate.",
+        "hi": "फ़ज्र में 2 फ़र्ज़ रकअत हैं। उनसे पहले की 2 सुन्नत अलग हैं।",
+        "ur": "فجر میں 2 فرض رکعتیں ہیں۔ ان سے پہلے کی 2 سنت الگ ہیں۔"
+      }
     },
     {
       "id": "fajr_sunnah",
@@ -42,7 +52,12 @@
         "fajar sunnah rakat count",
         "how many sunnah rakats before fajr",
         "subah ki namaz ki sunnat kitni hain"
-      ]
+      ],
+      "answers": {
+        "en": "There are 2 Sunnah rakahs before the obligatory Fajr prayer.",
+        "hi": "फ़ज्र की फ़र्ज़ नमाज़ से पहले 2 सुन्नत रकअत हैं।",
+        "ur": "فجر کی فرض نماز سے پہلے 2 سنت رکعتیں ہیں۔"
+      }
     },
     {
       "id": "ibrahim_family",
@@ -57,7 +72,12 @@
         "what is the name of abraham wife",
         "ibrahim ki begum ka naam batao",
         "ibrahim ki wife kaun thi"
-      ]
+      ],
+      "answers": {
+        "en": "Sarah is named as Ibrahim Alaihis Salam's wife in Sahih al-Bukhari. Hajar is also mentioned in his household and was the mother of Ismail Alaihis Salam. If you mean Ismail's mother, the name is Hajar.",
+        "hi": "सहीह बुख़ारी में इब्राहीम अलैहिस्सलाम की पत्नी का नाम सारा आता है। हाजरा का भी उनके परिवार में ज़िक्र है; वह इस्माईल अलैहिस्सलाम की माँ थीं। अगर आप इस्माईल की माँ पूछ रहे हैं, तो नाम हाजरा है।",
+        "ur": "صحیح بخاری میں ابراہیم علیہ السلام کی بیوی کا نام سارہ آتا ہے۔ ہاجرہ کا بھی ان کے گھرانے میں ذکر ہے؛ وہ اسماعیل علیہ السلام کی والدہ تھیں۔ اگر آپ اسماعیل کی والدہ پوچھ رہے ہیں تو نام ہاجرہ ہے۔"
+      }
     },
     {
       "id": "daily_prayers",
@@ -75,7 +95,12 @@
         "how many daily obligatory prayers are there",
         "daily farz namaz count",
         "ek din mein farz namaz kitni hain"
-      ]
+      ],
+      "answers": {
+        "en": "There are 5 obligatory daily prayers.",
+        "hi": "दिन-रात में 5 फ़र्ज़ नमाज़ें हैं।",
+        "ur": "دن رات میں 5 فرض نمازیں ہیں۔"
+      }
     },
     {
       "id": "quran_language",
@@ -93,7 +118,12 @@
         "what language was the quran revealed in",
         "quran kaunsi bhasha mein hai",
         "quran language batao"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran was revealed in Arabic.",
+        "hi": "कुरआन अरबी में नाज़िल हुआ।",
+        "ur": "قرآن عربی زبان میں نازل ہوا۔"
+      }
     },
     {
       "id": "quran_month",
@@ -110,7 +140,12 @@
         "which month was quran revealed in",
         "quran ka nuzool kis month mein hua",
         "quran revelation month kya hai"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran connects its revelation with Ramadan.",
+        "hi": "कुरआन अपने नुज़ूल का ज़िक्र रमज़ान के साथ करता है।",
+        "ur": "قرآن اپنے نزول کا ذکر رمضان کے ساتھ کرتا ہے۔"
+      }
     },
     {
       "id": "fasting_month",
@@ -132,7 +167,12 @@
         "which month do muslims fast",
         "farz fasting ka month kya hai",
         "ramzan ke roze farz hain kya"
-      ]
+      ],
+      "answers": {
+        "en": "Ramadan is the month of obligatory fasting. The Quran provides concessions for illness and travel, with missed days made up later.",
+        "hi": "रमज़ान फ़र्ज़ रोज़ों का महीना है। कुरआन बीमारी और सफ़र में रियायत और बाद में छूटे दिनों की गिनती पूरी करने का ज़िक्र करता है।",
+        "ur": "رمضان فرض روزوں کا مہینہ ہے۔ قرآن بیماری اور سفر میں رخصت اور بعد میں چھوٹے دنوں کی گنتی پوری کرنے کا ذکر کرتا ہے۔"
+      }
     },
     {
       "id": "qibla",
@@ -150,7 +190,12 @@
         "what is the qibla",
         "muslims face which direction in prayer",
         "namaz mein kahan muh karein"
-      ]
+      ],
+      "answers": {
+        "en": "In prayer we face al-Masjid al-Haram; the Kaaba is our qibla.",
+        "hi": "नमाज़ में रुख़ मस्जिद अल-हराम की ओर होता है; काबा हमारा क़िबला है।",
+        "ur": "نماز میں رخ مسجد الحرام کی طرف ہوتا ہے؛ کعبہ ہمارا قبلہ ہے۔"
+      }
     },
     {
       "id": "last_prophet",
@@ -168,7 +213,12 @@
         "who is the last prophet",
         "sabse aakhri paigambar kaun hai",
         "khatam un nabiyyin kaun hain"
-      ]
+      ],
+      "answers": {
+        "en": "Muhammad ﷺ is Allah's Messenger and the last Prophet.",
+        "hi": "मुहम्मद ﷺ अल्लाह के रसूल और आख़िरी नबी हैं।",
+        "ur": "محمد ﷺ اللہ کے رسول اور آخری نبی ہیں۔"
+      }
     },
     {
       "id": "allah_one",
@@ -186,7 +236,12 @@
         "allah ek hai kya",
         "tawheed ka matlab kya hai",
         "what is tawheed"
-      ]
+      ],
+      "answers": {
+        "en": "Allah is One. The opening verse of Surah Al-Ikhlas states this oneness.",
+        "hi": "अल्लाह एक है। सूरह अल-इख़लास की पहली आयत यह तौहीद बताती है।",
+        "ur": "اللہ ایک ہے۔ سورۃ الاخلاص کی پہلی آیت یہ توحید بیان کرتی ہے۔"
+      }
     },
     {
       "id": "isa_mother",
@@ -204,7 +259,12 @@
         "who is the mother of jesus",
         "isa mother name",
         "hazrat esa ki ammi ka naam"
-      ]
+      ],
+      "answers": {
+        "en": "Maryam is the mother of Isa Alaihis Salam.",
+        "hi": "ईसा अलैहिस्सलाम की माँ का नाम मरयम है।",
+        "ur": "عیسیٰ علیہ السلام کی والدہ کا نام مریم ہے۔"
+      }
     },
     {
       "id": "yahya_father",
@@ -222,7 +282,12 @@
         "who is the father of yahya",
         "zakariya ke bete ka naam kya tha",
         "zakariya son name"
-      ]
+      ],
+      "answers": {
+        "en": "Yahya Alaihis Salam was the son granted to Zakariya Alaihis Salam.",
+        "hi": "यहया अलैहिस्सलाम, ज़करिया अलैहिस्सलाम को दिए गए बेटे थे।",
+        "ur": "یحییٰ علیہ السلام، زکریا علیہ السلام کو عطا کیے گئے بیٹے تھے۔"
+      }
     },
     {
       "id": "ibrahim_fire",
@@ -239,7 +304,12 @@
         "which prophet was saved from fire",
         "aag kis prophet ke liye thandi hui",
         "aag kis nabi ko nahi jala saki"
-      ]
+      ],
+      "answers": {
+        "en": "Allah commanded the fire to be cool and safe for Ibrahim Alaihis Salam.",
+        "hi": "अल्लाह ने आग को इब्राहीम अलैहिस्सलाम के लिए ठंडक और सलामती वाली होने का हुक्म दिया।",
+        "ur": "اللہ نے آگ کو ابراہیم علیہ السلام کے لیے ٹھنڈک اور سلامتی والی ہونے کا حکم دیا۔"
+      }
     },
     {
       "id": "yunus_fish",
@@ -271,7 +341,12 @@
         "which prophet was swallowed by a fish",
         "machli ke pet mein kaun nabi the",
         "fish ne kis prophet ko nigla tha"
-      ]
+      ],
+      "answers": {
+        "en": "A fish swallowed Yunus Alaihis Salam. The Quran also recounts his prayer and rescue by Allah.",
+        "hi": "यूनुस अलैहिस्सलाम को मछली ने निगल लिया था। कुरआन उनकी दुआ और अल्लाह की ओर से निजात का भी ज़िक्र करता है।",
+        "ur": "یونس علیہ السلام کو مچھلی نے نگل لیا تھا۔ قرآن ان کی دعا اور اللہ کی طرف سے نجات کا بھی ذکر کرتا ہے۔"
+      }
     },
     {
       "id": "nuh_ark",
@@ -288,7 +363,12 @@
         "which prophet built the ark",
         "nuh ki kashti kisne banayi",
         "kashti banane wale nabi ka naam"
-      ]
+      ],
+      "answers": {
+        "en": "Allah instructed Nuh Alaihis Salam to build the ark under His care and revelation.",
+        "hi": "अल्लाह ने नूह अलैहिस्सलाम को अपनी निगरानी और वही के अनुसार कश्ती बनाने का हुक्म दिया।",
+        "ur": "اللہ نے نوح علیہ السلام کو اپنی نگرانی اور وحی کے مطابق کشتی بنانے کا حکم دیا۔"
+      }
     },
     {
       "id": "kaaba_builders",
@@ -305,7 +385,12 @@
         "kaaba kisne banaya",
         "who raised the foundations of the kaaba",
         "kaaba banane wale nabi kaun the"
-      ]
+      ],
+      "answers": {
+        "en": "Ibrahim Alaihis Salam and Ismail Alaihis Salam raised the foundations of the Kaaba together and prayed for acceptance.",
+        "hi": "इब्राहीम और इस्माईल अलैहिमस्सलाम ने साथ काबा की बुनियादें उठाईं और क़बूलियत की दुआ की।",
+        "ur": "ابراہیم اور اسماعیل علیہما السلام نے مل کر کعبہ کی بنیادیں اٹھائیں اور قبولیت کی دعا کی۔"
+      }
     },
     {
       "id": "first_house",
@@ -322,7 +407,12 @@
         "where was the first house of worship",
         "pehla house of worship kahan hai",
         "sabse pehla ibadat ka ghar"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran identifies the first House appointed for people's worship as being at Bakkah, or Makkah.",
+        "hi": "कुरआन के अनुसार लोगों की इबादत के लिए पहला घर बक्का, यानी मक्का में निर्धारित हुआ।",
+        "ur": "قرآن کے مطابق لوگوں کی عبادت کے لیے پہلا گھر بکہ، یعنی مکہ میں مقرر ہوا۔"
+      }
     },
     {
       "id": "ismail_mother",
@@ -345,7 +435,12 @@
         "who is the mother of ismail",
         "ismail mother name",
         "hazrat ismail ki ammi ka naam"
-      ]
+      ],
+      "answers": {
+        "en": "Hajar was the mother of Ismail Alaihis Salam. Sahih al-Bukhari recounts her stay in Makkah and the Zamzam episode.",
+        "hi": "इस्माईल अलैहिस्सलाम की माँ हाजरा थीं। सहीह बुख़ारी में उनके मक्का में रहने और ज़मज़म का वाक़िआ है।",
+        "ur": "اسماعیل علیہ السلام کی والدہ ہاجرہ تھیں۔ صحیح بخاری میں ان کے مکہ میں رہنے اور زمزم کا واقعہ ہے۔"
+      }
     },
     {
       "id": "zamzam_place",
@@ -362,7 +457,12 @@
         "where is zamzam",
         "zamzam ka pani kahan nikla",
         "zamzam water location kya hai"
-      ]
+      ],
+      "answers": {
+        "en": "Zamzam appeared in the valley of Makkah. Sahih al-Bukhari recounts the event involving Hajar and Ismail Alaihis Salam.",
+        "hi": "ज़मज़म मक्का की वादी में ज़ाहिर हुआ। हाजरा और इस्माईल अलैहिस्सलाम से जुड़ा यह वाक़िआ सहीह बुख़ारी में है।",
+        "ur": "زمزم مکہ کی وادی میں ظاہر ہوا۔ ہاجرہ اور اسماعیل علیہ السلام سے متعلق یہ واقعہ صحیح بخاری میں ہے۔"
+      }
     },
     {
       "id": "safa_marwa_seven",
@@ -379,7 +479,12 @@
         "safa marwa saee kitni martaba hai",
         "how many journeys between safa and marwa",
         "saee ke chakkar kitne hain"
-      ]
+      ],
+      "answers": {
+        "en": "Hajar went between Safa and Marwa seven times seeking water and help. The sahih report connects this event with sa'i.",
+        "hi": "हाजरा ने पानी और मदद की तलाश में सफ़ा और मरवा के बीच सात बार आना-जाना किया। सहीह रिवायत इसे सई से जोड़ती है।",
+        "ur": "ہاجرہ نے پانی اور مدد کی تلاش میں صفا اور مروہ کے درمیان سات مرتبہ آنا جانا کیا۔ صحیح روایت اسے سعی سے جوڑتی ہے۔"
+      }
     },
     {
       "id": "adam_creation",
@@ -401,7 +506,12 @@
         "adam ki takhleeq kis se hui",
         "what was adam created from",
         "hazrat adam ko kaise banaya gaya"
-      ]
+      ],
+      "answers": {
+        "en": "Allah created Adam Alaihis Salam from clay. The Quran presents this as a sign of His creative power.",
+        "hi": "अल्लाह ने आदम अलैहिस्सलाम को मिट्टी से बनाया। कुरआन इसे अल्लाह की क़ुदरत की निशानी बताता है।",
+        "ur": "اللہ نے آدم علیہ السلام کو مٹی سے پیدا کیا۔ قرآن اسے اللہ کی قدرت کی نشانی بیان کرتا ہے۔"
+      }
     },
     {
       "id": "revelation_angel",
@@ -418,7 +528,12 @@
         "which angel brought the quran",
         "wahi lane wale farishte ka naam kya hai",
         "quran jibril laye the kya"
-      ]
+      ],
+      "answers": {
+        "en": "Jibril brought the Quran to the heart of Muhammad ﷺ by Allah's permission.",
+        "hi": "जिब्रील अल्लाह की इजाज़त से कुरआन मुहम्मद ﷺ के दिल पर लाए।",
+        "ur": "جبرائیل اللہ کے اذن سے قرآن محمد ﷺ کے دل پر لائے۔"
+      }
     },
     {
       "id": "parents_kindness",
@@ -435,7 +550,12 @@
         "maa baap ke saath kaise pesh aayein",
         "how should we treat parents",
         "parents ke bare mein quran kya kehta hai"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran commands kindness to parents, including not saying even 'uff' to them and speaking respectfully.",
+        "hi": "कुरआन माँ-बाप के साथ अच्छा सुलूक करने, उन्हें उफ़ तक न कहने और इज़्ज़त से बात करने का हुक्म देता है।",
+        "ur": "قرآن والدین کے ساتھ احسان، انہیں اُف تک نہ کہنے اور عزت سے بات کرنے کا حکم دیتا ہے۔"
+      }
     },
     {
       "id": "salam_reply",
@@ -452,7 +572,12 @@
         "how should we return a greeting",
         "salam ke jawab ke bare mein quran kya kehta hai",
         "greeting ka jawab kya hona chahiye"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran instructs us to return a greeting with a better greeting, or at least an equal one.",
+        "hi": "कुरआन सलाम का जवाब उससे बेहतर या कम-से-कम उसी तरह देने की हिदायत देता है।",
+        "ur": "قرآن سلام کا جواب اس سے بہتر یا کم از کم اسی طرح دینے کی ہدایت دیتا ہے۔"
+      }
     },
     {
       "id": "patience_help",
@@ -469,7 +594,12 @@
         "quran madad kis se mangne ko kehta hai",
         "what does quran say about patience",
         "sabr aur namaz se madad"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran instructs us to seek help through patience and prayer. Allah is with those who are patient.",
+        "hi": "कुरआन सब्र और नमाज़ से मदद माँगने की हिदायत देता है। अल्लाह सब्र करने वालों के साथ है।",
+        "ur": "قرآن صبر اور نماز سے مدد مانگنے کی ہدایت دیتا ہے۔ اللہ صبر کرنے والوں کے ساتھ ہے۔"
+      }
     },
     {
       "id": "hardship_ease",
@@ -491,7 +621,12 @@
         "what does quran say about hardship and ease",
         "inna maal usri yusra ka matlab",
         "mushkil aur aasani wali ayat ka matlab"
-      ]
+      ],
+      "answers": {
+        "en": "The Quran teaches that ease accompanies hardship.",
+        "hi": "कुरआन का पैग़ाम है कि मुश्किल के साथ आसानी है।",
+        "ur": "قرآن کا پیغام ہے کہ مشکل کے ساتھ آسانی ہے۔"
+      }
     },
     {
       "id": "mercy_hope",
@@ -508,7 +643,12 @@
         "what does quran say about despair of mercy",
         "kya allah ki mercy se umeed rakhni chahiye",
         "allah ki rahmat ki umeed"
-      ]
+      ],
+      "answers": {
+        "en": "Do not despair of Allah's mercy. The Quran calls even those who have sinned to hope in His mercy.",
+        "hi": "अल्लाह की रहमत से मायूस न हों। कुरआन गुनाह करने वालों को भी उसकी रहमत की उम्मीद दिलाता है।",
+        "ur": "اللہ کی رحمت سے مایوس نہ ہوں۔ قرآن گناہ کرنے والوں کو بھی اس کی رحمت کی امید دلاتا ہے۔"
+      }
     }
   ]
 }

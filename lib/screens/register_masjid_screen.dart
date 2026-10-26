@@ -1,4 +1,10 @@
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/admin_contact.dart';
+import '../services/email_admin_verification.dart';
+import '../widgets/admin_country_picker.dart';
+import '../widgets/international_account_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -25,6 +31,7 @@ class RegisterMasjidScreen extends StatefulWidget {
 
 class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
   final _formKey = GlobalKey<FormState>();
+  AdminCountry _country = AdminCountry.india;
   final _masjidName = TextEditingController();
   final _registrationNo = TextEditingController();
   final _landmark = TextEditingController();
@@ -197,16 +204,27 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     if (existing == null) _previousAdminLeft = false;
 
     setState(() => _isSendingOtp = true);
+    if (!_country.isIndia) {
+      try {
+        final verified = await openInternationalAccount(context,
+          auth: FirebaseAuth.instance, email: _email.text);
+        if (verified && mounted) await _saveMasjidAfterVerification();
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(EmailAdminVerification.friendly(e))));
+      } finally { if (mounted) setState(() => _isSendingOtp = false); }
+      return;
+    }
 
     await AuthService.sendOtp(
-      phoneNumber: '+91${_mobile.text}',
+      phoneNumber: _country.number(_mobile.text),
       onCodeSent: (verificationId, resendToken) {
         if (!mounted) return;
         setState(() => _isSendingOtp = false);
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => OtpScreen(
-              phoneNumber: _mobile.text,
+              phoneNumber: _country.number(_mobile.text),
               verificationId: verificationId,
               resendToken: resendToken,
               onVerified: _saveMasjidAfterVerification,
@@ -284,7 +302,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
         throw StateError('This masjid already exists. Go back and select the administration transfer option.');
       }
       await OwnershipTransferRepository.request(existing,
-        name: _adminName.text, mobile: _mobile.text, email: _email.text);
+        name: _adminName.text, mobile: _mobile.text.trim(), email: _email.text, countryIso: _country.iso);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
         'Administration transfer requested. The platform admin will verify it. Existing masjid data and followers are preserved.')));
@@ -308,7 +326,10 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       verificationStatus: 'Pending Verification',
       registrationNo: _registrationNo.text,
       adminName: _adminName.text,
-      adminMobile: _mobile.text,
+      adminMobile: _mobile.text.trim(),
+      adminCountryIso: _country.iso, adminDialCode: _country.dialCode,
+      adminVerificationMethod: _country.isIndia ? 'phone' : 'email_password',
+      adminMobileVerified: _country.isIndia,
       adminEmail: _email.text,
       previousAdminLeftClaim: _previousAdminLeft ? true : null,
       capacity: _capacity.text.trim().isEmpty ? null : int.tryParse(_capacity.text.trim()),
@@ -329,12 +350,15 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       setState(() => _isSavingPhotos = false);
     }
 
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('admin_mobile', newMasjid.adminMobile);
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Registered. Status: Pending Verification.')),
     );
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => AdminDashboardScreen(adminMobile: _mobile.text)),
+      MaterialPageRoute(builder: (_) => AdminDashboardScreen(adminMobile: newMasjid.adminMobile)),
       (route) => false,
     );
   }
@@ -475,8 +499,20 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             const Text('Admin Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 12),
             _field(_adminName, 'Admin Name (Imam/Trustee)', Icons.person),
-            _field(_mobile, 'Mobile Number', Icons.phone, keyboardType: TextInputType.phone),
-            _field(_email, 'Email', Icons.email, keyboardType: TextInputType.emailAddress),
+            AdminCountryPicker(value: _country, enabled: !_isSendingOtp,
+              onChanged: (country) => setState(() { _country = country; _mobile.clear(); })),
+            TextFormField(controller: _mobile, enabled: !_isSendingOtp,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(labelText: 'Mobile number', prefixText: '${_country.dialCode} '),
+              validator: _country.validate),
+            const SizedBox(height: 12),
+            TextFormField(controller: _email, enabled: !_isSendingOtp,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(labelText: _country.isIndia ? 'Email (optional)' : 'Email for admin login'),
+              validator: (v) => (!_country.isIndia || (v ?? '').trim().isNotEmpty) && !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
+                  ? 'Enter a valid email address' : null),
+            if (!_country.isIndia) const Padding(padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('No OTP required. Your registration will be sent to Platform Admin for approval.')),
             const SizedBox(height: 8),
             Card(
               color: AppColors.cream,
@@ -486,12 +522,11 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                   children: [
                     Icon(Icons.info_outline, color: AppColors.emerald),
                     const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        "We'll send an OTP to the mobile number above to confirm it's yours "
-                        'before your masjid is registered.',
-                        style: TextStyle(fontSize: 13),
-                      ),
+                    Expanded(
+                      child: Text(_country.isIndia
+                        ? 'We will send an SMS code to verify your mobile number before registration.'
+                        : 'Create an email/password login and submit your registration for Platform Admin approval.',
+                        style: const TextStyle(fontSize: 13)),
                     ),
                   ],
                 ),
@@ -505,7 +540,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                 onPressed: (_isSendingOtp || _isCheckingDuplicate || _isSavingPhotos) ? null : _submit,
                 child: (_isSendingOtp || _isCheckingDuplicate)
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Verify Mobile & Register', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    : Text(_country.isIndia ? 'Verify Mobile & Register' : 'Submit for Approval', style: const TextStyle(color: Colors.white, fontSize: 16)),
               ),
             ),
           ],

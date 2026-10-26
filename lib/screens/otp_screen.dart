@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/admin_contact.dart';
 import '../theme/app_theme.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -52,13 +53,23 @@ class _OtpScreenState extends State<OtpScreen> {
     // most of the time now, this screen just closes itself before they've
     // even finished manually typing the code, instead of them fighting a
     // false "incorrect code" error for a code that verified fine already.
-    _authSub = AuthService.authStateChanges.listen((user) {
+    _authSub = AuthService.authStateChanges.listen((user) async {
       if (_autoHandled || _isVerifying || !mounted) return;
-      if (user != null && user.phoneNumber == '+91${widget.phoneNumber.trim()}') {
+      if (user != null && await _hasFreshPhoneSession() && mounted && !_autoHandled && !_isVerifying) {
         _autoHandled = true;
         _completeVerification();
       }
     });
+  }
+
+  Future<bool> _hasFreshPhoneSession() async {
+    final user = AuthService.currentUser;
+    if (user?.phoneNumber != AdminContact.canonical(widget.phoneNumber.trim())) return false;
+    try {
+      final token = await user!.getIdTokenResult();
+      final time = token.authTime;
+      return time != null && DateTime.now().difference(time).inSeconds < 540;
+    } catch (_) { return false; }
   }
 
   void _startCountdown() {
@@ -102,7 +113,7 @@ class _OtpScreenState extends State<OtpScreen> {
   Future<void> _resendCode() async {
     setState(() => _isResending = true);
     await AuthService.sendOtp(
-      phoneNumber: '+91${widget.phoneNumber}',
+      phoneNumber: AdminContact.canonical(widget.phoneNumber),
       forceResendingToken: _resendToken,
       onCodeSent: (verificationId, resendToken) {
         if (!mounted) return;
@@ -151,7 +162,7 @@ class _OtpScreenState extends State<OtpScreen> {
     // person even presses this button, most of the time - this check is the
     // fallback for whatever gap remains (e.g. the auth state event and this
     // button press landing in the same frame).
-    if (AuthService.currentUser?.phoneNumber == '+91${widget.phoneNumber.trim()}') {
+    if (await _hasFreshPhoneSession()) {
       _autoHandled = true;
       await _completeVerification();
       return;
@@ -211,7 +222,7 @@ class _OtpScreenState extends State<OtpScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Text('Enter the OTP sent to +91 ${widget.phoneNumber}',
+              Text('Enter the OTP sent to ${AdminContact.canonical(widget.phoneNumber)}',
                   style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 20),
               TextField(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/masjid.dart';
+import '../widgets/timing_review_status.dart';
 import '../services/follower_service.dart';
 import '../services/masjid_repository.dart';
 
@@ -203,9 +204,15 @@ class _SuperAdminMasjidDetailScreenState extends State<SuperAdminMasjidDetailScr
           _row('Admin Name', m.adminName),
           _row('Mobile', m.adminMobile),
           _row('Email', m.adminEmail),
+          if (m.adminVerificationMethod == 'email_password')
+            const Text('International registration without OTP. Email and phone are contact details. Verify the applicant before approving.'),
 
           const SizedBox(height: 20),
           _sectionTitle('Prayer Times'),
+          StreamBuilder<Masjid?>(
+            stream: MasjidRepository.streamById(m.id),
+            builder: (context, snapshot) => TimingReviewStatus(masjid: snapshot.data ?? m),
+          ),
           _row('Fajr', m.prayerTimes.fajr),
           _row('Dhuhr', m.prayerTimes.dhuhr),
           _row('Asr', m.prayerTimes.asr),

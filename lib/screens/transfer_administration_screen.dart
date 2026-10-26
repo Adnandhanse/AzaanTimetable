@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/masjid.dart';
-import '../services/auth_service.dart';
+import '../services/admin_contact.dart';
 import '../services/direct_ownership_transfer.dart';
+import '../services/email_admin_verification.dart';
 import '../services/masjid_repository.dart';
-import 'otp_screen.dart';
+import '../services/timing_reminder_service.dart';
+import '../widgets/admin_country_picker.dart';
+import '../widgets/international_account_dialog.dart';
 import 'home_screen.dart';
 
 class TransferAdministrationScreen extends StatefulWidget {
@@ -17,261 +19,142 @@ class TransferAdministrationScreen extends StatefulWidget {
   @override
   State<TransferAdministrationScreen> createState() => _TransferAdministrationScreenState();
 }
-
 class _TransferAdministrationScreenState extends State<TransferAdministrationScreen> {
-  final _form = GlobalKey<FormState>();
-  final _name = TextEditingController();
-  final _mobile = TextEditingController();
-  final _email = TextEditingController();
-  final _otp = TextEditingController();
-  final _recipient = DirectOwnershipTransfer();
-  final _operationId = 'transfer-${DateTime.now().microsecondsSinceEpoch}';
-  bool _ready = false, _busy = false, _verified = false, _complete = false;
-  String? _verificationId, _recipientMobile;
-  int? _resendToken;
-  int _otpAttempt = 0;
-  String? _initializationError;
-
+  final form = GlobalKey<FormState>();
+  final name = TextEditingController(), mobile = TextEditingController(), email = TextEditingController(), code = TextEditingController();
+  final recipient = DirectOwnershipTransfer();
+  final operationId = 'transfer-${DateTime.now().microsecondsSinceEpoch}';
+  AdminCountry country = AdminCountry.india;
+  bool busy = false, ready = false, verified = false;
+  String? error, verificationId, expectedUid, verifiedKey;
+  int attempt = 0;
+  String get identityKey => '${country.iso}:${country.number(mobile.text)}:${email.text.trim().toLowerCase()}';
   @override
-  void initState() { super.initState(); _initialize(); _loadOwnership(); }
-
-  Future<void> _initialize() async {
+  void initState() { super.initState(); initialize(); }
+  Future<void> initialize() async {
     try {
-      await _recipient.initialize();
-      if (mounted) setState(() => _ready = true);
-    } catch (_) {
-      if (mounted) setState(() => _initializationError = 'Unable to prepare transfer. Reopen this page to try again.');
-    }
+      await recipient.initialize();
+      expectedUid = await MasjidRepository.getAdminUid(widget.masjid.id);
+      if (mounted) setState(() => ready = true);
+    } catch (_) { if (mounted) setState(() => error = 'Unable to prepare transfer. Reopen this page.'); }
   }
-
-  String? _transferError;
-
-  String _friendlyError(Object error) {
-    if (error is FirebaseFunctionsException) {
-      switch (error.code) {
-        case 'not-found':
-          return 'The transfer service could not be found. Please contact the platform admin to complete the setup.';
-        case 'unauthenticated':
-          final details = error.details;
-          final reason = details is Map ? details['reason'] : null;
-          if (reason == 'caller-session-invalid') {
-            return 'Your current-admin session needs verification. Sign in again as the current admin.';
-          }
-          if (reason == 'recipient-session-invalid') {
-            return 'Verify the new admin phone again, then retry the transfer.';
-          }
-          return 'The transfer session could not be checked. Try Verify phone again. If it continues, the platform admin should check the server logs.';
-        case 'permission-denied':
-          return 'You do not have permission to transfer this masjid. Please contact the platform admin.';
-        case 'unavailable':
-        case 'deadline-exceeded':
-          return 'We could not confirm the transfer. Check your connection and retry on this page.';
-        case 'failed-precondition':
-          return error.message ?? 'The admin details have changed or verification has expired. Please reopen this page and verify again.';
-        default:
-          return 'The transfer could not be completed. Please try again or contact the platform admin.';
-      }
-    }
-    if (error is FirebaseAuthException) {
-      switch (error.code) {
-        case 'invalid-verification-code': return 'The OTP is incorrect. Please check and try again.';
-        case 'session-expired': return 'The OTP has expired. Please request a new code.';
-        case 'too-many-requests': return 'Too many OTP attempts. Please wait before trying again.';
-        case 'network-request-failed': return 'Check your internet connection and try again.';
-        default: return 'Phone verification could not be completed. Please try again.';
-      }
-    }
-    if (error is FirebaseException && error.code == 'permission-denied') {
-      return 'Unable to read the masjid details. Please contact the platform admin.';
-    }
-    if (error is StateError) return '${error.message}';
-    return 'Something went wrong. Please try again.';
+  void reset() { attempt++; verified = false; verifiedKey = null; verificationId = null; code.clear(); error = null; }
+  String friendly(Object e) {
+    if (e is FirebaseFunctionsException && e.code == 'failed-precondition') return e.message ?? 'Verification expired. Verify the new admin again.';
+    if (e is FirebaseFunctionsException && e.code == 'permission-denied') return 'Only the current masjid admin can transfer administration.';
+    if (e is FirebaseAuthException) return 'The code is incorrect or expired. Please request a new code.';
+    if (e is StateError) return '${e.message}';
+    return EmailAdminVerification.friendly(e);
   }
-
-  void _error(Object error) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(_friendlyError(error)),
-      behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 6),
-    ));
-  }
-
-  Future<void> _sendOtp() async {
-    if (!_form.currentState!.validate()) return;
-    final currentMobile = widget.masjid.adminMobile.trim();
-    if (AuthService.currentUser?.phoneNumber != '+91$currentMobile') {
-      setState(() => _busy = true);
-      await AuthService.sendOtp(phoneNumber: '+91$currentMobile',
-        onCodeSent: (id, token) {
-          if (!mounted) return;
-          setState(() => _busy = false);
-          Navigator.of(context).push(MaterialPageRoute(builder: (otpContext) => OtpScreen(
-            phoneNumber: currentMobile, verificationId: id, resendToken: token,
-            onVerified: () async {
-              if (!mounted) return;
-              Navigator.of(otpContext).pop();
-              await _sendRecipientOtp();
-            })));
-        }, onError: (error) { if (mounted) setState(() => _busy = false); _error(error); });
-      return;
+  Future<void> requestCode() async {
+    if (!form.currentState!.validate()) return;
+    if (!AdminContact.owns(widget.masjid, FirebaseAuth.instance.currentUser)) {
+      setState(() => error = 'Sign in again as the current admin, then reopen this transfer.'); return;
     }
-    await _sendRecipientOtp();
-  }
-
-  Future<void> _sendRecipientOtp() async {
-    final mobile = _mobile.text.trim();
-    final token = _recipientMobile == mobile ? _resendToken : null;
-    final attempt = ++_otpAttempt;
-    setState(() {
-      _busy = true; _verified = false; _recipientMobile = mobile;
-      _verificationId = null; _transferError = null;
-      _otp.clear();
-    });
+    setState(() { reset(); busy = true; });
+    final generation = attempt, key = identityKey, number = country.number(mobile.text);
     try {
-      await _recipient.auth.signOut();
-      await _recipient.auth.verifyPhoneNumber(phoneNumber: '+91$mobile', forceResendingToken: token,
-        verificationCompleted: (credential) async {
-          if (!mounted || _complete || attempt != _otpAttempt) return;
-          try {
-            await _recipient.auth.signInWithCredential(credential);
-            if (_recipient.auth.currentUser?.phoneNumber != '+91$mobile') {
-              throw StateError('The verified number does not match the new admin phone.');
-            }
-            if (mounted && attempt == _otpAttempt) setState(() { _verified = true; _busy = false; _transferError = null; });
-          } catch (error) { if (mounted) setState(() => _busy = false); _error(error); }
-        },
-        verificationFailed: (error) { if (!mounted || attempt != _otpAttempt) return; setState(() => _busy = false); _error(error); },
-        codeSent: (id, token) {
-          if (mounted && attempt == _otpAttempt) setState(() { _verificationId = id; _resendToken = token; _busy = false; });
-        }, codeAutoRetrievalTimeout: (_) {});
-    } catch (error) { if (mounted) setState(() => _busy = false); _error(error); }
-  }
-
-  Future<void> _verifyRecipient() async {
-    if (_verificationId == null || !RegExp(r'^\d{6}$').hasMatch(_otp.text.trim())) {
-      _error(StateError('Enter the 6-digit OTP received on the new admin phone.'));
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      await _recipient.auth.signInWithCredential(PhoneAuthProvider.credential(
-        verificationId: _verificationId!, smsCode: _otp.text.trim()));
-      if (_recipient.auth.currentUser?.phoneNumber != '+91$_recipientMobile') {
-        throw StateError('The verified number does not match B’s phone.');
+      await recipient.auth.signOut();
+      if (!country.isIndia) {
+        if (!mounted) return;
+        final ok = await openInternationalAccount(context, auth: recipient.auth, email: email.text);
+        if (mounted && generation == attempt && key == identityKey) setState(() { verified = ok; verifiedKey = ok ? key : null; });
+      } else {
+        await recipient.auth.verifyPhoneNumber(phoneNumber: number,
+          verificationCompleted: (credential) async {
+            if (!mounted || generation != attempt) return;
+            try {
+              await recipient.auth.signInWithCredential(credential);
+              if (mounted && generation == attempt && key == identityKey && recipient.auth.currentUser?.phoneNumber == number) {
+                setState(() { verified = true; verifiedKey = key; busy = false; });
+              }
+            } catch (e) { if (mounted) setState(() { busy = false; error = friendly(e); }); }
+          },
+          verificationFailed: (e) { if (mounted && generation == attempt) setState(() { busy = false; error = friendly(e); }); },
+          codeSent: (id, _) { if (mounted && generation == attempt) setState(() { verificationId = id; busy = false; }); },
+          codeAutoRetrievalTimeout: (_) {});
       }
-      if (mounted) setState(() { _verified = true; _transferError = null; });
-    } catch (error) { _error(error); }
-    finally { if (mounted) setState(() => _busy = false); }
+    } catch (e) { if (mounted) setState(() { error = friendly(e); busy = false; }); }
+    finally { if (mounted && !country.isIndia) setState(() => busy = false); }
   }
-
-  Future<void> _transfer() async {
-    if (!_form.currentState!.validate() || !_verified) return;
-    final confirmed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Confirm transfer'),
-      content: Text('Transfer ${widget.masjid.name} to ${_name.text.trim()} ($_recipientMobile)? Your admin access to this masjid will end. Followers, timings and all masjid data will remain unchanged.'),
+  Future<void> verifySms() async {
+    if (verificationId == null || !RegExp(r'^\d{6}$').hasMatch(code.text.trim())) { setState(() => error = 'Enter the 6-digit SMS code.'); return; }
+    setState(() { busy = true; error = null; });
+    final key = identityKey;
+    try {
+      await recipient.auth.signInWithCredential(PhoneAuthProvider.credential(verificationId: verificationId!, smsCode: code.text.trim()));
+      if (recipient.auth.currentUser?.phoneNumber != country.number(mobile.text)) throw StateError('The verified number does not match.');
+      if (mounted && key == identityKey) setState(() { verified = true; verifiedKey = key; });
+    } catch (e) { if (mounted) setState(() => error = friendly(e)); }
+    finally { if (mounted) setState(() => busy = false); }
+  }
+  Future<void> transfer() async {
+    if (!form.currentState!.validate() || !verified || verifiedKey != identityKey) return;
+    final pending = !country.isIndia || widget.masjid.adminCountryIso != 'IN';
+    final yes = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+      title: Text(pending ? 'Request transfer approval' : 'Confirm transfer'),
+      content: Text(pending
+        ? 'Send a transfer request for ${widget.masjid.name} to Platform Admin? Current ownership stays unchanged until approval.'
+        : 'Transfer ${widget.masjid.name} to ${name.text.trim()}? Your admin access will end. All timings, followers and masjid data will be preserved.'),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirm transfer'))],
-    ));
-    if (confirmed != true || !mounted) return;
-    setState(() { _busy = true; _transferError = null; });
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Transfer'))]));
+    if (yes != true || !mounted) return;
+    setState(() { busy = true; error = null; });
     try {
-      // Capture ownership when opening this screen, not after a competing transfer.
-      await _recipient.submit(masjidId: widget.masjid.id, name: _name.text,
-        mobile: _recipientMobile!, email: _email.text, operationId: _operationId,
-        expectedAdminMobile: widget.masjid.adminMobile, expectedAdminUid: _expectedAdminUid);
-      _complete = true;
-      try { final prefs = await SharedPreferences.getInstance(); await prefs.remove('admin_mobile'); } catch (_) {}
+      await recipient.submit(masjidId: widget.masjid.id, name: name.text,
+        mobile: mobile.text.trim(), email: email.text, countryIso: country.iso,
+        operationId: operationId, expectedAdminMobile: widget.masjid.adminMobile, expectedAdminUid: expectedUid, requireApproval: pending);
+      if (pending) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
+          'Transfer request sent. Current admin keeps access until Platform Admin approves.')));
+        Navigator.of(context).pop(); return;
+      }
+      await TimingReminderService.disable();
+      final prefs = await SharedPreferences.getInstance(); await prefs.remove('admin_mobile');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(
-        'Administration transferred. All masjid data and followers are preserved.')));
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
-    } catch (error) {
-      if (mounted) setState(() {
-        _transferError = _friendlyError(error);
-        if (error is FirebaseFunctionsException && error.details is Map &&
-            (error.details as Map)['reason'] == 'recipient-session-invalid') {
-          _verified = false;
-          _verificationId = null;
-          _otp.clear();
-        }
-      });
-    } finally { if (mounted) setState(() => _busy = false); }
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Administration transferred. All masjid data is preserved.')));
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
+    } catch (e) { if (mounted) setState(() => error = friendly(e)); }
+    finally { if (mounted) setState(() => busy = false); }
   }
-
-  String? _expectedAdminUid;
-  bool _ownershipLoaded = false;
-
-  Future<void> _loadOwnership() async {
-    // A raw ownership snapshot is loaded by a repository helper.
-    try {
-      final uid = await MasjidRepository.getAdminUid(widget.masjid.id);
-      if (mounted) setState(() { _expectedAdminUid = uid; _ownershipLoaded = true; });
-    } catch (error) { _error(error); }
-  }
-
   @override
-  void dispose() {
-    unawaited(_recipient.dispose());
-    _name.dispose(); _mobile.dispose(); _email.dispose(); _otp.dispose();
-    super.dispose();
-  }
-
+  void dispose() { attempt++; unawaited(recipient.dispose()); name.dispose(); mobile.dispose(); email.dispose(); code.dispose(); super.dispose(); }
   @override
-  Widget build(BuildContext context) => PopScope(
-    canPop: !_busy,
-    child: Scaffold(appBar: AppBar(title: const Text('Transfer administration')),
-      body: Form(key: _form, child: ListView(padding: const EdgeInsets.all(20), children: [
-        Text(widget.masjid.name, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 12),
-        const Text('Complete this on the current admin’s phone with the new admin present. With their consent, enter the OTP received on their phone. No new masjid registration is needed.'),
-        const SizedBox(height: 20),
-        if (_initializationError != null) Text(_initializationError!),
-        if (_transferError != null) ...[
-          Container(
-            padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onErrorContainer),
-              const SizedBox(width: 10),
-              Expanded(child: Text(_transferError!, style: TextStyle(
-                color: Theme.of(context).colorScheme.onErrorContainer))),
-            ]),
-          ),
-        ],
-        TextFormField(controller: _name, enabled: !_busy,
-          decoration: const InputDecoration(labelText: 'New admin name'),
-          validator: (v) => (v ?? '').trim().isEmpty ? 'Enter a name' : null),
-        TextFormField(controller: _mobile, enabled: !_busy && _recipientMobile == null,
-          keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'New admin mobile (+91)'),
-          validator: (v) => !RegExp(r'^[6-9]\d{9}$').hasMatch((v ?? '').trim())
-              ? 'Enter a valid 10-digit mobile' : v!.trim() == widget.masjid.adminMobile.trim()
-              ? 'Enter a different mobile number' : null),
-        TextFormField(controller: _email, enabled: !_busy,
-          keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'New admin email (optional)')),
-        const SizedBox(height: 16),
-        if (!_verified) ElevatedButton(onPressed: !_ready || _busy ? null : _sendOtp,
-          child: Text(_verificationId == null ? 'Send OTP to new admin' : 'Resend OTP')),
-        if (_verificationId != null && !_verified) ...[
-          TextFormField(controller: _otp, enabled: !_busy, keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'OTP received on new admin’s phone')),
-          ElevatedButton(onPressed: _busy ? null : _verifyRecipient, child: const Text('Verify new admin')),
-        ],
-        if (_verified) ...[
-          Text('New admin phone verified: $_recipientMobile'),
-          TextButton.icon(
-            onPressed: _busy ? null : _sendOtp,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Verify phone again'),
-          ),
-          ElevatedButton(onPressed: _busy || !_ownershipLoaded ? null : _transfer, child: const Text('Transfer administration')),
-        ],
-        if (_busy) const Center(child: CircularProgressIndicator()),
-      ])),
-    ),
-  );
+  Widget build(BuildContext context) => PopScope(canPop: !busy, child: Scaffold(
+    appBar: AppBar(title: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request transfer approval' : 'Transfer administration')),
+    body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
+      Text(widget.masjid.name, style: Theme.of(context).textTheme.titleLarge),
+      const SizedBox(height: 12),
+      const Text('Complete this on the current admin’s phone with the new admin present. Indian admins verify by SMS. International admins use an email/password account and Platform Admin approval. No new masjid registration is needed.'),
+      const SizedBox(height: 20),
+      AdminCountryPicker(value: country, enabled: !busy, onChanged: (v) => setState(() { country = v; mobile.clear(); reset(); })),
+      TextFormField(controller: name, enabled: !busy, decoration: const InputDecoration(labelText: 'New admin name'),
+        validator: (v) => (v ?? '').trim().isEmpty ? 'Enter a name' : null),
+      TextFormField(controller: mobile, enabled: !busy, keyboardType: TextInputType.phone,
+        onChanged: (_) => setState(reset), validator: country.validate,
+        decoration: InputDecoration(labelText: 'New admin mobile', prefixText: '${country.dialCode} ')),
+      TextFormField(controller: email, enabled: !busy, keyboardType: TextInputType.emailAddress,
+        onChanged: (_) => setState(reset),
+        decoration: InputDecoration(labelText: country.isIndia ? 'New admin email (optional)' : 'New admin email'),
+        validator: (v) => (!country.isIndia || (v ?? '').trim().isNotEmpty) && !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim()) ? 'Enter a valid email address' : null),
+      if (!country.isIndia) const Padding(padding: EdgeInsets.symmetric(vertical: 12),
+        child: Text('No OTP required. Email and mobile are contact details; Platform Admin must approve the transfer.')),
+      const SizedBox(height: 16),
+      if (error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
+      if (!verified) FilledButton(onPressed: !ready || busy ? null : requestCode,
+        child: Text(country.isIndia ? 'Send SMS code' : 'Continue with new admin account')),
+      if (verificationId != null && !verified) ...[
+        TextFormField(controller: code, enabled: !busy, keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: '6-digit SMS code'), maxLength: 6),
+        FilledButton(onPressed: busy ? null : verifySms, child: const Text('Verify phone')),
+      ],
+      if (verified) ...[
+        Text(country.isIndia ? 'New admin phone verified' : 'New admin account ready — approval required'),
+        TextButton(onPressed: busy ? null : requestCode, child: const Text('Verify again')),
+        FilledButton(onPressed: busy ? null : transfer, child: Text(!country.isIndia || widget.masjid.adminCountryIso != 'IN' ? 'Request transfer approval' : 'Transfer administration')),
+      ],
+      if (busy) const Center(child: CircularProgressIndicator()),
+    ])),
+  ));
 }

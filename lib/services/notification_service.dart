@@ -24,6 +24,40 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
+  static Future<void> createTimingReminderChannel() async {
+    await _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(const AndroidNotificationChannel(
+          'timing_reminders', 'Prayer timing reminders',
+          description: 'Reminders for masjid admins to check prayer timings',
+          importance: Importance.defaultImportance,
+        ));
+  }
+
+  static Future<String?> initialTimingReminder() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    final payload = details?.notificationResponse?.payload;
+    return details?.didNotificationLaunchApp == true &&
+        payload != null && payload.startsWith('timing-reminder:')
+        ? payload.substring('timing-reminder:'.length) : null;
+  }
+
+  static Future<void> dismissTimingReminder(String masjidId) async {
+    if (!_initialized) return;
+    await _plugin.cancel(920001);
+    await _plugin.cancel(0, tag: 'timings-$masjidId');
+  }
+
+  static Future<void> showTimingReminder(String masjidId) async {
+    if (!_initialized) return;
+    await _plugin.show(920001, 'Namaz timings check karein',
+        'Apni masjid ki timings check karein. Sahi hon to app mein confirm karein.',
+        const NotificationDetails(android: AndroidNotificationDetails(
+          'timing_reminders', 'Prayer timing reminders',
+          importance: Importance.defaultImportance, priority: Priority.defaultPriority,
+        )), payload: 'timing-reminder:$masjidId');
+  }
+
+
   /// NEW CHANNEL ID ON PURPOSE.
   ///
   /// A notification channel's sound is fixed the moment Android creates it and

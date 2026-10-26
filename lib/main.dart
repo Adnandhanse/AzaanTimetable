@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/setup_wizard_screen.dart';
@@ -5,6 +6,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'screens/azan_ringing_screen.dart';
 import 'services/notification_service.dart';
+import 'services/timing_reminder_service.dart';
+import 'services/auth_service.dart';
+import 'services/admin_contact.dart';
+import 'services/masjid_repository.dart';
+import 'screens/update_prayer_times_screen.dart';
+import 'screens/admin_login_screen.dart';
 import 'services/app_language.dart';
 import 'services/follower_service.dart';
 import 'theme/app_theme.dart';
@@ -29,6 +36,10 @@ void main() async {
   await NotificationService.init(
     onTapPayload: (payload) {
       if (payload == null) return;
+      if (payload.startsWith('timing-reminder:')) {
+        TimingReminderService.requestOpen(payload.substring('timing-reminder:'.length));
+        return;
+      }
       final (prayer, masjidName, audioUrl) = NotificationService.parsePayload(payload);
       navigatorKey.currentState?.push(
         MaterialPageRoute(
@@ -96,6 +107,41 @@ void main() async {
     runApp(initError == null
       ? MasjidAlarmApp(needsSetup: needsSetup)
       : _FirebaseErrorApp(error: initError));
+  if (initError == null) {
+    unawaited(_initializeTimingReminders());
+  }
+}
+
+Future<void> _initializeTimingReminders() async {
+  try {
+    await NotificationService.createTimingReminderChannel();
+    await TimingReminderService.initialize((id) => unawaited(_openTimingReminder(id)));
+    final initial = await NotificationService.initialTimingReminder();
+    if (initial != null) TimingReminderService.requestOpen(initial);
+  } catch (_) {
+    debugPrint('Timing reminder initialization unavailable; prayer alarms unaffected.');
+  }
+}
+
+Future<void> _openTimingReminder(String id) async {
+  if (id.isEmpty || id.contains('/')) return;
+  try {
+    await AuthService.authStateChanges.first.timeout(const Duration(seconds: 10));
+    final masjid = await MasjidRepository.getById(id).timeout(const Duration(seconds: 10));
+    if (masjid == null) return;
+    final user = AuthService.currentUser;
+    final prefs = await SharedPreferences.getInstance();
+    final authorized = prefs.getString('admin_mobile') == masjid.adminMobile &&
+        AdminContact.owns(masjid, user);
+    // The splash/setup route may still be installing its first frame.
+    for (var i = 0; i < 10 && navigatorKey.currentState == null; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    navigatorKey.currentState?.push(MaterialPageRoute(builder: (_) => authorized
+        ? UpdatePrayerTimesScreen(masjid: masjid) : const AdminLoginScreen()));
+  } catch (_) {
+    debugPrint('Timing reminder page could not open.');
+  }
 }
 
 /// Shown instead of crashing silently if Firebase fails to initialize,

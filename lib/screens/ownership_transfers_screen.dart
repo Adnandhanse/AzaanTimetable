@@ -51,6 +51,8 @@ class _OwnershipTransfersScreenState extends State<OwnershipTransfersScreen> {
               Text('Current admin: ${data['previousAdminMobile']}'),
               Text('New admin: ${data['newAdminName']} • ${data['newAdminMobile']}'),
               Text('Email: ${data['newAdminEmail']}'),
+              if (data['newAdminVerificationMethod'] == 'email_password')
+                const Text('International request: email and phone are not OTP-verified. Check the masjid/admin before approval.'),
               const Text('Verify with the masjid before approving.'),
               Wrap(spacing: 12, children: [
                 TextButton(onPressed: _busy ? null : () => _review(doc.id, data, false), child: const Text('Reject')),

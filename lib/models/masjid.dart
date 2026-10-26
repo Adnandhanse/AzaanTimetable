@@ -104,6 +104,11 @@ class Masjid {
   String adminName;
   String adminMobile;
   String adminEmail;
+  String? adminUid;
+  String adminCountryIso;
+  String adminDialCode;
+  String adminVerificationMethod;
+  bool adminMobileVerified;
 
   // Verification document (not currently used - registration number based instead)
   String? verificationDocName;
@@ -141,6 +146,13 @@ class Masjid {
   /// Null for every masjid registered before this existed, and for any that has
   /// never had its times edited — which is itself the useful signal.
   DateTime? timesUpdatedAt;
+  DateTime? timesConfirmedAt;
+  DateTime? get lastTimesCheckedAt {
+    final a = timesUpdatedAt, b = timesConfirmedAt;
+    if (a == null) return b;
+    if (b == null) return a;
+    return a.isAfter(b) ? a : b;
+  }
 
   /// How many devices currently follow this masjid.
   ///
@@ -165,12 +177,18 @@ class Masjid {
     this.adminName = '',
     this.adminMobile = '',
     this.adminEmail = '',
+    this.adminUid,
+    this.adminCountryIso = 'IN',
+    this.adminDialCode = '+91',
+    this.adminVerificationMethod = 'phone',
+    this.adminMobileVerified = true,
     this.verificationDocName,
     this.customAzanAudioName,
     this.customAzanAudioUrl,
     this.previousAdminLeftClaim,
     this.followerCount = 0,
     this.timesUpdatedAt,
+    this.timesConfirmedAt,
     this.capacity,
     this.about,
     this.photoUrls = const <String>[],
@@ -188,6 +206,10 @@ class Masjid {
         'adminName': adminName,
         'adminMobile': adminMobile,
         'adminEmail': adminEmail,
+        'adminCountryIso': adminCountryIso,
+        'adminDialCode': adminDialCode,
+        'adminVerificationMethod': adminVerificationMethod,
+        'adminMobileVerified': adminMobileVerified,
         'verificationDocName': verificationDocName,
         'customAzanAudioName': customAzanAudioName,
         'customAzanAudioUrl': customAzanAudioUrl,
@@ -206,6 +228,8 @@ class Masjid {
         timesUpdatedAt: map['timesUpdatedAt'] is Timestamp
             ? (map['timesUpdatedAt'] as Timestamp).toDate()
             : null,
+        timesConfirmedAt: map['timesConfirmedAt'] is Timestamp
+            ? (map['timesConfirmedAt'] as Timestamp).toDate() : null,
         name: map['name'] ?? '',
         city: map['city'] ?? '',
         address: map['address'] ?? '',
@@ -217,6 +241,11 @@ class Masjid {
         adminName: map['adminName'] ?? '',
         adminMobile: map['adminMobile'] ?? '',
         adminEmail: map['adminEmail'] ?? '',
+        adminUid: map['adminUid'] as String?,
+        adminCountryIso: map['adminCountryIso'] as String? ?? 'IN',
+        adminDialCode: map['adminDialCode'] as String? ?? '+91',
+        adminVerificationMethod: map['adminVerificationMethod'] as String? ?? 'phone',
+        adminMobileVerified: map['adminMobileVerified'] as bool? ?? true,
         verificationDocName: map['verificationDocName'],
         customAzanAudioName: map['customAzanAudioName'],
         customAzanAudioUrl: map['customAzanAudioUrl'],

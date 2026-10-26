@@ -1,0 +1,11 @@
+// Merge INSIDE match /databases/{database}/documents. This is NOT a full rules file.
+// All access is through authenticated callable functions/Admin SDK.
+match /_timingReminderDevices/{device} { allow read, write: if false; }
+match /_timingReminderState/{masjid} { allow read, write: if false; }
+
+// IMPORTANT: a broad match /{document=**} with allow read/write would also
+// grant access here: explicit deny does NOT override another matching allow.
+// Restrict any such broad allow to your known public collections first.
+// In an existing masjid update-field allow-list, add timesConfirmedAt, and
+// require request.resource.data.timesConfirmedAt == request.time when changed.
+// Existing owner checks MUST remain. Do not grant public masjid writes.

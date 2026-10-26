@@ -1,0 +1,16 @@
+{
+  "flow": "International email/password login + Platform Admin approval; no OTP",
+  "tests": {
+    "internationalAndLegacyHelpers": 12,
+    "transfer": 10,
+    "reminders": 9,
+    "ai": 89,
+    "totalPassed": 120
+  },
+  "liveFirebaseAccountSignup": false,
+  "deployedRuleTest": false,
+  "androidBuild": false,
+  "dartSyntaxParse": true,
+  "emailProviderRequired": false,
+  "existingMasjidsMigrated": false
+}

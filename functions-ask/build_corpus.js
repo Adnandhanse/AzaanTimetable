@@ -39,6 +39,15 @@ for (const b of load('prophet_stories/stories.json').books) {
     en: p.english, roman: p.roman, ur: '', ar: '', grades: [], sources: p.sources,
     image: `assets/prophet_stories/scenes/${p.scene}.webp`, context: `${b.id} ${b.name} ${p.title}`}));
 }
+// Dua collection entries retain their provenance; this does not assign them
+// a Hadith authenticity grade or verify any external numbering in their notes.
+for(const chapter of load('duas/duas_en.json'))for(const entry of chapter.TEXT||[]) {
+  if(!(entry.TRANSLATED_TEXT||entry.ARABIC_TEXT||'').trim())continue;
+  docs.push({id:`dua:${chapter.ID}:${entry.ID}`,kind:'dua',number:Number(entry.ID),
+    chapterId:Number(chapter.ID),chapter:chapter.TITLE,title:'Hisn al-Muslim',
+    contentType:'collection-entry',en:entry.TRANSLATED_TEXT||'',ur:'',ar:entry.ARABIC_TEXT||'',grades:[],
+    context:chapter.TITLE});
+}
 if (docs.length < 40000 || new Set(docs.map(d => d.id)).size !== docs.length) throw Error('Corpus is incomplete or has duplicate IDs');
 async function build() {
   const hash=crypto.createHash('sha256');
@@ -56,7 +65,7 @@ async function build() {
   // A stale legacy array file should never be uploaded alongside the stream.
   fs.rmSync(path.join(__dirname,'corpus.json.gz'),{force:true});
   const manifest={format:'normalized-ndjson-v1',count:docs.length,sha256:hash.digest('hex'),
-    kinds:Object.fromEntries(['quran','hadith','story'].map(k=>[k,docs.filter(d=>d.kind===k).length]))};
+    kinds:Object.fromEntries(['quran','hadith','story','dua'].map(k=>[k,docs.filter(d=>d.kind===k).length]))};
   fs.writeFileSync(path.join(__dirname,'corpus_manifest.json'),JSON.stringify(manifest,null,2));
   const quranDocs=docs.filter(d=>d.kind==='quran');
   const reviewed=load('ai/reviewed_facts.json');

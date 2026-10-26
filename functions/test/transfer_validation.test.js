@@ -8,7 +8,7 @@ const recipient = {uid:'B', phone_number:'+919000000002', auth_time:1000, fireba
 const input = {expectedAdminMobile:'9000000001',expectedAdminUid:'A', name:'B',mobile:'9000000002',email:''};
 test('changes only admin fields, preserving every existing masjid data field', () => {
   const patch=transferPatch(current,caller,recipient,input,1100);
-  assert.deepEqual(Object.keys(patch).sort(),['adminEmail','adminMobile','adminName','adminUid']);
+  assert.deepEqual(Object.keys(patch).sort(),['adminCountryIso','adminDialCode','adminEmail','adminEmailVerified','adminMobile','adminMobileVerified','adminName','adminUid','adminVerificationMethod']);
   const result={...current,...patch};
   assert.equal(result.adminUid,'B');
   for(const key of ['followerCount','prayerTimes','photoUrls','customAzanAudioUrl','verificationStatus'])
@@ -28,4 +28,7 @@ test('wrong recipient phone, stale OTP, non-phone account and self-transfer are 
   for(const invalid of [{...recipient,phone_number:'+919000000003'}, {...recipient,auth_time:1},
     {...recipient,firebase:{sign_in_provider:'password'}}, {...recipient,uid:'A'}])
     assert.throws(()=>transferPatch(current,caller,invalid,input,1100));
+});
+test('international transfer cannot bypass Platform Admin approval',()=>{
+ assert.throws(()=>transferPatch(current,caller,recipient,{...input,countryIso:'AE',mobile:'+971501234567',email:'b@example.com'},1100),/Platform Admin approval/);
 });

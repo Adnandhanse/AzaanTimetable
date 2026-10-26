@@ -6,6 +6,7 @@ const {getFirestore, FieldValue} = require('firebase-admin/firestore');
 const {transferPatch} = require('./transfer_validation');
 const {verifyTransferToken} = require('./token_verification');
 const logger = require('firebase-functions/logger');
+const {contact}=require('./admin_identity');
 initializeApp();
 
 exports.transferMasjidAdministration = onCall({region: 'us-central1'}, async (request) => {
@@ -36,7 +37,7 @@ exports.transferMasjidAdministration = onCall({region: 'us-central1'}, async (re
     if (audit.exists) {
       const prior = audit.data();
       if (prior.fromUid === caller.uid && prior.toUid === recipient.uid &&
-          prior.toMobile === input.mobile) return {success: true};
+          prior.toMobile === contact(input.mobile,input.countryIso||'IN').mobile) return {success: true};
       throw new HttpsError('already-exists', 'This transfer reference was already used.');
     }
     if (!masjid.exists) throw new HttpsError('not-found', 'Masjid not found.');
@@ -51,7 +52,8 @@ exports.transferMasjidAdministration = onCall({region: 'us-central1'}, async (re
       ownershipTransferredAt: FieldValue.serverTimestamp(),
       ownershipTransferRequestId: 'direct-' + input.operationId});
     tx.create(auditRef, {fromUid: caller.uid, fromMobile: current.adminMobile,
-      toUid: recipient.uid, toMobile: input.mobile,
+      toUid: recipient.uid, toMobile: patch.adminMobile,
+      toEmail: patch.adminEmail, verificationMethod: patch.adminVerificationMethod,
       method: 'current_admin_with_recipient_otp', transferredAt: FieldValue.serverTimestamp()});
     return {success: true};
     });

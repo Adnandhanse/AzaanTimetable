@@ -1,0 +1,28 @@
+name: Evaluate Ask Islam Connect (Gemini)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install backend dependencies
+        run: npm --prefix functions-ask ci --ignore-scripts
+      - name: Build source data
+        run: npm --prefix functions-ask run build:corpus
+      - name: Evaluate public questions with live Gemini (up to 40 requests)
+        env:
+          AI_KEY: ${{ secrets.ASK_GEMINI_API_KEY }}
+        run: node functions-ask/evaluate-assistant.js --live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assistant-live-evaluation
+          path: functions-ask/assistant-live-evaluation.json
+          if-no-files-found: warn

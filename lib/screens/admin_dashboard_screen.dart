@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import '../services/timing_reminder_service.dart';
+import '../services/admin_contact.dart';
+import '../services/auth_service.dart';
+import '../widgets/timing_review_status.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import 'announcement_admin_screen.dart';
@@ -17,25 +21,34 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
-  static String _updatedLabel(DateTime? t) {
-    if (t == null) return 'Times never updated';
-    final d = DateTime.now().difference(t);
-    if (d.inMinutes < 60) return 'Updated just now';
-    if (d.inHours < 24) return 'Updated ${d.inHours}h ago';
-    if (d.inDays == 1) return 'Updated yesterday';
-    if (d.inDays < 30) return 'Updated ${d.inDays} days ago';
-    final months = d.inDays ~/ 30;
-    return 'Updated $months month${months == 1 ? '' : 's'} ago';
+  String _reminderStatus = 'Enable reminders to receive timing checks';
+  final Set<String> _confirming = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _enableReminders(requestPermission: false);
   }
 
-  /// Amber past a month, red past three. Prayer times drift with the seasons,
-  /// so "not touched since spring" is a real problem rather than a cosmetic one.
-  static Color _staleColour(DateTime? t) {
-    if (t == null) return const Color(0xFFB3261E);
-    final days = DateTime.now().difference(t).inDays;
-    if (days >= 90) return const Color(0xFFB3261E);
-    if (days >= 30) return AppColors.gold;
-    return AppColors.textMuted;
+  Future<void> _enableReminders({bool requestPermission = true}) async {
+    final result = await TimingReminderService.enable(widget.adminMobile, requestPermission: requestPermission);
+    if (mounted) setState(() => _reminderStatus = result);
+  }
+
+  Future<void> _confirm(Masjid masjid) async {
+    if (_confirming.contains(masjid.id)) return;
+    setState(() => _confirming.add(masjid.id));
+    try {
+      await MasjidRepository.confirmPrayerTimes(masjid.id)
+          .timeout(const Duration(seconds: 20));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Timings confirmed. Agla reminder 10 din baad hoga.')));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Confirmation save nahi hui. Connection check karke dobara try karein.')));
+    } finally {
+      if (mounted) setState(() => _confirming.remove(masjid.id));
+    }
   }
 
   @override
@@ -70,6 +83,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               );
               if (ok != true) return;
+              await TimingReminderService.disable();
               try {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.remove('admin_mobile');
@@ -99,6 +113,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             itemBuilder: (context, index) {
               final masjid = masjids[index];
               final verified = masjid.verificationStatus == 'Verified';
+              final canManage = AdminContact.owns(masjid, AuthService.currentUser);
               return Card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,24 +128,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('${masjid.city} • ${masjid.verificationStatus}'),
+                      if (!canManage) const Text('Awaiting Platform Admin approval. Management becomes available after approval.'),
                       const SizedBox(height: 2),
                       // How long since the times were touched. The number an
                       // admin needs to see is not "when did I last log in" but
                       // "are my times still right" — and a masjid whose times
                       // were last edited in Ramadan is the one to chase.
-                      Row(
-                        children: [
-                          Icon(Icons.update,
-                              size: 14,
-                              color: _staleColour(masjid.timesUpdatedAt)),
-                          const SizedBox(width: 5),
-                          Text(
-                            _updatedLabel(masjid.timesUpdatedAt),
-                            style: AppText.caption.copyWith(
-                                color: _staleColour(masjid.timesUpdatedAt)),
-                          ),
-                        ],
-                      ),
+                      TimingReviewStatus(masjid: masjid),
                       const SizedBox(height: 2),
                       Row(
                         children: [
@@ -158,7 +162,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         icon: const Icon(Icons.campaign_outlined, size: 20),
                         color: AppColors.gold,
                         tooltip: 'Announcements',
-                        onPressed: () => Navigator.of(context).push(
+                        onPressed: !canManage ? null : () => Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (_) =>
                                   AnnouncementAdminScreen(masjid: masjid)),
@@ -167,11 +171,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       const Icon(Icons.chevron_right),
                     ],
                   ),
-                  onTap: () {
+                  onTap: !canManage ? null : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => UpdatePrayerTimesScreen(masjid: masjid)),
                     );
                   },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.check_circle_outline),
+                          label: Text(_confirming.contains(masjid.id) ? 'Saving...' : 'Timings sahi hain'),
+                          onPressed: !canManage || _confirming.contains(masjid.id) ? null : () => _confirm(masjid),
+                        ),
+                        Text(_reminderStatus, style: Theme.of(context).textTheme.bodySmall),
+                        Align(alignment: Alignment.centerLeft, child: TextButton(
+                          onPressed: () => _enableReminders(), child: const Text('Enable reminders'))),
+                      ]),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -187,7 +204,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         label: const Text('Transfer ownership',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w600)),
-                        onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                        onPressed: !canManage ? null : () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => TransferAdministrationScreen(masjid: masjid))),
                       ),
                     ),

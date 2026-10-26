@@ -22,12 +22,13 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     super.initState();
     // If already signed in as the real admin account (not an anonymous
     // regular-user session), skip straight to the dashboard.
-    if (AuthService.isAdminLoggedIn) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const SuperAdminDashboardScreen()),
-        );
-      });
+    _restorePlatformSession();
+  }
+
+  Future<void> _restorePlatformSession() async {
+    if (await AuthService.isPlatformAdmin() && mounted) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (_) => const SuperAdminDashboardScreen()));
     }
   }
 

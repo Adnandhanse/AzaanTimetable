@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../models/masjid.dart';
 import 'auth_service.dart';
+import 'admin_contact.dart';
+import 'notification_service.dart';
 
 /// Handles all reads/writes to the "masjids" collection in Firestore.
 /// This is the single source of truth for masjid data - replacing the
@@ -42,12 +46,21 @@ class MasjidRepository {
 
   /// Live stream of masjids managed by a specific admin mobile number.
   static Stream<List<Masjid>> streamByAdminMobile(String mobile) {
-    return _collection
-        .where('adminMobile', isEqualTo: mobile)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>))
-            .toList());
+    final user = AuthService.currentUser;
+    if (user == null) return Stream.value(<Masjid>[]);
+    Query query = _collection.where('adminUid', isEqualTo: user.uid);
+    if (user.phoneNumber != null) {
+      final phone = user.phoneNumber!;
+      final legacy = phone.startsWith('+91') ? phone.substring(3) : phone;
+      query = _collection.where(Filter.or(
+        Filter('adminUid', isEqualTo: user.uid),
+        Filter('adminMobile', isEqualTo: phone),
+        Filter('adminMobile', isEqualTo: legacy),
+      ));
+    }
+    return query.snapshots().map((snapshot) => snapshot.docs
+      .map((doc) => Masjid.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+      .where((m) => AdminContact.matchesAccount(m, AuthService.currentUser)).toList());
   }
 
   /// One-time fetch of a single masjid by id - used when a user is
@@ -79,15 +92,18 @@ class MasjidRepository {
     if (await findActiveByRegistrationNo(masjid.registrationNo.trim()) != null) {
       throw StateError('This registration already exists. Request administration transfer instead.');
     }
-    final data = masjid.toMap();
-    data['registrationNo'] = masjid.registrationNo.trim();
-    final user = AuthService.currentUser;
-    if (user == null || user.phoneNumber != '+91${masjid.adminMobile.trim()}') {
-      throw StateError('Verify the registered admin mobile first.');
-    }
-    data['adminUid'] = user.uid;
-    final docRef = await _collection.add(data);
-    return docRef.id;
+    final result = await FirebaseFunctions.instanceFor(region: 'us-central1')
+      .httpsCallable('registerVerifiedMasjid').call({
+        'name': masjid.name, 'city': masjid.city, 'address': masjid.address,
+        'registrationNo': masjid.registrationNo.trim(),
+        'adminName': masjid.adminName, 'mobile': masjid.adminMobile,
+        'email': masjid.adminEmail, 'countryIso': masjid.adminCountryIso,
+        'latitude': masjid.latitude, 'longitude': masjid.longitude,
+        'about': masjid.about, 'capacity': masjid.capacity,
+      });
+    final response = result.data as Map;
+    masjid.adminMobile = response['mobile'] as String;
+    return response['id'] as String;
   }
 
   /// Updates the times and stamps WHEN.
@@ -100,10 +116,27 @@ class MasjidRepository {
   /// Useful for exactly the thing you asked about: seeing which masjids have
   /// gone stale and need chasing.
   static Future<void> updatePrayerTimes(String id, PrayerTimes times) async {
-    await _collection.doc(id).update({
-      'prayerTimes': times.toMap(),
-      'timesUpdatedAt': FieldValue.serverTimestamp(),
+    final ref = _collection.doc(id);
+    await FirebaseFirestore.instance.runTransaction((tx) async {
+      final snapshot = await tx.get(ref);
+      if (!snapshot.exists) throw StateError('Masjid not found.');
+      final data = snapshot.data() as Map<String, dynamic>;
+      final existing = PrayerTimes.fromMap(
+          Map<String, dynamic>.from(data['prayerTimes'] as Map? ?? {}));
+      final changed = !mapEquals(existing.toMap(), times.toMap());
+      tx.update(ref, {
+        'prayerTimes': times.toMap(),
+        'timesConfirmedAt': FieldValue.serverTimestamp(),
+        if (changed) 'timesUpdatedAt': FieldValue.serverTimestamp(),
+      });
     });
+    try { await NotificationService.dismissTimingReminder(id); } catch (_) {}
+  }
+
+  static Future<void> confirmPrayerTimes(String id) async {
+    await FirebaseFunctions.instanceFor(region: 'us-central1')
+        .httpsCallable('confirmPrayerTimings').call({'masjidId': id});
+    try { await NotificationService.dismissTimingReminder(id); } catch (_) {}
   }
 
   static Future<void> updateVerificationStatus(String id, String status) async {

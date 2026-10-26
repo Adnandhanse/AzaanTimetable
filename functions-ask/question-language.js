@@ -2,7 +2,10 @@
 // Exact known words only. Unknown words and negation remain intact; no fuzzy
 // transliteration may erase a qualifier and turn a new ruling into a basic fact.
 const words={
-'तरीका':'tarika','तरीक़ा':'tareeqa','आखिरी':'aakhri','आख़िरी':'aakhri','आखरी':'aakhri','अंतिम':'last','नबी':'nabi','पैगंबर':'nabi','पैगम्बर':'nabi',
+'आदम':'adam','इदरीस':'idris','नूह':'nuh','हूद':'hud','सालेह':'salih','लूत':'lut','इस्माइल':'ismail','इस्माईल':'ismail','इसहाक':'ishaq','याकूब':'yaqub','यूसुफ':'yusuf','अय्यूब':'ayyub','शुऐब':'shuayb','मूसा':'musa','हारून':'harun','दाऊद':'dawud','सुलेमान':'sulayman','इलयास':'ilyas','यूनुस':'yunus','ज़करिया':'zakariya','यहया':'yahya','मरयम':'maryam',
+'वुजू':'wuzu','वुज़ू':'wuzu','हाथ':'haath','उठाना':'uthana','बाँधना':'baandhna','उंगली':'ungli','हिलाना':'hilana','रोजा':'roza','रोज़ा':'roza','दुआ':'dua','सोने':'sone','माता':'mother','माँ':'mother','पिता':'father','माँबाप':'parents','पड़ोसी':'padosi','सब्र':'sabr','किताब':'book',
+
+'इसमें':'isme','उसमें':'usme','इसकी':'iski','उसकी':'uski','फजर':'fajr','रकअत':'rakat','फ़र्ज़':'farz','सुन्‍नत':'sunnat','तरीका':'tarika','तरीक़ा':'tareeqa','आखिरी':'aakhri','आख़िरी':'aakhri','आखरी':'aakhri','अंतिम':'last','नबी':'nabi','पैगंबर':'nabi','पैगम्बर':'nabi',
 'नाम':'naam','कौन':'kaun','क्या':'kya','का':'ka','की':'ki','के':'ke','है':'hai','हैं':'hain','था':'tha','थी':'thi','बताओ':'batao','बताइए':'batao','मुझे':'mujhe',
 'नमाज':'namaz','नमाज़':'namaz','फजर':'fajr','फ़ज्र':'fajr','फज्र':'fajr','फ़जर':'fajr','सुबह':'subah','में':'mein','कितनी':'kitni','कितने':'kitne','रकात':'rakat','रकाअत':'rakat','रकातें':'rakat','रकाते':'rakat','फर्ज':'farz','फ़र्ज़':'farz','सुन्नत':'sunnat',
 'नहीं':'nahi','नही':'nahi','बाद':'baad','पहले':'pehle','कजा':'qaza','क़ज़ा':'qaza',
