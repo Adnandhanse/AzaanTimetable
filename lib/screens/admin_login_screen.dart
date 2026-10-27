@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/admin_contact.dart';
@@ -55,7 +56,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         // Confirm the masjid still exists and this number still administers it,
         // so a removed admin is not let straight back in.
         final matches =
-            await MasjidRepository.streamByAdminMobile(saved).first;
+            await MasjidRepository.streamByAdminMobile(saved).first.timeout(const Duration(seconds: 15));
         if (matches.isNotEmpty && mounted && matches.any((m) => AdminContact.matchesAccount(m, AuthService.currentUser))) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -71,8 +72,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   Future<void> _openDashboard(String mobile) async {
-    final matches = await MasjidRepository.streamByAdminMobile(mobile).first;
-    if (matches.isEmpty) throw StateError('No masjid found for this verified admin.');
+    final matches = await MasjidRepository.streamByAdminMobile(mobile).first.timeout(const Duration(seconds: 15));
+    if (matches.isEmpty) throw StateError('No masjid is linked to this account yet. Register your masjid or contact the Platform Admin.');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, matches.first.adminMobile);
     if (!mounted) return;
@@ -103,10 +104,20 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         }, onError: (error) {
           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
         });
+    } on TimeoutException {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not load your masjid in time. Check your connection and try again.')));
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error is StateError ? '${error.message}' : EmailAdminVerification.friendly(error))));
     } finally { if (mounted) setState(() => _isChecking = false); }
+  }
+
+  @override
+  void dispose() {
+    _mobileController.dispose();
+    _email.dispose();
+    super.dispose();
   }
 
   @override

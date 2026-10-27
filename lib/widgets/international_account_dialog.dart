@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -19,31 +20,45 @@ class _AccountDialogState extends State<_AccountDialog> {
   final password = TextEditingController(), confirm = TextEditingController();
   late bool create = widget.create;
   bool busy = false, hide = true;
+  Future<UserCredential>? _pendingAuth;
   String? error;
   Future<void> submit() async {
+    if (_pendingAuth != null) {
+      setState(() => error = 'The previous sign-in request is still finishing. Please wait or close this dialog.');
+      return;
+    }
     if (password.text.length < 6 || (create && password.text != confirm.text)) {
       setState(() => error = create ? 'Use at least 6 characters and match both passwords.' : 'Enter your password.');return;
     }
     setState(() { busy = true; error = null; });
     try {
-      if (create) {
-        await widget.auth.createUserWithEmailAndPassword(email: widget.email, password: password.text);
-      } else {
-        await widget.auth.signInWithEmailAndPassword(email: widget.email, password: password.text);
-      }
+      final operation = create
+          ? widget.auth.createUserWithEmailAndPassword(email: widget.email, password: password.text)
+          : widget.auth.signInWithEmailAndPassword(email: widget.email, password: password.text);
+      _pendingAuth = operation;
+      // A timeout does not cancel Firebase's native operation. Prevent duplicate
+      // account creation/sign-in until that operation has actually settled.
+      operation.then<void>((_) { _pendingAuth = null; },
+          onError: (Object _, StackTrace __) { _pendingAuth = null; });
+      await operation.timeout(const Duration(seconds: 25));
       if (mounted) Navigator.of(context).pop(true);
+    } on TimeoutException {
+      if (mounted) setState(() => error = 'Sign in is taking too long. Check your connection, then try again.');
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => error = e.code == 'email-already-in-use'
           ? 'This email already has an account. Choose Sign in below.'
           : e.code == 'weak-password' ? 'Choose a stronger password.'
-          : 'Could not continue. Check your email/password and try again.');
+           : e.code == 'network-request-failed' ? 'Cannot reach sign-in service. Try mobile data or another network.'
+          : e.code == 'operation-not-allowed' ? 'Email/password sign-in is not enabled. Contact the Platform Admin.'
+          : e.code == 'too-many-requests' ? 'Too many attempts. Please wait before trying again.'
+          : 'Could not sign in. Check your email and password.');
     } catch (_) { if (mounted) setState(() => error = 'Check your connection and try again.'); }
     finally { if (mounted) setState(() => busy = false); }
   }
   Future<void> resetPassword() async {
     setState(() { busy = true; error = null; });
     try {
-      await widget.auth.sendPasswordResetEmail(email: widget.email);
+      await widget.auth.sendPasswordResetEmail(email: widget.email).timeout(const Duration(seconds: 25));
       if (mounted) setState(() => error = 'If this account supports password reset, check your email for the reset link.');
     } catch (_) { if (mounted) setState(() => error = 'Could not request a reset. Please try later.'); }
     finally { if (mounted) setState(() => busy = false); }
