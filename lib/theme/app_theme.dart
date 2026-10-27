@@ -84,6 +84,10 @@ class AppColors {
         'purple': const Color(0xFF8A63B8),
       });
 
+  /// Foreground chosen for >=4.5:1 contrast on each palette's primary fill.
+  static Color get onEmerald =>
+      emerald.computeLuminance() > 0.179 ? Colors.black : Colors.white;
+
   // accent, ornament - gold stays close to the same value across every
   // theme (see note on `emerald` above), only shifting where a theme's own
   // background genuinely needs a brighter or muted version for contrast.
@@ -269,7 +273,7 @@ class AppText {
 
   static const TextStyle screenTitle = TextStyle(
     fontFamily: AppFonts.sans,
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.15,
   );
@@ -293,7 +297,7 @@ class AppText {
 
   static const TextStyle rowTitle = TextStyle(
     fontFamily: AppFonts.sans,
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: FontWeight.w600,
     height: 1.2,
   );
@@ -400,9 +404,12 @@ class AppTheme {
   static ThemeData light() {
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: AppColors.emerald,
-      brightness: Brightness.light,
+      brightness: AppThemeController.instance.isDark
+          ? Brightness.dark
+          : Brightness.light,
     ).copyWith(
       primary: AppColors.emerald,
+      onPrimary: AppColors.onEmerald,
       secondary: AppColors.gold,
       surface: AppColors.ivory,
       onSurface: AppColors.text,
@@ -482,6 +489,14 @@ class AppTheme {
         ),
       ),
 
+      textSelectionTheme: TextSelectionThemeData(
+          cursorColor: AppColors.emerald,
+          selectionColor: AppColors.emerald.withOpacity(.25)),
+      chipTheme: ChipThemeData(
+          backgroundColor: AppColors.white,
+          selectedColor: AppColors.emerald.withOpacity(.16),
+          labelStyle: TextStyle(fontSize: 12, color: AppColors.text),
+          secondaryLabelStyle: TextStyle(fontSize: 12, color: AppColors.text)),
       listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         iconColor: AppColors.emerald,
@@ -496,7 +511,23 @@ class AppTheme {
         titleTextStyle: AppText.screenTitle.copyWith(color: AppColors.text),
         shape: Border(bottom: BorderSide(color: AppColors.goldRule)),
       ),
-      textTheme: Typography.material2021().black.apply(
+      textTheme: (AppThemeController.instance.isDark
+              ? Typography.material2021().white
+              : Typography.material2021().black)
+          .copyWith(
+            bodyLarge: const TextStyle(fontSize: 14, height: 1.5),
+            bodyMedium: const TextStyle(fontSize: 13, height: 1.45),
+            bodySmall: const TextStyle(fontSize: 11.5, height: 1.4),
+            titleLarge:
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            titleMedium:
+                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            titleSmall:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            labelLarge:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          )
+          .apply(
             fontFamily: AppFonts.sans,
             bodyColor: AppColors.text,
             displayColor: AppColors.text,

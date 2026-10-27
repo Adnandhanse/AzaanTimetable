@@ -72,12 +72,15 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _togglePrayerNotification(String key) async {
     setState(() => _savingNotification = true);
     try {
-      await PrayerNotificationPreferences.setEnabled(key, !(_prayerNotifications[key] ?? true));
+      await PrayerNotificationPreferences.setEnabled(
+          key, !(_prayerNotifications[key] ?? true));
       await _loadPrayerNotifications();
       await NotificationService.scheduleFromCache();
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not update notifications. Please try again.')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text('Could not update notifications. Please try again.')));
     } finally {
       if (mounted) setState(() => _savingNotification = false);
     }
@@ -158,12 +161,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   static const List<IconData> _prayerIcons = <IconData>[
-    Icons.wb_twilight,        // Fajr
-    Icons.wb_sunny_outlined,  // Dhuhr
-    Icons.wb_sunny,           // Asr
-    Icons.wb_twilight,        // Maghrib
-    Icons.nightlight_round,   // Isha
-    Icons.groups_outlined,    // Juma
+    Icons.wb_twilight, // Fajr
+    Icons.wb_sunny_outlined, // Dhuhr
+    Icons.wb_sunny, // Asr
+    Icons.wb_twilight, // Maghrib
+    Icons.nightlight_round, // Isha
+    Icons.groups_outlined, // Juma
   ];
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
@@ -257,8 +260,8 @@ class _HomeScreenState extends State<HomeScreen>
     if (_watchedMasjidId == masjidId) return;
     _watchedMasjidId = masjidId;
     _announcementSub?.cancel();
-    _announcementSub =
-        AnnouncementRepository.streamActive(masjidId, masjidName).listen((list) {
+    _announcementSub = AnnouncementRepository.streamActive(masjidId, masjidName)
+        .listen((list) {
       if (!mounted) return;
       setState(() => _announcementList = list);
       _notifyNewAnnouncements(list, masjidName);
@@ -368,9 +371,8 @@ class _HomeScreenState extends State<HomeScreen>
       if (today == null) continue;
 
       // Today if it is still to come, otherwise the same time tomorrow.
-      final DateTime when = today.isAfter(_now)
-          ? today
-          : today.add(const Duration(days: 1));
+      final DateTime when =
+          today.isAfter(_now) ? today : today.add(const Duration(days: 1));
 
       if (best == null || when.isBefore(best.$2)) {
         best = (label, when);
@@ -471,8 +473,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 foregroundColor: AppColors.warningFg,
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: Text('Fix This Now',
                                   style: AppText.body.copyWith(
@@ -539,8 +540,8 @@ class _HomeScreenState extends State<HomeScreen>
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const HadithHomeScreen()));
             } else if (index == 3) {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const PrayersHomeScreen()));
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PrayersHomeScreen()));
             } else if (index == 4 && _isAdmin) {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminLoginScreen()));
@@ -572,7 +573,8 @@ class _HomeScreenState extends State<HomeScreen>
             // pointless. Changeable any time from Settings.
             if (_isAdmin)
               BottomNavigationBarItem(
-                  icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
+                  icon:
+                      const Icon(Icons.admin_panel_settings_outlined, size: 20),
                   label: S.masjidAdmin),
             BottomNavigationBarItem(
                 icon: const Icon(Icons.settings_outlined, size: 20),
@@ -584,43 +586,64 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _askIslamConnectButton() => Material(
-    color: AppColors.white,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18),
-      side: BorderSide(color: AppColors.goldRule)),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => const AskIslamConnectScreen())),
-      child: Ink(
-        decoration: BoxDecoration(gradient: LinearGradient(
-          colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
-          begin: Alignment.topLeft, end: Alignment.bottomRight)),
-        padding: const EdgeInsets.all(16),
-        child: Row(children: [
-          Container(padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: AppColors.goldRule.withOpacity(.5),
-              borderRadius: BorderRadius.circular(18)),
-            child: Icon(Icons.mic_none_rounded, size: 24, color: AppColors.text)),
-          const SizedBox(width: 14),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Ask Islam Connect', style: TextStyle(fontFamily: 'Inter',
-              fontWeight: FontWeight.w600, color: AppColors.text, fontSize: 17)),
-            const SizedBox(height: 5),
-            Text('Apna sawal likhein ya boliye',
-              style: AppText.body.copyWith(color: AppColors.textMuted, fontSize: 13)),
-            const SizedBox(height: 4),
-            Text('Quran aur hadees · References ke saath',
-              style: AppText.caption.copyWith(color: AppColors.textMuted)),
-          ])),
-          const SizedBox(width: 6),
-          Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 22),
-        ])),
-    ),
-  );
+        color: AppColors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: AppColors.goldRule)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => const AskIslamConnectScreen())),
+          child: Ink(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [
+                AppColors.goldRule.withOpacity(.28),
+                AppColors.white
+              ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+              padding: const EdgeInsets.all(16),
+              child: Row(children: [
+                Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: AppColors.goldRule.withOpacity(.5),
+                        borderRadius: BorderRadius.circular(18)),
+                    child: Icon(Icons.mic_none_rounded,
+                        size: 24, color: AppColors.text)),
+                const SizedBox(width: 14),
+                Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Text('Ask Islam Connect',
+                          style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.text,
+                              fontSize: 17)),
+                      const SizedBox(height: 5),
+                      Text(
+                          S.tr('Ask a question, in your own words',
+                              'اپنے الفاظ میں سوال کریں'),
+                          style: AppText.body.copyWith(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 4),
+                      Text(
+                          S.tr('Quran, Hadith and trusted references',
+                              'قرآن، حدیث اور معتبر حوالے'),
+                          style: AppText.caption
+                              .copyWith(color: AppColors.textMuted)),
+                    ])),
+                const SizedBox(width: 6),
+                Icon(Icons.arrow_forward_rounded,
+                    color: AppColors.gold, size: 22),
+              ])),
+        ),
+      );
 
   Widget _buildNoMasjidSelected() {
     return Center(
-      child: SingleChildScrollView(child: Padding(
+      child: SingleChildScrollView(
+          child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -660,7 +683,8 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 onPressed: () async {
                   final result = await Navigator.of(context).push<Masjid>(
-                    MaterialPageRoute(builder: (_) => const MasjidSearchScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const MasjidSearchScreen()),
                   );
                   if (result != null) {
                     await UserRepository.setSelectedMasjid(result.id);
@@ -702,23 +726,25 @@ class _HomeScreenState extends State<HomeScreen>
               child: AnimatedBuilder(
                 animation: _intro,
                 builder: (context, _) => ArtworkHeader(
-              masjidName: masjid.name,
-              // Address on the first line, date on the second. Two lines beat
-              // one long dotted string once the address is in there — most
-              // masjid addresses are too long to sit beside a date.
-              metaLine: '${masjid.address.trim().isEmpty ? masjid.city : '${masjid.address}, ${masjid.city}'}\n'
-                  '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
-              phase: _skyPhase(masjid),
-              settle: _fade.value,
-              onDirectionsTap:
-                  (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                      ? () => _openDirections(masjid)
-                      : null,
-              announcementCount: _announcementList.length,
-              onAnnouncementsTap: _announcementList.isEmpty
-                  ? null
-                  : () => _showAnnouncements(_announcementList, masjid.name),
-              onMetaTap: _showHijriInfo,
+                  masjidName: masjid.name,
+                  // Address on the first line, date on the second. Two lines beat
+                  // one long dotted string once the address is in there — most
+                  // masjid addresses are too long to sit beside a date.
+                  metaLine:
+                      '${masjid.address.trim().isEmpty ? masjid.city : '${masjid.address}, ${masjid.city}'}\n'
+                      '${hijri.hDay} ${hijri.longMonthName} ${hijri.hYear} AH',
+                  phase: _skyPhase(masjid),
+                  settle: _fade.value,
+                  onDirectionsTap:
+                      (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                          ? () => _openDirections(masjid)
+                          : null,
+                  announcementCount: _announcementList.length,
+                  onAnnouncementsTap: _announcementList.isEmpty
+                      ? null
+                      : () =>
+                          _showAnnouncements(_announcementList, masjid.name),
+                  onMetaTap: _showHijriInfo,
                 ),
               ),
             ),
@@ -730,283 +756,311 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-          // Compact. This block was two ornamented rules around a 44pt figure
-          // with generous spacing, which pushed the prayer list below the fold.
-          // One rule, a smaller figure, and the name and countdown on the same
-          // line as before — the information is identical, the height is about
-          // half.
-          // NO ANNOUNCEMENT CARD HERE ANY MORE.
-          //
-          // It was a full-width card between the banner and the prayer times —
-          // the busiest possible place to put anything, and it pushed the
-          // prayer list down the screen on every launch whether or not there
-          // was anything worth reading.
-          //
-          // It is now an icon with a count under the settings button on the
-          // banner, which is where a notification belongs.
+                  // Compact. This block was two ornamented rules around a 44pt figure
+                  // with generous spacing, which pushed the prayer list below the fold.
+                  // One rule, a smaller figure, and the name and countdown on the same
+                  // line as before — the information is identical, the height is about
+                  // half.
+                  // NO ANNOUNCEMENT CARD HERE ANY MORE.
+                  //
+                  // It was a full-width card between the banner and the prayer times —
+                  // the busiest possible place to put anything, and it pushed the
+                  // prayer list down the screen on every launch whether or not there
+                  // was anything worth reading.
+                  //
+                  // It is now an icon with a count under the settings button on the
+                  // banner, which is where a notification belongs.
 
-          // The content sits on a sheet that OVERLAPS the photograph by 18px and
-          // casts a soft shadow onto it. One object in front of another, which
-          // is what depth actually looks like — no perspective, no tilt, and
-          // nothing that makes Arabic text harder to read.
-          Transform.translate(
-            offset: const Offset(0, -18),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.ivory,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-                boxShadow: <BoxShadow>[
-                  // Two shadows, not one: a tight dark one for the contact edge
-                  // and a wide soft one for the ambient lift. A single shadow
-                  // reads as a sticker.
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 10,
-                    offset: Offset(0, -3),
-                  ),
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 28,
-                    offset: Offset(0, -10),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Column(
-              children: [
-                if (next == null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(
-                      'Prayer times for this masjid haven\u2019t been set yet.',
-                      textAlign: TextAlign.center,
-                      style: AppText.body.copyWith(color: AppColors.textMuted),
-                    ),
-                  )
-                else
-                  // Off-white (AppColors.cream), not pure white - the same
-                  // surface tone used for cards elsewhere in the app (the
-                  // theme's surfaceContainer, the Zakat calculator card),
-                  // rather than a one-off white that stood out against it.
-                  // Also a size down from the first pass - smaller padding
-                  // and a smaller icon circle, since the card only needed to
-                  // read as a distinct object, not fill the width so fully.
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.cream,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          color: Color(0x14000000),
-                          blurRadius: 20,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          S.nextPrayer.toUpperCase(),
-                          style: AppText.eyebrow
-                              .copyWith(color: AppColors.textMuted),
-                        ),
-                        const SizedBox(height: 12),
-                        // Icon on the left in a subtle circular outline, name
-                        // and time on the right - one clear reading order
-                        // instead of the clock figure, name, Arabic name, and
-                        // countdown all competing on one line.
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.emerald.withOpacity(0.08),
-                                border: Border.all(
-                                  color: AppColors.emerald.withOpacity(0.25),
-                                  width: 1.4,
-                                ),
-                              ),
-                              child: Icon(
-                                _iconFor(next.$1),
-                                size: 22,
-                                color: AppColors.emerald,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      // A refined serif for the name -
-                                      // premium and readable, distinct from
-                                      // the clean sans the time is set in
-                                      // below.
-                                      Text(
-                                        next.$1,
-                                        style: TextStyle(
-                                          fontFamily: AppFonts.serif,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.text,
+                  // The content sits on a sheet that OVERLAPS the photograph by 18px and
+                  // casts a soft shadow onto it. One object in front of another, which
+                  // is what depth actually looks like — no perspective, no tilt, and
+                  // nothing that makes Arabic text harder to read.
+                  Transform.translate(
+                    offset: const Offset(0, -18),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.ivory,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(18)),
+                        boxShadow: <BoxShadow>[
+                          // Two shadows, not one: a tight dark one for the contact edge
+                          // and a wide soft one for the ambient lift. A single shadow
+                          // reads as a sticker.
+                          BoxShadow(
+                            color: Color(0x33000000),
+                            blurRadius: 10,
+                            offset: Offset(0, -3),
+                          ),
+                          BoxShadow(
+                            color: Color(0x14000000),
+                            blurRadius: 28,
+                            offset: Offset(0, -10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                            child: Column(
+                              children: [
+                                if (next == null)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 6),
+                                    child: Text(
+                                      'Prayer times for this masjid haven\u2019t been set yet.',
+                                      textAlign: TextAlign.center,
+                                      style: AppText.body
+                                          .copyWith(color: AppColors.textMuted),
+                                    ),
+                                  )
+                                else
+                                  // Off-white (AppColors.cream), not pure white - the same
+                                  // surface tone used for cards elsewhere in the app (the
+                                  // theme's surfaceContainer, the Zakat calculator card),
+                                  // rather than a one-off white that stood out against it.
+                                  // Also a size down from the first pass - smaller padding
+                                  // and a smaller icon circle, since the card only needed to
+                                  // read as a distinct object, not fill the width so fully.
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cream,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: const <BoxShadow>[
+                                        BoxShadow(
+                                          color: Color(0x14000000),
+                                          blurRadius: 20,
+                                          offset: Offset(0, 8),
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        _arabicFor(next.$1),
-                                        style: AppText.arabic.copyWith(
-                                          fontSize: 16,
-                                          color: AppColors.emerald,
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          S.nextPrayer.toUpperCase(),
+                                          style: AppText.eyebrow.copyWith(
+                                              color: AppColors.textMuted),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 3),
-                                  // LIGHTER WEIGHT than AppText.hero's default
-                                  // w600 - a premium display figure reads as
-                                  // refined at a lighter weight, not as loud
-                                  // as the rest of the card was. Also a size
-                                  // down again (28 -> 24), still clearly the
-                                  // largest text on the card without dominating
-                                  // it the way the original 44sp hero size did.
-                                  Text(
-                                    _clockLabel(next.$2),
-                                    style: AppText.hero.copyWith(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.emerald,
+                                        const SizedBox(height: 12),
+                                        // Icon on the left in a subtle circular outline, name
+                                        // and time on the right - one clear reading order
+                                        // instead of the clock figure, name, Arabic name, and
+                                        // countdown all competing on one line.
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: AppColors.emerald
+                                                    .withOpacity(0.08),
+                                                border: Border.all(
+                                                  color: AppColors.emerald
+                                                      .withOpacity(0.25),
+                                                  width: 1.4,
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                _iconFor(next.$1),
+                                                size: 22,
+                                                color: AppColors.emerald,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .baseline,
+                                                    textBaseline:
+                                                        TextBaseline.alphabetic,
+                                                    children: [
+                                                      // A refined serif for the name -
+                                                      // premium and readable, distinct from
+                                                      // the clean sans the time is set in
+                                                      // below.
+                                                      Text(
+                                                        next.$1,
+                                                        style: TextStyle(
+                                                          fontFamily:
+                                                              AppFonts.serif,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: AppColors.text,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        _arabicFor(next.$1),
+                                                        style: AppText.arabic
+                                                            .copyWith(
+                                                          fontSize: 16,
+                                                          color:
+                                                              AppColors.emerald,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 3),
+                                                  // LIGHTER WEIGHT than AppText.hero's default
+                                                  // w600 - a premium display figure reads as
+                                                  // refined at a lighter weight, not as loud
+                                                  // as the rest of the card was. Also a size
+                                                  // down again (28 -> 24), still clearly the
+                                                  // largest text on the card without dominating
+                                                  // it the way the original 44sp hero size did.
+                                                  Text(
+                                                    _clockLabel(next.$2),
+                                                    style:
+                                                        AppText.hero.copyWith(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: AppColors.emerald,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Countdown and jamat, EQUALLY WEIGHTED.
+                                        //
+                                        // Same size box, same font size, same font weight -
+                                        // the only thing that tells them apart is the icon
+                                        // and the colour (emerald for azan's countdown,
+                                        // champagne gold for jamat), not one being larger or
+                                        // bolder than the other.
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: _NextPrayerStat(
+                                                icon: Icons.access_time,
+                                                label: _countdownLabel(next.$2),
+                                                color: AppColors.emerald,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: _NextPrayerStat(
+                                                icon: Icons.groups_outlined,
+                                                label: _jamatFor(
+                                                            masjid, next.$1)
+                                                        .isEmpty
+                                                    ? '${S.jamatLabel} \u2014'
+                                                    : '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
+                                                color: AppColors.champagneGold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Countdown and jamat, EQUALLY WEIGHTED.
-                        //
-                        // Same size box, same font size, same font weight -
-                        // the only thing that tells them apart is the icon
-                        // and the colour (emerald for azan's countdown,
-                        // champagne gold for jamat), not one being larger or
-                        // bolder than the other.
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: _NextPrayerStat(
-                                icon: Icons.access_time,
-                                label: _countdownLabel(next.$2),
-                                color: AppColors.emerald,
-                              ),
+                          ),
+                          // GAP ADDED HERE. The card above had zero bottom padding, so its
+                          // pills sat almost flush against the AZAN/JAMAT header of the list
+                          // below - the "cramped, overlapping" look, even though the header
+                          // row itself was correctly aligned to its columns underneath it.
+                          const SizedBox(height: 14),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: _askIslamConnectButton(),
+                          ),
+                          const SizedBox(height: 18),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: _prayerTimesList(masjid, next?.$1),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _quickAction(
+                                    Icons.explore_outlined,
+                                    S.findQiblaDirection,
+                                    () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) => const QiblaScreen()),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _quickAction(
+                                      Icons.place_outlined, S.nearbyMasjid,
+                                      () async {
+                                    final result = await Navigator.of(context)
+                                        .push<Masjid>(
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const MasjidSearchScreen()),
+                                    );
+                                    if (result != null) {
+                                      await UserRepository.setSelectedMasjid(
+                                          result.id);
+                                      setState(
+                                          () => _selectedMasjidId = result.id);
+                                    }
+                                  }),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _NextPrayerStat(
-                                icon: Icons.groups_outlined,
-                                label: _jamatFor(masjid, next.$1).isEmpty
-                                    ? '${S.jamatLabel} \u2014'
-                                    : '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
-                                color: AppColors.champagneGold,
-                              ),
+                          ),
+                          // The masjid name, address, date and directions are all on the image
+                          // now. A card repeating them under it was the same information twice.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                OutlinedButton.icon(
+                                  icon: const Icon(
+                                      Icons.calendar_month_outlined,
+                                      size: 16),
+                                  label: Text(S.viewFullPrayerSchedule),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.emerald,
+                                    side: BorderSide(color: AppColors.gold),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 13),
+                                    textStyle: AppText.body,
+                                  ),
+                                  onPressed: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            PrayerTimesScreen(masjid: masjid)),
+                                  ),
+                                ),
+                                const SizedBox(height: 90),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-              ],
-            ),
-          ),
-          // GAP ADDED HERE. The card above had zero bottom padding, so its
-          // pills sat almost flush against the AZAN/JAMAT header of the list
-          // below - the "cramped, overlapping" look, even though the header
-          // row itself was correctly aligned to its columns underneath it.
-          const SizedBox(height: 14),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _askIslamConnectButton(),
-          ),
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _prayerTimesList(masjid, next?.$1),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _quickAction(
-                    Icons.explore_outlined,
-                    S.findQiblaDirection,
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const QiblaScreen()),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child:
-                      _quickAction(Icons.place_outlined, S.nearbyMasjid, () async {
-                    final result = await Navigator.of(context).push<Masjid>(
-                      MaterialPageRoute(
-                          builder: (_) => const MasjidSearchScreen()),
-                    );
-                    if (result != null) {
-                      await UserRepository.setSelectedMasjid(result.id);
-                      setState(() => _selectedMasjidId = result.id);
-                    }
-                  }),
-                ),
-              ],
-            ),
-          ),
-          // The masjid name, address, date and directions are all on the image
-          // now. A card repeating them under it was the same information twice.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.calendar_month_outlined, size: 16),
-                  label: Text(S.viewFullPrayerSchedule),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.emerald,
-                    side: BorderSide(color: AppColors.gold),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    textStyle: AppText.body,
-                  ),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => PrayerTimesScreen(masjid: masjid)),
-                  ),
-                ),
-                const SizedBox(height: 90),
-              ],
-            ),
-          ),
-                ],
-              ),
-            ),
-          ),
                 ],
               ),
             ),
@@ -1115,7 +1169,9 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Text(S.azanLabel.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: AppText.eyebrow.copyWith(
-                          fontSize: 9, letterSpacing: 1, color: AppColors.textFaint)),
+                          fontSize: 9,
+                          letterSpacing: 1,
+                          color: AppColors.textFaint)),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -1123,7 +1179,9 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Text(S.jamatLabel.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: AppText.eyebrow.copyWith(
-                          fontSize: 9, letterSpacing: 1, color: AppColors.champagneGold)),
+                          fontSize: 9,
+                          letterSpacing: 1,
+                          color: AppColors.champagneGold)),
                 ),
               ],
             ),
@@ -1139,8 +1197,7 @@ class _HomeScreenState extends State<HomeScreen>
                   : null,
               borderRadius: BorderRadius.circular(6),
               border: rows[i].$1 == nextLabel
-                  ? Border(
-                      left: BorderSide(color: AppColors.emerald, width: 3))
+                  ? Border(left: BorderSide(color: AppColors.emerald, width: 3))
                   : (i == 0
                       ? null
                       : Border(
@@ -1165,24 +1222,34 @@ class _HomeScreenState extends State<HomeScreen>
                       Semantics(
                         label: '${rows[i].$1} prayer notifications',
                         child: Switch(
-                          value: _prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true,
+                          value: _prayerNotifications[
+                                  PrayerNotificationPreferences.keys[i]] ??
+                              true,
                           activeColor: AppColors.emerald,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          onChanged: _savingNotification || _prayerNotifications.isEmpty
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          onChanged: _savingNotification ||
+                                  _prayerNotifications.isEmpty
                               ? null
-                              : (_) => _togglePrayerNotification(PrayerNotificationPreferences.keys[i]),
+                              : (_) => _togglePrayerNotification(
+                                  PrayerNotificationPreferences.keys[i]),
                         ),
                       ),
                       Text(
                         _prayerNotifications.isEmpty
                             ? '…'
-                            : (_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
+                            : (_prayerNotifications[
+                                        PrayerNotificationPreferences
+                                            .keys[i]] ??
+                                    true)
                                 ? 'ON'
                                 : 'OFF',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: (_prayerNotifications[PrayerNotificationPreferences.keys[i]] ?? true)
+                          color: (_prayerNotifications[
+                                      PrayerNotificationPreferences.keys[i]] ??
+                                  true)
                               ? AppColors.emerald
                               : AppColors.textMuted,
                         ),
@@ -1307,7 +1374,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-
   /// The full text, and any older announcements still running.
   ///
   /// A bottom sheet rather than a page: an announcement is a short read, and
@@ -1392,7 +1458,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _quickAction(IconData icon, String label, VoidCallback onTap) =>
       _PressCard(icon: icon, label: label, onTap: onTap);
-
 }
 
 /// A card that sinks when pressed.
@@ -1456,13 +1521,13 @@ class _PressCardState extends State<_PressCard> {
               const SizedBox(width: 9),
               Flexible(
                 child: Text(
-                widget.label,
-                textAlign: TextAlign.left,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.rowTitle
-                    .copyWith(fontSize: 14, color: AppColors.text),
-              ),
+                  widget.label,
+                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.rowTitle
+                      .copyWith(fontSize: 14, color: AppColors.text),
+                ),
               ),
             ],
           ),

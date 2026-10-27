@@ -55,7 +55,11 @@ class _OtpScreenState extends State<OtpScreen> {
     // false "incorrect code" error for a code that verified fine already.
     _authSub = AuthService.authStateChanges.listen((user) async {
       if (_autoHandled || _isVerifying || !mounted) return;
-      if (user != null && await _hasFreshPhoneSession() && mounted && !_autoHandled && !_isVerifying) {
+      if (user != null &&
+          await _hasFreshPhoneSession() &&
+          mounted &&
+          !_autoHandled &&
+          !_isVerifying) {
         _autoHandled = true;
         _completeVerification();
       }
@@ -64,12 +68,15 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<bool> _hasFreshPhoneSession() async {
     final user = AuthService.currentUser;
-    if (user?.phoneNumber != AdminContact.canonical(widget.phoneNumber.trim())) return false;
+    if (user?.phoneNumber != AdminContact.canonical(widget.phoneNumber.trim()))
+      return false;
     try {
       final token = await user!.getIdTokenResult();
       final time = token.authTime;
       return time != null && DateTime.now().difference(time).inSeconds < 540;
-    } catch (_) { return false; }
+    } catch (_) {
+      return false;
+    }
   }
 
   void _startCountdown() {
@@ -105,7 +112,9 @@ class _OtpScreenState extends State<OtpScreen> {
       if (!mounted) return;
       setState(() => _isVerifying = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Phone verified, but the operation could not be completed: $e')),
+        SnackBar(
+            content: Text(
+                'Phone verified, but the operation could not be completed: $e')),
       );
     }
   }
@@ -189,7 +198,8 @@ class _OtpScreenState extends State<OtpScreen> {
       // points straight at "resend" instead of "try typing it again",
       // since retyping the same dead code will never work.
       final String message = e.toString();
-      final bool expired = message.contains('expired') || message.contains('session');
+      final bool expired =
+          message.contains('expired') || message.contains('session');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -222,14 +232,16 @@ class _OtpScreenState extends State<OtpScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Text('Enter the OTP sent to ${AdminContact.canonical(widget.phoneNumber)}',
+              Text(
+                  'Enter the OTP sent to ${AdminContact.canonical(widget.phoneNumber)}',
                   style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 20),
               TextField(
                 controller: _otpController,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
-                style: const TextStyle(fontSize: 22, letterSpacing: 4),
+                style: TextStyle(
+                    fontSize: 20, letterSpacing: 3, color: AppColors.text),
                 decoration: InputDecoration(
                   labelText: 'OTP',
                   border: OutlineInputBorder(
@@ -245,7 +257,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     borderSide: BorderSide(color: AppColors.gold, width: 2),
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.white,
                 ),
               ),
               const SizedBox(height: 4),
@@ -256,7 +268,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     ? 'Code expires in ${_secondsRemaining ~/ 60}:${(_secondsRemaining % 60).toString().padLeft(2, '0')}'
                     : 'This code has expired.',
                 style: TextStyle(
-                  color: _secondsRemaining > 0 ? Colors.black54 : Colors.red,
+                  color: _secondsRemaining > 0 ? AppColors.textMid : Colors.red,
                   fontSize: 13,
                 ),
               ),
@@ -274,9 +286,12 @@ class _OtpScreenState extends State<OtpScreen> {
                   onPressed: _isVerifying ? null : _verifyOtp,
                   child: _isVerifying
                       ? const SizedBox(
-                          height: 20, width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Verify', style: TextStyle(color: Colors.white, fontSize: 16)),
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Text('Verify',
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -285,14 +300,18 @@ class _OtpScreenState extends State<OtpScreen> {
                   onPressed: canResend ? _resendCode : null,
                   child: _isResending
                       ? SizedBox(
-                          height: 16, width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.emerald))
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: AppColors.emerald))
                       : Text(
                           canResend
                               ? 'Resend code'
                               : 'Resend code (${_secondsRemaining}s)',
                           style: TextStyle(
-                            color: canResend ? AppColors.emerald : Colors.black38,
+                            color: canResend
+                                ? AppColors.emerald
+                                : AppColors.textMuted,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

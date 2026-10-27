@@ -22,11 +22,16 @@ return async function processMasjid(ref,counts){
   let successes=0;
   for(let offset=0;offset<eligible.length;offset+=500){
    const fresh=await ref.get();if(!fresh.exists||baseline(fresh.data())!==claim.base||fresh.data().verificationStatus!=='Verified')break;
-   const batch=eligible.slice(offset,offset+500).filter(d=>owner(fresh.data(),d.data().uid,d.data().phone));
+   const window=eligible.slice(offset,offset+500).filter(d=>owner(fresh.data(),d.data().uid,d.data().phone));
+   for (const language of ['en','ur']) {
+   const batch=window.filter(d=>(d.data().language==='ur'?'ur':'en')===language);
    if(!batch.length)continue;
-   const result=await messaging.sendEachForMulticast({tokens:batch.map(d=>d.data().token),notification:{title:'Namaz timings check karein',body:`${String(fresh.data().name||'Aapki masjid').slice(0,100)} ki timings check karein. Sahi hon to app mein confirm karein.`},data:{type:'prayer_timing_reminder',masjidId:ref.id},android:{priority:'normal',ttl:3600000,collapseKey:`timings-${ref.id}`,notification:{channelId:'timing_reminders',tag:`timings-${ref.id}`}}});
+   const beforeSend=await ref.get();
+   if(!beforeSend.exists||baseline(beforeSend.data())!==claim.base||beforeSend.data().verificationStatus!=='Verified')break;
+   const result=await messaging.sendEachForMulticast({tokens:batch.map(d=>d.data().token),notification:{title:language==='ur'?'نماز کے اوقات کا جائزہ':'Review Prayer Timings',body:language==='ur'?`${String(fresh.data().name||'مسجد').slice(0,100)} کے اوقات دیکھ کر تصدیق کریں۔`:`Please review the prayer timings for ${String(fresh.data().name||'your masjid').slice(0,100)} and confirm if correct.`},data:{type:'prayer_timing_reminder',masjidId:ref.id},android:{priority:'normal',ttl:3600000,collapseKey:`timings-${ref.id}`,notification:{channelId:'timing_reminders',tag:`timings-${ref.id}`}}});
    successes+=result.successCount;
    for(let i=0;i<result.responses.length;i++)if(['messaging/registration-token-not-registered','messaging/invalid-registration-token'].includes(result.responses[i].error?.code))await batch[i].ref.delete();
+   }
   }
   if(successes){await db.runTransaction(async tx=>{const s=await tx.get(ref);if(s.exists&&baseline(s.data())===claim.base)tx.set(stateRef,{sentBaseline:claim.effectiveBase,lastSentAt:stamp()},{merge:true});});counts.sent++;}
  }finally{await stateRef.set({leaseUntil:Timestamp.fromMillis(0)},{merge:true});}

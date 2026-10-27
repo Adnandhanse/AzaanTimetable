@@ -1,5 +1,6 @@
 """Validate story assets, stable IDs and reference targets (not a scholarly review)."""
 import json
+import struct
 from pathlib import Path
 root=Path(__file__).resolve().parent.parent
 def read(p):return json.loads((root/p).read_text())
@@ -16,7 +17,11 @@ for b in data['books']:
  for page in b['pages']:
   assert page['id'] not in ids;ids.add(page['id'])
   assert page['roman'].strip() and page['english'].strip() and page['sources']
-  assert (root/f"assets/prophet_stories/scenes/{page['scene']}.webp").is_file(),page['id']
+  image = root/f"assets/prophet_stories/scenes/{page['scene']}.webp"
+  assert image.is_file(), page['id']
+  raw = image.read_bytes()
+  assert len(raw) > 100 and raw[:4] == b'RIFF' and raw[8:12] == b'WEBP', f"Invalid story artwork: {image}"
+  assert struct.unpack('<I', raw[4:8])[0] + 8 == len(raw), f"Truncated story artwork: {image}"
   for ref in page['sources']:
    refs+=1
    if ref['kind']=='quran':

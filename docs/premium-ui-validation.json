@@ -1,0 +1,25 @@
+{
+  "base": "0e114a7",
+  "reminderTests": {
+    "passed": 10
+  },
+  "offlineDartLanguageCases": {
+    "passed": 7
+  },
+  "storyImages": {
+    "decodedWithPillow": 34
+  },
+  "storyValidation": {
+    "stories": 25,
+    "chapters": 183,
+    "referenceRanges": 234,
+    "stableIDsAndReferencesUnchanged": true
+  },
+  "secondaryTextContrast": {
+    "paletteSurfaceCombinations": 12,
+    "minimumRatio": 5.63
+  },
+  "flutterWidgetTests": "added for CI, not run locally: Flutter setup blocked by automatic safety review (cloud metadata access)",
+  "androidBuild": "not run",
+  "liveFirebaseGeminiFCM": "not run"
+}

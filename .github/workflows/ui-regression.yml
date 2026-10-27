@@ -1,0 +1,27 @@
+name: UI Regression Checks
+on:
+  push:
+    branches: [main]
+    paths: ['lib/**', 'assets/prophet_stories/**', 'test/premium_ui_regression_test.dart', 'scripts/check_prophet_stories.py', 'pubspec.yaml', '.github/workflows/ui-regression.yml']
+  pull_request:
+    paths: ['lib/**', 'assets/prophet_stories/**', 'test/premium_ui_regression_test.dart', 'scripts/check_prophet_stories.py', 'pubspec.yaml', '.github/workflows/ui-regression.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.24.0'
+          channel: stable
+      - run: flutter pub get
+      - name: Validate non-empty artwork and source targets
+        run: python3 scripts/check_prophet_stories.py
+      - name: Test palette contrast, voice language, artwork decoding and layouts
+        run: flutter test test/premium_ui_regression_test.dart

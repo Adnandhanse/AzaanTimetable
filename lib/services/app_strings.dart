@@ -6,7 +6,9 @@ import 'app_language.dart';
 /// button labels, prayer names) so the whole app feels native in
 /// whichever language the user picks.
 class S {
-  static String _t(String en, String ur) => AppLanguageController.instance.isUrdu ? ur : en;
+  static String tr(String en, String ur) => _t(en, ur);
+  static String _t(String en, String ur) =>
+      AppLanguageController.instance.isUrdu ? ur : en;
   static bool get isUrdu => AppLanguageController.instance.isUrdu;
 
   static String get appTitle => _t('Islam Connect', 'اسلام کنیکٹ');
@@ -30,7 +32,8 @@ class S {
   static String get hadithWord => _t('Hadith', 'حدیث');
   static String get arabicEdition => _t('Arabic ed.', 'عربی ایڈیشن');
   static String get totalWord => _t('total', 'کل');
-  static String get tapToReadFull => _t('Tap to read in full', 'مکمل پڑھنے کے لیے دبائیں');
+  static String get tapToReadFull =>
+      _t('Tap to read in full', 'مکمل پڑھنے کے لیے دبائیں');
   static String get collapse => _t('Collapse', 'بند کریں');
   static String get listenToTranslation =>
       _t('Listen to translation', 'ترجمہ سنیں');
@@ -50,18 +53,22 @@ class S {
       'Urdu chapter names are a first draft and have not been checked by a scholar.',
       'باب کے اردو نام ابتدائی مسودہ ہیں اور کسی عالم نے ان کی تصدیق نہیں کی۔');
   // --- Zakat calculator ----------------------------------------------------
-  static String get zakatCalculator => _t('Zakat Calculator', 'زکوٰۃ کیلکولیٹر');
+  static String get zakatCalculator =>
+      _t('Zakat Calculator', 'زکوٰۃ کیلکولیٹر');
   static String get zakatApplicable =>
       _t('Zakat Applicable', 'زکوٰۃ لاگو ہوتی ہے');
   static String get zakatNotApplicable =>
       _t('Zakat Not Applicable', 'زکوٰۃ لاگو نہیں ہوتی');
   static String get nisabBasis => _t('Nisab', 'نصاب');
-  static String get silverNisab => _t('Silver Nisab (595g)', 'چاندی کا نصاب (595 گرام)');
-  static String get goldNisab => _t('Gold Nisab (85g)', 'سونے کا نصاب (85 گرام)');
+  static String get silverNisab =>
+      _t('Silver Nisab (595g)', 'چاندی کا نصاب (595 گرام)');
+  static String get goldNisab =>
+      _t('Gold Nisab (85g)', 'سونے کا نصاب (85 گرام)');
   static String get goldLabel => _t('Gold', 'سونا');
   static String get silverLabel => _t('Silver', 'چاندی');
   static String get cashLabel => _t('Cash / Savings', 'نقد / بچت');
-  static String get liabilitiesLabel => _t('Liabilities / Debts', 'واجبات / قرض');
+  static String get liabilitiesLabel =>
+      _t('Liabilities / Debts', 'واجبات / قرض');
   static String get gramsLabel => _t('Grams', 'گرام');
   static String get purityLabel => _t('Purity', 'خالص پن');
   static String get karatLabel => _t('Karat', 'قیراط');
@@ -98,12 +105,15 @@ class S {
   static String get comingSoon => _t('Coming soon', 'جلد آ رہا ہے');
   static String get evidence => _t('EVIDENCE', 'دلائل');
 
-  static String get todaysPrayerTimes => _t("Today's Prayer Times", 'آج کے نماز کے اوقات');
+  static String get todaysPrayerTimes =>
+      _t("Today's Prayer Times", 'آج کے نماز کے اوقات');
   static String get changeMasjid => _t('Change Masjid', 'مسجد تبدیل کریں');
   static String get getDirections => _t('Get Directions', 'راستہ دکھائیں');
-  static String get findQiblaDirection => _t('Find Qibla Direction', 'قبلہ کی سمت معلوم کریں');
+  static String get findQiblaDirection =>
+      _t('Find Qibla Direction', 'قبلہ کی سمت معلوم کریں');
   static String get nearbyMasjid => _t('Nearby Masjid', 'قریبی مسجد');
-  static String get viewFullPrayerSchedule => _t('View Full Prayer Schedule', 'مکمل نماز شیڈول دیکھیں');
+  static String get viewFullPrayerSchedule =>
+      _t('View Full Prayer Schedule', 'مکمل نماز شیڈول دیکھیں');
   static String get noMasjidSelected => _t(
         'No masjid selected yet.\nTap "Change Masjid" below to follow one.',
         'ابھی تک کوئی مسجد منتخب نہیں کی گئی۔\nپیروی کرنے کے لیے نیچے "مسجد تبدیل کریں" پر ٹیپ کریں۔',
@@ -118,22 +128,26 @@ class S {
   static String get juma => _t('Juma (Friday)', 'جمعہ');
 
   static String get verified => _t('Verified', 'تصدیق شدہ');
-  static String get pendingVerification => _t('Pending Verification', 'توثیق زیر التواء');
+  static String get pendingVerification =>
+      _t('Pending Verification', 'توثیق زیر التواء');
 
   // Quran screen
   static String get bySurah => _t('By Surah', 'بالسورۃ');
   static String get byJuz => _t('By Juz', 'بالجزء');
   static String get favourites => _t('Favourites', 'پسندیدہ');
-  static String get searchSurahHint => _t('Search Surah by name or number', 'سورۃ کا نام یا نمبر تلاش کریں');
+  static String get searchSurahHint =>
+      _t('Search Surah by name or number', 'سورۃ کا نام یا نمبر تلاش کریں');
 
   // Hadith screen
   static String get hadithBooks => _t('Hadith Books', 'کتب حدیث');
-  static String get sixAuthenticBooks => _t('Kutub al-Sittah - The Six Authentic Books', 'کتب ستہ - چھ مستند کتابیں');
+  static String get sixAuthenticBooks => _t(
+      'Kutub al-Sittah - The Six Authentic Books', 'کتب ستہ - چھ مستند کتابیں');
   static String get myBookmarks => _t('My Bookmarks', 'میرے پسندیدہ');
   static String get chapters => _t('Chapters', 'ابواب');
 
   // Prayers screen
-  static String get fivePillars => _t('The Five Pillars of Islam', 'اسلام کے پانچ ارکان');
+  static String get fivePillars =>
+      _t('The Five Pillars of Islam', 'اسلام کے پانچ ارکان');
   static String get shahada => _t('Shahada', 'شہادت');
   static String get namaz => _t('Namaz (Salah)', 'نماز');
   static String get roza => _t('Roza (Sawm)', 'روزہ');

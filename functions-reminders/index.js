@@ -35,7 +35,7 @@ exports.registerTimingReminderDevice=onCall(options,async req=>{
  const id=input(req);await owned(req,id);
  const token=req.data?.token;
  if(typeof token!=='string'||token.length<20||token.length>4096)throw new HttpsError('invalid-argument','Invalid device.');
- await db.collection('_timingReminderDevices').doc(hash(token)+'_'+hash(id)).set({token,masjidId:id,uid:req.auth.uid,phone:req.auth.token.phone_number||null,updatedAt:stamp()});
+ await db.collection('_timingReminderDevices').doc(hash(token)+'_'+hash(id)).set({token,masjidId:id,uid:req.auth.uid,phone:req.auth.token.phone_number||null,language:req.data?.language==='ur'?'ur':'en',updatedAt:stamp()});
  return {ok:true};
 });
 exports.removeTimingReminderDevice=onCall(options,async req=>{

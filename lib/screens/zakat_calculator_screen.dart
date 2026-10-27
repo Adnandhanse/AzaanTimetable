@@ -492,7 +492,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                     : '\u274C ${S.zakatNotApplicable}',
                 style: AppText.rowTitle.copyWith(
                     fontSize: 17,
-                    color: due ? AppColors.white : AppColors.textMid),
+                    color: due ? AppColors.onEmerald : AppColors.textMid),
               ),
               if (due) ...[
                 const SizedBox(height: 10),
@@ -500,7 +500,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                     style: AppText.eyebrow.copyWith(color: AppColors.goldPale)),
                 Text(_money(r.zakatDue),
                     style: AppText.hero
-                        .copyWith(fontSize: 34, color: AppColors.white)),
+                        .copyWith(fontSize: 34, color: AppColors.onEmerald)),
                 const SizedBox(height: 8),
                 Text(S.breakdownNote,
                     style: AppText.caption

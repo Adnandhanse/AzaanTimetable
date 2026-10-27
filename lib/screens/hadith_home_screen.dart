@@ -360,7 +360,7 @@ class _LangSegment extends StatelessWidget {
               child: Text(
                 label,
                 style: AppText.caption.copyWith(
-                  color: selected ? AppColors.white : AppColors.textMuted,
+                  color: selected ? AppColors.onEmerald : AppColors.textMuted,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),

@@ -1,3 +1,4 @@
+import 'app_strings.dart';
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -21,13 +22,17 @@ import 'azan_stop_controller.dart';
 /// directly to a ringing screen that plays the masjid's uploaded Azan
 /// audio, similar to how a normal alarm clock app behaves.
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
   static Future<void> createTimingReminderChannel() async {
-    await _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
-          'timing_reminders', 'Prayer timing reminders',
+          'timing_reminders',
+          'Prayer timing reminders',
           description: 'Reminders for masjid admins to check prayer timings',
           importance: Importance.defaultImportance,
         ));
@@ -37,8 +42,10 @@ class NotificationService {
     final details = await _plugin.getNotificationAppLaunchDetails();
     final payload = details?.notificationResponse?.payload;
     return details?.didNotificationLaunchApp == true &&
-        payload != null && payload.startsWith('timing-reminder:')
-        ? payload.substring('timing-reminder:'.length) : null;
+            payload != null &&
+            payload.startsWith('timing-reminder:')
+        ? payload.substring('timing-reminder:'.length)
+        : null;
   }
 
   static Future<void> dismissTimingReminder(String masjidId) async {
@@ -49,14 +56,20 @@ class NotificationService {
 
   static Future<void> showTimingReminder(String masjidId) async {
     if (!_initialized) return;
-    await _plugin.show(920001, 'Namaz timings check karein',
-        'Apni masjid ki timings check karein. Sahi hon to app mein confirm karein.',
-        const NotificationDetails(android: AndroidNotificationDetails(
-          'timing_reminders', 'Prayer timing reminders',
-          importance: Importance.defaultImportance, priority: Priority.defaultPriority,
-        )), payload: 'timing-reminder:$masjidId');
+    await _plugin.show(
+        920001,
+        S.tr('Review Prayer Timings', 'نماز کے اوقات کا جائزہ'),
+        S.tr('Review your masjid timings and confirm if correct.',
+            'اپنی مسجد کے اوقات دیکھ کر تصدیق کریں۔'),
+        const NotificationDetails(
+            android: AndroidNotificationDetails(
+          'timing_reminders',
+          'Prayer timing reminders',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        )),
+        payload: 'timing-reminder:$masjidId');
   }
-
 
   /// NEW CHANNEL ID ON PURPOSE.
   ///
@@ -186,7 +199,8 @@ class NotificationService {
   /// announcements mute their Fajr alarm with them.
   static const String channelIdAnnounce = 'masjid_announcements_v1';
 
-  static Future<void> showAnnouncement(String masjidName, String message) async {
+  static Future<void> showAnnouncement(
+      String masjidName, String message) async {
     await init();
     try {
       await _plugin.show(
@@ -257,9 +271,7 @@ class NotificationService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_diagKey);
-      return raw == null
-          ? null
-          : Map<String, dynamic>.from(json.decode(raw));
+      return raw == null ? null : Map<String, dynamic>.from(json.decode(raw));
     } catch (_) {
       return null;
     }
@@ -304,7 +316,8 @@ class NotificationService {
       ('default sound + ${secondary.name}', false, secondary),
     ];
 
-    for (final (String label, bool azan, AndroidScheduleMode mode) in attempts) {
+    for (final (String label, bool azan, AndroidScheduleMode mode)
+        in attempts) {
       try {
         await _plugin.zonedSchedule(
           id,
@@ -350,20 +363,25 @@ class NotificationService {
     'Asia/Rangoon': 'Asia/Yangon',
   };
 
-  static Future<void> init({void Function(String? payload)? onTapPayload}) async {
+  static Future<void> init(
+      {void Function(String? payload)? onTapPayload}) async {
     if (_initialized) return;
     tzdata.initializeTimeZones();
 
     try {
       var deviceTimeZone = await FlutterTimezone.getLocalTimezone();
-      final resolvedName = _legacyTimezoneAliases[deviceTimeZone] ?? deviceTimeZone;
+      final resolvedName =
+          _legacyTimezoneAliases[deviceTimeZone] ?? deviceTimeZone;
       tz.setLocalLocation(tz.getLocation(resolvedName));
-      _detectedTimezoneDebugInfo = 'Detected: "$deviceTimeZone" -> using: ${tz.local.name}';
+      _detectedTimezoneDebugInfo =
+          'Detected: "$deviceTimeZone" -> using: ${tz.local.name}';
     } catch (e) {
-      _detectedTimezoneDebugInfo = 'FAILED to detect/set timezone: $e (falling back to ${tz.local.name})';
+      _detectedTimezoneDebugInfo =
+          'FAILED to detect/set timezone: $e (falling back to ${tz.local.name})';
     }
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await _plugin.initialize(
       initSettings,
@@ -377,7 +395,8 @@ class NotificationService {
       // Taps that arrive while the app is not running come here instead.
       // Without this, the Stop button on a prayer notification would do
       // nothing in exactly the case that matters — phone locked, app closed.
-      onDidReceiveBackgroundNotificationResponse: azanNotificationActionBackground,
+      onDidReceiveBackgroundNotificationResponse:
+          azanNotificationActionBackground,
     );
 
     // Remove the pre-azan channel. Anyone upgrading already has it, it has no
@@ -542,7 +561,8 @@ class NotificationService {
     }
   }
 
-  static String _buildPayload(String prayerLabel, String masjidName, String? audioUrl) {
+  static String _buildPayload(
+      String prayerLabel, String masjidName, String? audioUrl) {
     return '$prayerLabel|||$masjidName|||${audioUrl ?? ''}';
   }
 
@@ -622,8 +642,10 @@ class NotificationService {
 
     final CachedSchedule? schedule = given ?? await PrayerScheduleCache.load();
     if (schedule == null) {
-      await _writeDiagnostics(
-          <String, dynamic>{'result': 'no cached schedule yet', 'scheduled': 0});
+      await _writeDiagnostics(<String, dynamic>{
+        'result': 'no cached schedule yet',
+        'scheduled': 0
+      });
       return <String>['No cached schedule yet'];
     }
 
@@ -678,8 +700,12 @@ class NotificationService {
       // is lost silently. These explicit one-shots cover the next few days on
       // their own, and are re-armed every time the app opens.
       if (key != 'juma') {
-        await _scheduleExtraDays(key: key, label: label, base: dt,
-            masjidName: schedule.masjidName, audioUrl: schedule.audioUrl);
+        await _scheduleExtraDays(
+            key: key,
+            label: label,
+            base: dt,
+            masjidName: schedule.masjidName,
+            audioUrl: schedule.audioUrl);
       }
     }
 
@@ -765,8 +791,9 @@ class NotificationService {
       payload: 'Test|||Test|||',
     );
     await _writeDiagnostics(<String, dynamic>{
-      'result':
-          tier == null ? 'test alarm REFUSED by the system' : 'test alarm armed',
+      'result': tier == null
+          ? 'test alarm REFUSED by the system'
+          : 'test alarm armed',
       'mode': tier ?? 'none',
       'scheduled': tier == null ? 0 : 1,
     });

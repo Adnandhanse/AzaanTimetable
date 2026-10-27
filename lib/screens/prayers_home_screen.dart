@@ -95,15 +95,25 @@ class PrayersHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [..._pillars, ..._also,
+    final items = [
+      ..._pillars,
+      ..._also,
       <String, dynamic>{
         'title': S.isUrdu ? 'انبیاء کے واقعات' : 'Prophet Stories',
         'subtitle': S.isUrdu ? 'نبیوں کی کہانیاں' : 'Nabiyon ki kahaniyan',
         'stories': true,
       },
     ];
-    const images = ['shahada', 'namaz', 'roza', 'zakat', 'hajj',
-      'umrah', 'duas', 'stories'];
+    const images = [
+      'shahada',
+      'namaz',
+      'roza',
+      'zakat',
+      'hajj',
+      'umrah',
+      'duas',
+      'stories'
+    ];
     // Keep the existing destinations; only the presentation changes.
     items[4]['title'] = S.isUrdu ? 'حج' : 'Hajj';
     items[6]['title'] = S.isUrdu ? 'روزمرہ کی دعائیں' : 'Daily Duas';
@@ -113,31 +123,39 @@ class PrayersHomeScreen extends StatelessWidget {
         top: false,
         child: LayoutBuilder(builder: (context, constraints) {
           final scale = MediaQuery.textScalerOf(context).scale(1);
-          final columns = constraints.maxWidth >= 720 ? 3
-              : constraints.maxWidth < 340 || scale > 1.5 ? 1 : 2;
+          final columns = constraints.maxWidth >= 720
+              ? 3
+              : constraints.maxWidth < 340 || scale > 1.5
+                  ? 1
+                  : 2;
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
             child: Column(children: [
-              Text(S.isUrdu ? 'سیکھیں، سمجھیں، عمل کریں'
-                  : 'Seekhein, samjhein, amal karein',
-                textAlign: TextAlign.center,
-                style: (S.isUrdu ? AppText.urduText : AppText.body)
-                    .copyWith(color: AppColors.textMuted)),
+              Text(
+                  S.isUrdu
+                      ? 'سیکھیں، سمجھیں، عمل کریں'
+                      : 'Learn, reflect and put knowledge into practice',
+                  textAlign: TextAlign.center,
+                  style: (S.isUrdu ? AppText.urduText : AppText.body)
+                      .copyWith(color: AppColors.textMuted)),
               const SizedBox(height: 20),
               // Rows size naturally to their longest title, including Urdu and
               // accessibility text sizes, instead of clipping a fixed grid.
               for (var row = 0; row < items.length; row += columns)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 14),
-                  child: IntrinsicHeight(child: Row(
+                  child: IntrinsicHeight(
+                      child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (var col = 0; col < columns; col++) ...[
                         if (col > 0) const SizedBox(width: 12),
-                        Expanded(child: row + col < items.length
-                          ? _LearningCard(item: items[row + col],
-                              image: images[row + col])
-                          : const SizedBox.shrink()),
+                        Expanded(
+                            child: row + col < items.length
+                                ? _LearningCard(
+                                    item: items[row + col],
+                                    image: images[row + col])
+                                : const SizedBox.shrink()),
                       ],
                     ],
                   )),
@@ -166,11 +184,13 @@ class _LearningCard extends StatelessWidget {
     } else if (item['zakat'] == true) {
       destination = ZakatHomeScreen(description: item['description'] as String);
     } else {
-      destination = PillarDetailScreen(title: item['title'] as String,
-        description: item['description'] as String,
-        guide: item['guide'] as IbadatGuide?);
+      destination = PillarDetailScreen(
+          title: item['title'] as String,
+          description: item['description'] as String,
+          guide: item['guide'] as IbadatGuide?);
     }
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => destination));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => destination));
   }
 
   @override
@@ -180,27 +200,32 @@ class _LearningCard extends StatelessWidget {
       button: true,
       child: Material(
         color: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: radius,
-          side: BorderSide(color: AppColors.goldRule)),
+        shape: RoundedRectangleBorder(
+            borderRadius: radius, side: BorderSide(color: AppColors.goldRule)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _open(context),
           child: Column(children: [
-            ExcludeSemantics(child: AspectRatio(
+            ExcludeSemantics(
+                child: AspectRatio(
               aspectRatio: image == 'stories' ? 1.5 : 900 / 620,
               child: Ink.image(
                 image: AssetImage('assets/learn_illustrations/$image.webp'),
                 fit: BoxFit.contain,
               ),
             )),
-            Expanded(child: Container(
+            Expanded(
+                child: Container(
               alignment: Alignment.center,
               constraints: const BoxConstraints(minHeight: 64),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: Text(item['title'] as String, textAlign: TextAlign.center,
-                style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
-                  .copyWith(fontSize: S.isUrdu ? 18 : 18,
-                    height: S.isUrdu ? 1.8 : 1.25, color: AppColors.text)),
+              child: Text(item['title'] as String,
+                  textAlign: TextAlign.center,
+                  style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
+                      .copyWith(
+                          fontSize: S.isUrdu ? 17 : 15,
+                          height: S.isUrdu ? 1.8 : 1.25,
+                          color: AppColors.text)),
             )),
           ]),
         ),
