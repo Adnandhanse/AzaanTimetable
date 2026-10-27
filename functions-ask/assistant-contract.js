@@ -10,7 +10,7 @@ function languageOf(text,history=[],requested='auto'){
  if(/(?:in hindi|hindi (?:mein|me)|हिंदी में|ہندی میں)/u.test(q))return 'hi';
  if(/[\u0900-\u097f]/.test(text))return 'hi';
  if(/[\u0600-\u06ff]/.test(text))return 'ur';
- const romanWords=q.match(/\b(kya|kitn\w*|hai|hain|hota|ka|ki|ke|mein|me|mujhe|bata\w*|bta\w*|isme\w*|usme\w*|kaise|kyun)\b/g)||[];
+ const romanWords=q.match(/\b(kya|kia|kitn\w*|hai|hain|hota|hoti|hote|tha|thi|thee|ka|ki|ke|ko|se|mein|mai|me|m|mujhe|mjhe|hume|hme|aap|ap|tum|tm|hum|hm|bata\w*|bta\w*|isme\w*|usme\w*|iska|iski|uska|uski|unka|unki|unke|kaise|kese|kyun|kyu|kab|kb|kahan|kahaan|kaha|mili|mila|mile|milti|milega|hue|huwe|hui|hua|ho|hoga|hogi|karna|krna|kare|kru|karu|chahiye|chahie|chahoye|nahi|ni|nahin|nhi|aur|pehle|pahle|baad|btado|btao)\b/g)||[];
  const englishWords=q.match(/\b(what|how|who|which|why|where|when|the|is|are|does|can|in|tell|please|explain|you|your|many)\b/g)||[];
  if(englishWords.length>=2&&romanWords.length<2)return 'en';
  if(romanWords.length)return 'roman';
@@ -37,6 +37,7 @@ function requestData(data){
 const MESSAGES={
  reference:{roman:'Is exact reference ko available source data se verify nahi kar saka. Ise confirmed hawala nahi keh raha.',en:'I could not verify that exact reference in the available source data.',hi:'उपलब्ध स्रोतों से यह सटीक हवाला सत्यापित नहीं हो सका। इसे पक्का संदर्भ नहीं कहूँगा।',ur:'دستیاب مصادر سے اس خاص حوالے کی تصدیق نہیں ہو سکی۔ اسے مصدقہ حوالہ نہیں کہوں گا۔'},
  partial:{roman:'Kuch references verify nahi hue; sirf tasdeeq-shuda hawale neeche hain.',en:'Some references could not be verified; only checked references are listed below.',hi:'कुछ संदर्भ सत्यापित नहीं हो सके; नीचे केवल जाँचे गए संदर्भ हैं।',ur:'بعض حوالوں کی تصدیق نہیں ہو سکی؛ نیچے صرف جانچے گئے حوالے ہیں۔'},
+ uncited:{roman:'Is jawab ka exact hawala available sources se verify nahi ho saka.',en:'An exact source for this answer could not be verified from the available data.',hi:'उपलब्ध स्रोतों से इस जवाब का सटीक हवाला सत्यापित नहीं हो सका।',ur:'دستیاب مصادر سے اس جواب کے خاص حوالے کی تصدیق نہیں ہو سکی۔'},
  limited:{roman:'Is tafseel ke liye mere paas kaafi verified evidence nahi hai. Thoda specific sawal poochhein.',en:'I do not have enough verified evidence for that detail. Please make the question more specific.',hi:'इस विवरण के लिए पर्याप्त सत्यापित प्रमाण उपलब्ध नहीं हैं। कृपया सवाल थोड़ा स्पष्ट करें।',ur:'اس تفصیل کے لیے کافی مصدقہ شواہد دستیاب نہیں۔ براہ کرم سوال ذرا واضح کریں۔'}
 };
 function message(key,language){return MESSAGES[key][language]||MESSAGES[key].en;}

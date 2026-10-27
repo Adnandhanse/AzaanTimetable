@@ -27,7 +27,7 @@ exports.confirmPrayerTimings=onCall(options,async req=>{
  await db.runTransaction(async tx=>{
   const s=await tx.get(ref);
   if(!s.exists||!isOwner(s.data(),{...req.auth.token,uid:req.auth.uid}))throw new HttpsError('permission-denied','Current masjid admin required.');
-  tx.update(ref,{timesConfirmedAt:stamp()});
+  tx.update(ref,{timesUpdatedAt:stamp(),timesConfirmedAt:stamp()});
  });
  return {ok:true};
 });

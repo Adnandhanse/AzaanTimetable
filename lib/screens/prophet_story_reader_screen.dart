@@ -376,7 +376,7 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
                                     style: const TextStyle(
                                         fontFamily: 'Inter',
                                         color: Colors.white,
-                                        fontSize: 20,
+                                        fontSize: 18,
                                         height: 1.35,
                                         fontWeight: FontWeight.w600)),
                               ])),

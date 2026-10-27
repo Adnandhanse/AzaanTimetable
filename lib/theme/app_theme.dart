@@ -272,9 +272,9 @@ class AppText {
   );
 
   static const TextStyle screenTitle = TextStyle(
-    fontFamily: AppFonts.sans,
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
+    fontFamily: AppFonts.serif,
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
     height: 1.15,
   );
 
@@ -296,9 +296,9 @@ class AppText {
   );
 
   static const TextStyle rowTitle = TextStyle(
-    fontFamily: AppFonts.sans,
-    fontSize: 15,
-    fontWeight: FontWeight.w600,
+    fontFamily: AppFonts.serif,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
     height: 1.2,
   );
 
@@ -312,14 +312,14 @@ class AppText {
 
   static const TextStyle body = TextStyle(
     fontFamily: AppFonts.sans,
-    fontSize: 13,
-    height: 1.35,
+    fontSize: 12,
+    height: 1.4,
   );
 
   static const TextStyle caption = TextStyle(
     fontFamily: AppFonts.sans,
-    fontSize: 11.5,
-    height: 1.3,
+    fontSize: 11,
+    height: 1.35,
   );
 
   /// Arabic scripture, at reading size. Every Qur'an verse and every hadith
@@ -515,17 +515,17 @@ class AppTheme {
               ? Typography.material2021().white
               : Typography.material2021().black)
           .copyWith(
-            bodyLarge: const TextStyle(fontSize: 14, height: 1.5),
-            bodyMedium: const TextStyle(fontSize: 13, height: 1.45),
-            bodySmall: const TextStyle(fontSize: 11.5, height: 1.4),
+            bodyLarge: const TextStyle(fontSize: 13, height: 1.45),
+            bodyMedium: const TextStyle(fontSize: 12, height: 1.4),
+            bodySmall: const TextStyle(fontSize: 11, height: 1.35),
             titleLarge:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
             titleMedium:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             titleSmall:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             labelLarge:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           )
           .apply(
             fontFamily: AppFonts.sans,

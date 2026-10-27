@@ -59,8 +59,8 @@ class NotificationService {
     await _plugin.show(
         920001,
         S.tr('Review Prayer Timings', 'نماز کے اوقات کا جائزہ'),
-        S.tr('Review your masjid timings and confirm if correct.',
-            'اپنی مسجد کے اوقات دیکھ کر تصدیق کریں۔'),
+        S.tr('Review your masjid timings and save any updates.',
+            'اپنی مسجد کے اوقات دیکھ کر محفوظ کریں۔'),
         const NotificationDetails(
             android: AndroidNotificationDetails(
           'timing_reminders',

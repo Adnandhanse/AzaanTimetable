@@ -6,7 +6,7 @@ const entities=[
  ['fajr','fajar'],['dhuhr','zuhr','zohar'],['asr','asar'],['maghrib','magrib'],['isha','esha'],['wudu','wuzu','wudhu'],['namaz','salah','prayer'],['roza','fasting'],['zakat','zakah']
 ];
 function focusQuestion(question,history=[]){
- let q=normalize(romanQuestion(question)).replace(/\b(?:maa|ma|ammi)\s+(?:(?:aur|or|and)\s+)?(?:baap|abbu|walid)\b/g,'parents');
+ let q=normalize(romanQuestion(question).replace(/\b(?:aap\s+(?:saw|saws|sawas)|saws|sawas)\b/gi,'Muhammad nabi')).replace(/\b(?:maa|ma|ammi)\s+(?:(?:aur|or|and)\s+)?(?:baap|abbu|walid)\b/g,'parents');
  const words=new Set(q.split(' '));
  const elliptical=/\b(?:isme|ismein|usme|usmein|unka|unki|unke|iska|iski|uska|uski|it|its|they|their|those|that|this|aur|more|also)\b/u.test(q);
  if(!elliptical)return {query:q,inheritedTopic:null};

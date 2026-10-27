@@ -44,7 +44,7 @@ class ProphetStoryArtwork extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.rowTitle.copyWith(
-                          color: Colors.white, fontSize: 20, height: 1.25))),
+                          color: Colors.white, fontSize: 18, height: 1.25))),
             ])),
         // Let long chapter titles and accessibility text wrap below the image.
         if (subtitle != null)

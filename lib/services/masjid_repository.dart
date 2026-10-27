@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../models/masjid.dart';
 import 'auth_service.dart';
@@ -120,14 +119,11 @@ class MasjidRepository {
     await FirebaseFirestore.instance.runTransaction((tx) async {
       final snapshot = await tx.get(ref);
       if (!snapshot.exists) throw StateError('Masjid not found.');
-      final data = snapshot.data() as Map<String, dynamic>;
-      final existing = PrayerTimes.fromMap(
-          Map<String, dynamic>.from(data['prayerTimes'] as Map? ?? {}));
-      final changed = !mapEquals(existing.toMap(), times.toMap());
+      // Every successful Save records the backend timestamp, including a save
+      // with unchanged values. No separate confirmation flow is required.
       tx.update(ref, {
         'prayerTimes': times.toMap(),
-        'timesConfirmedAt': FieldValue.serverTimestamp(),
-        if (changed) 'timesUpdatedAt': FieldValue.serverTimestamp(),
+        'timesUpdatedAt': FieldValue.serverTimestamp(),
       });
     });
     try { await NotificationService.dismissTimingReminder(id); } catch (_) {}

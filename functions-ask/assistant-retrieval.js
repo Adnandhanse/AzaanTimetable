@@ -5,7 +5,7 @@ const {focusQuestion}=require('./question-focus');
 const notes=require('./scholarly-notes.json');
 const reviewed=require('./quick_answers.json').facts;
 const indexes=new WeakMap();
-const stop=new Set('a an the is are was were what who how many does do did can could please tell explain about me my i you your in on of to for and or it this that have has hain hai tha thi kya ka ki ke ko se mein me mujhe batao btao kitni kitne kitna isme usme alaisalam alaihis salam alaihissalam hazrat number reference exact give why where when teaching teachings teach say says said ruling hukm s not no should would we our us they their them he she his her had be been being am being must was were related regarding happened happen step steps by kaise kese karu karoon karein karna krna bata dena samjhao pehle phele before after baad'.split(' '));
+const stop=new Set('a an the is are was were what who how many does do did can could please tell explain about me my i you your in on of to for and or it this that have has hain hai tha thi kya ka ki ke ko se mein me mujhe batao btao kitni kitne kitna isme usme alaisalam alaihis salam alaihissalam hazrat number reference exact give why where when teaching teachings teach say says said ruling hukm s not no should would we our us they their them he she his her had be been being am being must was were related regarding happened happen step steps by kaise kese karu karoon karein karna krna kab kb mili mila mile milti hoga hogi hua hui aap ap saws sawas bata dena samjhao pehle phele before after baad'.split(' '));
 const groups=[
  ['namaz','namaaz','namaj','salah','salaah','salat','prayer','نماز','صلاة'],
  ['rakat','rakaat','rakatain','rakate','rakatein','rakaatein','rakah','rakahs','rakats','rakate','رکعت','رکعات'],
@@ -23,12 +23,14 @@ const groups=[
  ['uthana','uthane','uthate','raise','raising','raised','اٹھانا'],['baandhna','bandhna','baandhne','fold','folding','placed','باندھنا'],
  ['ungli','finger','forefinger','انگلی'],['harkat','hilana','hilane','move','moving','motion','حرکت'],
  ['roza','roze','fast','fasting','روزہ'],['dua','duaa','supplication','invocation','دعا'],
+ ['nabuwwat','nabuwat','nabuat','nabuat','naboowat','prophethood','commissioned','appointed','divine inspiration','revelation','نبوت'],
+ ['umar','umr','age','old','عمر'],
  ['quran','kuran','quraan','koran','قرآن'],['hadees','hadis','hadith','narration','حدیث'],
  ['tarika','tareeqa','method','perform','procedure','طریقہ'],['qaza','missed','قضا'],
  ['hanafi','hanfi','حنفی'],['shafii','shafi','shafie','shafii','شافعی'],['maliki','مالکی'],['hanbali','حنبلی'],
  ['ikhtilaf','differences','difference','madhhab','schools','مسلک'],['nam','naam','name','نام'],
  ['kitni','kitne','kitna','count','many','کتنی'],['aakhri','akhri','akhiri','last','final','seal','khatam','آخری'],
- ['nabi','nabee','prophet','prophets','anbiya','paigambar','نبی'],['patience','sabr','صبر'],['parents','parent','walidain','والدین'],
+ ['nabi','nabee','prophet','prophets','apostle','messenger','anbiya','paigambar','نبی'],['patience','sabr','صبر'],['parents','parent','walidain','والدین'],
  ['kindness','kind','good','ihsan','neki','احسان'],['neighbour','neighbor','neighbours','neighbors','padosi','پڑوسی'],
  ['sleep','sleeping','bed','bedtime','sone','sona','سونے'],['prison','prisoners','prisonmates','imprisoned','jail','qaid','قید'],
  ['zakat','zakah','charity','زکات'],['qibla','direction','قبلہ'],
@@ -96,7 +98,7 @@ function retrieveEvidence(question,history,docs){
    if(matched.length)rows.push({doc,matched});
   }
   const useful=terms.map((g,i)=>frequencies[i]&&!domain(g)?i:-1).filter(i=>i>=0);
-  const strong=new Set(['adam','idris','hud','salih','lut','ismail','ishaq','yaqub','ayyub','shuayb','harun','dhulkifl','dawud','sulayman','ilyas','alyasa','zakariya','yahya','fajr','ibrahim','musa','isa','nuh','yunus','yusuf','parents','biwi','haath','ungli','wuzu','roza','sleep','prison']);
+  const strong=new Set(['adam','idris','hud','salih','lut','ismail','ishaq','yaqub','ayyub','shuayb','harun','dhulkifl','dawud','sulayman','ilyas','alyasa','zakariya','yahya','fajr','ibrahim','musa','isa','nuh','yunus','yusuf','nabuwwat','parents','biwi','haath','ungli','wuzu','roza','sleep','prison']);
   const required=useful.filter(i=>strong.has(terms[i][0]));
   const threshold=Math.min(2,useful.length);
   const broadSubject=terms.length===1&&terms[0].includes('prayer');
@@ -137,6 +139,7 @@ function retrieveEvidence(question,history,docs){
    }
    if(doc.kind==='scholarly'&&terms.some(g=>g.includes('madhhab')))score+=5;
    if(doc.kind==='story'&&terms.some(g=>g.includes(doc.storyId)))score+=3;
+   if(terms.some(g=>g.includes('prophethood'))&&/\b(?:kab|kb|when|age|umar|umr)\b/i.test(question)&&doc.kind==='hadith'&&/(?:at (?:the )?age of|when he was|reached the age of)/i.test(doc.en||''))score+=45;
    const prophetAliases={ismail:'ishmael',ishaq:'isaac',yaqub:'jacob',ayyub:'job',harun:'aaron',dawud:'david',sulayman:'solomon',ilyas:'elijah',alyasa:'elisha',zakariya:'zechariah',yahya:'john',ibrahim:'abraham',musa:'moses',isa:'jesus',nuh:'noah',yunus:'jonah',yusuf:'joseph'};
    for(const i of required){const preferred=prophetAliases[terms[i][0]];
     if(preferred&&doc.normalized.includes(` ${preferred} `))score+=5;

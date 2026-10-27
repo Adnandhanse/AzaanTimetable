@@ -38,7 +38,8 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   final _scroll = ScrollController();
   final _turns = <_ChatTurn>[];
   bool _busy = false, _voiceBusy = false, _speaking = false;
-  String _locale = 'en-IN', _replyLanguage = 'auto';
+  String _locale = 'hi-IN';
+  static const _replyLanguage = 'auto';
   int _version = 0;
   @override
   void initState() {
@@ -312,32 +313,6 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                     padding: const EdgeInsets.all(24),
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
                       DropdownButtonFormField<String>(
-                          value: _replyLanguage,
-                          decoration: InputDecoration(
-                              labelText:
-                                  _ui('Answer Language', 'جواب کی زبان')),
-                          items: [
-                            DropdownMenuItem(
-                                value: 'auto',
-                                child: Text(_ui(
-                                    'Automatic · English or Hinglish',
-                                    'خودکار · انگریزی یا رومن اردو'))),
-                            DropdownMenuItem(
-                                value: 'roman',
-                                child: Text('Roman Hindi / Urdu')),
-                            DropdownMenuItem(value: 'hi', child: Text('हिंदी')),
-                            DropdownMenuItem(value: 'ur', child: Text('اردو')),
-                            DropdownMenuItem(
-                                value: 'en', child: Text('English'))
-                          ],
-                          onChanged: (v) {
-                            if (v != null) {
-                              setState(() => _replyLanguage = v);
-                              update(() {});
-                            }
-                          }),
-                      const SizedBox(height: 18),
-                      DropdownButtonFormField<String>(
                           value: _locale,
                           decoration: InputDecoration(
                               labelText: _ui('Voice Input', 'آواز کی زبان')),
@@ -358,7 +333,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                           }),
                       const SizedBox(height: 18),
                       Text(
-                          _ui('Conversation stays in this session. Start a new chat to clear the context.',
+                          _ui('Answers follow your question: Hinglish or English. Start a new chat to clear context.',
                               'گفتگو اسی سیشن میں رہتی ہے۔ نئی گفتگو سے سیاق ختم ہو جاتا ہے۔'),
                           style: TextStyle(fontSize: 12, height: 1.6)),
                     ])))));
@@ -439,8 +414,8 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                 language == 'ur' ? TextDirection.rtl : TextDirection.ltr,
             style: TextStyle(
                 fontFamily: language == 'ur' ? 'NotoNastaliqUrdu' : 'Inter',
-                fontSize: language == 'ur' ? 16 : 14,
-                height: language == 'ur' ? 1.95 : 1.6,
+                fontSize: language == 'ur' ? 16 : 12.5,
+                height: language == 'ur' ? 1.95 : 1.55,
                 color: AppColors.text)),
         if ((raw['sourceIds'] as List? ?? []).isNotEmpty)
           Padding(
@@ -490,7 +465,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
           title:
-              const Text('Ask Islam Connect', style: TextStyle(fontSize: 17)),
+              const Text('Ask Islam Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           actions: [
             IconButton(
                 tooltip: _ui('New Chat', 'نئی گفتگو'),
@@ -525,7 +500,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                               _ui('A little clarity, every day.',
                                   'ہر روز، علم کی طرف ایک قدم۔'),
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w600)),
+                                  fontSize: 18, fontWeight: FontWeight.w500)),
                           const SizedBox(height: 10),
                           Text(
                               _ui('Ask naturally. Explore answers with trusted references.',
@@ -572,7 +547,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                             borderRadius: BorderRadius.circular(16)),
                         child: SelectableText(turn.question,
                             style:
-                                const TextStyle(fontSize: 14, height: 1.5)))),
+                                const TextStyle(fontSize: 12.5, height: 1.5)))),
                 Container(
                     margin: const EdgeInsets.only(bottom: 24),
                     padding: const EdgeInsets.all(16),
@@ -596,7 +571,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                           maxLines: 5,
                           maxLength: 500,
                           textInputAction: TextInputAction.newline,
-                          style: TextStyle(fontSize: 14, color: AppColors.text),
+                          style: TextStyle(fontSize: 13, color: AppColors.text),
                           decoration: InputDecoration(
                               hintText: _voiceBusy
                                   ? _ui('Listening…', 'سن رہے ہیں…')

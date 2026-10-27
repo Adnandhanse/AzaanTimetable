@@ -176,7 +176,7 @@ class _MasjidSearchScreenState extends State<MasjidSearchScreen> {
                       leading: Icon(Icons.mosque, color: AppColors.emerald),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(MasjidDisplay.name(masjid.name),
-                        style: TextStyle(fontFamily: AppFonts.sans, fontSize: 16,
+                        style: TextStyle(fontFamily: AppFonts.sans, fontSize: 14,
                           fontWeight: FontWeight.w600, height: 1.35, color: AppColors.text)),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(top: 6),

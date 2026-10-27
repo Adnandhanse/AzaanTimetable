@@ -223,7 +223,7 @@ class _LearningCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: (S.isUrdu ? AppText.urduText : AppText.rowTitle)
                       .copyWith(
-                          fontSize: S.isUrdu ? 17 : 15,
+                          fontSize: S.isUrdu ? 17 : 14,
                           height: S.isUrdu ? 1.8 : 1.25,
                           color: AppColors.text)),
             )),

@@ -4,7 +4,7 @@ const {requestData}=require('./assistant-contract');
 const {localResponse}=require('./assistant-local');
 const {answerConversation}=require('./conversational');
 const {optionalCache}=require('./shared-answer-cache');
-const VERSION='conversation-v1.1';
+const VERSION='conversation-v1.2-language-references';
 const notesVersion=createHash('sha256').update(JSON.stringify(require('./scholarly-notes.json'))).digest('hex');
 function cacheKey({uid,question,language,model,version}){
  return createHash('sha256').update(JSON.stringify([VERSION,uid,question.normalize('NFKC').trim().replace(/\s+/g,' '),language,model,version])).digest('hex');
@@ -36,7 +36,7 @@ function createAssistantHandler({quickData,stats,documents,reserve,cache,ram,mod
    const docs=await documents();
    const result=await answerConversation({...request,docs,key:key(),model,...(call?{call}:{}),now});
    if(result.status!=='answered')await optionalCache(()=>reservation.refund());
-   if(!request.history.length&&result.status==='answered'){
+   if(!request.history.length&&result.status==='answered'&&(!result.notices?.length||result.references?.length)){
     ram?.put(ck,result);await optionalCache(()=>cache?.put(ck,result));
    }
    return result;

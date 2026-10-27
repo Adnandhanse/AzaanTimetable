@@ -1,330 +1,107 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
-import '../services/timing_reminder_service.dart';
-import '../services/admin_contact.dart';
-import '../services/auth_service.dart';
-import '../services/app_strings.dart';
-import 'package:permission_handler/permission_handler.dart';
-import '../widgets/timing_review_status.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../theme/app_theme.dart';
-import 'announcement_admin_screen.dart';
 import '../models/masjid.dart';
+import '../services/admin_contact.dart';
+import '../services/app_strings.dart';
+import '../services/auth_service.dart';
 import '../services/masjid_repository.dart';
-import 'update_prayer_times_screen.dart';
+import '../services/timing_reminder_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/timing_review_status.dart';
+import 'announcement_admin_screen.dart';
+import 'home_screen.dart';
 import 'transfer_administration_screen.dart';
+import 'update_prayer_times_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final String adminMobile;
   const AdminDashboardScreen({super.key, required this.adminMobile});
-
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen>
-    with WidgetsBindingObserver {
-  final Set<String> _confirming = {};
-
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> with WidgetsBindingObserver {
+  late final Stream<List<Masjid>> _masjids;
   @override
   void initState() {
     super.initState();
+    _masjids = MasjidRepository.streamByAdminMobile(widget.adminMobile);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _enableReminders(requestPermission: true);
+      if (mounted) TimingReminderService.enable(widget.adminMobile, requestPermission: true);
     });
   }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed)
-      _enableReminders(requestPermission: false);
+    if (state == AppLifecycleState.resumed) TimingReminderService.enable(widget.adminMobile);
   }
-
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+  void dispose() { WidgetsBinding.instance.removeObserver(this); super.dispose(); }
+  Future<void> _logout() async {
+    final ok = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+      title: Text(S.tr('Log Out?', 'لاگ آؤٹ کریں؟')),
+      content: Text(S.tr('You will need to sign in again to manage your masjid.', 'مسجد کا انتظام کرنے کے لیے دوبارہ لاگ ان کرنا ہوگا۔')),
+      actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(S.tr('Cancel', 'منسوخ'))),
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(S.tr('Log Out', 'لاگ آؤٹ')))]));
+    if (ok != true) return;
+    await TimingReminderService.disable();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('admin_mobile');
+    await AuthService.signOutAdmin();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
   }
-
-  Future<void> _enableReminders({bool requestPermission = true}) async {
-    await TimingReminderService.enable(widget.adminMobile,
-        requestPermission: requestPermission);
-  }
-
-  Future<void> _confirm(Masjid masjid) async {
-    if (_confirming.contains(masjid.id)) return;
-    setState(() => _confirming.add(masjid.id));
-    try {
-      await MasjidRepository.confirmPrayerTimes(masjid.id)
-          .timeout(const Duration(seconds: 20));
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(S.tr(
-                'Timings confirmed. The next check is due in 10 days.',
-                'اوقات کی تصدیق ہو گئی۔ اگلا جائزہ دس دن بعد ہوگا۔'))));
-    } catch (_) {
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(S.tr(
-                'Could not save. Check your connection and try again.',
-                'محفوظ نہیں ہو سکا۔ انٹرنیٹ دیکھ کر دوبارہ کوشش کریں۔'))));
-    } finally {
-      if (mounted) setState(() => _confirming.remove(masjid.id));
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Prayer Time Dashboard'),
-        actions: [
-          // REQUIRED, now that the session persists.
-          //
-          // Without this an admin could never sign out — and on a shared phone,
-          // or when a masjid changes who manages it, the previous admin would
-          // stay signed in forever.
-          IconButton(
-            icon: const Icon(Icons.logout, size: 20),
-            tooltip: 'Log out',
-            onPressed: () async {
-              final ok = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Log out?'),
-                  content: const Text(
-                      'You will need to enter your mobile number again to manage this masjid.'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                        child: const Text('Cancel')),
-                    TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        child: const Text('Log out')),
-                  ],
-                ),
-              );
-              if (ok != true) return;
-              await TimingReminderService.disable();
-              try {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.remove('admin_mobile');
-              } catch (_) {}
-              if (!context.mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-                (route) => false,
-              );
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<List<Masjid>>(
-        stream: MasjidRepository.streamByAdminMobile(widget.adminMobile),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final masjids = snapshot.data!;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) TimingReminderService.enable(widget.adminMobile);
-          });
-          if (masjids.isEmpty) {
-            return const Center(
-                child: Text('No masjids found for this number.'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: masjids.length,
-            itemBuilder: (context, index) {
-              final masjid = masjids[index];
-              final verified = masjid.verificationStatus == 'Verified';
-              final canManage =
-                  AdminContact.owns(masjid, AuthService.currentUser);
-              return Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ListTile(
-                      leading: Icon(
-                          verified ? Icons.verified : Icons.hourglass_top,
-                          color: verified ? Colors.green : Colors.orange),
-                      title: Text(masjid.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      // Follower count is the number an imam actually wants: how
-                      // many people are relying on the times he keeps. It is a
-                      // count only — the app holds no record of WHO follows him.
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${masjid.city} • ${masjid.verificationStatus}'),
-                          if (!canManage)
-                            const Text(
-                                'Awaiting Platform Admin approval. Management becomes available after approval.'),
-                          const SizedBox(height: 2),
-                          // How long since the times were touched. The number an
-                          // admin needs to see is not "when did I last log in" but
-                          // "are my times still right" — and a masjid whose times
-                          // were last edited in Ramadan is the one to chase.
-                          TimingReviewStatus(masjid: masjid),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Icon(Icons.people_outline,
-                                  size: 14, color: AppColors.emerald),
-                              const SizedBox(width: 5),
-                              Text(
-                                masjid.followerCount == 1
-                                    ? '1 follower'
-                                    : '${masjid.followerCount} followers',
-                                style: AppText.caption
-                                    .copyWith(color: AppColors.emerald),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // Two things an admin does: change the times, and tell people
-                      // something. Both reachable from the row rather than one
-                      // being buried behind the other.
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.campaign_outlined, size: 20),
-                            color: AppColors.gold,
-                            tooltip: 'Announcements',
-                            onPressed: !canManage
-                                ? null
-                                : () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              AnnouncementAdminScreen(
-                                                  masjid: masjid)),
-                                    ),
-                          ),
-                          const Icon(Icons.chevron_right),
-                        ],
-                      ),
-                      onTap: !canManage
-                          ? null
-                          : () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) => UpdatePrayerTimesScreen(
-                                        masjid: masjid)),
-                              );
-                            },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.check_circle_outline),
-                              label: Text(_confirming.contains(masjid.id)
-                                  ? S.tr('Saving…', 'محفوظ ہو رہا ہے…')
-                                  : S.tr(
-                                      'Timings Are Correct', 'اوقات درست ہیں')),
-                              onPressed:
-                                  !canManage || _confirming.contains(masjid.id)
-                                      ? null
-                                      : () => _confirm(masjid),
-                            ),
-                            if (canManage)
-                              Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(Icons.notifications_none,
-                                            size: 16,
-                                            color: AppColors.textMuted),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                            child: Text(
-                                                S.tr(
-                                                    'Automatic check after 10 days; every 5 days until confirmed.',
-                                                    'دس دن بعد خودکار یاددہانی؛ تصدیق تک ہر پانچ دن بعد۔'),
-                                                style: AppText.caption.copyWith(
-                                                    color: AppColors.textMid))),
-                                      ])),
-                            if (canManage)
-                              ValueListenableBuilder<String>(
-                                  valueListenable:
-                                      TimingReminderService.deliveryState,
-                                  builder: (context, status, _) {
-                                    if (status == 'permission-required')
-                                      return TextButton.icon(
-                                          onPressed: () async {
-                                            await openAppSettings();
-                                          },
-                                          icon: const Icon(
-                                              Icons.settings_outlined,
-                                              size: 16),
-                                          label: Text(S.tr(
-                                              'Allow Notifications in Phone Settings',
-                                              'فون کی ترتیبات میں اطلاعات کی اجازت دیں')));
-                                    if (status == 'retrying')
-                                      return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 4),
-                                          child: Text(
-                                              S.tr(
-                                                  'Connecting reminder delivery. Retrying automatically.',
-                                                  'یاددہانی کے لیے رابطہ ہو رہا ہے۔ خودکار دوبارہ کوشش جاری ہے۔'),
-                                              style: AppText.caption.copyWith(
-                                                  color: AppColors.textMid)));
-                                    if (status == 'pending-connection')
-                                      return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 4),
-                                          child: Text(
-                                              S.tr(
-                                                  'Reminder delivery is pending. We will retry when you reopen this screen.',
-                                                  'یاددہانی کا رابطہ باقی ہے۔ صفحہ دوبارہ کھولنے پر کوشش ہوگی۔'),
-                                              style: AppText.caption.copyWith(
-                                                  color: AppColors.textMid)));
-                                    return const SizedBox.shrink();
-                                  }),
-                          ]),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.emerald,
-                          side: BorderSide(color: AppColors.emerald),
-                          minimumSize: const Size.fromHeight(48),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        icon: const Icon(Icons.swap_horiz_rounded, size: 22),
-                        label: const Text('Transfer ownership',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                        onPressed: !canManage
-                            ? null
-                            : () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        TransferAdministrationScreen(
-                                            masjid: masjid))),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(S.tr('Masjid Dashboard', 'مسجد ڈیش بورڈ')),
+      actions: [IconButton(tooltip: S.tr('Log Out', 'لاگ آؤٹ'), onPressed: _logout, icon: const Icon(Icons.logout, size: 20))]),
+    body: StreamBuilder<List<Masjid>>(stream: _masjids, builder: (context, snapshot) {
+      if (snapshot.hasError) return Center(child: Text(S.tr('Could not load masjids. Please try again.', 'مساجد لوڈ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔')));
+      if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+      final masjids = snapshot.data!;
+      if (masjids.isEmpty) return Center(child: Text(S.tr('No masjids found for this account.', 'اس اکاؤنٹ کے لیے کوئی مسجد نہیں ملی۔')));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) TimingReminderService.enable(widget.adminMobile);
+      });
+      return ListView.separated(padding: const EdgeInsets.all(16), itemCount: masjids.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final m = masjids[index];
+          final canManage = AdminContact.owns(m, AuthService.currentUser);
+          return Card(margin: EdgeInsets.zero, shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), side: BorderSide(color: AppColors.goldRule)),
+            child: Padding(padding: const EdgeInsets.all(14), child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Icon(m.verificationStatus == 'Verified' ? Icons.verified_outlined : Icons.hourglass_top,
+                    size: 20, color: AppColors.emerald),
+                  const SizedBox(width: 10),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(m.name, style: TextStyle(fontFamily: AppFonts.sans, fontSize: 14,
+                      fontWeight: FontWeight.w600, color: AppColors.text)),
+                    const SizedBox(height: 4),
+                    Text('${m.city} · ${m.verificationStatus}', style: AppText.caption.copyWith(color: AppColors.textMid)),
+                    TimingReviewStatus(masjid: m),
+                    if (!canManage) Text(S.tr('Awaiting Platform Admin approval.', 'پلیٹ فارم ایڈمن کی منظوری کا انتظار ہے۔'),
+                      style: AppText.caption.copyWith(color: AppColors.textMid)),
+                  ])),
+                  if (canManage) IconButton(tooltip: S.tr('Announcements', 'اعلانات'),
+                    icon: Icon(Icons.campaign_outlined, size: 20, color: AppColors.emerald),
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnnouncementAdminScreen(masjid: m)))),
+                ]),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(onPressed: !canManage ? null : () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => UpdatePrayerTimesScreen(masjid: m))),
+                  icon: const Icon(Icons.schedule, size: 17), label: Text(S.tr('Edit Prayer Times', 'نماز کے اوقات تبدیل کریں'))),
+                Row(children: [
+                  Icon(Icons.people_outline, size: 14, color: AppColors.textMid), const SizedBox(width: 5),
+                  Expanded(child: Text('${m.followerCount} ${S.tr('followers', 'فالوورز')}',
+                    style: AppText.caption.copyWith(color: AppColors.textMid))),
+                  TextButton(onPressed: !canManage ? null : () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => TransferAdministrationScreen(masjid: m))),
+                    child: Text(S.tr('Transfer Ownership', 'انتظام منتقل کریں'), style: const TextStyle(fontSize: 11))),
+                ]),
+              ])));
+        });
+    }));
 }

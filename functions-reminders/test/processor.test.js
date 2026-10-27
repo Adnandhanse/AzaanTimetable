@@ -13,7 +13,7 @@ function fixture({devices=true,fail=false}={}){
  return {payloads,run:()=>processor(ref('masjids/m'),{sent:0,failed:0}),data,sends:()=>sends,setNow:v=>now=v,afterClaim:f=>afterClaim=f};
 }
 test('successful push records cadence; rerun does not duplicate; repeat after five days',async()=>{const f=fixture();await f.run();await f.run();a.equal(f.sends(),1);f.setNow(25*DAY);await f.run();a.equal(f.sends(),2);});
-test('confirmation cancels old cadence and waits ten more days',async()=>{const f=fixture();await f.run();f.data.get('masjids/m').timesConfirmedAt=ts(21*DAY);f.setNow(26*DAY);await f.run();a.equal(f.sends(),1);f.setNow(31*DAY);await f.run();a.equal(f.sends(),2);});
+test('saving timings cancels old cadence and waits ten more days',async()=>{const f=fixture();await f.run();f.data.get('masjids/m').timesUpdatedAt=ts(21*DAY);f.setNow(26*DAY);await f.run();a.equal(f.sends(),1);f.setNow(31*DAY);await f.run();a.equal(f.sends(),2);});
 test('concurrent timing change after claim cancels before push',async()=>{const f=fixture();f.afterClaim(()=>f.data.get('masjids/m').timesUpdatedAt=ts(20*DAY));await f.run();a.equal(f.sends(),0);a.equal(f.data.get('_timingReminderState/m').leaseUntil.toMillis(),0);});
 test('former owners and missing devices never count as delivered',async()=>{for(const devices of [true,false]){const f=fixture({devices});if(devices)f.data.get('_timingReminderDevices/d').uid='old';await f.run();a.equal(f.sends(),0);a.equal(f.data.get('_timingReminderState/m').lastSentAt,undefined);}});
 test('FCM failure clears lease without starting a five day cooldown',async()=>{const f=fixture({fail:true});await a.rejects(f.run());const s=f.data.get('_timingReminderState/m');a.equal(s.leaseUntil.toMillis(),0);a.equal(s.lastSentAt,undefined);});

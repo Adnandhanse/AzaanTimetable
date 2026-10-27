@@ -62,7 +62,7 @@ void main() {
             greaterThanOrEqualTo(4.5),
             reason: id);
       }
-      expect(theme.textTheme.bodyMedium!.fontSize, 13);
+      expect(theme.textTheme.bodyMedium!.fontSize, 12);
     }
   });
   test(
@@ -143,14 +143,12 @@ void main() {
         home: Scaffold(body: TimingReviewStatus(masjid: m))));
     expect(find.textContaining('Date available'), findsNothing);
     expect(find.textContaining('Confirmed:'), findsNothing);
-    expect(
-        find.text('Confirm the current timings to start a new review cycle.'),
-        findsOneWidget);
-    m.timesConfirmedAt = DateTime(2026, 10, 27);
+    expect(find.byType(Text), findsNothing);
+    m.timesUpdatedAt = DateTime(2026, 10, 27, 9, 30);
     await tester.pumpWidget(MaterialApp(
         theme: AppTheme.light(),
         home: Scaffold(body: TimingReviewStatus(masjid: m))));
-    expect(find.text('Confirmed: 27 Oct 2026'), findsOneWidget);
+    expect(find.text('Last saved: 27 Oct 2026, 09:30'), findsOneWidget);
   });
   testWidgets('Geographic map opens its cited stories without layout overflow',
       (tester) async {
