@@ -119,7 +119,7 @@ class _ProphetStoriesScreenState extends State<ProphetStoriesScreen> {
                         ...books.map((b) {
                           final saved = _progress[b.id] ?? {};
                           final done = saved['completed'] == true &&
-                              saved['contentVersion'] == 4;
+                              saved['contentVersion'] == b.contentVersion;
                           final index =
                               b.pages.indexWhere((p) => p.id == saved['page']);
                           return Card(

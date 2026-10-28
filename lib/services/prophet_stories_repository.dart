@@ -29,12 +29,12 @@ class ProphetStoryProgress {
       return raw == null ? {} : Map<String, dynamic>.from(jsonDecode(raw) as Map);
     } catch (_) { return {}; }
   }
-  static Future<void> save(String id, String pageId, {bool completed = false}) async {
+  static Future<void> save(String id, String pageId, {bool completed = false, int contentVersion = 4}) async {
     final prefs = await SharedPreferences.getInstance();
     final old = await read(id);
     final ok = await prefs.setString(_key(id), jsonEncode({
-      'page': pageId, 'contentVersion': 4,
-      'completed': completed || (old['contentVersion'] == 4 && old['completed'] == true),
+      'page': pageId, 'contentVersion': contentVersion,
+      'completed': completed || (old['contentVersion'] == contentVersion && old['completed'] == true),
     }));
     if (!ok) throw StateError('Progress not saved');
   }

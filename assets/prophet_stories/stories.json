@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "books": [
     {
       "id": "adam",
@@ -192,7 +192,8 @@
       "birthNoteEnglish": "Adam Alaihis Salam’s account begins with his creation by Allah, rather than a human birth.",
       "teaser": "Insani kahani Adam Alaihis Salam ki takhleeq se shuru hoti hai.",
       "openingRoman": "Insani kahani Adam Alaihis Salam ki takhleeq se shuru hoti hai. Ilm ki nemat, Iblis ka takabbur aur taubah ki qubooliyat—yeh waqiat batate hain ke Allah Ta'ala ki hidayat insaan ki zindagi mein kitni aham hai.",
-      "openingEnglish": "The human story begins with the creation of Adam Alaihis Salam. The gift of knowledge, the arrogance of Iblis and the acceptance of repentance introduce the need for Allah’s guidance."
+      "openingEnglish": "The human story begins with the creation of Adam Alaihis Salam. The gift of knowledge, the arrogance of Iblis and the acceptance of repentance introduce the need for Allah’s guidance.",
+      "contentVersion": 4
     },
     {
       "id": "idris",
@@ -244,7 +245,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Idris Alaihis Salam ki zindagi ka lamba safarnama Quran mein nahi aata.",
       "openingRoman": "Idris Alaihis Salam ki zindagi ka lamba safarnama Quran mein nahi aata. Jo pehchan milti hai, woh bahut qeemti hai: sachchai, nabuwat, sabr aur Allah Ta'ala ki taraf se buland maqam.",
-      "openingEnglish": "The Quran does not give a long biography of Idris Alaihis Salam. It preserves his truthfulness, prophethood, patience and the high station Allah granted him."
+      "openingEnglish": "The Quran does not give a long biography of Idris Alaihis Salam. It preserves his truthfulness, prophethood, patience and the high station Allah granted him.",
+      "contentVersion": 4
     },
     {
       "id": "nuh",
@@ -578,7 +580,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Ek Nabi apni qaum ko baar-baar Allah Ta'ala ki taraf bulate rahe.",
       "openingRoman": "Ek Nabi apni qaum ko baar-baar Allah Ta'ala ki taraf bulate rahe. Nuh Alaihis Salam ki kahani lambi dawat se kashti aur toofan tak pahunchti hai—jahan nijat ka faisla quwwat ya rishtedari se nahi hua.",
-      "openingEnglish": "Nuh Alaihis Salam repeatedly called his people to Allah. His story moves from a long mission to the ark and the flood, when strength and family ties could not secure safety."
+      "openingEnglish": "Nuh Alaihis Salam repeatedly called his people to Allah. His story moves from a long mission to the ark and the flood, when strength and family ties could not secure safety.",
+      "contentVersion": 4
     },
     {
       "id": "hud",
@@ -671,7 +674,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Aad ko apni taqat par naaz tha.",
       "openingRoman": "Aad ko apni taqat par naaz tha. Hud Alaihis Salam ne unhein unke Rabb ki yaad dilayi. Is kahani mein quwwat ke ghuroor aur Allah Ta'ala par iman ka anjaam samne aata hai.",
-      "openingEnglish": "The people of Aad were proud of their strength. Hud Alaihis Salam reminded them of their Lord. Their story contrasts pride in power with faith in Allah."
+      "openingEnglish": "The people of Aad were proud of their strength. Hud Alaihis Salam reminded them of their Lord. Their story contrasts pride in power with faith in Allah.",
+      "contentVersion": 4
     },
     {
       "id": "salih",
@@ -767,7 +771,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Paharon mein tarashe hue ghar Thamud ke hunar ki nishani the.",
       "openingRoman": "Paharon mein tarashe hue ghar Thamud ke hunar ki nishani the. Salih Alaihis Salam ne unhein Allah Ta'ala ki ibadat ki taraf bulaya; phir oontni ki nishani unke liye ita-at ki azmaish bani.",
-      "openingEnglish": "The rock-carved homes of Thamud displayed their skill. Salih Alaihis Salam called them to worship Allah, and the she-camel became a sign and a test of obedience."
+      "openingEnglish": "The rock-carved homes of Thamud displayed their skill. Salih Alaihis Salam called them to worship Allah, and the she-camel became a sign and a test of obedience.",
+      "contentVersion": 4
     },
     {
       "id": "ibrahim",
@@ -1056,7 +1061,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Ibrahim Alaihis Salam ki kahani tawheed ki dawat, hijrat, dua aur ita-at ke waqiat ko jorti hai.",
       "openingRoman": "Ibrahim Alaihis Salam ki kahani tawheed ki dawat, hijrat, dua aur ita-at ke waqiat ko jorti hai. Qaum ke buton se Makkah ki be-aab waadi aur Kaaba ki bunyadon tak, unka rujoo apne Rabb hi ki taraf raha.",
-      "openingEnglish": "The story of Ibrahim Alaihis Salam brings together the call to worship Allah alone, migration, prayer and obedience. Its scenes extend from his people’s idols to the valley of Makkah and the foundations of the Kaaba."
+      "openingEnglish": "The story of Ibrahim Alaihis Salam brings together the call to worship Allah alone, migration, prayer and obedience. Its scenes extend from his people’s idols to the valley of Makkah and the foundations of the Kaaba.",
+      "contentVersion": 4
     },
     {
       "id": "lut",
@@ -1149,7 +1155,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Lut Alaihis Salam ne apni qaum ko bad-amali se roka.",
       "openingRoman": "Lut Alaihis Salam ne apni qaum ko bad-amali se roka. Mehmanon ki amad aur raat ki rawangi ke waqiat ke saath yeh kahani Allah Ta'ala ki hifazat aur zulm ke anjaam ko bayan karti hai.",
-      "openingEnglish": "Lut Alaihis Salam warned his people against wrongdoing. The arrival of visitors and the departure by night lead into an account of Allah’s protection and the consequences of oppression."
+      "openingEnglish": "Lut Alaihis Salam warned his people against wrongdoing. The arrival of visitors and the departure by night lead into an account of Allah’s protection and the consequences of oppression.",
+      "contentVersion": 4
     },
     {
       "id": "ismail",
@@ -1259,7 +1266,8 @@
       "birthNoteEnglish": "The Quran recalls Ibrahim Alaihis Salam’s prayer and the gift of children. Sahih Bukhari relates Ismail Alaihis Salam’s infancy in Makkah.",
       "teaser": "Ismail Alaihis Salam ki shuruati zindagi Makkah ki be-aab waadi se jurti hai.",
       "openingRoman": "Ismail Alaihis Salam ki shuruati zindagi Makkah ki be-aab waadi se jurti hai. Zamzam ke pani, waadi ki abadi aur apne walid ke saath Kaaba ki tameer ke waqiat mein Allah Ta'ala ki nemat aur bandon ki ita-at samne aati hai.",
-      "openingEnglish": "The early life of Ismail Alaihis Salam is linked to the valley of Makkah. Zamzam, the settlement of the valley and the raising of the Kaaba’s foundations connect Allah’s gifts with obedience."
+      "openingEnglish": "The early life of Ismail Alaihis Salam is linked to the valley of Makkah. Zamzam, the settlement of the valley and the raising of the Kaaba’s foundations connect Allah’s gifts with obedience.",
+      "contentVersion": 4
     },
     {
       "id": "ishaq",
@@ -1319,7 +1327,8 @@
       "birthNoteEnglish": "The Quran announces Ishaq Alaihis Salam’s birth, but does not provide a precise date or detailed childhood here.",
       "teaser": "Barhape mein ek bete ki khushkhabri—aur uske saath Allah Ta'ala ki qudrat ka izhar.",
       "openingRoman": "Barhape mein ek bete ki khushkhabri—aur uske saath Allah Ta'ala ki qudrat ka izhar. Quran Ishaq Alaihis Salam ko nabuwat, neki aur barkat ke zikr ke saath yaad karta hai.",
-      "openingEnglish": "The good news of a son in old age displayed Allah’s power. The Quran remembers Ishaq Alaihis Salam through prophethood, righteousness and blessing."
+      "openingEnglish": "The good news of a son in old age displayed Allah’s power. The Quran remembers Ishaq Alaihis Salam through prophethood, righteousness and blessing.",
+      "contentVersion": 4
     },
     {
       "id": "yaqub",
@@ -1387,6 +1396,24 @@
           "titleEnglish": "Separation and Patience"
         },
         {
+          "id": "yaqub_gham_mein_umeed",
+          "title": "Gham mein bhi umeed",
+          "titleEnglish": "Hope Through Grief",
+          "scene": "night",
+          "roman": "Judai ka gham Yaqub Alaihis Salam ke liye gehra tha. Quran unki aankhon aur unke dil ke ranj ka zikr karta hai. Jab unke beton ne Yusuf Alaihis Salam ko yaad karne par baat ki, to unhon ne apni pareshani aur gham ki faryad Allah Ta'ala hi ke huzoor ki.\n\nIs gham ke bawajood unhon ne umeed ka darwaza band nahi kiya. Unhon ne apne beton ko Yusuf Alaihis Salam aur unke bhai ki khabar talash karne ko kaha aur Allah Ta'ala ki rahmat se naumeed hone se roka. Is tarah kahani mein sabr ke saath koshish bhi chalti rehti hai, aur aane wali mulaqat ki taraf raasta khulta hai.",
+          "english": "The separation weighed heavily on Yaqub Alaihis Salam. The Quran describes his sorrow and the effect on his eyes. When his sons spoke about his continuing remembrance of Yusuf Alaihis Salam, he directed his complaint and grief to Allah.\n\nYet grief did not close the door to hope. He told his sons to seek news of Yusuf Alaihis Salam and his brother and warned them against despairing of Allah's mercy. Patience here is accompanied by an instruction to keep searching. The narrative moves towards reunion without pretending that a faithful person feels no pain.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 12,
+              "start": 84,
+              "end": 87
+            }
+          ],
+          "noteRoman": "Seekh: Sabr ka matlab gham na hona nahi; Allah Ta'ala ki rahmat se umeed rakhna hai.",
+          "noteEnglish": "Reflection: Patience does not mean an absence of grief; it includes hope in Allah’s mercy."
+        },
+        {
           "id": "yaqub_dobara_mulaqat",
           "title": "Dobara mulaqat",
           "scene": "palace",
@@ -1422,7 +1449,8 @@
       "birthNoteEnglish": "The Quran announces Yaqub Alaihis Salam after Ishaq Alaihis Salam. It does not provide a detailed childhood account here.",
       "teaser": "Yaqub Alaihis Salam ki kahani ek walid ki naseehat, judai ke sabr aur Allah Ta'ala se umeed ki kahani hai.",
       "openingRoman": "Yaqub Alaihis Salam ki kahani ek walid ki naseehat, judai ke sabr aur Allah Ta'ala se umeed ki kahani hai. Yusuf Alaihis Salam ka khwaab aur baad ki mulaqat is safar ke aham manzar hain.",
-      "openingEnglish": "The story of Yaqub Alaihis Salam includes a father’s counsel, patience through separation and hope in Allah. The dream of Yusuf Alaihis Salam and their later reunion are important scenes in that account."
+      "openingEnglish": "The story of Yaqub Alaihis Salam includes a father’s counsel, patience through separation and hope in Allah. The dream of Yusuf Alaihis Salam and their later reunion are important scenes in that account.",
+      "contentVersion": 5
     },
     {
       "id": "yusuf",
@@ -1674,7 +1702,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Ek khwaab, ghar se judai, Misr mein azmaish aur phir mulaqat.",
       "openingRoman": "Ek khwaab, ghar se judai, Misr mein azmaish aur phir mulaqat. Yusuf Alaihis Salam ki kahani ke marhale ek doosre se jurte hain, aur aakhir mein bachpan ke khwaab ki tabeer samne aati hai.",
-      "openingEnglish": "A dream, separation from home, trials in Egypt and a reunion form the connected story of Yusuf Alaihis Salam. Its later events reveal the fulfilment of his childhood dream."
+      "openingEnglish": "A dream, separation from home, trials in Egypt and a reunion form the connected story of Yusuf Alaihis Salam. Its later events reveal the fulfilment of his childhood dream.",
+      "contentVersion": 4
     },
     {
       "id": "ayyub",
@@ -1744,6 +1773,24 @@
           "titleEnglish": "Mercy and Family"
         },
         {
+          "id": "ayyub_qasam_aur_asani",
+          "title": "Qasam aur aasani",
+          "titleEnglish": "An Oath and a Merciful Way",
+          "scene": "garden",
+          "roman": "Ayyub Alaihis Salam ke waqye mein shifa aur rahmat ke saath ek qasam ka zikr bhi aata hai. Allah Ta'ala ne unhein haath mein tinkon ka guchchha lene aur usse maarne ki hidayat di, taake woh apni qasam na torein. Quran is qasam ki tamam pehle ki tafseel bayan nahi karta. Isliye hum uska sabab, mukhatab ya koi mukalma apni taraf se nahi jorte.\n\nIsi ayat mein Ayyub Alaihis Salam ke sabr aur Allah Ta'ala ki taraf ruju ki tareef hai. Unki kahani sirf takleef ka bayan nahi, balki rahmat aur bandagi ke saath uske anjaam ko bhi dikhati hai.",
+          "english": "Alongside healing and mercy, the account of Ayyub Alaihis Salam mentions an oath. Allah directed him to take a bundle of stems and strike with it so that he would not break his oath. The Quran does not give the full preceding circumstances. This retelling therefore supplies neither an invented cause nor an unnamed person's imagined dialogue.\n\nThe same verse praises his patience and constant turning to Allah. His story is not only an account of suffering; it also ends with mercy and recognition of his devotion.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 44,
+              "end": 44
+            }
+          ],
+          "noteRoman": "Seekh: Jahan wahi tafseel nahi deti, wahan hum bhi ehtiyat se rukte hain.",
+          "noteEnglish": "Reflection: Where revelation does not provide detail, a careful retelling does not invent it."
+        },
+        {
           "id": "ayyub_sabr_karne_wala_banda",
           "title": "Sabr karne wala banda",
           "scene": "sunrise",
@@ -1764,7 +1811,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Takleef ke waqt Ayyub Alaihis Salam ne apne Rabb ko pukara.",
       "openingRoman": "Takleef ke waqt Ayyub Alaihis Salam ne apne Rabb ko pukara. Quran ki mukhtasar magar gehri riwayat mein dua, shifa aur Allah Ta'ala ki rahmat ka zikr hai.",
-      "openingEnglish": "In affliction, Ayyub Alaihis Salam called upon his Lord. The Quran’s concise account brings together supplication, healing and Allah’s mercy."
+      "openingEnglish": "In affliction, Ayyub Alaihis Salam called upon his Lord. The Quran’s concise account brings together supplication, healing and Allah’s mercy.",
+      "contentVersion": 5
     },
     {
       "id": "shuayb",
@@ -1845,7 +1893,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Shuayb Alaihis Salam ki dawat ibadat ke saath logon ke huqooq se bhi juri thi.",
       "openingRoman": "Shuayb Alaihis Salam ki dawat ibadat ke saath logon ke huqooq se bhi juri thi. Madyan ke logon ko naap-tol poora karne aur zameen mein fasad se bachne ki naseehat ki gayi.",
-      "openingEnglish": "The call of Shuayb Alaihis Salam concerned worship and people’s rights. The people of Madyan were told to give full measure and weight and avoid corruption."
+      "openingEnglish": "The call of Shuayb Alaihis Salam concerned worship and people’s rights. The people of Madyan were told to give full measure and weight and avoid corruption.",
+      "contentVersion": 4
     },
     {
       "id": "musa",
@@ -2151,6 +2200,60 @@
           "titleEnglish": "Water and Provision on the Journey"
         },
         {
+          "id": "musa_sarzameen_aur_inkar",
+          "title": "Himmat ki jagah inkar",
+          "titleEnglish": "A Refusal at the Threshold",
+          "scene": "valley",
+          "roman": "Firaun se nijat ke baad bhi Bani Israil ka safar azmaishon se khaali nahi tha. Musa Alaihis Salam ne apni qaum ko Allah Ta'ala ki nematein yaad dilayin aur muqaddas sarzameen mein dakhil hone ki dawat di. Unhon ne wahan ke taqatwar logon se khauf ka izhar kiya.\n\nDo Allah se darne wale afrad ne unhein darwaze se dakhil hone aur Allah Ta'ala par bharosa rakhne ki naseehat ki. Magar qaum ne Musa Alaihis Salam ke saath chalne ke bajaye inkar kar diya. Musa Alaihis Salam ne apni aur apne bhai ki bebasi Allah Ta'ala ke huzoor arz ki. Quran chalis saal tak sarzameen mein bhatakne ka faisla bayan karta hai.",
+          "english": "Deliverance from Pharaoh did not end the trials of Bani Israil. Musa Alaihis Salam reminded his people of Allah's favours and called them to enter the holy land. They answered with fear of its powerful inhabitants.\n\nTwo God-fearing men urged them to enter through the gate and trust Allah. The people instead refused to accompany Musa Alaihis Salam. He turned to Allah, explaining that he had authority over only himself and his brother. The Quran then describes forty years of wandering. The account contrasts a clear call to obedience with a people unwilling to take the next step.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 5,
+              "start": 20,
+              "end": 26
+            }
+          ],
+          "noteRoman": "Seekh: Allah Ta'ala par bharosa mushkil zimmedari se bhaagne ka naam nahi.",
+          "noteEnglish": "Reflection: Trust in Allah does not mean avoiding a difficult responsibility."
+        },
+        {
+          "id": "musa_gaay_ka_hukm",
+          "title": "Sawal par sawal",
+          "titleEnglish": "Questions Instead of Obedience",
+          "scene": "garden",
+          "roman": "Musa Alaihis Salam ki qaum ka ek aur waqia Surah Al-Baqarah mein aata hai. Allah Ta'ala ne unhein ek gaay zabah karne ka hukm diya. Unhon ne pehle is baat ko mazaq samjha; Musa Alaihis Salam ne aisi jahalat se Allah Ta'ala ki panah maangi.\n\nIske baad woh gaay ki umar, rang aur pehchan ke mutalliq baar baar sawal karte rahe. Aakhir unhon ne hukm poora kiya, jabke Quran unki hichkichahat bhi bayan karta hai. Phir ek qatl ke chhupaye gaye maamle ko zahir karne aur murdon ko zinda karne ki Allah Ta'ala ki qudrat ka zikr aata hai. Yeh alag waqia hai; Quran iski exact tareekhi jagah muqarrar nahi karta.",
+          "english": "Surah Al-Baqarah records another episode involving the people of Musa Alaihis Salam. Allah commanded them to slaughter a cow. They initially treated the instruction as a possible joke; Musa Alaihis Salam sought Allah's protection from such ignorance.\n\nThey repeatedly asked about the animal's age, colour and identifying features. Eventually they obeyed, though the Quran notes their reluctance. The passage then addresses a concealed killing and a sign of Allah's power to bring the dead to life. This is a separate episode; the Quran does not establish its precise date in the wider journey.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 67,
+              "end": 73
+            }
+          ],
+          "noteRoman": "Seekh: Deeni rehnumai ko beja bahson se bojhal na banayein.",
+          "noteEnglish": "Reflection: Do not turn guidance into needless disputation."
+        },
+        {
+          "id": "musa_qarun_ki_daulat",
+          "title": "Daulat ki azmaish",
+          "titleEnglish": "The Trial of Wealth",
+          "scene": "gifts",
+          "roman": "Musa Alaihis Salam ki qaum mein Qarun ko bahut daulat mili thi. Magar woh apni qaum par sarkashi karne laga. Logon ne usse naseehat ki ke Allah Ta'ala ki di hui nemat se aakhirat ki bhalai talash kare, neki kare aur zameen mein fasad na chahe. Qarun ne apni daulat ko apne ilm ka nateeja qarar diya.\n\nJab woh apni zeenat ke saath nikla to kuch logon ne us jaisi daulat ki tamanna ki. Ilm walon ne iman aur nek amal ke ajr ki taraf tawajjuh dilayi. Phir Allah Ta'ala ne usse aur uske ghar ko zameen mein dhansa diya. Kal uski jagah chahne walon ko ehsaas hua ke Allah Ta'ala rizq kushada bhi farmate hain aur tang bhi.",
+          "english": "Qarun belonged to the people of Musa Alaihis Salam and possessed immense wealth, yet he became oppressive. His people urged him to use Allah's gifts for the Hereafter, do good and avoid corruption. Qarun credited his fortune to his own knowledge.\n\nWhen he appeared in splendour, some wished for a fortune like his. Those given knowledge reminded them of the better reward of faith and good deeds. Allah then caused the earth to swallow Qarun and his home. Those who had envied him recognised their mistake. Wealth had looked like security, but it could not protect him.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 28,
+              "start": 76,
+              "end": 82
+            }
+          ],
+          "noteRoman": "Seekh: Daulat nemat bhi hai aur zimmedari bhi; takabbur ka jawaz nahi.",
+          "noteEnglish": "Reflection: Wealth brings responsibility, not a licence for arrogance."
+        },
+        {
           "id": "musa_ilm_ke_safar_ki_seekh",
           "title": "Ilm ke safar ki seekh",
           "scene": "ocean",
@@ -2187,7 +2290,8 @@
       "birthNoteEnglish": "The Quran describes Musa Alaihis Salam’s birth and early life. No exact calendar date is supplied here.",
       "teaser": "Musa Alaihis Salam ki kahani ek bachche ki hifazat se shuru hoti hai aur Firaun ke samne Allah Ta'ala ka paigham pahunchane tak barhti hai.",
       "openingRoman": "Musa Alaihis Salam ki kahani ek bachche ki hifazat se shuru hoti hai aur Firaun ke samne Allah Ta'ala ka paigham pahunchane tak barhti hai. Hijrat, samandar ka rasta aur qaum ki rehnumai is safar ke aham marhale hain.",
-      "openingEnglish": "The story of Musa Alaihis Salam begins with the protection of a child and develops into a mission before Pharaoh. Leaving Egypt, the passage through the sea and guiding his people form major stages."
+      "openingEnglish": "The story of Musa Alaihis Salam begins with the protection of a child and develops into a mission before Pharaoh. Leaving Egypt, the passage through the sea and guiding his people form major stages.",
+      "contentVersion": 5
     },
     {
       "id": "harun",
@@ -2286,7 +2390,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Musa Alaihis Salam ne apne bhai Harun Alaihis Salam ko madadgar banane ki dua ki.",
       "openingRoman": "Musa Alaihis Salam ne apne bhai Harun Alaihis Salam ko madadgar banane ki dua ki. Donon ki dawat aur qaum ke darmiyan Harun Alaihis Salam ki zimmedari is kahani ka markaz hain.",
-      "openingEnglish": "Musa Alaihis Salam asked Allah to appoint his brother Harun Alaihis Salam as a helper. Their shared mission and the responsibility of Harun Alaihis Salam among the people are central to this account."
+      "openingEnglish": "Musa Alaihis Salam asked Allah to appoint his brother Harun Alaihis Salam as a helper. Their shared mission and the responsibility of Harun Alaihis Salam among the people are central to this account.",
+      "contentVersion": 4
     },
     {
       "id": "dhulkifl",
@@ -2339,13 +2444,32 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Dhul-Kifl Alaihis Salam ke bare mein Quran tafseeli waqiat nahi sunata.",
       "openingRoman": "Dhul-Kifl Alaihis Salam ke bare mein Quran tafseeli waqiat nahi sunata. Unka zikr sabr, neki aur Allah Ta'ala ki rahmat ke saath aata hai; isi sabit zikr tak yeh mukhtasar kahani mehdood hai.",
-      "openingEnglish": "The Quran gives no detailed life narrative of Dhul-Kifl Alaihis Salam. This short account stays with its references to patience, righteousness and Allah’s mercy."
+      "openingEnglish": "The Quran gives no detailed life narrative of Dhul-Kifl Alaihis Salam. This short account stays with its references to patience, righteousness and Allah’s mercy.",
+      "contentVersion": 4
     },
     {
       "id": "dawud",
       "name": "Dawud Alaihis Salam",
       "birthNote": "Paidaish ki tareekh aur bachpan ki tafseel is book ke Quran/sahih hadees sources mein nahi milti. Kahani pehle sabit zikr se shuru hoti hai.",
       "pages": [
+        {
+          "id": "dawud_talut_ke_safar_ka_pasmanzar",
+          "title": "Muqable se pehle ki azmaish",
+          "titleEnglish": "The Trial Before the Battle",
+          "scene": "river",
+          "roman": "Jalut ke muqable ka pasmanzar samajhne ke liye Quran Talut ke lashkar ke safar ki taraf le jata hai. Talut ne darya ke pani se mutalliq ek azmaish ki khabar di. Bahut se log us azmaish mein peeche reh gaye. Aage barhne walon mein bhi kuch ko dushman ki quwwat dekh kar apni kamzori mehsoos hui.\n\nAllah Ta'ala se mulaqat par yaqeen rakhne walon ne yaad dilaya ke chhoti jamaat Allah Ta'ala ke izn se badi jamaat par ghalib aa sakti hai. Unhon ne sabr, sabit-qadmi aur madad ki dua ki. Isi silsile mein Dawud Alaihis Salam ke Jalut ko qatl karne aur Allah Ta'ala ki taraf se hukumat aur hikmat milne ka zikr hai.",
+          "english": "The Quran provides a wider setting for the confrontation with Jalut. Talut announced a test involving the water of a river, and many did not keep to the instruction. Some who continued still felt overwhelmed by the strength of the opposing force.\n\nThose certain of meeting Allah recalled that a smaller company can overcome a larger one by His permission. They prayed for patience, firm footing and help. The passage then records Dawud Alaihis Salam defeating Jalut and receiving authority and wisdom from Allah. The encounter was also a test of obedience and trust.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 2,
+              "start": 249,
+              "end": 251
+            }
+          ],
+          "noteRoman": "Seekh: Kam tadaad hona haar ka faisla nahi; sabr aur ita'at aham hain.",
+          "noteEnglish": "Reflection: Numbers alone do not decide the outcome; patience and obedience matter."
+        },
         {
           "id": "dawud_jalut_ke_muqable_mein",
           "title": "Jalut ke muqable mein",
@@ -2466,7 +2590,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Jalut ke muqable ke zikr se Dawud Alaihis Salam ki kahani hukumat, hikmat aur ibadat ki taraf barhti hai.",
       "openingRoman": "Jalut ke muqable ke zikr se Dawud Alaihis Salam ki kahani hukumat, hikmat aur ibadat ki taraf barhti hai. Zabur ki ata aur insaf ki zimmedari un par Allah Ta'ala ki nematon ka hissa thin.",
-      "openingEnglish": "From the account of Jalut, the story of Dawud Alaihis Salam turns to kingship, wisdom and worship. The gift of the Zabur and the responsibility to judge fairly were among Allah’s favours."
+      "openingEnglish": "From the account of Jalut, the story of Dawud Alaihis Salam turns to kingship, wisdom and worship. The gift of the Zabur and the responsibility to judge fairly were among Allah’s favours.",
+      "contentVersion": 5
     },
     {
       "id": "sulayman",
@@ -2616,12 +2741,31 @@
             }
           ],
           "titleEnglish": "Authority Is a Gift from Allah"
+        },
+        {
+          "id": "sulayman_azmaish_aur_rujoo",
+          "title": "Ikhtiyar ke darmiyan ruju",
+          "titleEnglish": "A Trial and a Prayer",
+          "scene": "throne",
+          "roman": "Sulayman Alaihis Salam ki kahani mein quwwat aur saltanat ke saath azmaish ka zikr bhi hai. Quran unke takht par ek jism rakhe jane ka bayan karta hai, phir unke Allah Ta'ala ki taraf ruju ka. Is mukhtasar bayan ki woh tafseelein jo Quran mein nahi, hum yahan kahani bana kar shamil nahi karte.\n\nUnhon ne apne Rabb se maghfirat aur khaas saltanat ki dua ki. Aage Allah Ta'ala ki taraf se hawa aur doosri quwwaton ko unke liye musakhkhar kiye jane ka zikr aata hai. Aakhir mein unke qurb aur achhe anjaam ka bayan hai. Nemat ke darmiyan bhi banda apne Rabb ka mohtaj rehta hai.",
+          "english": "Power did not place Sulayman Alaihis Salam beyond trial. The Quran describes a body placed on his throne and his turning back to Allah. It does not supply the full details of that event, and this account does not fill the gap with a speculative story.\n\nHe prayed for forgiveness and a distinctive kingdom. The following verses describe Allah placing the wind and other forces at his disposal, and conclude with his nearness and good return. The movement of the passage is from trial to repentance and divine favour: authority never removes a servant's dependence on Allah.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 38,
+              "start": 34,
+              "end": 40
+            }
+          ],
+          "noteRoman": "Seekh: Ikhtiyar milne par bhi maghfirat aur hidayat ki zaroorat rehti hai.",
+          "noteEnglish": "Reflection: Authority does not remove the need for forgiveness and guidance."
         }
       ],
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Sulayman Alaihis Salam ko ilm aur ikhtiyar ki khaas nematein milin.",
       "openingRoman": "Sulayman Alaihis Salam ko ilm aur ikhtiyar ki khaas nematein milin. Cheentiyon ki waadi, Saba ka paigham aur malika ki amad ke waqiat mein woh in nematon ko shukr ki azmaish ke taur par pehchante hain.",
-      "openingEnglish": "Sulayman Alaihis Salam received special gifts of knowledge and authority. The valley of the ants, the message to Saba and the queen’s arrival reveal his recognition of these gifts as a test of gratitude."
+      "openingEnglish": "Sulayman Alaihis Salam received special gifts of knowledge and authority. The valley of the ants, the message to Saba and the queen’s arrival reveal his recognition of these gifts as a test of gratitude.",
+      "contentVersion": 5
     },
     {
       "id": "ilyas",
@@ -2682,7 +2826,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Ilyas Alaihis Salam ne apni qaum ko Baal ko pukarne ke bajaye Allah Ta'ala ki ibadat ki taraf bulaya.",
       "openingRoman": "Ilyas Alaihis Salam ne apni qaum ko Baal ko pukarne ke bajaye Allah Ta'ala ki ibadat ki taraf bulaya. Quran unki dawat aur un par salam ka zikr mehfooz rakhta hai.",
-      "openingEnglish": "Ilyas Alaihis Salam called his people to worship Allah rather than invoke Baal. The Quran preserves his call and a greeting of peace upon him."
+      "openingEnglish": "Ilyas Alaihis Salam called his people to worship Allah rather than invoke Baal. The Quran preserves his call and a greeting of peace upon him.",
+      "contentVersion": 4
     },
     {
       "id": "alyasa",
@@ -2728,7 +2873,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Al-Yasa Alaihis Salam ke tafseeli waqiat Quran mein bayan nahi hue.",
       "openingRoman": "Al-Yasa Alaihis Salam ke tafseeli waqiat Quran mein bayan nahi hue. Unka naam hidayat, fazilat aur neki ke zikr mein aata hai. Yahan isi pehchan ko parhein.",
-      "openingEnglish": "The Quran does not narrate detailed events from the life of Al-Yasa Alaihis Salam. It records his name among those granted guidance, distinction and righteousness."
+      "openingEnglish": "The Quran does not narrate detailed events from the life of Al-Yasa Alaihis Salam. It records his name among those granted guidance, distinction and righteousness.",
+      "contentVersion": 4
     },
     {
       "id": "yunus",
@@ -2831,7 +2977,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Kashti se samandar ki azmaish tak, phir andheron mein ek dua.",
       "openingRoman": "Kashti se samandar ki azmaish tak, phir andheron mein ek dua. Yunus Alaihis Salam ki kahani mein apne Rabb ko pukarne aur Allah Ta'ala ki taraf se nijat milne ka zikr hai.",
-      "openingEnglish": "From a ship to a trial at sea, then a supplication in darkness: the story of Yunus Alaihis Salam tells of calling upon Allah and being delivered by Him."
+      "openingEnglish": "From a ship to a trial at sea, then a supplication in darkness: the story of Yunus Alaihis Salam tells of calling upon Allah and being delivered by Him.",
+      "contentVersion": 4
     },
     {
       "id": "zakariya",
@@ -2934,7 +3081,8 @@
       "birthNoteEnglish": "The Quran and sahih reports cited in this book do not provide detailed birth or childhood information. The account begins with the earliest established material presented here.",
       "teaser": "Maryam ki kifalat ke waqie ke saath Zakariya Alaihis Salam ki dua ki kahani bhi aati hai.",
       "openingRoman": "Maryam ki kifalat ke waqie ke saath Zakariya Alaihis Salam ki dua ki kahani bhi aati hai. Barhape mein ki gayi pukar ka jawab Yahya Alaihis Salam ki khushkhabri se mila.",
-      "openingEnglish": "Alongside his care for Maryam, the Quran tells of the supplication of Zakariya Alaihis Salam. His call in old age was answered with the good news of Yahya Alaihis Salam."
+      "openingEnglish": "Alongside his care for Maryam, the Quran tells of the supplication of Zakariya Alaihis Salam. His call in old age was answered with the good news of Yahya Alaihis Salam.",
+      "contentVersion": 4
     },
     {
       "id": "yahya",
@@ -3013,7 +3161,8 @@
       "birthNoteEnglish": "Yahya Alaihis Salam’s birth is announced by name in the Quran; no exact date or city is asserted here.",
       "teaser": "Yahya Alaihis Salam ka naam unki paidaish ki khushkhabri mein hi diya gaya.",
       "openingRoman": "Yahya Alaihis Salam ka naam unki paidaish ki khushkhabri mein hi diya gaya. Quran unke bachpan ki hikmat, pakizgi aur walidain ke saath neki ki pehchan karata hai.",
-      "openingEnglish": "Yahya Alaihis Salam was named in the announcement of his birth. The Quran describes wisdom in childhood, purity and kindness to his parents."
+      "openingEnglish": "Yahya Alaihis Salam was named in the announcement of his birth. The Quran describes wisdom in childhood, purity and kindness to his parents.",
+      "contentVersion": 4
     },
     {
       "id": "isa",
@@ -3200,7 +3349,8 @@
       "birthNoteEnglish": "The Quran describes Isa Alaihis Salam’s extraordinary birth. No exact calendar date is asserted here.",
       "teaser": "Maryam ko di gayi khushkhabri se Isa Alaihis Salam ki ghair-mamooli paidaish ka zikr shuru hota hai.",
       "openingRoman": "Maryam ko di gayi khushkhabri se Isa Alaihis Salam ki ghair-mamooli paidaish ka zikr shuru hota hai. Unki rasalat aur nishaniyon ke saath Quran baar-baar Allah Ta'ala ke izn aur ek Allah Ta'ala ki ibadat ko wazeh karta hai.",
-      "openingEnglish": "The announcement to Maryam introduces the extraordinary birth of Isa Alaihis Salam. In describing his mission and signs, the Quran repeatedly makes clear Allah’s permission and the call to worship Allah alone."
+      "openingEnglish": "The announcement to Maryam introduces the extraordinary birth of Isa Alaihis Salam. In describing his mission and signs, the Quran repeatedly makes clear Allah’s permission and the call to worship Allah alone.",
+      "contentVersion": 4
     },
     {
       "id": "muhammad",
@@ -3476,6 +3626,65 @@
           "titleEnglish": "The Conquest of Makkah and Humility"
         },
         {
+          "id": "muhammad_hunayn_ki_azmaish",
+          "title": "Hunayn mein bharose ki azmaish",
+          "titleEnglish": "The Trial at Hunayn",
+          "scene": "valley",
+          "roman": "Makkah ki fatah ke baad Hunayn ka waqia ek nayi azmaish laya. Quran yaad dilata hai ke us din Musalmanon ki kasrat par khushi hui, magar tadaad unke kaam na aayi. Wasee zameen tang mehsoos hone lagi aur peeche hatne ki naubat aayi.\n\nPhir Allah Ta'ala ne apne Rasool Muhammad ﷺ aur mominon par sukoon nazil farmaya aur aisi madad ka zikr farmaya jo unhein nazar nahi aayi. Agli ayat taubah aur maghfirat ka darwaza bhi yaad dilati hai. Yeh bayan fatah ke baad ghuroor ki jagah Allah Ta'ala par bharosa aur apni mohtaji yaad rakhne ki taraf le jata hai.",
+          "english": "After the conquest of Makkah, Hunayn brought another trial. The Quran recalls that the believers took confidence in their large numbers, but numbers did not help them. The open land seemed constricted, and they retreated.\n\nAllah then sent tranquillity upon His Messenger Muhammad ﷺ and the believers, along with help they could not see. The following verse also speaks of repentance and forgiveness. The account moves from confidence in visible strength to recognition of dependence on Allah. Success had not removed the need for humility.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 9,
+              "start": 25,
+              "end": 27
+            }
+          ],
+          "noteRoman": "Seekh: Asal bharosa Allah Ta'ala par ho, sirf apni quwwat par nahi.",
+          "noteEnglish": "Reflection: Place ultimate trust in Allah rather than numbers or visible strength."
+        },
+        {
+          "id": "muhammad_tabuk_safar",
+          "title": "Tangdasti ke safar mein saath",
+          "titleEnglish": "Standing Firm in Hardship",
+          "scene": "valley",
+          "roman": "Hunayn ke baad ke daur mein sakht safar ki azmaish bhi aayi. Surah At-Tawbah Nabi Muhammad ﷺ, Muhajirin aur Ansar par Allah Ta'ala ki rahmat ka zikr karti hai, jo tangi ke waqt aap ﷺ ke saath rahe. Kuch dilon ke larazne ke qareeb hone ka bayan bhi milta hai, phir Allah Ta'ala ki taraf se taubah ki qubooliyat ka.\n\nYeh ayat Tabuk ke safar se mutalliq samjhi jati hai. Is chapter mein Quran ke bayan tak reh kar sakhti, saath nibhane aur rahmat ko bayan kiya gaya hai. Ise kisi badi larai ka manzar bana kar pesh nahi kiya gaya, kyunki har lashkari safar mein jang hona zaroori nahi.",
+          "english": "The later period brought the trial of a difficult expedition. Surah At-Tawbah describes Allah's mercy towards Prophet Muhammad ﷺ, the Emigrants and the Helpers who stayed with him through hardship. It acknowledges that some hearts nearly faltered, then describes Allah turning to them in mercy.\n\nThe verse is understood in connection with the expedition of Tabuk. This chapter keeps its account to the Quranic themes of hardship, steadfast companionship and mercy. It does not turn the journey into an invented battlefield scene: an expedition is not necessarily a battle.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 9,
+              "start": 117,
+              "end": 117
+            },
+            {
+              "kind": "hadith",
+              "book": "bukhari",
+              "number": 4418
+            }
+          ],
+          "noteRoman": "Seekh: Tang waqt mein saath nibhana aur Allah Ta'ala ki taraf ruju aham hai. Tabuk ki pehchan Sahih al-Bukhari 4418 mein Kaab ibn Malik Radiyallahu Anhu ke waqye se hoti hai.",
+          "noteEnglish": "Reflection: Steadfast companionship and turning to Allah matter in hardship. The identification of the expedition as Tabuk is supported by the account of Kaab ibn Malik in Sahih al-Bukhari 4418."
+        },
+        {
+          "id": "muhammad_teen_afrad_ki_taubah",
+          "title": "Sachchai aur taubah",
+          "titleEnglish": "Truthfulness and Repentance",
+          "scene": "night",
+          "roman": "Isi silsile mein Quran teen afrad ka zikr karta hai jinka maamla muakhkhar hua. Unki kaifiyat yeh bayan hui ke zameen apni wus'at ke bawajood tang mehsoos hui aur unke apne dil bhi un par tang ho gaye. Unhein yaqeen hua ke Allah Ta'ala se bachne ki panah bhi usi ki taraf ruju mein hai.\n\nPhir Allah Ta'ala ne unki taubah qubool farmayi taake woh ruju karein. Iske baad iman walon ko Allah Ta'ala se darne aur sachchon ke saath rehne ki hidayat milti hai. Yahan Quran ke mukhtasar bayan ko rakha gaya hai; naam aur mazeed waqiat is reference se sabit samajh kar nahi jore gaye.",
+          "english": "In the same passage, the Quran mentions three men whose case was deferred. It describes the earth feeling narrow despite its vastness, and their own souls becoming constrained. They recognised that refuge from Allah could only be found by turning to Him.\n\nAllah then accepted their repentance so that they might return to Him. The next verse calls believers to be mindful of Allah and remain with the truthful. This chapter follows the Quran's concise account; it does not claim that names or additional narrative details are supplied by these verses.",
+          "sources": [
+            {
+              "kind": "quran",
+              "surah": 9,
+              "start": 118,
+              "end": 119
+            }
+          ],
+          "noteRoman": "Seekh: Sachchai aur taubah mushkil se nikalne ka raasta hain.",
+          "noteEnglish": "Reflection: Truthfulness and repentance offer a way through a painful failure."
+        },
+        {
           "id": "muhammad_deen_ki_takmeel",
           "title": "Deen ki takmeel",
           "scene": "mountain",
@@ -3554,7 +3763,8 @@
       "birthNoteEnglish": "The Quran recalls his orphanhood. This book does not assert an exact birth date; established reports of revelation and later life follow.",
       "teaser": "Muhammad ﷺ ki zindagi ke yeh marhale pehli wahi se dawat, hijrat aur deen ki takmeel tak pahunchte hain.",
       "openingRoman": "Muhammad ﷺ ki zindagi ke yeh marhale pehli wahi se dawat, hijrat aur deen ki takmeel tak pahunchte hain. Quran aur sahih hadees ki roshni mein rehmat, sabr aur Allah Ta'ala ki taraf bulane ka paigham parhein.",
-      "openingEnglish": "These episodes from the life of Muhammad ﷺ extend from the first revelation to the mission, migration and completion of the religion. They present mercy, patience and the call to Allah through Quranic passages and authentic hadith."
+      "openingEnglish": "These episodes from the life of Muhammad ﷺ extend from the first revelation to the mission, migration and completion of the religion. They present mercy, patience and the call to Allah through Quranic passages and authentic hadith.",
+      "contentVersion": 5
     }
   ],
   "editorialPolicy": {

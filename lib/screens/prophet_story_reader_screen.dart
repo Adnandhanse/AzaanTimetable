@@ -6,6 +6,7 @@ import '../services/prophet_stories_repository.dart';
 import '../services/quran_repository.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/story_manuscript_frame.dart';
 import '../services/app_strings.dart';
 import 'surah_detail_screen.dart';
 
@@ -53,7 +54,7 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
     final pageId = _story.pages[_page].id;
     _saveQueue = _saveQueue
         .then((_) =>
-            ProphetStoryProgress.save(_story.id, pageId, completed: completed))
+            ProphetStoryProgress.save(_story.id, pageId, completed: completed, contentVersion: _story.contentVersion))
         .catchError((Object _) {
       _notice(S.tr('Could not save reading progress.',
           'پڑھنے کی پیش رفت محفوظ نہیں ہو سکی۔'));
@@ -334,7 +335,7 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
                       errorBuilder: (_, __, ___) =>
                           const ColoredBox(color: Color(0xFF172A2B)))),
               Positioned.fill(
-                  child: ColoredBox(color: Colors.black.withOpacity(.76))),
+                  child: ColoredBox(color: const Color(0xFF191D18).withOpacity(.90))),
               Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 AspectRatio(
                     aspectRatio: 1.5,
@@ -391,7 +392,7 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
                                 style: const TextStyle(
                                     fontFamily: 'Inter',
                                     color: Color(0xFFF0D492),
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     height: 1.65)),
                             const SizedBox(height: 20),
                           ],
@@ -399,8 +400,8 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
                               style: const TextStyle(
                                   fontFamily: 'Inter',
                                   color: Colors.white,
-                                  fontSize: 14,
-                                  height: 1.7)),
+                                  fontSize: 13,
+                                  height: 1.75)),
                           const SizedBox(height: 20),
                           Theme(
                               data: Theme.of(context)
@@ -458,6 +459,9 @@ class _ProphetStoryReaderScreenState extends State<ProphetStoryReaderScreen>
                                   ])),
                         ])),
               ]),
+              const Positioned.fill(
+                child: IgnorePointer(child: CustomPaint(painter: StoryManuscriptFrame())),
+              ),
             ])));
   }
 }

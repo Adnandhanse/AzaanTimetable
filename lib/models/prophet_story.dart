@@ -63,7 +63,8 @@ class ProphetStory {
       required this.pages,
       this.teaser = '',
       this.openingRoman = '',
-      this.openingEnglish = ''});
+      this.openingEnglish = '',
+      this.contentVersion = 4});
   final String id,
       name,
       birthNote,
@@ -71,9 +72,11 @@ class ProphetStory {
       teaser,
       openingRoman,
       openingEnglish;
+  final int contentVersion;
   final List<ProphetStoryPage> pages;
   factory ProphetStory.fromJson(Map<String, dynamic> j) => ProphetStory(
       id: j['id'] as String,
+      contentVersion: j['contentVersion'] as int? ?? 4,
       name: j['name'] as String,
       teaser: j['teaser'] as String? ?? '',
       openingRoman: j['openingRoman'] as String? ?? '',
