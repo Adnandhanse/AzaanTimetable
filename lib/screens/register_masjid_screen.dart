@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/admin_contact.dart';
-import '../services/email_admin_verification.dart';
 import '../widgets/admin_country_picker.dart';
-import '../widgets/international_account_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -204,18 +201,6 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
     if (existing == null) _previousAdminLeft = false;
 
     setState(() => _isSendingOtp = true);
-    if (!_country.isIndia) {
-      try {
-        final verified = await openInternationalAccount(context,
-          auth: FirebaseAuth.instance, email: _email.text);
-        if (verified && mounted) await _saveMasjidAfterVerification();
-      } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(EmailAdminVerification.friendly(e))));
-      } finally { if (mounted) setState(() => _isSendingOtp = false); }
-      return;
-    }
-
     await AuthService.sendOtp(
       phoneNumber: _country.number(_mobile.text),
       onCodeSent: (verificationId, resendToken) {
@@ -328,8 +313,8 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
       adminName: _adminName.text,
       adminMobile: _mobile.text.trim(),
       adminCountryIso: _country.iso, adminDialCode: _country.dialCode,
-      adminVerificationMethod: _country.isIndia ? 'phone' : 'email_password',
-      adminMobileVerified: _country.isIndia,
+      adminVerificationMethod: 'phone',
+      adminMobileVerified: true,
       adminEmail: _email.text,
       previousAdminLeftClaim: _previousAdminLeft ? true : null,
       capacity: _capacity.text.trim().isEmpty ? null : int.tryParse(_capacity.text.trim()),
@@ -508,11 +493,9 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
             const SizedBox(height: 12),
             TextFormField(controller: _email, enabled: !_isSendingOtp,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: _country.isIndia ? 'Email (optional)' : 'Email for admin login'),
-              validator: (v) => (!_country.isIndia || (v ?? '').trim().isNotEmpty) && !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
+              decoration: InputDecoration(labelText: 'Email (Optional)'),
+              validator: (v) => (v ?? '').trim().isNotEmpty && !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim())
                   ? 'Enter a valid email address' : null),
-            if (!_country.isIndia) const Padding(padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('No OTP required. Your registration will be sent to Platform Admin for approval.')),
             const SizedBox(height: 8),
             Card(
               color: AppColors.cream,
@@ -523,9 +506,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                     Icon(Icons.info_outline, color: AppColors.emerald),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(_country.isIndia
-                        ? 'We will send an SMS code to verify your mobile number before registration.'
-                        : 'Create an email/password login and submit your registration for Platform Admin approval.',
+                      child: Text('We will send an SMS code to verify your mobile number before registration.',
                         style: const TextStyle(fontSize: 13)),
                     ),
                   ],
@@ -540,7 +521,7 @@ class _RegisterMasjidScreenState extends State<RegisterMasjidScreen> {
                 onPressed: (_isSendingOtp || _isCheckingDuplicate || _isSavingPhotos) ? null : _submit,
                 child: (_isSendingOtp || _isCheckingDuplicate)
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text(_country.isIndia ? 'Verify Mobile & Register' : 'Submit for Approval', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                    : Text('Verify Mobile & Register', style: const TextStyle(color: Colors.white, fontSize: 16)),
               ),
             ),
           ],

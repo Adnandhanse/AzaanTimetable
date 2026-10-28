@@ -61,6 +61,8 @@ jobs:
         run: |
           touch functions-ask/.env.actual-masjid-prayer-time
           sed -i '/^ASK_AI_PROVIDER=/d' functions-ask/.env.actual-masjid-prayer-time
+          sed -i '/^ASK_USER_DAILY_LIMIT=/d' functions-ask/.env.actual-masjid-prayer-time
+          printf '\nASK_USER_DAILY_LIMIT=10\n' >> functions-ask/.env.actual-masjid-prayer-time
           printf '\nASK_AI_PROVIDER=%s\n' "$ASK_AI_PROVIDER" >> functions-ask/.env.actual-masjid-prayer-time
       - name: Deploy only the Ask AI service
         run: npx --yes firebase-tools@14 --config firebase.ask.json deploy --only functions:ask-islam-connect --project actual-masjid-prayer-time --non-interactive --force

@@ -25,9 +25,11 @@ const documents=createCorpusLoader(path.join(__dirname,'corpus.ndjson.gz'));
 // questions, audio or answers. This collection MUST be closed to client writes.
 async function reserve(uid) {
   const limit=(name,fallback) => Math.max(1,Math.min(5000,Number(process.env[name]) || fallback));
-  return await reserveQuota({db:getFirestore(),uid,timestamp:Timestamp.fromMillis,
-    userLimit:limit('ASK_USER_DAILY_LIMIT',5),globalLimit:Math.min(250,limit('ASK_GLOBAL_DAILY_LIMIT',250)),
+  const reservation=await reserveQuota({db:getFirestore(),uid,timestamp:Timestamp.fromMillis,
+    userLimit:limit('ASK_USER_DAILY_LIMIT',10),globalLimit:Math.min(250,limit('ASK_GLOBAL_DAILY_LIMIT',250)),
     limited:reason=>new HttpsError('resource-exhausted',reason==='cooldown'?'Please wait 5 seconds before another AI search.':reason==='user'?'Daily personal AI limit reached.':'Daily project AI budget reached.',{supportCode:reason==='cooldown'?'AI-COOLDOWN':reason==='user'?'AI-USER-LIMIT':'AI-PROJECT-LIMIT'})});
+  console.info('ask-quota-reserved',reservation.usage);
+  return reservation;
 }
 exports.askIslamConnect=onCall({region:'us-central1',secrets:[apiKey],timeoutSeconds:120,
   memory:'2GiB',maxInstances:2,concurrency:1},async request=>{

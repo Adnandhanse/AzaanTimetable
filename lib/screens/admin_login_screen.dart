@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/admin_contact.dart';
 import '../services/email_admin_verification.dart';
 import '../widgets/admin_country_picker.dart';
-import '../widgets/international_account_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_masjid_screen.dart';
 import 'admin_dashboard_screen.dart';
@@ -23,7 +21,6 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final TextEditingController _mobileController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
   AdminCountry _country = AdminCountry.india;
   bool _isChecking = false;
 
@@ -86,12 +83,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     final mobile = _country.number(_mobileController.text.trim());
     setState(() => _isChecking = true);
     try {
-      if (!_country.isIndia) {
-        final verified = await openInternationalAccount(context, auth: FirebaseAuth.instance,
-          email: _email.text, create: false);
-        if (verified) await _openDashboard(mobile);
-        return;
-      }
       if (AuthService.currentUser?.phoneNumber == mobile) {
         await _openDashboard(mobile); return;
       }
@@ -116,7 +107,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   @override
   void dispose() {
     _mobileController.dispose();
-    _email.dispose();
     super.dispose();
   }
 
@@ -143,19 +133,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               const SizedBox(height: 16),
               const Text('Admin Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text(_country.isIndia ? 'Verify your registered mobile number' : 'Sign in with your registered email and password', style: TextStyle(color: Colors.grey)),
+              Text('Verify your registered mobile number', style: TextStyle(color: Colors.grey)),
               const SizedBox(height: 24),
               AdminCountryPicker(value: _country, enabled: !_isChecking,
                 onChanged: (country) => setState(() { _country = country; _mobileController.clear(); })),
-              if (_country.isIndia) TextFormField(
+              TextFormField(
                 controller: _mobileController, enabled: !_isChecking,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(labelText: 'Mobile number', prefixText: '${_country.dialCode} ', border: const OutlineInputBorder()),
                 validator: _country.validate,
-              ) else TextFormField(
-                controller: _email, enabled: !_isChecking, keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Registered email', border: OutlineInputBorder()),
-                validator: (v) => !RegExp(r'^\S+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim()) ? 'Enter a valid email address' : null,
               ),
               const SizedBox(height: 16),
               SizedBox(

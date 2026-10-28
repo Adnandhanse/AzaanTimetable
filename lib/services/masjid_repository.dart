@@ -92,7 +92,7 @@ class MasjidRepository {
       throw StateError('This registration already exists. Request administration transfer instead.');
     }
     final result = await FirebaseFunctions.instanceFor(region: 'us-central1')
-      .httpsCallable('registerVerifiedMasjid').call({
+      .httpsCallable('registerVerifiedMasjid', options: HttpsCallableOptions(timeout: const Duration(seconds: 30))).call({
         'name': masjid.name, 'city': masjid.city, 'address': masjid.address,
         'registrationNo': masjid.registrationNo.trim(),
         'adminName': masjid.adminName, 'mobile': masjid.adminMobile,
@@ -179,7 +179,7 @@ class MasjidRepository {
   static Future<Masjid?> findActiveByRegistrationNo(String registrationNo) async {
     final snapshot = await _collection
         .where('registrationNo', isEqualTo: registrationNo)
-        .get();
+        .get().timeout(const Duration(seconds: 15));
     if (snapshot.docs.isEmpty) return null;
     if (snapshot.docs.length > 1) {
       throw StateError('Multiple masjids have this registration number. Contact the platform admin to resolve them before transferring.');

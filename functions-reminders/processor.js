@@ -28,7 +28,7 @@ return async function processMasjid(ref,counts){
    if(!batch.length)continue;
    const beforeSend=await ref.get();
    if(!beforeSend.exists||baseline(beforeSend.data())!==claim.base||beforeSend.data().verificationStatus!=='Verified')break;
-   const result=await messaging.sendEachForMulticast({tokens:batch.map(d=>d.data().token),notification:{title:language==='ur'?'نماز کے اوقات کا جائزہ':'Review Prayer Timings',body:language==='ur'?`${String(fresh.data().name||'مسجد').slice(0,100)} کے اوقات دیکھ کر محفوظ کریں۔`:`Please review the prayer timings for ${String(fresh.data().name||'your masjid').slice(0,100)} and save any updates.`},data:{type:'prayer_timing_reminder',masjidId:ref.id},android:{priority:'normal',ttl:3600000,collapseKey:`timings-${ref.id}`,notification:{channelId:'timing_reminders',tag:`timings-${ref.id}`}}});
+   const result=await messaging.sendEachForMulticast({tokens:batch.map(d=>d.data().token),notification:{title:language==='ur'?'نماز کے اوقات کا جائزہ':'Prayer Timings Reminder',body:language==='ur'?`${String(fresh.data().name||'مسجد').slice(0,100)} کے اوقات دیکھ کر محفوظ کریں۔`:`Please review the prayer timings for ${String(fresh.data().name||'your masjid').slice(0,100)}. Update and save them if needed.`},data:{type:'prayer_timing_reminder',masjidId:ref.id},android:{priority:'normal',ttl:3600000,collapseKey:`timings-${ref.id}`,notification:{channelId:'timing_reminders',tag:`timings-${ref.id}`}}});
    successes+=result.successCount;
    for(let i=0;i<result.responses.length;i++)if(['messaging/registration-token-not-registered','messaging/invalid-registration-token'].includes(result.responses[i].error?.code))await batch[i].ref.delete();
    }

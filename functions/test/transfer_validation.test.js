@@ -29,6 +29,12 @@ test('wrong recipient phone, stale OTP, non-phone account and self-transfer are 
     {...recipient,firebase:{sign_in_provider:'password'}}, {...recipient,uid:'A'}])
     assert.throws(()=>transferPatch(current,caller,invalid,input,1100));
 });
-test('international transfer cannot bypass Platform Admin approval',()=>{
- assert.throws(()=>transferPatch(current,caller,recipient,{...input,countryIso:'AE',mobile:'+971501234567',email:'b@example.com'},1100),/Platform Admin approval/);
+test('international transfer uses fresh SMS proof and preserves all masjid data',()=>{
+ const target={...recipient,phone_number:'+971501234567'};
+ const patch=transferPatch(current,caller,target,{...input,countryIso:'AE',mobile:'0501234567'},1100);
+ assert.equal(patch.adminMobile,'+971501234567');assert.equal(patch.adminMobileVerified,true);
+ assert.equal(patch.adminVerificationMethod,'phone');assert.equal(patch.adminUid,'B');
+ const international={...current,adminCountryIso:'AE',adminMobile:'+971501234567'};
+ assert.equal(transferPatch(international,{...caller,phone_number:'+971501234567'},recipient,{...input,expectedAdminMobile:international.adminMobile},1100).adminUid,'B');
+ assert.throws(()=>transferPatch(current,caller,recipient,{...input,countryIso:'AE',mobile:'0501234567'},1100));
 });

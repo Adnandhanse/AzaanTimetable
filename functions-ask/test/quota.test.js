@@ -43,3 +43,13 @@ test('unsuccessful requests refund the personal quota once but never the provide
  await call('u',now+6000,{userLimit:1,globalLimit:2});
  await assert.rejects(call('another',now+12000,{globalLimit:2}),/limited/);
 });
+
+test('default personal budget is ten; reservation reports accurate counters',async()=>{
+ const {call}=fixture(),now=Date.UTC(2026,0,1,12);
+ for(let i=0;i<10;i++) {
+  const r=await call('u',now+i*6000);
+  assert.equal(r.usage.userUsed,i+1);assert.equal(r.usage.globalUsed,i+1);
+  assert.equal(r.usage.userLimit,10);assert.equal(r.usage.globalLimit,250);
+ }
+ await assert.rejects(call('u',now+60000),/limited/);
+});

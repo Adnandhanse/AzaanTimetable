@@ -58,8 +58,8 @@ class NotificationService {
     if (!_initialized) return;
     await _plugin.show(
         920001,
-        S.tr('Review Prayer Timings', 'نماز کے اوقات کا جائزہ'),
-        S.tr('Review your masjid timings and save any updates.',
+        S.tr('Prayer Timings Reminder', 'نماز کے اوقات کا جائزہ'),
+        S.tr('Please review your masjid prayer timings. Update and save them if needed.',
             'اپنی مسجد کے اوقات دیکھ کر محفوظ کریں۔'),
         const NotificationDetails(
             android: AndroidNotificationDetails(
@@ -671,8 +671,8 @@ class NotificationService {
       try {
         tier = await _scheduleDaily(
           id: _ids[key]!,
-          title: '$label - ${schedule.masjidName}',
-          body: "It's time for $label prayer.",
+          title: '$label Prayer',
+          body: "${schedule.masjidName} • It's time for $label.",
           timeToday: dt,
           payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
           fridayOnly: key == 'juma',
@@ -829,8 +829,8 @@ class NotificationService {
       if (!when.isAfter(now)) continue;
       await _scheduleWithFallback(
         id: _extraBase + slot * 10 + day,
-        title: '$label - $masjidName',
-        body: "It's time for $label prayer.",
+        title: '$label Prayer',
+        body: "$masjidName • It's time for $label.",
         when: when,
         payload: _buildPayload(label, masjidName, audioUrl),
       );

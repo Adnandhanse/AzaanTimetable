@@ -15,6 +15,7 @@ import '../services/quran_repository.dart';
 import '../services/tts_service.dart';
 import '../services/prophet_stories_repository.dart';
 import '../theme/app_theme.dart';
+import '../widgets/assistant_loading.dart';
 import 'surah_detail_screen.dart';
 import 'prophet_story_reader_screen.dart';
 
@@ -397,12 +398,7 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       ]);
     final response = turn.response;
     if (response == null)
-      return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2)));
+      return AssistantLoading(label: _ui('Preparing your answer', 'جواب تیار ہو رہا ہے'));
     final language = response['language'] as String? ?? 'roman';
     final refs = (response['references'] as List? ?? [])
         .map((r) => Map<String, dynamic>.from(r as Map))
@@ -467,19 +463,23 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
           title:
               const Text('Ask Islam Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           actions: [
-            IconButton(
-                tooltip: _ui('New Chat', 'نئی گفتگو'),
-                onPressed: _busy
-                    ? null
-                    : () {
-                        _stop();
-                        setState(() => _turns.clear());
-                      },
-                icon: const Icon(Icons.edit_square, size: 21)),
-            IconButton(
-                tooltip: _ui('Language', 'زبان'),
-                onPressed: _busy ? null : _settings,
-                icon: const Icon(Icons.tune, size: 21)),
+            PopupMenuButton<String>(
+              enabled: !_busy,
+              tooltip: _ui('Chat Options', 'گفتگو کے اختیارات'),
+              icon: const Icon(Icons.more_horiz, size: 22),
+              onSelected: (value) {
+                if (value == 'new') {
+                  _stop();
+                  setState(() => _turns.clear());
+                } else {
+                  _settings();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'new', child: Text(_ui('New Chat', 'نئی گفتگو'))),
+                PopupMenuItem(value: 'language', child: Text(_ui('Voice Language', 'آواز کی زبان'))),
+              ],
+            ),
           ]),
       body: Column(children: [
         Expanded(
@@ -509,32 +509,6 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
                                   fontSize: 13,
                                   height: 1.5,
                                   color: AppColors.textMid)),
-                          const SizedBox(height: 22),
-                          for (final example in [
-                            _ui('How can I build a habit of prayer?',
-                                'نماز کی عادت کیسے بناؤں؟'),
-                            _ui('What does Islam teach about kindness?',
-                                'اسلام حسن سلوک کے بارے میں کیا سکھاتا ہے؟'),
-                          ])
-                            Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                        alignment: Alignment.centerLeft,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 14, vertical: 12),
-                                        foregroundColor: AppColors.textMid,
-                                        side: BorderSide(
-                                            color: AppColors.goldRule),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12))),
-                                    onPressed: () {
-                                      _query.text = example;
-                                    },
-                                    child: Text(example,
-                                        style: const TextStyle(
-                                            fontSize: 12, height: 1.4)))),
                         ])),
               for (final turn in _turns) ...[
                 Align(

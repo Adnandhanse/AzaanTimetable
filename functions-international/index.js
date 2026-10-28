@@ -15,7 +15,7 @@ async function recipient(req,purpose,masjidId=''){
  requireAuth(req);return parse(()=>identity.recipientIdentity({...req.auth.token,uid:req.auth.uid},req.data,Math.floor(Date.now()/1000),purpose,masjidId));
 }
 // Retired endpoints fail closed for older APKs. No provider key or domain needed.
-exports.startAdminEmailOtp=onCall(opts,async()=>{throw new HttpsError('failed-precondition','Update the app. International admins now use email/password and Platform Admin approval.');});
+exports.startAdminEmailOtp=onCall(opts,async()=>{throw new HttpsError('failed-precondition','Update the app. Admins now verify their mobile number by SMS.');});
 exports.verifyAdminEmailOtp=onCall(opts,async()=>{throw new HttpsError('failed-precondition','Email OTP is no longer used. Update the app.');});
 exports.registerVerifiedMasjid=onCall(opts,safe(async req=>{
  const r=await recipient(req,'registration');const d=req.data,reg=field(d.registrationNo,100);

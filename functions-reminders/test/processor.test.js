@@ -23,6 +23,6 @@ test('automatic reminders separate English and Urdu payloads; legacy devices def
  f.data.set('_timingReminderDevices/urdu',{token:'urdu-device',masjidId:'m',uid:'owner',language:'ur',updatedAt:ts(20*DAY)});
  await f.run();a.equal(f.sends(),2);
  const en=f.payloads.find(p=>p.tokens.includes('secret-token')),ur=f.payloads.find(p=>p.tokens.includes('urdu-device'));
- a.equal(en.notification.title,'Review Prayer Timings');a.equal(ur.notification.title,'نماز کے اوقات کا جائزہ');
+ a.equal(en.notification.title,'Prayer Timings Reminder');a.equal(ur.notification.title,'نماز کے اوقات کا جائزہ');
  a.equal(en.tokens.length,1);a.equal(ur.tokens.length,1);
 });
