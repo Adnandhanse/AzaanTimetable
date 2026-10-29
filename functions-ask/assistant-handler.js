@@ -4,7 +4,7 @@ const {requestData}=require('./assistant-contract');
 const {localResponse}=require('./assistant-local');
 const {answerConversation}=require('./conversational');
 const {optionalCache}=require('./shared-answer-cache');
-const VERSION='conversation-v1.2-language-references';
+const VERSION='conversation-v1.3-procedure-evidence';
 const notesVersion=createHash('sha256').update(JSON.stringify(require('./scholarly-notes.json'))).digest('hex');
 function cacheKey({uid,question,language,model,version}){
  return createHash('sha256').update(JSON.stringify([VERSION,uid,question.normalize('NFKC').trim().replace(/\s+/g,' '),language,model,version])).digest('hex');

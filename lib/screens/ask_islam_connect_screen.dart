@@ -169,8 +169,8 @@ class _AskIslamConnectScreenState extends State<AskIslamConnectScreen>
       final support = details is Map ? details['supportCode'] : null;
       if (support == 'AI-USER-LIMIT')
         return _ui(
-            'You have used your 5 new AI answers for today. Basic and saved answers remain available.',
-            'آج کے پانچ نئے AI جوابات استعمال ہو چکے ہیں۔ بنیادی اور محفوظ جوابات دستیاب رہیں گے۔');
+            'Daily limit reached. You have used all 10 new AI answers for today. Please try again tomorrow. Basic and saved answers remain available.',
+            'آج کے دس نئے AI جوابات کی حد مکمل ہو گئی ہے۔ کل دوبارہ کوشش کریں۔ بنیادی اور محفوظ جوابات دستیاب رہیں گے۔');
       if (support == 'AI-PROJECT-LIMIT')
         return _ui(
             'Today’s shared AI allowance has been used. Basic and saved answers remain available.',

@@ -239,8 +239,8 @@ class _DailyHadithDialogState extends State<_DailyHadithDialog> {
                                 ? 'Roman Urdu meaning · Complete Quran verse'
                                 : (urdu ? 'مکمل آیت · سورت میں سیاق پڑھیں' : 'Complete verse · Open Surah for context'))
                             : (_script == _Script.roman
-                                ? 'Roman Urdu meaning · Read in full for context'
-                                : (urdu ? 'مختصر اقتباس — مکمل سیاق کے لیے پوری حدیث پڑھیں' : 'Short hadith · Read in full for context')),
+                                ? 'Roman Urdu meaning · Short reminder'
+                                : (urdu ? 'مختصر حدیث کا مفہوم' : 'Short hadith reminder · Source available below')),
                         style: AppText.caption.copyWith(color: AppColors.textMuted)),
                       const SizedBox(height: 12),
                       // Urdu / Roman / English.

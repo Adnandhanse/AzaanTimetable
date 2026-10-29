@@ -5,7 +5,7 @@ const {focusQuestion}=require('./question-focus');
 const notes=require('./scholarly-notes.json');
 const reviewed=require('./quick_answers.json').facts;
 const indexes=new WeakMap();
-const stop=new Set('a an the is are was were what who how many does do did can could please tell explain about me my i you your in on of to for and or it this that have has hain hai tha thi kya ka ki ke ko se mein me mujhe batao btao kitni kitne kitna isme usme alaisalam alaihis salam alaihissalam hazrat number reference exact give why where when teaching teachings teach say says said ruling hukm s not no should would we our us they their them he she his her had be been being am being must was were related regarding happened happen step steps by kaise kese karu karoon karein karna krna kab kb mili mila mile milti hoga hogi hua hui aap ap saws sawas bata dena samjhao pehle phele before after baad'.split(' '));
+const stop=new Set('a an the is are was were what who how many does do did can could please tell explain about me my i you your in on of to for and or it this that have has hain hai tha thi kya ka ki ke ko se mein me mujhe batao btao kitni kitne kitna isme usme alaisalam alaihis salam alaihissalam hazrat number reference exact give why where when teaching teachings teach say says said ruling hukm s not no should would we our us they their them he she his her had be been being am being must was were related regarding happened happen step steps by kaise kese karu karoon karein karna krna kab kb mili mila mile milti hoga hogi hua hui aap ap saws sawas bare baare baarey mutalliq related bata dena samjhao pehle phele before after baad'.split(' '));
 const groups=[
  ['namaz','namaaz','namaj','salah','salaah','salat','prayer','نماز','صلاة'],
  ['rakat','rakaat','rakatain','rakate','rakatein','rakaatein','rakah','rakahs','rakats','rakate','رکعت','رکعات'],
@@ -26,14 +26,14 @@ const groups=[
  ['nabuwwat','nabuwat','nabuat','nabuat','naboowat','prophethood','commissioned','appointed','divine inspiration','revelation','نبوت'],
  ['umar','umr','age','old','عمر'],
  ['quran','kuran','quraan','koran','قرآن'],['hadees','hadis','hadith','narration','حدیث'],
- ['tarika','tareeqa','method','perform','procedure','طریقہ'],['qaza','missed','قضا'],
+ ['tarika','tariqa','tariqah','tareeqa','tareqa','tarikaa','method','perform','procedure','طریقہ'],['qaza','missed','قضا'],
  ['hanafi','hanfi','حنفی'],['shafii','shafi','shafie','shafii','شافعی'],['maliki','مالکی'],['hanbali','حنبلی'],
  ['ikhtilaf','differences','difference','madhhab','schools','مسلک'],['nam','naam','name','نام'],
  ['kitni','kitne','kitna','count','many','کتنی'],['aakhri','akhri','akhiri','last','final','seal','khatam','آخری'],
  ['nabi','nabee','prophet','prophets','apostle','messenger','anbiya','paigambar','نبی'],['patience','sabr','صبر'],['parents','parent','walidain','والدین'],
  ['kindness','kind','good','ihsan','neki','احسان'],['neighbour','neighbor','neighbours','neighbors','padosi','پڑوسی'],
  ['sleep','sleeping','bed','bedtime','sone','sona','سونے'],['prison','prisoners','prisonmates','imprisoned','jail','qaid','قید'],
- ['zakat','zakah','charity','زکات'],['qibla','direction','قبلہ'],
+ ['zakat','zakah','زکات','زکوۃ'],['charity','sadaqa','sadaqah','صدقة'],['qibla','direction','قبلہ'],
  ['gussa','gusse','ghussa','ghusse','anger','angry','rage','غصہ'],
  ['jhoot','jhut','jhooth','lie','lies','lying','falsehood','جھوٹ'],
  ['sach','truth','truthful','honesty','honest','سچ'],
@@ -84,6 +84,7 @@ function exactLookup(question,index){
 }
 function retrieveEvidence(question,history,docs){
  const index=corpusIndex(docs),exact=exactLookup(question,index),terms=queryGroups(question,history),matches=[];
+  const procedural=terms.some(g=>g.includes('prayer'))&&/tarika|tariqa|tareeqa|tareqa|method|perform|step|kaise|how.*(?:pray|salah)|طریق|तरी/iu.test(focusQuestion(question,history).query);
  if(exact.doc)matches.push({doc:exact.doc,score:1e6,terms:terms.flat()});
  if(!exact.requested){
   const frequencies=new Array(terms.length).fill(0),rows=[];
@@ -98,11 +99,10 @@ function retrieveEvidence(question,history,docs){
    if(matched.length)rows.push({doc,matched});
   }
   const useful=terms.map((g,i)=>frequencies[i]&&!domain(g)?i:-1).filter(i=>i>=0);
-  const strong=new Set(['adam','idris','hud','salih','lut','ismail','ishaq','yaqub','ayyub','shuayb','harun','dhulkifl','dawud','sulayman','ilyas','alyasa','zakariya','yahya','fajr','ibrahim','musa','isa','nuh','yunus','yusuf','nabuwwat','parents','biwi','haath','ungli','wuzu','roza','sleep','prison']);
+  const strong=new Set(['adam','idris','hud','salih','lut','ismail','ishaq','yaqub','ayyub','shuayb','harun','dhulkifl','dawud','sulayman','ilyas','alyasa','zakariya','yahya','fajr','ibrahim','musa','isa','nuh','yunus','yusuf','nabuwwat','parents','biwi','haath','ungli','wuzu','roza','sleep','prison','zakat']);
   const required=useful.filter(i=>strong.has(terms[i][0]));
   const threshold=Math.min(2,useful.length);
   const broadSubject=terms.length===1&&terms[0].includes('prayer');
-  const procedural=broadSubject&&/tarika|tareeqa|method|perform|step|how.*(?:pray|salah)|طریق|तरी/iu.test(question);
   const reviewedBoost=new Map();
   // Reuse the existing reviewed knowledge set as evidence anchors across
   // paraphrases, without turning the whole assistant into a fixed FAQ router.
@@ -115,9 +115,16 @@ function retrieveEvidence(question,history,docs){
   if(threshold)for(const {doc,matched} of rows){
    if(matched.filter(i=>useful.includes(i)).length<threshold||required.some(i=>!matched.includes(i)))continue;
    const body=` ${normalize(doc.en||doc.ur||doc.roman||'')} `;
+   // Bibliographic cross-references are not a standalone Hadith answer.
+   if(doc.kind==='hadith'&&(doc.en||'').length<450&&/same (?:chain|hadith|meaning|words)|chain of transmitters|as (?:mentioned|narrated|reported) (?:above|before)/i.test(doc.en||''))continue;
    if(doc.kind==='hadith'&&(body.length<60||required.some(i=>!terms[i].some(t=>body.includes(` ${t} `)))))continue;
    let score=matched.reduce((n,i)=>n+(domain(terms[i])?.5:1+Math.log((index.all.length+1)/(frequencies[i]+1))),0);
    score+=reviewedBoost.get(doc.id)||0;
+   const definition=/\b(?:kya|matlab|meaning|define|what)\b/i.test(question);
+   if(definition&&doc.kind==='hadith') {
+    if(/obligatory|enjoined|obligation|duty|consists|means|pillars|five.*(?:things|principles)/i.test(doc.en||''))score+=8;
+    if(terms.some(g=>g.includes('zakat'))&&/rich.*poor|wealthy.*poor|poor.*rich/i.test(doc.en||''))score+=16;
+   }
    if(broadSubject&&doc.kind==='hadith'&&/prayer|salat/i.test(doc.context||''))score+=3;
    if(procedural&&doc.kind==='hadith') {
     const stages=[/qibla/i,/takbir|allahu akbar/i,/recit/i,/bow|ruku/i,/prostrat|sujud/i,/sit|sitting/i];
@@ -151,15 +158,17 @@ function retrieveEvidence(question,history,docs){
  const seen=new Set();const unique=matches.filter(x=>{const key=normalize(x.doc.en||x.doc.ur||x.doc.roman||'');if(seen.has(key))return false;seen.add(key);return true;});
  // Avoid letting near-identical narrations crowd every other relevant source
  // type out of the evidence window. Generation still decides what to cite.
- const selected=unique.slice(0,4);
- for(const kind of ['quran','story','scholarly','dua']){
+ const hadithOnly=terms.some(g=>g.includes('hadith'))&&!terms.some(g=>g.includes('quran'))&&!/compare|comparison|muqabla/i.test(question);
+ const candidates=hadithOnly?unique.filter(x=>x.doc.kind==='hadith'):procedural?unique.filter(x=>['hadith','dua'].includes(x.doc.kind)):unique;
+ const selected=candidates.slice(0,4);
+ for(const kind of (hadithOnly?[]:procedural?['hadith','dua']:['hadith','quran','story','scholarly','dua'])){
   if(selected.some(x=>x.doc.kind===kind))continue;
-  const next=unique.find(x=>x.doc.kind===kind);if(next&&selected.length<8)selected.push(next);
+  const next=candidates.find(x=>x.doc.kind===kind);if(next&&selected.length<8)selected.push(next);
  }
- for(const next of unique){if(selected.length===8)break;if(!selected.includes(next))selected.push(next);}
+ for(const next of candidates){if(selected.length===8)break;if(!selected.includes(next))selected.push(next);}
  const evidence=selected.map(({doc,terms})=>({id:doc.id,kind:doc.kind,title:doc.title,
   publisher:doc.publisher||'',contentType:doc.contentType||(doc.kind==='story'?'editorial-retelling':'source-text'),
-  text:excerpt(doc.en||doc.ur||doc.roman,terms,1400),grades:doc.grades||[],sources:doc.sources||[]}));
+  text:excerpt(doc.en||doc.ur||doc.roman,terms,procedural?3000:1800),grades:doc.grades||[],sources:doc.sources||[]}));
  return {index,evidence,exact};
 }
 module.exports={retrieveEvidence,corpusIndex,exactLookup,queryGroups};

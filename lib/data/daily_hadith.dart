@@ -2,7 +2,7 @@ import '../models/hadith.dart';
 import '../services/hadith_link.dart';
 
 /// Short sayings/reports from the bundled collections; source references and grades are preserved, without narrator chains.
-/// Arabic, Urdu and English are source excerpts. Roman Urdu gives their meaning.
+/// Arabic and English are selected source excerpts. Urdu and Roman Urdu convey the selected meaning; they are not the entire narration.
 /// Full source narration remains available through [ref].
 class DailyHadith {
   const DailyHadith({
@@ -89,7 +89,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 1442,
       theme: "Generosity", themeUr: "سخاوت",
-      text: "Every day two angels come down from Heaven and one of them says, 'O Allah! Compensate every person who spends in Your Cause,' and the other (angel) says, 'O Allah! Destroy every miser", textUr: "ممسك",
+      text: "Every day two angels come down from Heaven and one of them says, 'O Allah! Compensate every person who spends in Your Cause,' and the other (angel) says, 'O Allah! Destroy every miser", textUr: "ہر صبح دو فرشتے دعا کرتے ہیں: اے اللہ! خرچ کرنے والے کو بدل عطا فرما، اور مال روک کر رکھنے والے کے مال کو تلف فرما۔",
       textHi: "Roz do farishte kehte hain: Aye Allah! Kharch karne wale ko badla de, aur rok kar rakhne wale ka maal tabah kar.", arabic: "مَا مِنْ يَوْمٍ يُصْبِحُ الْعِبَادُ فِيهِ إِلاَّ مَلَكَانِ يَنْزِلاَنِ فَيَقُولُ أَحَدُهُمَا اللَّهُمَّ أَعْطِ مُنْفِقًا خَلَفًا، وَيَقُولُ الآخَرُ اللَّهُمَّ أَعْطِ مُمْسِكًا تَلَفًا",
     ),
     DailyHadith(
@@ -149,7 +149,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.ibnmajah, number: 1015,
       theme: "Daily manners", themeUr: "روزمرہ آداب",
-      text: "The Messenger of Allah (ﷺ) said: ‘Whoever eats from this plant; garlic, let him not annoy us with it in this mosque of ours", textUr: "کراث",
+      text: "The Messenger of Allah (ﷺ) said: ‘Whoever eats from this plant; garlic, let him not annoy us with it in this mosque of ours", textUr: "جو لہسن کھائے، وہ اس کی بو سے ہماری مسجد میں ہمیں تکلیف نہ دے۔",
       textHi: "Lahsun kha kar hamari masjid mein us ki badboo se hamein takleef na do.", arabic: "مَنْ أَكَلَ مِنْ هَذِهِ الشَّجَرَةِ الثُّومِ فَلاَ يُؤْذِينَا بِهَا فِي مَسْجِدِنَا هَذَا",
     ),
     DailyHadith(
@@ -237,12 +237,6 @@ class DailyHadith {
       textHi: "Sajda saat aza par hota hai: chehra, dono haath, dono ghutne aur dono paon.", arabic: "إِذَا سَجَدَ الْعَبْدُ سَجَدَ مَعَهُ سَبْعَةُ أَطْرَافٍ وَجْهُهُ وَكَفَّاهُ وَرُكْبَتَاهُ وَقَدَمَاهُ",
     ),
     DailyHadith(
-      book: HadithBook.bukhari, number: 163,
-      theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "Save your heels from the fire", textUr: "ایڑیوں کے لیے آگ کا عذاب ہے",
-      textHi: "Apni eriyon ko Jahannam ki aag se bachao.", arabic: "وَيْلٌ لِلأَعْقَابِ مِنَ النَّارِ",
-    ),
-    DailyHadith(
       book: HadithBook.tirmidhi, number: 780,
       theme: "Fasting and worship", themeUr: "روزہ اور عبادت",
       text: "When one of you is invited to eat then let him respond, if he is fasting then let him pray", textUr: "جب تم میں سے کسی کو کھانے کی دعوت ملے تو اسے قبول کرے، اور اگر وہ روزہ سے ہو تو چاہیئے کہ دعا کرے",
@@ -273,21 +267,15 @@ class DailyHadith {
       textHi: "Jo ilm hasil karne ke raste par chale, Allah us ke liye Jannat ka rasta asan karta hai.", arabic: "مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ",
     ),
     DailyHadith(
-      book: HadithBook.bukhari, number: 4945,
-      theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "Carry on doing (good deeds), for every body will find it easy to do (what will lead him to his destined place)", textUr: "فأما من أعطى واتقى * وصدق بالحسنى",
-      textHi: "Nek aamal karte raho; har shakhs ke liye us ki taqdeer ki taraf le jane wale aamal asan kiye jate hain.", arabic: "مَا مِنْكُمْ مِنْ أَحَدٍ إِلاَّ وَقَدْ كُتِبَ مَقْعَدُهُ مِنَ الْجَنَّةِ وَمَقْعَدُهُ مِنَ النَّارِ",
-    ),
-    DailyHadith(
       book: HadithBook.bukhari, number: 5827,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "Nobody says: 'None has the right to be worshipped but Allah' and then later on he dies while believing in that, except that he will enter Paradise", textUr: "اللہ کے سوا کوئی معبود نہیں",
+      text: "Nobody says: 'None has the right to be worshipped but Allah' and then later on he dies while believing in that, except that he will enter Paradise", textUr: "جو شخص اللہ کے سوا کسی کو معبود نہ مانے اور اسی ایمان پر وفات پائے، وہ جنت میں داخل ہوگا۔",
       textHi: "Jo sachche iman ke saath La ilaha illallah kehte hue mare, woh Jannat mein dakhil hoga.", arabic: "مَا مِنْ عَبْدٍ قَالَ لاَ إِلَهَ إِلاَّ اللَّهُ‏.‏ ثُمَّ مَاتَ عَلَى ذَلِكَ، إِلاَّ دَخَلَ الْجَنَّةَ",
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 1900,
       theme: "Fasting and worship", themeUr: "روزہ اور عبادت",
-      text: "When you see the crescent (of the month of Ramadan), start fasting, and when you see the crescent (of the month of Shawwal), stop fasting; and if the sky is overcast (and you can't see it) then regard the month of Ramadan as of 30 days", textUr: "رمضان کا چاند",
+      text: "When you see the crescent (of the month of Ramadan), start fasting, and when you see the crescent (of the month of Shawwal), stop fasting; and if the sky is overcast (and you can't see it) then regard the month of Ramadan as of 30 days", textUr: "رمضان کا چاند دیکھ کر روزے شروع کرو اور شوال کا چاند دیکھ کر ختم کرو۔ بادل ہوں تو مہینے کی گنتی پوری کرو۔",
       textHi: "Chand dekh kar roze shuru aur khatm karo; badal hon to tees din poore karo.", arabic: "إِذَا رَأَيْتُمُوهُ فَصُومُوا، وَإِذَا رَأَيْتُمُوهُ فَأَفْطِرُوا، فَإِنْ غُمَّ عَلَيْكُمْ فَاقْدُرُوا لَهُ",
     ),
     DailyHadith(
@@ -311,7 +299,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 445,
       theme: "Supplication", themeUr: "دعا",
-      text: "The angels keep on asking Allah's forgiveness for anyone of you, as long as he is at his Musalla (praying place) and he does not pass wind (Hadath). They say, 'O Allah! Forgive him, O Allah! be Merciful to him", textUr: "اے اللہ! اس کی مغفرت کیجیئے، اے اللہ! اس پر رحم کیجیئے",
+      text: "The angels keep on asking Allah's forgiveness for anyone of you, as long as he is at his Musalla (praying place) and he does not pass wind (Hadath). They say, 'O Allah! Forgive him, O Allah! be Merciful to him", textUr: "جب تک آدمی نماز کی جگہ پر باوضو بیٹھا رہے، فرشتے اس کے لیے دعا کرتے ہیں: اے اللہ! اسے بخش دے اور اس پر رحم فرما۔",
       textHi: "Jab tak koi namaz ki jagah par ba-wuzu baitha rahe, farishte us ke liye maghfirat aur rehmat ki dua karte hain.", arabic: "الْمَلاَئِكَةُ تُصَلِّي عَلَى أَحَدِكُمْ مَا دَامَ فِي مُصَلاَّهُ الَّذِي صَلَّى فِيهِ، مَا لَمْ يُحْدِثْ، تَقُولُ اللَّهُمَّ اغْفِرْ لَهُ اللَّهُمَّ ارْحَمْهُ",
     ),
     DailyHadith(
@@ -323,7 +311,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 3497,
       theme: "Supplication", themeUr: "دعا",
-      text: "None of you should say: ‘O Allah forgive me if You wish. O Allah have mercy on me if You wish.’ Let him be firm in asking, for there is none that can compel Him to do things", textUr: "۱؎ بلکہ زور دار طریقے سے مانگے، اس لیے کہ اللہ کو کوئی مجبور کرنے والا تو ہے نہیں ( کہ کہا جائے: اگر تو چاہے ) ، امام ترمذی کہتے ہیں: یہ حدیث حسن صحیح ہے",
+      text: "None of you should say: ‘O Allah forgive me if You wish. O Allah have mercy on me if You wish.’ Let him be firm in asking, for there is none that can compel Him to do things", textUr: "دعا میں یہ نہ کہو: اے اللہ! اگر تو چاہے تو مجھے بخش دے اور مجھ پر رحم فرما۔ پختہ ارادے سے مانگو، کیونکہ اللہ کو کوئی مجبور نہیں کر سکتا۔",
       textHi: "Dua mein 'agar tu chahe' na kaho. Pakke irade se mango; Allah ko koi majboor nahin kar sakta.", arabic: "لاَ يَقُولُ أَحَدُكُمُ اللَّهُمَّ اغْفِرْ لِي إِنْ شِئْتَ اللَّهُمَّ ارْحَمْنِي إِنْ شِئْتَ لِيَعْزِمِ الْمَسْأَلَةَ فَإِنَّهُ لاَ مُكْرِهَ لَهُ",
     ),
     DailyHadith(
@@ -371,7 +359,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.ibnmajah, number: 4330,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "A place the size of a whip in Paradise is better than this world and everything in it", textUr: "دنيا وما فيها",
+      text: "A place the size of a whip in Paradise is better than this world and everything in it", textUr: "جنت میں ایک کوڑے جتنی جگہ دنیا اور اس کی سب چیزوں سے بہتر ہے۔",
       textHi: "Jannat mein ek kore jitni jagah is duniya aur is ki har cheez se behtar hai.", arabic: "مَوْضِعُ سَوْطٍ فِي الْجَنَّةِ خَيْرٌ مِنَ الدُّنْيَا وَمَا فِيهَا",
     ),
     DailyHadith(
@@ -401,7 +389,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 934,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "When the Imam is delivering the Khutba, and you ask your companion to keep quiet and listen, then no doubt you have done an evil act", textUr: "چپ رہ",
+      text: "When the Imam is delivering the Khutba, and you ask your companion to keep quiet and listen, then no doubt you have done an evil act", textUr: "امام کے خطبے کے دوران اپنے ساتھی سے چپ رہنے کو کہنا بھی لغو بات ہے۔",
       textHi: "Imam khutba de raha ho aur tum saathi ko chup rehne ko bhi kaho, to tum ne laghw kiya.", arabic: "إِذَا قُلْتَ لِصَاحِبِكَ يَوْمَ الْجُمُعَةِ أَنْصِتْ‏.‏ وَالإِمَامُ يَخْطُبُ فَقَدْ لَغَوْتَ",
     ),
     DailyHadith(
@@ -485,7 +473,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 3593,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "That which Allah selected for His angels (to say): ‘Glory to my Lord, and with His praise. Glory to my Lord, and with His praise (Subḥāna rabbī wa biḥamdihi, subḥāna rabbī wa biḥamdihi)", textUr: "وہ کلام جو اللہ نے اپنے فرشتوں کے لیے منتخب فرمایا ہے ( اور وہ یہ ہے )",
+      text: "That which Allah selected for His angels (to say): ‘Glory to my Lord, and with His praise. Glory to my Lord, and with His praise (Subḥāna rabbī wa biḥamdihi, subḥāna rabbī wa biḥamdihi)", textUr: "اپنے رب کی پاکیزگی اور حمد بیان کرو: سبحان ربي وبحمده، سبحان ربي وبحمده۔",
       textHi: "Mere Rabb ki pakeezgi aur hamd hai. Mere Rabb ki pakeezgi aur hamd hai.", arabic: "مَا اصْطَفَى اللَّهُ لِمَلاَئِكَتِهِ سُبْحَانَ رَبِّي وَبِحَمْدِهِ سُبْحَانَ رَبِّي وَبِحَمْدِهِ",
     ),
     DailyHadith(
@@ -497,8 +485,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.muslim, number: 6913,
       theme: "Daily manners", themeUr: "روزمرہ آداب",
-      text: "Hallowed be Allah and praise is due to Him according to the number of His creation and according to the pleasure of His Self and according to the weight of His Throne and according to the ink (used in recording) words (for His Praise)", textUr: "تمہارے ( ہاں سے جانے کے ) بعد میں نے چار کلمے تین بار کہے ہیں ، اگر ان کو ان کے ساتھ تولا جائے جو تم نے آج کے دن اب تک کہا ہے تو یہ ان سے وزن میں بڑھ جائیں",
-      textHi: "Allah ki pakeezgi aur hamd us ki makhlooq ki tadaad, us ki raza, us ke Arsh ke wazan aur us ke kalimat ki siyahi jitni.", arabic: "لَقَدْ قُلْتُ بَعْدَكِ أَرْبَعَ كَلِمَاتٍ ثَلاَثَ مَرَّاتٍ لَوْ وُزِنَتْ بِمَا قُلْتِ مُنْذُ الْيَوْمِ لَوَزَنَتْهُنَّ سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ وَرِضَا نَفْسِهِ وَزِنَةَ عَرْشِهِ وَمِدَادَ كَلِمَاتِهِ",
+      text: "Hallowed be Allah and praise is due to Him according to the number of His creation and according to the pleasure of His Self and according to the weight of His Throne and according to the ink (used in recording) words (for His Praise)", textUr: "اللہ کی پاکیزگی اور حمد، اس کی مخلوق کی تعداد، اس کی رضا، اس کے عرش کے وزن اور اس کے کلمات کی روشنائی کے برابر۔",
+      textHi: "Allah ki pakeezgi aur hamd us ki makhlooq ki tadaad, us ki raza, us ke Arsh ke wazan aur us ke kalimat ki siyahi jitni.", arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ وَرِضَا نَفْسِهِ وَزِنَةَ عَرْشِهِ وَمِدَادَ كَلِمَاتِهِ",
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 645,
@@ -527,7 +515,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.muslim, number: 1324,
       theme: "Daily manners", themeUr: "روزمرہ آداب",
-      text: "O Allah! I seek refuge with Thee from the torment of the Hell, from the torment of the grave, from the trial of life and death and from the evil of the trial of Masih al-Dajjal", textUr: "جب تم میں سے کوئی تشہد پڑھ لے تو چار چیزوں سے اللہ کی پناہ طلب کرے",
+      text: "O Allah! I seek refuge with Thee from the torment of the Hell, from the torment of the grave, from the trial of life and death and from the evil of the trial of Masih al-Dajjal", textUr: "اے اللہ! جہنم اور قبر کے عذاب، زندگی اور موت کی آزمائش اور مسیح دجال کے فتنے کے شر سے تیری پناہ مانگتا ہوں۔",
       textHi: "Aye Allah! Jahannam aur qabr ke azab, zindagi aur maut ki azmaish aur Dajjal ke fitne se teri panah mangta hoon.", arabic: "إِذَا تَشَهَّدَ أَحَدُكُمْ فَلْيَسْتَعِذْ بِاللَّهِ مِنْ أَرْبَعٍ يَقُولُ اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ وَمِنْ عَذَابِ الْقَبْرِ وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ",
     ),
     DailyHadith(
@@ -593,7 +581,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 5033,
       theme: "The Quran", themeUr: "قرآن",
-      text: "Commit yourself to the Qur'an, for by Him in whose Hand is my soul, it is surely more prone to break away than a camel in its bind", textUr: "قرآن مجید کا پڑھتے رہنا لازم پکڑ لو",
+      text: "Commit yourself to the Qur'an, for by Him in whose Hand is my soul, it is surely more prone to break away than a camel in its bind", textUr: "قرآن کی پابندی سے تلاوت اور یاد دہانی کرتے رہو؛ وہ بندھے ہوئے اونٹ کے چھوٹ جانے سے بھی زیادہ جلد یاد سے نکل سکتا ہے۔",
       textHi: "Quran ko yaad rakhne ki pabandi karo; woh bandhe hue oont se bhi zyada jaldi nikal jata hai.", arabic: "تَعَاهَدُوا الْقُرْآنَ فَوَالَّذِي نَفْسِي بِيَدِهِ لَهُوَ أَشَدُّ تَفَصِّيًا مِنَ الإِبِلِ فِي عُقُلِهَا",
     ),
     DailyHadith(
@@ -737,7 +725,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 142,
       theme: "Supplication", themeUr: "دعا",
-      text: "Allah-umma inni a`udhu bika minal khubuthi wal khaba'ith i.e. O Allah, I seek Refuge with You from all offensive and wicked things (evil deeds and evil spirits)", textUr: "اللهم إني أعوذ بك من الخبث والخبائث",
+      text: "Allah-umma inni a`udhu bika minal khubuthi wal khaba'ith i.e. O Allah, I seek Refuge with You from all offensive and wicked things (evil deeds and evil spirits)", textUr: "اے اللہ! میں خبیث جنوں اور خبیث جنیوں سے تیری پناہ مانگتا ہوں۔",
       textHi: "Aye Allah! Main buri cheezon aur shaitanon se teri panah mangta hoon.", arabic: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ",
     ),
     DailyHadith(
@@ -845,7 +833,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 6489,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "The truest poetic verse ever said by a poet, is: Indeed! Everything except Allah, is perishable", textUr: "سب سے سچا شعر جسے شاعر نے کہا ہے یہ ہے",
+      text: "The truest poetic verse ever said by a poet, is: Indeed! Everything except Allah, is perishable", textUr: "کسی شاعر کی سب سے سچی بات یہ ہے کہ اللہ کے سوا ہر چیز فانی ہے۔",
       textHi: "Sab se sachchi shairana baat: Allah ke siwa har cheez fana hone wali hai.", arabic: "أَصْدَقُ بَيْتٍ قَالَهُ الشَّاعِرُ أَلاَ كُلُّ شَىْءٍ مَا خَلاَ اللَّهَ بَاطِلُ",
     ),
     DailyHadith(
@@ -857,7 +845,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.ibnmajah, number: 3879,
       theme: "Supplication", themeUr: "دعا",
-      text: "Subhan Allahi Rabbil-‘alamin (Glory is to Allah, the Lord of the worlds)", textUr: "سبحان الله رب العالمين",
+      text: "Subhan Allahi Rabbil-‘alamin (Glory is to Allah, the Lord of the worlds)", textUr: "اللہ پاک ہے، جو تمام جہانوں کا رب ہے۔",
       textHi: "Allah pakeeza hai, jo tamam jahano ka Rabb hai.", arabic: "سُبْحَانَ اللَّهِ رَبِّ الْعَالَمِينَ",
     ),
     DailyHadith(
@@ -947,7 +935,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 1438,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "An honest Muslim storekeeper who carries out the orders of his master and pays fully what he has been ordered to give with a good heart and pays to that person to whom he was ordered to pay, is regarded as one of the two charitable persons", textUr: "خازن",
+      text: "An honest Muslim storekeeper who carries out the orders of his master and pays fully what he has been ordered to give with a good heart and pays to that person to whom he was ordered to pay, is regarded as one of the two charitable persons", textUr: "دیانت دار مسلمان خزانچی جو خوش دلی سے حکم کے مطابق پوری چیز مستحق شخص کو دے، صدقہ کرنے والوں میں شمار ہوتا ہے۔",
       textHi: "Imanadar khazanchi jo khushi se poori amanat sahi shakhs tak pahunchaye, woh bhi sadqa karne walon mein hai.", arabic: "الْخَازِنُ الْمُسْلِمُ الأَمِينُ الَّذِي يُنْفِذُ ـ وَرُبَّمَا قَالَ يُعْطِي ـ مَا أُمِرَ بِهِ كَامِلاً مُوَفَّرًا طَيِّبٌ بِهِ نَفْسُهُ، فَيَدْفَعُهُ إِلَى الَّذِي أُمِرَ لَهُ بِهِ، أَحَدُ الْمُتَصَدِّقَيْنِ",
     ),
     DailyHadith(
@@ -1085,7 +1073,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.ibnmajah, number: 876,
       theme: "Supplication", themeUr: "دعا",
-      text: "When the Imam says: ‘Sami’ Allahu liman hamidah (Allah hears those who praise Him),’ say: ‘Rabbana wa lakal-hamd (O our Lord, to You is the praise)", textUr: "سمع الله لمن حمده",
+      text: "When the Imam says: ‘Sami’ Allahu liman hamidah (Allah hears those who praise Him),’ say: ‘Rabbana wa lakal-hamd (O our Lord, to You is the praise)", textUr: "جب امام سمع الله لمن حمده کہے، تو تم ربنا ولك الحمد کہو۔",
       textHi: "Imam 'Sami Allahu liman hamidah' kahe, to tum 'Rabbana wa lakal hamd' kaho.", arabic: "إِذَا قَالَ الإِمَامُ سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ ‏.‏ فَقُولُوا رَبَّنَا وَلَكَ الْحَمْدُ",
     ),
     DailyHadith(
@@ -1109,7 +1097,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 794,
       theme: "Supplication", themeUr: "دعا",
-      text: "Subhanaka l-lahumma Rabbana wa bihamdika; Allahumma ghfir li.' (Exalted [from unbecoming attributes] Are you O Allah our Lord, and by Your praise [do I exalt You]. O Allah! Forgive me", textUr: "سبحانك اللهم ربنا وبحمدك،‏‏‏‏ اللهم اغفر لي",
+      text: "Subhanaka l-lahumma Rabbana wa bihamdika; Allahumma ghfir li.' (Exalted [from unbecoming attributes] Are you O Allah our Lord, and by Your praise [do I exalt You]. O Allah! Forgive me", textUr: "اے اللہ، ہمارے رب! تیری پاکیزگی اور حمد ہے۔ اے اللہ! مجھے بخش دے۔",
       textHi: "Aye Allah, hamare Rabb! Teri pakeezgi teri hamd ke saath bayan karta hoon. Aye Allah! Mujhe bakhsh de.", arabic: "سُبْحَانَكَ اللَّهُمَّ رَبَّنَا وَبِحَمْدِكَ، اللَّهُمَّ اغْفِرْ لِي",
     ),
     DailyHadith(
@@ -1163,7 +1151,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 3437,
       theme: "Daily manners", themeUr: "روزمرہ آداب",
-      text: "Whoever stops at a stopping place and then says: ‘I seek refuge in Allah’s Perfect Words from the evil of what He has created, (A`ūdhu bi-kalimātillāhit-tāmmāti min sharri mā khalaq)’ nothing shall harm him until he departs from that stopping place of his", textUr: "، تو جب تک کہ وہ اپنی اس منزل سے کوچ نہ کرے اسے کوئی چیز نقصان نہ پہنچائے گی",
+      text: "Whoever stops at a stopping place and then says: ‘I seek refuge in Allah’s Perfect Words from the evil of what He has created, (A`ūdhu bi-kalimātillāhit-tāmmāti min sharri mā khalaq)’ nothing shall harm him until he departs from that stopping place of his", textUr: "کسی جگہ ٹھہر کر یہ دعا پڑھو: میں اللہ کے کامل کلمات کی پناہ مانگتا ہوں اس کی مخلوق کے شر سے۔ وہاں سے روانہ ہونے تک کوئی چیز نقصان نہ پہنچائے گی۔",
       textHi: "Jahan thehro, Allah ke poore kalimat ki panah us ki makhlooq ke shar se mango; wahan se jane tak nuqsan na hoga.", arabic: "مَنْ نَزَلَ مَنْزِلاً ثُمَّ قَالَ أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ لَمْ يَضُرَّهُ شَيْءٌ حَتَّى يَرْتَحِلَ مِنْ مَنْزِلِهِ ذَلِكَ",
     ),
     DailyHadith(
@@ -1187,7 +1175,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 552,
       theme: "Family ties", themeUr: "رشتہ داری",
-      text: "Whoever misses the `Asr prayer (intentionally) then it is as if he lost his family and property", textUr: "يترکم",
+      text: "Whoever misses the `Asr prayer (intentionally) then it is as if he lost his family and property", textUr: "جس کی عصر کی نماز چھوٹ گئی، گویا اس کے اہل و عیال اور مال چھن گئے۔",
       textHi: "Jis ki Asr ki namaz chhoot gayi, goya us ke ghar wale aur maal sab chhin gaye.", arabic: "الَّذِي تَفُوتُهُ صَلاَةُ الْعَصْرِ كَأَنَّمَا وُتِرَ أَهْلَهُ وَمَالَهُ",
     ),
     DailyHadith(
@@ -1205,7 +1193,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.nasai, number: 66,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "The Messenger of Allah (ﷺ) said: 'If a dog licks the vessel of any one of you, let him throw (the contents) away and wash it seven times.'", textUr: "فلیرقہ",
+      text: "The Messenger of Allah (ﷺ) said: 'If a dog licks the vessel of any one of you, let him throw (the contents) away and wash it seven times.'", textUr: "اگر کتا کسی برتن میں منہ ڈال دے تو اس کا مواد بہا دو اور برتن سات مرتبہ دھوؤ۔",
       textHi: "Kutta bartan chaat le, to us ka pani phenk do aur bartan saat martaba dho.", arabic: "إِذَا وَلَغَ الْكَلْبُ فِي إِنَاءِ أَحَدِكُمْ فَلْيُرِقْهُ ثُمَّ لْيَغْسِلْهُ سَبْعَ مَرَّاتٍ",
     ),
     DailyHadith(
@@ -1277,7 +1265,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.nasai, number: 1338,
       theme: "Prayer", themeUr: "نماز",
-      text: "Allahumma anta as-salam wa minka as-salam tabarakta ya dhal-jalali wal-ikram (O Allah, You are the source of eace (or the One free from all faults) and from You comes peace, blessed are You, O Possessor of Majesty and Honor", textUr: "اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام",
+      text: "Allahumma anta as-salam wa minka as-salam tabarakta ya dhal-jalali wal-ikram (O Allah, You are the source of eace (or the One free from all faults) and from You comes peace, blessed are You, O Possessor of Majesty and Honor", textUr: "اے اللہ! تو سلامتی والا ہے اور تجھ ہی سے سلامتی ہے۔ اے بزرگی اور عزت والے! تو بابرکت ہے۔",
       textHi: "Aye Allah! Tu Salam hai aur salamati tujh se hai. Tu barkat wala hai, aye azmat aur izzat wale!", arabic: "اللَّهُمَّ أَنْتَ السَّلاَمُ وَمِنْكَ السَّلاَمُ تَبَارَكْتَ يَا ذَا الْجَلاَلِ وَالإِكْرَامِ",
     ),
     DailyHadith(
@@ -1295,7 +1283,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 6024,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "Be calm, O `Aisha! Allah loves that on, should be kind and lenient in all matters", textUr: "وعليكم السام واللعنة",
+      text: "Be calm, O `Aisha! Allah loves that on, should be kind and lenient in all matters", textUr: "نرمی اختیار کرو؛ اللہ تعالیٰ ہر معاملے میں نرمی پسند فرماتا ہے۔",
       textHi: "Aye Aishah! Narmi karo. Allah har kaam mein narmi ko pasand karta hai.", arabic: "مَهْلاً يَا عَائِشَةُ، إِنَّ اللَّهَ يُحِبُّ الرِّفْقَ فِي الأَمْرِ كُلِّهِ",
     ),
     DailyHadith(
@@ -1349,7 +1337,7 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.tirmidhi, number: 2902,
       theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "Some Ayat have been revealed to me the likes of which have not been seen: Qul A'udhu Birabbin-Nas until the end of the Surah and Qul A'udhu Birabbil-Falaq until the end of the Surah", textUr: "اللہ تعالیٰ نے مجھ پر ایسی آیات نازل کی ہیں جیسی ( کبھی ) نہیں دیکھی گئی ہیں، وہ یہ ہیں",
+      text: "Some Ayat have been revealed to me the likes of which have not been seen: Qul A'udhu Birabbin-Nas until the end of the Surah and Qul A'udhu Birabbil-Falaq until the end of the Surah", textUr: "سورہ الناس اور سورہ الفلق ایسی نازل کردہ آیات ہیں جن جیسی پہلے نہیں دیکھی گئیں۔",
       textHi: "Mujh par aisi ayatein nazil hui hain jin jaisi nahin dekhi gayin: Surah Falaq aur Surah Nas.", arabic: "قَدْ أَنْزَلَ اللَّهُ عَلَىَّ آيَاتٍ لَمْ يُرَ مِثْلُهُنَّ ‏(‏قُلْ أَعُوذُ بِرَبِّ النَّاسِ ‏)‏ إِلَى آخِرِ السُّورَةِ وَ ‏(‏قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ‏)‏ إِلَى آخِرِ السُّورَةِ",
     ),
     DailyHadith(
@@ -1413,12 +1401,6 @@ class DailyHadith {
       textHi: "Jo takabbur se apna kapra ghaseete, Allah Qiyamat ke din us ki taraf nahin dekhega.", arabic: "لاَ يَنْظُرُ اللَّهُ يَوْمَ الْقِيَامَةِ إِلَى مَنْ جَرَّ إِزَارَهُ بَطَرًا",
     ),
     DailyHadith(
-      book: HadithBook.ibnmajah, number: 1034,
-      theme: "Everyday guidance", themeUr: "روزمرہ رہنمائی",
-      text: "The Tasbih (saying Subhan-Allah) is for men and clapping is for women", textUr: "سبحان الله",
-      textHi: "Namaz mein mardon ke liye Subhanallah kehna aur auraton ke liye tali bajana hai.", arabic: "التَّسْبِيحُ لِلرِّجَالِ وَالتَّصْفِيقُ لِلنِّسَاءِ",
-    ),
-    DailyHadith(
       book: HadithBook.bukhari, number: 5378,
       theme: "Daily manners", themeUr: "روزمرہ آداب",
       text: "Mention the Name of Allah and eat of the dish what is nearer to you", textUr: "بسم اللہ پڑھ اور اپنے سامنے سے کھا",
@@ -1463,8 +1445,8 @@ class DailyHadith {
     DailyHadith(
       book: HadithBook.bukhari, number: 5459,
       theme: "Supplication", themeUr: "دعا",
-      text: "Praise be to Allah Who has satisfied our needs and quenched our thirst. Your favor cannot by compensated or denied", textUr: "تمام تعریفیں اس اللہ کے لیے ہیں جس نے ہماری کفایت کی اور ہمیں سیراب کیا۔ ہم اس کھانے کا حق پوری طرح ادا نہ کر سکے ورنہ ہم اس نعمت کے منکر نہیں ہیں۔ اور ایک مرتبہ فرمایا",
-      textHi: "Allah ka shukr jis ne hamari zaroorat aur pyas poori ki. Us ka ehsan na chukaya ja sakta hai, na us se be-niyazi hai.", arabic: "الْحَمْدُ لِلَّهِ الَّذِي كَفَانَا وَأَرْوَانَا، غَيْرَ مَكْفِيٍّ، وَلاَ مَكْفُورٍ ـ وَقَالَ مَرَّةً الْحَمْدُ لِلَّهِ رَبِّنَا، غَيْرَ مَكْفِيٍّ، وَلاَ مُوَدَّعٍ ـ وَلاَ مُسْتَغْنًى، رَبَّنَا",
+      text: "Praise be to Allah Who has satisfied our needs and quenched our thirst. Your favor cannot by compensated or denied", textUr: "تمام تعریف اللہ کے لیے ہے جس نے ہماری ضرورت پوری کی اور ہمیں سیراب کیا۔ اس کے احسان کا بدلہ نہیں چکایا جا سکتا اور نہ اس سے بےنیازی ہے۔",
+      textHi: "Allah ka shukr jis ne hamari zaroorat aur pyas poori ki. Us ka ehsan na chukaya ja sakta hai, na us se be-niyazi hai.", arabic: "الْحَمْدُ لِلَّهِ الَّذِي كَفَانَا وَأَرْوَانَا، غَيْرَ مَكْفِيٍّ، وَلاَ مَكْفُورٍ",
     ),
     DailyHadith(
       book: HadithBook.bukhari, number: 5984,
