@@ -27,7 +27,7 @@ jobs:
       - name: Test SMS identity and country validation
         run: npm --prefix functions-international test
       - name: Deploy registration and verified admin endpoints
-        run: npx --yes firebase-tools@14 --config firebase.registration.json deploy --only functions:international-admins --project actual-masjid-prayer-time --non-interactive
+        run: npx --yes firebase-tools@14 --config firebase.registration.json deploy --only functions:international-admins --project actual-masjid-prayer-time --non-interactive --force
       - name: Verify registration endpoint is deployed in the app region
         run: |
           npx --yes firebase-tools@14 functions:list --json --project actual-masjid-prayer-time > "$RUNNER_TEMP/registration-functions.json"
