@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/masjid.dart';
+import 'masjid_clock.dart';
 
 /// Everything the alarm system needs, held on the device.
 ///
@@ -24,8 +25,10 @@ class CachedSchedule {
     required this.times,
     this.audioUrl,
     this.savedAt,
+    this.timeZone,
   });
 
+  final String? timeZone;
   final String masjidId;
   final String masjidName;
 
@@ -37,45 +40,48 @@ class CachedSchedule {
   final DateTime? savedAt;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'masjidId': masjidId,
-        'masjidName': masjidName,
-        'times': times,
-        'audioUrl': audioUrl,
-        'savedAt': (savedAt ?? DateTime.now()).millisecondsSinceEpoch,
-      };
+    'timeZone': timeZone,
+    'masjidId': masjidId,
+    'masjidName': masjidName,
+    'times': times,
+    'audioUrl': audioUrl,
+    'savedAt': (savedAt ?? DateTime.now()).millisecondsSinceEpoch,
+  };
 
   static CachedSchedule fromJson(Map<String, dynamic> j) => CachedSchedule(
-        masjidId: j['masjidId'] as String? ?? '',
-        masjidName: j['masjidName'] as String? ?? '',
-        times: Map<String, String>.from(
-          (j['times'] as Map?)?.map(
-                (dynamic k, dynamic v) =>
-                    MapEntry<String, String>(k.toString(), v.toString()),
-              ) ??
-              <String, String>{},
-        ),
-        audioUrl: j['audioUrl'] as String?,
-        savedAt: j['savedAt'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch(j['savedAt'] as int),
-      );
+    timeZone: j['timeZone'] as String?,
+    masjidId: j['masjidId'] as String? ?? '',
+    masjidName: j['masjidName'] as String? ?? '',
+    times: Map<String, String>.from(
+      (j['times'] as Map?)?.map(
+            (dynamic k, dynamic v) =>
+                MapEntry<String, String>(k.toString(), v.toString()),
+          ) ??
+          <String, String>{},
+    ),
+    audioUrl: j['audioUrl'] as String?,
+    savedAt: j['savedAt'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(j['savedAt'] as int),
+  );
 
   static CachedSchedule fromMasjid(Masjid m) => CachedSchedule(
-        masjidId: m.id,
-        masjidName: m.name,
-        audioUrl: m.customAzanAudioUrl,
-        times: <String, String>{
-          'fajr': m.prayerTimes.fajr,
-          'dhuhr': m.prayerTimes.dhuhr,
-          'asr': m.prayerTimes.asr,
-          'maghrib': m.prayerTimes.maghrib,
-          'isha': m.prayerTimes.isha,
-          'juma': m.prayerTimes.juma,
-        },
-      );
+    timeZone: MasjidClock.zoneFor(m.latitude, m.longitude),
+    masjidId: m.id,
+    masjidName: m.name,
+    audioUrl: m.customAzanAudioUrl,
+    times: <String, String>{
+      'fajr': m.prayerTimes.fajr,
+      'dhuhr': m.prayerTimes.dhuhr,
+      'asr': m.prayerTimes.asr,
+      'maghrib': m.prayerTimes.maghrib,
+      'isha': m.prayerTimes.isha,
+      'juma': m.prayerTimes.juma,
+    },
+  );
 
   /// Identity of the schedule itself. Used to skip pointless rescheduling.
-  String get signature => '$masjidId|${times.values.join('|')}';
+  String get signature => '$masjidId|$timeZone|${times.values.join('|')}';
 }
 
 class PrayerScheduleCache {
@@ -95,7 +101,8 @@ class PrayerScheduleCache {
     if (raw == null) return null;
     try {
       return CachedSchedule.fromJson(
-          Map<String, dynamic>.from(json.decode(raw)));
+        Map<String, dynamic>.from(json.decode(raw)),
+      );
     } catch (_) {
       // A corrupt cache must never stop the app starting.
       return null;
@@ -113,7 +120,9 @@ class PrayerScheduleCache {
   static Future<void> markSeen(String prayerKey, DateTime when) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(
-        '$_lastFiredPrefix$prayerKey', when.millisecondsSinceEpoch);
+      '$_lastFiredPrefix$prayerKey',
+      when.millisecondsSinceEpoch,
+    );
   }
 
   static Future<DateTime?> lastSeen(String prayerKey) async {

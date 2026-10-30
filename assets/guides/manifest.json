@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "guides": [
+    {
+      "id": "registration",
+      "language": "en",
+      "title": "Masjid Registration",
+      "pdf": "assets/guides/registration_en.pdf",
+      "pages": [
+        "assets/guides/registration_en/page_01.png",
+        "assets/guides/registration_en/page_02.png",
+        "assets/guides/registration_en/page_03.png",
+        "assets/guides/registration_en/page_04.png",
+        "assets/guides/registration_en/page_05.png",
+        "assets/guides/registration_en/page_06.png"
+      ],
+      "summaries": [
+        "Open registration. Choose Masjid Admin, then tap \"New masjid? Register here\".",
+        "Masjid details. Enter masjid details. Tap Use Current Location while at the masjid.",
+        "Admin details. Enter the admin name, country and mobile number. Email is optional.",
+        "Verify mobile. Tap Verify Mobile & Register. Enter the SMS code and tap Verify.",
+        "Save prayer times. After platform approval, open Edit Prayer Times. Set times and tap Save.",
+        "Already registered?. Use the existing masjid. For a new admin, follow the Transfer Guide."
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=bQCdNrpS2aM"
+    },
+    {
+      "id": "registration",
+      "language": "ur",
+      "title": "مسجد کی رجسٹریشن",
+      "pdf": "assets/guides/registration_ur.pdf",
+      "pages": [
+        "assets/guides/registration_ur/page_01.png",
+        "assets/guides/registration_ur/page_02.png",
+        "assets/guides/registration_ur/page_03.png",
+        "assets/guides/registration_ur/page_04.png",
+        "assets/guides/registration_ur/page_05.png",
+        "assets/guides/registration_ur/page_06.png"
+      ],
+      "summaries": [
+        "رجسٹریشن کھولیں۔ مسجد ایڈمن منتخب کریں، پھر نئی مسجد کی رجسٹریشن کا بٹن دبائیں۔",
+        "مسجد کی معلومات۔ مسجد کی معلومات درج کریں۔ مسجد میں موجود ہو کر موجودہ مقام لیں۔",
+        "ایڈمن کی معلومات۔ ایڈمن کا نام، ملک اور موبائل نمبر درج کریں۔ ای میل اختیاری ہے۔",
+        "موبائل کی تصدیق۔ رجسٹریشن کا بٹن دبائیں۔ ایس ایم ایس کا کوڈ درج کر کے تصدیق کریں۔",
+        "نماز کے اوقات محفوظ کریں۔ منظوری کے بعد نماز کے اوقات کھولیں، اوقات درج کر کے محفوظ کریں۔",
+        "مسجد پہلے سے رجسٹر ہے؟۔ اسی مسجد کو استعمال کریں۔ نئے ایڈمن کے لیے منتقلی کی گائیڈ دیکھیں۔"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=bQCdNrpS2aM"
+    },
+    {
+      "id": "admin_transfer",
+      "language": "en",
+      "title": "Admin Transfer",
+      "pdf": "assets/guides/admin_transfer_en.pdf",
+      "pages": [
+        "assets/guides/admin_transfer_en/page_01.png"
+      ],
+      "summaries": [
+        "Open transfer. On the current admin phone, open Masjid Dashboard > Transfer Ownership.\nNew admin details. Enter the new admin name, country and mobile. Email is optional.\nVerify the new admin. Tap Send SMS Code. Enter the new admin's code, then tap Verify Phone.\nConfirm transfer. Tap Transfer Administration and confirm. Existing masjid data stays saved.\nOld admin unavailable?. Use the existing registration number and previous-admin-left option; approval is required."
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=GFf2gKK0G1E"
+    },
+    {
+      "id": "admin_transfer",
+      "language": "ur",
+      "title": "ایڈمن کی منتقلی",
+      "pdf": "assets/guides/admin_transfer_ur.pdf",
+      "pages": [
+        "assets/guides/admin_transfer_ur/page_01.png"
+      ],
+      "summaries": [
+        "منتقلی کھولیں۔ موجودہ ایڈمن کے فون پر مسجد کے ڈیش بورڈ میں منتقلی کھولیں۔\nنئے ایڈمن کی معلومات۔ نئے ایڈمن کا نام، ملک اور موبائل درج کریں۔ ای میل اختیاری ہے۔\nنئے ایڈمن کی تصدیق۔ کوڈ بھیجیں، نئے ایڈمن کا کوڈ درج کریں، پھر فون کی تصدیق کریں۔\nمنتقلی کی تصدیق۔ انتظام منتقل کرنے کا بٹن دبائیں اور تصدیق کریں۔ مسجد کی معلومات محفوظ رہیں گی۔\nپرانا ایڈمن دستیاب نہیں؟۔ موجودہ رجسٹریشن نمبر سے پرانے ایڈمن کے جانے کی درخواست دیں؛ منظوری ضروری ہے۔"
+      ],
+      "videoUrl": "https://www.youtube.com/watch?v=GFf2gKK0G1E"
+    }
+  ]
+}

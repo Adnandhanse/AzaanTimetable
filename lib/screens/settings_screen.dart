@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../theme/app_theme.dart';
 import '../services/notification_service.dart';
 import 'alarm_health_screen.dart';
@@ -11,6 +12,7 @@ import '../services/app_language.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme_controller.dart';
 import 'theme_selection_screen.dart';
+import 'help_guides_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -31,7 +33,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSound() async {
     final value = await PrayerNotificationPreferences.soundEnabled();
-    if (mounted) setState(() { azanEnabled = value; _soundLoading = false; });
+    if (mounted)
+      setState(() {
+        azanEnabled = value;
+        _soundLoading = false;
+      });
   }
 
   Future<void> _saveSound(bool value) async {
@@ -41,8 +47,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!value) await AzanStopController.stop();
       if (mounted) setState(() => azanEnabled = value);
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not save. Please try again.')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save. Please try again.')),
+        );
     } finally {
       if (mounted) setState(() => _soundLoading = false);
     }
@@ -53,9 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           // Listens to the theme controller directly (rather than via
@@ -86,12 +92,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           // Moved here, right after Appearance, per request.
           ListTile(
-            leading: Icon(Icons.switch_account_outlined,
-                color: AppColors.emerald),
+            leading: Icon(
+              Icons.switch_account_outlined,
+              color: AppColors.emerald,
+            ),
             title: Text(S.isUrdu ? 'استعمال کا طریقہ' : 'How you use the app'),
-            subtitle: Text(S.isUrdu
-                ? 'نمازی یا مسجد کا ذمہ دار'
-                : 'Switch between worshipper and masjid admin'),
+            subtitle: Text(
+              S.isUrdu
+                  ? 'نمازی یا مسجد کا ذمہ دار'
+                  : 'Switch between worshipper and masjid admin',
+            ),
             trailing: const Icon(Icons.chevron_right, size: 18),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
@@ -101,12 +111,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: Icon(Icons.language, color: AppColors.emerald),
             title: Text(S.appLanguage),
-            subtitle: Text(AppLanguageController.instance.isUrdu ? 'اردو (Urdu)' : 'English'),
+            subtitle: Text(
+              AppLanguageController.instance.isUrdu ? 'اردو (Urdu)' : 'English',
+            ),
             trailing: DropdownButton<AppLanguage>(
               value: AppLanguageController.instance.language,
               underline: const SizedBox(),
               items: const [
-                DropdownMenuItem(value: AppLanguage.english, child: Text('English')),
+                DropdownMenuItem(
+                  value: AppLanguage.english,
+                  child: Text('English'),
+                ),
                 DropdownMenuItem(value: AppLanguage.urdu, child: Text('اردو')),
               ],
               onChanged: (lang) {
@@ -131,6 +146,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) => setState(() => vibrateEnabled = v),
           ),
           const Divider(),
+          ListTile(
+            leading: Icon(Icons.menu_book_outlined, color: AppColors.emerald),
+            title: Text(S.tr('Help & Guides', 'مدد اور رہنمائی')),
+            subtitle: Text(
+              S.tr(
+                'Masjid registration and admin transfer',
+                'مسجد کی رجسٹریشن اور ایڈمن کی منتقلی',
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HelpGuidesScreen()),
+            ),
+          ),
+          const Divider(),
           // CREDITS AND LICENCES.
           //
           // Noto Nastaliq is OFL, which requires its copyright notice to
@@ -145,27 +175,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context: context,
               builder: (ctx) => AlertDialog(
                 backgroundColor: AppColors.white,
-                title: Text('Islam Connect',
-                    style: AppText.rowTitle.copyWith(color: AppColors.emerald)),
+                title: Text(
+                  'Islam Connect',
+                  style: AppText.rowTitle.copyWith(color: AppColors.emerald),
+                ),
                 content: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Fonts', style: AppText.eyebrow.copyWith(color: AppColors.gold)),
+                      Text(
+                        'Fonts',
+                        style: AppText.eyebrow.copyWith(color: AppColors.gold),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         'Qur\u2019an text is set in PDMS Saleem QuranFont.',
-                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                        style: AppText.caption.copyWith(
+                          color: AppColors.textMid,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'Urdu text is set in Noto Nastaliq Urdu, and Arabic '
                         'elsewhere in Amiri \u2014 both under the SIL Open Font License.',
-                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                        style: AppText.caption.copyWith(
+                          color: AppColors.textMid,
+                        ),
                       ),
                       const SizedBox(height: 14),
-                      Text('Text', style: AppText.eyebrow.copyWith(color: AppColors.gold)),
+                      Text(
+                        'Text',
+                        style: AppText.eyebrow.copyWith(color: AppColors.gold),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         'Hadith collections and dua text from published open '
@@ -173,15 +215,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         'Prayer times are supplied by each masjid\u2019s own '
                         'administrators. Hijri dates are calculated and local '
                         'moon sighting may differ by a day.',
-                        style: AppText.caption.copyWith(color: AppColors.textMid),
+                        style: AppText.caption.copyWith(
+                          color: AppColors.textMid,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Close')),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Close'),
+                  ),
                 ],
               ),
             ),
@@ -200,7 +245,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final Uri emailUri = Uri(
                 scheme: 'mailto',
                 path: 'dhanseadnan81@gmail.com',
-                query: 'subject=${Uri.encodeComponent('Islam Connect \u2013 Feedback')}'
+                query:
+                    'subject=${Uri.encodeComponent('Islam Connect \u2013 Feedback')}'
                     '&body=${Uri.encodeComponent('\n\n\n---\nApp: Islam Connect')}',
               );
               if (await canLaunchUrl(emailUri)) {
@@ -208,7 +254,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               } else if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('No email app found \u2014 write to dhanseadnan81@gmail.com'),
+                    content: Text(
+                      'No email app found \u2014 write to dhanseadnan81@gmail.com',
+                    ),
                   ),
                 );
               }
@@ -216,12 +264,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const Divider(),
           ListTile(
-            leading: Icon(Icons.calendar_month_outlined,
-                color: AppColors.emerald),
+            leading: Icon(
+              Icons.calendar_month_outlined,
+              color: AppColors.emerald,
+            ),
             title: Text(S.isUrdu ? 'اسلامی کیلنڈر' : 'Hijri calendar'),
-            subtitle: Text(S.isUrdu
-                ? 'اسلامی اور عیسوی تاریخیں ساتھ ساتھ'
-                : 'Hijri and Gregorian dates side by side'),
+            subtitle: Text(
+              S.isUrdu
+                  ? 'اسلامی اور عیسوی تاریخیں ساتھ ساتھ'
+                  : 'Hijri and Gregorian dates side by side',
+            ),
             trailing: const Icon(Icons.chevron_right, size: 18),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
@@ -233,11 +285,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // the app" — they look identical from the outside and need
           // completely different fixes.
           ListTile(
-            leading: Icon(Icons.health_and_safety_outlined,
-                color: AppColors.emerald),
+            leading: Icon(
+              Icons.health_and_safety_outlined,
+              color: AppColors.emerald,
+            ),
             title: const Text('Alarm Health'),
             subtitle: const Text(
-                'Check why alarms may not fire, and test one on this phone'),
+              'Check why alarms may not fire, and test one on this phone',
+            ),
             trailing: const Icon(Icons.chevron_right, size: 18),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AlarmHealthScreen()),
@@ -250,8 +305,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.battery_alert, color: Colors.orange),
             title: const Text('Disable Battery Optimization'),
-            subtitle: const Text('Important: needed for alarms to fire reliably'),
-            onTap: () => NotificationService.requestIgnoreBatteryOptimizations(),
+            subtitle: const Text(
+              'Important: needed for alarms to fire reliably',
+            ),
+            onTap: () =>
+                NotificationService.requestIgnoreBatteryOptimizations(),
           ),
           // The three debug entries that lived here are gone: Send Test
           // Notification Now, Show My Account ID, and Check Scheduled Alarms.

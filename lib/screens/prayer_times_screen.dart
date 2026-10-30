@@ -1,3 +1,5 @@
+import '../services/masjid_clock.dart';
+
 import 'package:flutter/material.dart';
 
 import '../models/masjid.dart';
@@ -29,11 +31,36 @@ class PrayerTimesScreen extends StatelessWidget {
       (S.juma, t.juma, t.jumaJamat, Icons.groups),
     ];
 
+    String? zone;
+    try {
+      zone = MasjidClock.zoneFor(masjid.latitude, masjid.longitude);
+    } catch (_) {}
+    if (zone != null) {
+      for (var i = 0; i < rows.length; i++) {
+        final row = rows[i];
+        rows[i] = (
+          row.$1,
+          MasjidClock.localDisplay(row.$2, zone, DateTime.now()),
+          MasjidClock.localDisplay(row.$3, zone, DateTime.now()),
+          row.$4,
+        );
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(masjid.name)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              zone == null
+                  ? 'Masjid location unavailable — times shown as entered'
+                  : 'Your local time • Masjid timezone: $zone',
+              style: AppText.eyebrow.copyWith(fontSize: 10),
+            ),
+          ),
           if (showJamat)
             Padding(
               padding: const EdgeInsets.only(left: 34, bottom: 8),
@@ -42,21 +69,27 @@ class PrayerTimesScreen extends StatelessWidget {
                   const Spacer(flex: 4),
                   Expanded(
                     flex: 3,
-                    child: Text(S.azanLabel.toUpperCase(),
-                        textAlign: TextAlign.right,
-                        style: AppText.eyebrow.copyWith(
-                            fontSize: 9,
-                            letterSpacing: 1,
-                            color: AppColors.textFaint)),
+                    child: Text(
+                      S.azanLabel.toUpperCase(),
+                      textAlign: TextAlign.right,
+                      style: AppText.eyebrow.copyWith(
+                        fontSize: 9,
+                        letterSpacing: 1,
+                        color: AppColors.textFaint,
+                      ),
+                    ),
                   ),
                   Expanded(
                     flex: 3,
-                    child: Text(S.jamatLabel.toUpperCase(),
-                        textAlign: TextAlign.right,
-                        style: AppText.eyebrow.copyWith(
-                            fontSize: 9,
-                            letterSpacing: 1,
-                            color: AppColors.gold)),
+                    child: Text(
+                      S.jamatLabel.toUpperCase(),
+                      textAlign: TextAlign.right,
+                      style: AppText.eyebrow.copyWith(
+                        fontSize: 9,
+                        letterSpacing: 1,
+                        color: AppColors.gold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -67,8 +100,7 @@ class PrayerTimesScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: i == 0
                     ? null
-                    : Border(
-                        top: BorderSide(color: AppColors.goldRuleFaint)),
+                    : Border(top: BorderSide(color: AppColors.goldRuleFaint)),
               ),
               // Same flex proportions as the home screen list, so the two read
               // as the same table rather than two different ones.
@@ -82,27 +114,37 @@ class PrayerTimesScreen extends StatelessWidget {
                       rows[i].$1,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppText.rowTitle
-                          .copyWith(fontSize: 15, color: AppColors.text),
+                      style: AppText.rowTitle.copyWith(
+                        fontSize: 15,
+                        color: AppColors.text,
+                      ),
                     ),
                   ),
                   if (!showJamat)
                     Expanded(
                       flex: 6,
-                      child: Text(rows[i].$2,
-                          textAlign: TextAlign.right,
-                          style: AppText.listTime.copyWith(
-                              fontSize: 17, color: AppColors.text)),
+                      child: Text(
+                        rows[i].$2,
+                        textAlign: TextAlign.right,
+                        style: AppText.listTime.copyWith(
+                          fontSize: 17,
+                          color: AppColors.text,
+                        ),
+                      ),
                     )
                   else ...[
                     Expanded(
                       flex: 3,
-                      child: Text(rows[i].$2,
-                          textAlign: TextAlign.right,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.listTime.copyWith(
-                              fontSize: 15, color: AppColors.textMuted)),
+                      child: Text(
+                        rows[i].$2,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.listTime.copyWith(
+                          fontSize: 15,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 3,
@@ -129,11 +171,11 @@ class PrayerTimesScreen extends StatelessWidget {
             // is a real question, and guessing wrong means missing a prayer.
             showJamat
                 ? (S.isUrdu
-                    ? 'الارم اذان کے وقت پر بجتا ہے، جماعت کے وقت پر نہیں۔'
-                    : 'The alarm sounds at the azan time, not the jamat time.')
+                      ? 'الارم اذان کے وقت پر بجتا ہے، جماعت کے وقت پر نہیں۔'
+                      : 'The alarm sounds at the azan time, not the jamat time.')
                 : (S.isUrdu
-                    ? 'ہر نماز کے وقت اذان کا الارم خود بخود بجے گا۔'
-                    : 'You will receive an azan alarm automatically at each prayer time.'),
+                      ? 'ہر نماز کے وقت اذان کا الارم خود بخود بجے گا۔'
+                      : 'You will receive an azan alarm automatically at each prayer time.'),
             style: AppText.caption.copyWith(color: AppColors.textMuted),
           ),
         ],

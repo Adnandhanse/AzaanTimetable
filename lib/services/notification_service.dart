@@ -1,13 +1,17 @@
 import 'app_strings.dart';
+
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tzdata;
+
+import 'masjid_clock.dart';
+
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:android_intent_plus/android_intent.dart';
+
 import '../models/masjid.dart';
 import 'alarm_event_log.dart';
 import 'foreground_alarm_manager.dart';
@@ -29,13 +33,16 @@ class NotificationService {
   static Future<void> createTimingReminderChannel() async {
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(const AndroidNotificationChannel(
-          'timing_reminders',
-          'Prayer timing reminders',
-          description: 'Reminders for masjid admins to check prayer timings',
-          importance: Importance.defaultImportance,
-        ));
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'timing_reminders',
+            'Prayer timing reminders',
+            description: 'Reminders for masjid admins to check prayer timings',
+            importance: Importance.defaultImportance,
+          ),
+        );
   }
 
   static Future<String?> initialTimingReminder() async {
@@ -57,18 +64,22 @@ class NotificationService {
   static Future<void> showTimingReminder(String masjidId) async {
     if (!_initialized) return;
     await _plugin.show(
-        920001,
-        S.tr('Prayer Timings Reminder', 'نماز کے اوقات کا جائزہ'),
-        S.tr('Please review your masjid prayer timings. Update and save them if needed.',
-            'اپنی مسجد کے اوقات دیکھ کر محفوظ کریں۔'),
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
+      920001,
+      S.tr('Prayer Timings Reminder', 'نماز کے اوقات کا جائزہ'),
+      S.tr(
+        'Please review your masjid prayer timings. Update and save them if needed.',
+        'اپنی مسجد کے اوقات دیکھ کر محفوظ کریں۔',
+      ),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
           'timing_reminders',
           'Prayer timing reminders',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
-        )),
-        payload: 'timing-reminder:$masjidId');
+        ),
+      ),
+      payload: 'timing-reminder:$masjidId',
+    );
   }
 
   /// NEW CHANNEL ID ON PURPOSE.
@@ -200,7 +211,9 @@ class NotificationService {
   static const String channelIdAnnounce = 'masjid_announcements_v1';
 
   static Future<void> showAnnouncement(
-      String masjidName, String message) async {
+    String masjidName,
+    String message,
+  ) async {
     await init();
     try {
       await _plugin.show(
@@ -225,18 +238,22 @@ class NotificationService {
   }
 
   static Future<void> _createChannels() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android == null) return;
 
     // Audio belongs to the service so every stop control affects the same player.
-    await android.createNotificationChannel(const AndroidNotificationChannel(
-      NotificationChannels.silent,
-      _channelName,
-      description: 'Prayer alerts; Azaan playback is controlled by the app',
-      importance: Importance.max,
-      playSound: false,
-    ));
+    await android.createNotificationChannel(
+      const AndroidNotificationChannel(
+        NotificationChannels.silent,
+        _channelName,
+        description: 'Prayer alerts; Azaan playback is controlled by the app',
+        importance: Importance.max,
+        playSound: false,
+      ),
+    );
   }
 
   /// Posts a notification immediately, bypassing AlarmManager entirely.
@@ -363,10 +380,11 @@ class NotificationService {
     'Asia/Rangoon': 'Asia/Yangon',
   };
 
-  static Future<void> init(
-      {void Function(String? payload)? onTapPayload}) async {
+  static Future<void> init({
+    void Function(String? payload)? onTapPayload,
+  }) async {
     if (_initialized) return;
-    tzdata.initializeTimeZones();
+    MasjidClock.initialize();
 
     try {
       var deviceTimeZone = await FlutterTimezone.getLocalTimezone();
@@ -380,8 +398,9 @@ class NotificationService {
           'FAILED to detect/set timezone: $e (falling back to ${tz.local.name})';
     }
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initSettings = InitializationSettings(android: androidSettings);
     await _plugin.initialize(
       initSettings,
@@ -409,7 +428,8 @@ class NotificationService {
       try {
         await _plugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.deleteNotificationChannel(dead);
       } catch (_) {}
     }
@@ -562,7 +582,10 @@ class NotificationService {
   }
 
   static String _buildPayload(
-      String prayerLabel, String masjidName, String? audioUrl) {
+    String prayerLabel,
+    String masjidName,
+    String? audioUrl,
+  ) {
     return '$prayerLabel|||$masjidName|||${audioUrl ?? ''}';
   }
 
@@ -629,9 +652,18 @@ class NotificationService {
   /// Arms alarms from fresh Firestore data, and caches that data so the next
   /// app start can arm without any network at all.
   static Future<List<String>> scheduleForMasjid(Masjid masjid) async {
-    final cached = CachedSchedule.fromMasjid(masjid);
-    await PrayerScheduleCache.save(cached);
-    return scheduleFromCache(cached);
+    try {
+      final cached = CachedSchedule.fromMasjid(masjid);
+      await PrayerScheduleCache.save(cached);
+      return scheduleFromCache(cached);
+    } on StateError {
+      // Switching to a mosque with no usable location must not leave the
+      // previous mosque's alarms running under the new selection.
+      await cancelAll();
+      await PrayerScheduleCache.clear();
+      await ForegroundAlarmManager.stop();
+      rethrow;
+    }
   }
 
   /// Arms alarms from device storage. This is the path used at app start,
@@ -644,7 +676,7 @@ class NotificationService {
     if (schedule == null) {
       await _writeDiagnostics(<String, dynamic>{
         'result': 'no cached schedule yet',
-        'scheduled': 0
+        'scheduled': 0,
       });
       return <String>['No cached schedule yet'];
     }
@@ -654,58 +686,87 @@ class NotificationService {
     final nextFires = <String>[];
     final failures = <String>[];
     String? modeUsed;
-
+    final zone = schedule.timeZone;
+    if (zone == null) {
+      // Old caches lack the mosque's timezone. Refresh the mosque document;
+      // never guess from the user's phone or phone-number country.
+      await ForegroundAlarmManager.refreshFromCache();
+      return <String>['Open the app online to refresh the masjid location.'];
+    }
+    MasjidClock.location(zone); // Validate before arming anything.
+    final now = DateTime.now();
+    final hasJuma = MasjidClock.parse(schedule.times['juma'] ?? '') != null;
     for (final entry in _labels.entries) {
       final key = entry.key;
       final label = entry.value;
       if (!await PrayerNotificationPreferences.enabled(key)) continue;
-      final timeStr = schedule.times[key];
-      if (timeStr == null) continue;
-      final dt = _parseTimeToday(timeStr);
-      if (dt == null) continue;
-
-      // One prayer failing must not abort the rest. Previously a single throw
-      // left every alarm cancelled and nothing rescheduled — which is exactly
-      // how the app went from "one notification" to total silence.
-      String? tier;
-      try {
-        tier = await _scheduleDaily(
-          id: _ids[key]!,
-          title: '$label Prayer',
-          body: "${schedule.masjidName} • It's time for $label.",
-          timeToday: dt,
-          payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
-          fridayOnly: key == 'juma',
-          // Only skip Dhuhr on Fridays when a Juma time actually exists —
-          // otherwise Friday would lose its midday alarm entirely.
-          skipFridays: key == 'dhuhr' &&
-              (schedule.times['juma'] ?? '').trim().isNotEmpty &&
-              _parseTimeToday(schedule.times['juma'] ?? '') != null,
-        );
-      } catch (_) {
-        tier = null;
-      }
-
+      final time = schedule.times[key] ?? '';
+      final next = MasjidClock.next(
+        time,
+        zone,
+        now,
+        fridayOnly: key == 'juma',
+        skipFriday: key == 'dhuhr' && hasJuma,
+      );
+      if (next == null) continue;
+      // Repeating notification uses the MOSQUE timezone. Extra one-shots are
+      // constructed afresh for each mosque calendar day (DST-safe).
+      final tier = await _scheduleWithFallback(
+        id: _ids[key]!,
+        title: '$label Prayer',
+        body: "${schedule.masjidName} • It's time for $label.",
+        when: next,
+        payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
+        match: key == 'juma' || (key == 'dhuhr' && hasJuma)
+            ? DateTimeComponents.dayOfWeekAndTime
+            : DateTimeComponents.time,
+      );
       if (tier == null) {
         failures.add(label);
       } else {
         modeUsed ??= tier;
-        scheduledSummary
-            .add('$label: $timeStr${key == 'juma' ? ' (Fridays only)' : ''}');
-        nextFires.add('$label -> ${_describeNext(dt, key == 'juma')}');
+        scheduledSummary.add(
+          '$label: ${MasjidClock.localDisplay(time, zone, now)}',
+        );
+        nextFires.add('$label -> ${next.toLocal()} ($zone)');
       }
-
-      // REDUNDANCY. The repeating alarm above relies on the plugin re-arming
-      // itself after each firing; if that link breaks, everything after today
-      // is lost silently. These explicit one-shots cover the next few days on
-      // their own, and are re-armed every time the app opens.
-      if (key != 'juma') {
-        await _scheduleExtraDays(
-            key: key,
-            label: label,
-            base: dt,
-            masjidName: schedule.masjidName,
-            audioUrl: schedule.audioUrl);
+      if (key == 'dhuhr' && hasJuma) {
+        for (var weekday = 1; weekday <= 7; weekday++) {
+          if (weekday == DateTime.friday || weekday == next.weekday) continue;
+          var at = MasjidClock.onDate(time, zone, now)!;
+          for (var day = 0; day < 8; day++) {
+            at = MasjidClock.onDate(time, zone, now, dayOffset: day)!;
+            if (at.weekday == weekday && at.isAfter(now)) break;
+          }
+          await _scheduleWithFallback(
+            id: 500 + weekday,
+            title: '$label Prayer',
+            body: "${schedule.masjidName} • It's time for $label.",
+            when: at,
+            match: DateTimeComponents.dayOfWeekAndTime,
+            payload: _buildPayload(
+              label,
+              schedule.masjidName,
+              schedule.audioUrl,
+            ),
+          );
+        }
+      }
+      for (var day = 0; day <= _extraDays; day++) {
+        final when = MasjidClock.onDate(time, zone, now, dayOffset: day);
+        if (when == null ||
+            !when.isAfter(now) ||
+            (key == 'juma' && when.weekday != DateTime.friday) ||
+            (key == 'dhuhr' && hasJuma && when.weekday == DateTime.friday) ||
+            when.isAtSameMomentAs(next))
+          continue;
+        await _scheduleWithFallback(
+          id: _extraBase + (_ids[key]! - 100) * 10 + day,
+          title: '$label Prayer',
+          body: "${schedule.masjidName} • It's time for $label.",
+          when: when,
+          payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
+        );
       }
     }
 
@@ -727,7 +788,8 @@ class NotificationService {
 
     await AlarmEventLog.add(
       'alarms armed',
-      detail: '${scheduledSummary.length} set via ${modeUsed ?? 'none'}'
+      detail:
+          '${scheduledSummary.length} set via ${modeUsed ?? 'none'}'
           '${failures.isEmpty ? '' : ', FAILED: ${failures.join('/')}'}'
           '${nextFires.isEmpty ? '' : ' | ${nextFires.join(', ')}'}',
     );
@@ -765,8 +827,10 @@ class NotificationService {
 
     // The important line in the whole log. If alarms are being wiped between
     // app opens, this is where it shows up.
-    await AlarmEventLog.add('alarms MISSING, repairing',
-        detail: '${missing.length} of ${expected.length} gone');
+    await AlarmEventLog.add(
+      'alarms MISSING, repairing',
+      detail: '${missing.length} of ${expected.length} gone',
+    );
 
     // Re-arm the whole set rather than patching individual ids — cheap, and it
     // avoids a half-armed state if several went missing at once.
@@ -780,8 +844,9 @@ class NotificationService {
   /// Fires a real alarm down the exact path a prayer uses. Returns which tier
   /// worked, or null if the system refused all three — that null is the
   /// diagnosis.
-  static Future<String?> scheduleTestAlarm(
-      {Duration delay = const Duration(seconds: 60)}) async {
+  static Future<String?> scheduleTestAlarm({
+    Duration delay = const Duration(seconds: 60),
+  }) async {
     await init();
     final tier = await _scheduleWithFallback(
       id: 998,
@@ -856,12 +921,15 @@ class NotificationService {
   }
 
   static Future<void> cancelAll() async {
+    for (var weekday = 1; weekday <= 7; weekday++) {
+      await _plugin.cancel(500 + weekday);
+    }
     for (final id in _ids.values) {
       await _plugin.cancel(id);
     }
     // The redundant one-shots too, or old times linger alongside new ones.
     for (int slot = 0; slot < 6; slot++) {
-      for (int day = 1; day <= _extraDays; day++) {
+      for (int day = 0; day <= _extraDays; day++) {
         await _plugin.cancel(_extraBase + slot * 10 + day);
       }
     }
@@ -906,14 +974,17 @@ class NotificationService {
     };
     final results = <String>['[Timezone] $_detectedTimezoneDebugInfo'];
     for (final e in entries.entries) {
-      final dt = _parseTimeToday(e.value);
-      if (dt == null) {
+      final zone = CachedSchedule.fromMasjid(masjid).timeZone!;
+      final scheduled = MasjidClock.next(
+        e.value,
+        zone,
+        DateTime.now(),
+        fridayOnly: e.key == 'Juma',
+        skipFriday: e.key == 'Dhuhr' && MasjidClock.parse(times.juma) != null,
+      );
+      if (scheduled == null) {
         results.add('${e.key}: not set');
         continue;
-      }
-      var scheduled = tz.TZDateTime.from(dt, tz.local);
-      if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) {
-        scheduled = scheduled.add(const Duration(days: 1));
       }
       results.add('${e.key}: next fires at $scheduled');
     }

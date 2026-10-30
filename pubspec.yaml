@@ -24,6 +24,7 @@ dependencies:
   geolocator: ^13.0.0
   geocoding: ^3.0.0
   flutter_local_notifications: ^17.2.2
+  lat_lng_to_timezone: 0.2.0
   timezone: ^0.9.4
   permission_handler: ^11.3.1
   url_launcher: ^6.3.1
@@ -33,6 +34,7 @@ dependencies:
   flutter_timezone: ^3.0.0
   flutter_foreground_task: ^8.13.0
   shared_preferences: ^2.3.2
+  share_plus: 7.2.2
   # Reads hadith and Qur'an TRANSLATIONS aloud. Never Arabic - see the comment
   # at the top of lib/services/tts_service.dart.
   #
@@ -97,6 +99,15 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
+    - assets/guides/manifest.json
+    - assets/guides/registration_en.pdf
+    - assets/guides/registration_ur.pdf
+    - assets/guides/admin_transfer_en.pdf
+    - assets/guides/admin_transfer_ur.pdf
+    - assets/guides/registration_en/
+    - assets/guides/registration_ur/
+    - assets/guides/admin_transfer_en/
+    - assets/guides/admin_transfer_ur/
     # Photographs, cropped and converted to WebP at 1x/2x/3x. Flutter picks the
     # right density automatically from assets/images/2.0x and 3.0x.
     # About 330 KB in total for all three.

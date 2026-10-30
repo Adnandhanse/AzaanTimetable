@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../models/masjid.dart';
 import 'prayer_schedule_cache.dart';
 import 'foreground_alarm_service.dart';
@@ -19,13 +21,16 @@ class ForegroundAlarmManager {
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'masjid_alarm_service',
         channelName: 'Masjid Alarm - Running',
-        channelDescription: 'Keeps checking prayer times so alarms fire reliably.',
+        channelDescription:
+            'Keeps checking prayer times so alarms fire reliably.',
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
       ),
       iosNotificationOptions: const IOSNotificationOptions(),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(20000), // check every 20 seconds
+        eventAction: ForegroundTaskEventAction.repeat(
+          20000,
+        ), // check every 20 seconds
         autoRunOnBoot: true,
         allowWakeLock: true,
         allowWifiLock: false,
@@ -49,8 +54,9 @@ class ForegroundAlarmManager {
   /// Deliberately not AlarmManager. On devices where the OS scheduler silently
   /// refuses to deliver, this is the only honest way to test the path that
   /// actually carries prayer alarms.
-  static Future<void> queueServiceTest(
-      {Duration delay = const Duration(seconds: 60)}) async {
+  static Future<void> queueServiceTest({
+    Duration delay = const Duration(seconds: 60),
+  }) async {
     _configureIfNeeded();
     await FlutterForegroundTask.saveData(
       key: 'service_test_at',
@@ -63,6 +69,7 @@ class ForegroundAlarmManager {
     if (c == null) return;
     await _push(
       masjidName: c.masjidName,
+      timeZone: c.timeZone,
       audioUrl: c.audioUrl,
       times: <String, String>{
         'Fajr': c.times['fajr'] ?? '',
@@ -77,6 +84,7 @@ class ForegroundAlarmManager {
 
   static Future<void> _push({
     required String masjidName,
+    required String? timeZone,
     required String? audioUrl,
     required Map<String, String> times,
   }) async {
@@ -84,6 +92,7 @@ class ForegroundAlarmManager {
     await FlutterForegroundTask.saveData(
       key: 'prayer_times_data',
       value: json.encode(<String, dynamic>{
+        'timeZone': timeZone,
         'masjidName': masjidName,
         'audioUrl': audioUrl,
         'times': times,
@@ -123,6 +132,7 @@ class ForegroundAlarmManager {
     _configureIfNeeded();
 
     final data = {
+      'timeZone': CachedSchedule.fromMasjid(masjid).timeZone,
       'masjidName': masjid.name,
       'audioUrl': masjid.customAzanAudioUrl,
       'times': {
@@ -134,7 +144,10 @@ class ForegroundAlarmManager {
         'Juma (Friday)': masjid.prayerTimes.juma,
       },
     };
-    await FlutterForegroundTask.saveData(key: 'prayer_times_data', value: json.encode(data));
+    await FlutterForegroundTask.saveData(
+      key: 'prayer_times_data',
+      value: json.encode(data),
+    );
 
     // Fire-and-forget: get the masjid's own recording sitting on disk NOW,
     // while there is a normal foreground network connection to do it with -

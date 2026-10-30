@@ -1,7 +1,12 @@
+import 'masjid_clock.dart';
+
+import 'package:timezone/timezone.dart' as tz;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show Color;
+
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,6 +16,7 @@ import 'alarm_event_log.dart';
 import 'notification_channels.dart';
 import 'azan_stop_controller.dart';
 import 'prayer_notification_preferences.dart';
+
 import 'package:azan_screen_events/azan_screen_events.dart';
 
 /// This runs in its own persistent background isolate, kept alive by a
@@ -26,8 +32,10 @@ void startForegroundTaskCallback() {
 }
 
 class PrayerAlarmTaskHandler extends TaskHandler {
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _pluginInitialized = false;
+
   /// Prayers already fired, as "date-label-time" strings.
   ///
   /// A SET, not a single value, and the TIME is part of the key. Both matter:
@@ -45,13 +53,17 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
   Future<void> _ensurePluginInitialized() async {
     if (_pluginInitialized) return;
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initSettings = InitializationSettings(android: androidSettings);
-    await _plugin.initialize(initSettings,
+    await _plugin.initialize(
+      initSettings,
       onDidReceiveNotificationResponse: (response) {
         if (response.actionId == 'stop_azan') _stopAzan();
       },
-      onDidReceiveBackgroundNotificationResponse: azanNotificationActionBackground,
+      onDidReceiveBackgroundNotificationResponse:
+          azanNotificationActionBackground,
     );
     _pluginInitialized = true;
   }
@@ -59,11 +71,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     await _ensurePluginInitialized();
-    _screenEvents = AzanScreenEvents.changes.listen((_) {
-      if (_ringing || _activeNotificationId != null) _stopAzan();
-    }, onError: (Object error) {
-      AlarmEventLog.add('screen event listener failed', detail: '$error');
-    });
+    _screenEvents = AzanScreenEvents.changes.listen(
+      (_) {
+        if (_ringing || _activeNotificationId != null) _stopAzan();
+      },
+      onError: (Object error) {
+        AlarmEventLog.add('screen event listener failed', detail: '$error');
+      },
+    );
     _playerComplete = _azanPlayer.onPlayerComplete.listen((_) {
       if (_ringing) _stopAzan(reason: 'Azaan finished');
     });
@@ -86,8 +101,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     // tests the mechanism that actually carries prayers.
     await _checkTestAlarm();
 
-    final dataString =
-        await FlutterForegroundTask.getData<String>(key: 'prayer_times_data');
+    final dataString = await FlutterForegroundTask.getData<String>(
+      key: 'prayer_times_data',
+    );
     if (dataString == null) {
       await AlarmEventLog.add('service tick', detail: 'NO PRAYER DATA STORED');
       return;
@@ -98,7 +114,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     final audioUrl = data['audioUrl'] as String?;
     final times = Map<String, dynamic>.from(data['times'] ?? {});
 
-    final now = DateTime.now();
+    final zone = data['timeZone'] as String?;
+    if (zone == null) return; // Legacy cache must be refreshed online.
+    final now = tz.TZDateTime.now(MasjidClock.location(zone));
     final todayKey = '${now.year}-${now.month}-${now.day}';
 
     // Restore from disk on the first tick after an isolate restart. Held only
@@ -107,13 +125,15 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     if (!_restored) {
       _restored = true;
       try {
-        final String? raw =
-            await FlutterForegroundTask.getData<String>(key: 'fired_keys');
+        final String? raw = await FlutterForegroundTask.getData<String>(
+          key: 'fired_keys',
+        );
         if (raw != null) {
           final decoded = json.decode(raw) as Map<String, dynamic>;
           if (decoded['day'] == todayKey) {
-            _firedKeys =
-                (decoded['keys'] as List).map((e) => e.toString()).toSet();
+            _firedKeys = (decoded['keys'] as List)
+                .map((e) => e.toString())
+                .toSet();
           }
         }
       } catch (_) {}
@@ -132,18 +152,22 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     // rewriting a notification every 20 seconds is three times the work for no
     // visible difference.
     if (now.second < 20) {
-      if (!_ringing) await _updateNotificationText(times, now);
+      if (!_ringing) await _updateNotificationText(times, now, zone);
     }
 
     if (now.second < 20) {
-      await AlarmEventLog.add('service tick',
-          detail: 'watching ${times.values.join(', ')}');
+      await AlarmEventLog.add(
+        'service tick',
+        detail: 'watching ${times.values.join(', ')}',
+      );
     }
 
     for (final entry in times.entries) {
       final label = entry.key;
       if (!await PrayerNotificationPreferences.enabled(
-          PrayerNotificationPreferences.keyForLabel(label))) continue;
+        PrayerNotificationPreferences.keyForLabel(label),
+      ))
+        continue;
       final timeStr = entry.value as String;
       final parsed = _parseTime(timeStr);
       if (parsed == null) continue;
@@ -173,10 +197,14 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       // is blank, Dhuhr must still fire or Friday would have no midday alarm at
       // all.
       if (label.toLowerCase() == 'dhuhr' && now.weekday == DateTime.friday) {
-        final String juma = (times.entries
-                .firstWhere((e) => e.key.toLowerCase().contains('juma'),
-                    orElse: () => const MapEntry<String, dynamic>('', ''))
-                .value as String?) ??
+        final String juma =
+            (times.entries
+                    .firstWhere(
+                      (e) => e.key.toLowerCase().contains('juma'),
+                      orElse: () => const MapEntry<String, dynamic>('', ''),
+                    )
+                    .value
+                as String?) ??
             '';
         if (juma.trim().isNotEmpty && _parseTime(juma) != null) continue;
       }
@@ -187,13 +215,17 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       // so a single slightly-delayed polling cycle doesn't cause a missed
       // alarm - the _firedKeys check below still guarantees a given
       // prayer at a given time fires only once.
-      final withinWindow = nowMinutes == scheduledMinutes || nowMinutes == scheduledMinutes + 1;
-      final fireKey = '$todayKey-$label-$timeStr';
+      final withinWindow =
+          nowMinutes == scheduledMinutes || nowMinutes == scheduledMinutes + 1;
+      final fireKey = '$zone-$masjidName-$todayKey-$label-$timeStr';
 
       if (withinWindow && !_firedKeys.contains(fireKey)) {
         _firedKeys.add(fireKey);
         await _persistFired(todayKey);
-        await AlarmEventLog.add('FIRED by service', detail: '$label at $timeStr');
+        await AlarmEventLog.add(
+          'FIRED by service',
+          detail: '$label at $timeStr',
+        );
         await _fireAlarm(label, masjidName, audioUrl);
       }
     }
@@ -237,20 +269,28 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   String _activePrayer = 'Prayer';
   String _activeMasjid = '';
 
-  Future<void> _playAzan(String? audioUrl, int generation, int stopSequence) async {
-    Future<bool> cancelled() async => !_ringing || generation != _playbackGeneration ||
+  Future<void> _playAzan(
+    String? audioUrl,
+    int generation,
+    int stopSequence,
+  ) async {
+    Future<bool> cancelled() async =>
+        !_ringing ||
+        generation != _playbackGeneration ||
         await AzanScreenEvents.stopSequence() != stopSequence;
 
     try {
-      await _azanPlayer.setAudioContext(AudioContext(
-        android: const AudioContextAndroid(
-          isSpeakerphoneOn: false,
-          stayAwake: true,
-          contentType: AndroidContentType.music,
-          usageType: AndroidUsageType.alarm,
-          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+      await _azanPlayer.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.alarm,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
         ),
-      ));
+      );
       await _azanPlayer.setVolume(1.0);
       bool loaded = false;
       if (audioUrl != null && audioUrl.isNotEmpty) {
@@ -259,7 +299,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           final urlFile = File('${dir.path}/custom_azan_cache_url.txt');
           final audioFile = File('${dir.path}/custom_azan_cache.mp3');
           if (await cancelled()) return;
-          if (await audioFile.exists() && await urlFile.exists() &&
+          if (await audioFile.exists() &&
+              await urlFile.exists() &&
               await urlFile.readAsString() == audioUrl) {
             await _azanPlayer.setSource(DeviceFileSource(audioFile.path));
             loaded = true;
@@ -269,7 +310,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           if (await cancelled()) return;
           try {
             // Prepare first; never start playback as a side effect of loading.
-            await _azanPlayer.setSource(UrlSource(audioUrl)).timeout(const Duration(seconds: 15));
+            await _azanPlayer
+                .setSource(UrlSource(audioUrl))
+                .timeout(const Duration(seconds: 15));
             loaded = true;
           } catch (_) {
             await _azanPlayer.stop();
@@ -287,7 +330,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       await AlarmEventLog.add('azan playing', detail: _activePrayer);
     } catch (error) {
       await AlarmEventLog.add('azan FAILED', detail: '$error');
-      if (generation == _playbackGeneration) await _stopAzan(reason: 'Audio unavailable');
+      if (generation == _playbackGeneration)
+        await _stopAzan(reason: 'Audio unavailable');
     }
   }
 
@@ -297,19 +341,32 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     final generation = ++_playbackGeneration;
     _autoStop?.cancel();
     _stopWatch?.cancel();
-    try { await _azanPlayer.stop(); } catch (_) {}
+    try {
+      await _azanPlayer.stop();
+    } catch (_) {}
     if (generation != _playbackGeneration) return;
     final id = _activeNotificationId;
     _activeNotificationId = null;
     if (id != null) {
-      await _plugin.show(id, '$_activePrayer • $reason', _activeMasjid,
-        NotificationDetails(android: AndroidNotificationDetails(
-          NotificationChannels.silent, 'Prayer Time Alarms',
-          playSound: false, enableVibration: false,
-          importance: Importance.defaultImportance, priority: Priority.defaultPriority,
-          onlyAlertOnce: true, ongoing: false, autoCancel: true,
-          color: const Color(0xFF175941),
-        )));
+      await _plugin.show(
+        id,
+        '$_activePrayer • $reason',
+        _activeMasjid,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            NotificationChannels.silent,
+            'Prayer Time Alarms',
+            playSound: false,
+            enableVibration: false,
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            onlyAlertOnce: true,
+            ongoing: false,
+            autoCancel: true,
+            color: const Color(0xFF175941),
+          ),
+        ),
+      );
     }
     await _setServiceNotice('Prayer reminders are active');
     await AlarmEventLog.add('azan stopped', detail: reason);
@@ -328,7 +385,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Future<void> _setServiceNotice(String text) async {
     try {
       await FlutterForegroundTask.updateService(
-        notificationTitle: 'Islam Connect', notificationText: text);
+        notificationTitle: 'Islam Connect',
+        notificationText: text,
+      );
     } catch (_) {}
   }
 
@@ -338,15 +397,20 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     try {
       await FlutterForegroundTask.saveData(
         key: 'fired_keys',
-        value: json.encode(
-            <String, dynamic>{'day': todayKey, 'keys': _firedKeys.toList()}),
+        value: json.encode(<String, dynamic>{
+          'day': todayKey,
+          'keys': _firedKeys.toList(),
+        }),
       );
     } catch (_) {}
   }
 
   /// Writes "Asr 5:40 PM · in 2h 6m" onto the service notification.
   Future<void> _updateNotificationText(
-      Map<String, dynamic> times, DateTime now) async {
+    Map<String, dynamic> times,
+    DateTime now,
+    String zone,
+  ) async {
     try {
       String? bestLabel;
       DateTime? bestAt;
@@ -355,18 +419,20 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         final label = entry.key;
         final value = (entry.value as String?) ?? '';
         if (value.trim().isEmpty) continue;
-        // Juma only counts down on a Friday, and Dhuhr does not count down on
-        // one — the same rule the alarms follow.
-        final bool isJuma = label.toLowerCase().contains('juma');
-        if (isJuma && now.weekday != DateTime.friday) continue;
-        if (label.toLowerCase() == 'dhuhr' && now.weekday == DateTime.friday) {
-          continue;
-        }
-        final parsed = _parseTime(value);
-        if (parsed == null) continue;
-
-        var at = DateTime(now.year, now.month, now.day, parsed.$1, parsed.$2);
-        if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
+        final at = MasjidClock.next(
+          value,
+          zone,
+          now,
+          fridayOnly: label.toLowerCase().contains('juma'),
+          skipFriday:
+              label.toLowerCase() == 'dhuhr' &&
+              times.entries.any(
+                (e) =>
+                    e.key.toLowerCase().contains('juma') &&
+                    MasjidClock.parse(e.value as String? ?? '') != null,
+              ),
+        );
+        if (at == null) continue;
         if (bestAt == null || at.isBefore(bestAt)) {
           bestAt = at;
           bestLabel = label;
@@ -382,7 +448,8 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
       await FlutterForegroundTask.updateService(
         notificationTitle: '$bestLabel — in $left',
-        notificationText: times[bestLabel] as String? ?? '',
+        notificationText:
+            '${MasjidClock.localDisplay(times[bestLabel] as String? ?? '', zone, now)} (device time)',
       );
     } catch (_) {
       // Never let a notification update interfere with the alarm loop.
@@ -391,8 +458,9 @@ class PrayerAlarmTaskHandler extends TaskHandler {
 
   Future<void> _checkTestAlarm() async {
     try {
-      final String? raw =
-          await FlutterForegroundTask.getData<String>(key: 'service_test_at');
+      final String? raw = await FlutterForegroundTask.getData<String>(
+        key: 'service_test_at',
+      );
       if (raw == null) return;
 
       final int at = int.tryParse(raw) ?? 0;
@@ -403,8 +471,10 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       // above treats 0 as "nothing pending") and it avoids depending on an
       // API whose presence varies across plugin versions.
       await FlutterForegroundTask.saveData(key: 'service_test_at', value: '0');
-      await AlarmEventLog.add('FIRED test by service',
-          detail: 'delivered by the polling service, not the OS scheduler');
+      await AlarmEventLog.add(
+        'FIRED test by service',
+        detail: 'delivered by the polling service, not the OS scheduler',
+      );
 
       await _showPrayerAlert('Test', 'Islam Connect', null, id: 996);
     } catch (_) {}
@@ -413,8 +483,12 @@ class PrayerAlarmTaskHandler extends TaskHandler {
   Future<void> _fireAlarm(String label, String masjidName, String? audioUrl) =>
       _showPrayerAlert(label, masjidName, audioUrl);
 
-  Future<void> _showPrayerAlert(String label, String masjidName, String? audioUrl,
-      {int id = 200}) async {
+  Future<void> _showPrayerAlert(
+    String label,
+    String masjidName,
+    String? audioUrl, {
+    int id = 200,
+  }) async {
     final generation = ++_playbackGeneration;
     _autoStop?.cancel();
     _stopWatch?.cancel();
@@ -426,24 +500,41 @@ class PrayerAlarmTaskHandler extends TaskHandler {
     final sound = await PrayerNotificationPreferences.soundEnabled();
     if (generation != _playbackGeneration) return;
     _ringing = sound;
-    await _plugin.show(id, '$label prayer time',
+    await _plugin.show(
+      id,
+      '$label prayer time',
       sound ? '$masjidName • Tap STOP AZAAN to end the sound' : masjidName,
-      NotificationDetails(android: AndroidNotificationDetails(
-        NotificationChannels.silent, 'Prayer Time Alarms',
-        channelDescription: 'Prayer reminders with Azaan playback controls',
-        importance: Importance.max, priority: Priority.high,
-        category: AndroidNotificationCategory.alarm,
-        fullScreenIntent: sound, playSound: false,
-        color: const Color(0xFF175941),
-        styleInformation: BigTextStyleInformation(
-          sound ? '$masjidName\nAzaan is playing. Tap STOP AZAAN to stop.'
-              : '$masjidName\nIt is time for $label prayer.'),
-        onlyAlertOnce: true, ongoing: sound, autoCancel: !sound,
-        actions: sound ? <AndroidNotificationAction>[
-          AndroidNotificationAction('stop_azan', 'STOP AZAAN',
-            showsUserInterface: false, cancelNotification: false),
-        ] : null,
-      )),
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          NotificationChannels.silent,
+          'Prayer Time Alarms',
+          channelDescription: 'Prayer reminders with Azaan playback controls',
+          importance: Importance.max,
+          priority: Priority.high,
+          category: AndroidNotificationCategory.alarm,
+          fullScreenIntent: sound,
+          playSound: false,
+          color: const Color(0xFF175941),
+          styleInformation: BigTextStyleInformation(
+            sound
+                ? '$masjidName\nAzaan is playing. Tap STOP AZAAN to stop.'
+                : '$masjidName\nIt is time for $label prayer.',
+          ),
+          onlyAlertOnce: true,
+          ongoing: sound,
+          autoCancel: !sound,
+          actions: sound
+              ? <AndroidNotificationAction>[
+                  AndroidNotificationAction(
+                    'stop_azan',
+                    'STOP AZAAN',
+                    showsUserInterface: false,
+                    cancelNotification: false,
+                  ),
+                ]
+              : null,
+        ),
+      ),
       payload: '$label|||$masjidName|||${audioUrl ?? ''}',
     );
     if (generation != _playbackGeneration ||
@@ -451,9 +542,15 @@ class PrayerAlarmTaskHandler extends TaskHandler {
       await _stopAzan();
       return;
     }
-    if (!sound) { _activeNotificationId = null; return; }
+    if (!sound) {
+      _activeNotificationId = null;
+      return;
+    }
     await _setServiceNotice('$label Azaan • Tap STOP AZAAN to stop');
-    _autoStop = Timer(const Duration(minutes: 6), () => _stopAzan(reason: 'Azaan finished'));
+    _autoStop = Timer(
+      const Duration(minutes: 6),
+      () => _stopAzan(reason: 'Azaan finished'),
+    );
     // Persisted fallback: if a broadcast is missed, stop still reaches playback.
     _stopWatch = Timer.periodic(const Duration(milliseconds: 400), (_) async {
       if (_ringing && await AzanScreenEvents.stopSequence() != sequence) {

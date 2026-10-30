@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
+
 import 'package:url_launcher/url_launcher.dart';
+
 import '../models/masjid.dart';
 import '../utils/masjid_display.dart';
 
@@ -38,9 +41,7 @@ class MasjidDetailsScreen extends StatelessWidget {
     // a Spacer merely pushed down (Spacer does not work inside a scroll
     // view at all, which is the other reason this could not stay as-is).
     return Scaffold(
-      appBar: AppBar(
-        title: Text(MasjidDisplay.name(masjid.name)),
-      ),
+      appBar: AppBar(title: Text(MasjidDisplay.name(masjid.name))),
       body: Column(
         children: [
           Expanded(
@@ -54,8 +55,15 @@ class MasjidDetailsScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.location_on, color: Colors.grey),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(MasjidDisplay.address(masjid.address, masjid.city),
-                        style: TextStyle(color: AppColors.textMid, height: 1.45))),
+                      Expanded(
+                        child: Text(
+                          MasjidDisplay.address(masjid.address, masjid.city),
+                          style: TextStyle(
+                            color: AppColors.textMid,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -65,11 +73,19 @@ class MasjidDetailsScreen extends StatelessWidget {
                       padding: EdgeInsets.only(left: 28),
                       child: Row(
                         children: [
-                          Icon(Icons.directions, size: 18, color: AppColors.emerald),
+                          Icon(
+                            Icons.directions,
+                            size: 18,
+                            color: AppColors.emerald,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Get Directions',
-                            style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                            style: TextStyle(
+                              color: AppColors.emerald,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ],
                       ),
@@ -79,14 +95,22 @@ class MasjidDetailsScreen extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        masjid.verificationStatus == 'Verified' ? Icons.verified : Icons.hourglass_top,
-                        color: masjid.verificationStatus == 'Verified' ? Colors.green : Colors.orange,
+                        masjid.verificationStatus == 'Verified'
+                            ? Icons.verified
+                            : Icons.hourglass_top,
+                        color: masjid.verificationStatus == 'Verified'
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                       const SizedBox(width: 8),
                       Text(masjid.verificationStatus),
                       if (masjid.capacity != null) ...[
                         const SizedBox(width: 16),
-                        const Icon(Icons.groups_outlined, size: 18, color: Colors.grey),
+                        const Icon(
+                          Icons.groups_outlined,
+                          size: 18,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text('Capacity: ${masjid.capacity}'),
                       ],
@@ -128,14 +152,24 @@ class MasjidDetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                  if (masjid.about != null && masjid.about!.trim().isNotEmpty) ...[
+                  if (masjid.about != null &&
+                      masjid.about!.trim().isNotEmpty) ...[
                     const SizedBox(height: 20),
-                    const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'About',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Text(masjid.about!, style: const TextStyle(height: 1.4)),
                   ],
                   const SizedBox(height: 24),
-                  const Text('Prayer Times', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Prayer Times (Masjid Local Time)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   // AZAN AND JAMAT, matching everywhere else.
                   //
@@ -150,27 +184,59 @@ class MasjidDetailsScreen extends StatelessWidget {
                           const Spacer(flex: 4),
                           Expanded(
                             flex: 3,
-                            child: Text('AZAN',
-                                textAlign: TextAlign.center,
-                                style: AppText.eyebrow.copyWith(
-                                    fontSize: 9, color: AppColors.textFaint)),
+                            child: Text(
+                              'AZAN',
+                              textAlign: TextAlign.center,
+                              style: AppText.eyebrow.copyWith(
+                                fontSize: 9,
+                                color: AppColors.textFaint,
+                              ),
+                            ),
                           ),
                           Expanded(
                             flex: 3,
-                            child: Text('JAMAT',
-                                textAlign: TextAlign.center,
-                                style: AppText.eyebrow.copyWith(
-                                    fontSize: 9, color: AppColors.champagneGold)),
+                            child: Text(
+                              'JAMAT',
+                              textAlign: TextAlign.center,
+                              style: AppText.eyebrow.copyWith(
+                                fontSize: 9,
+                                color: AppColors.champagneGold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  _row('Fajr', masjid.prayerTimes.fajr, masjid.prayerTimes.fajrJamat),
-                  _row('Dhuhr', masjid.prayerTimes.dhuhr, masjid.prayerTimes.dhuhrJamat),
-                  _row('Asr', masjid.prayerTimes.asr, masjid.prayerTimes.asrJamat),
-                  _row('Maghrib', masjid.prayerTimes.maghrib, masjid.prayerTimes.maghribJamat),
-                  _row('Isha', masjid.prayerTimes.isha, masjid.prayerTimes.ishaJamat),
-                  _row('Juma', masjid.prayerTimes.juma, masjid.prayerTimes.jumaJamat),
+                  _row(
+                    'Fajr',
+                    masjid.prayerTimes.fajr,
+                    masjid.prayerTimes.fajrJamat,
+                  ),
+                  _row(
+                    'Dhuhr',
+                    masjid.prayerTimes.dhuhr,
+                    masjid.prayerTimes.dhuhrJamat,
+                  ),
+                  _row(
+                    'Asr',
+                    masjid.prayerTimes.asr,
+                    masjid.prayerTimes.asrJamat,
+                  ),
+                  _row(
+                    'Maghrib',
+                    masjid.prayerTimes.maghrib,
+                    masjid.prayerTimes.maghribJamat,
+                  ),
+                  _row(
+                    'Isha',
+                    masjid.prayerTimes.isha,
+                    masjid.prayerTimes.ishaJamat,
+                  ),
+                  _row(
+                    'Juma',
+                    masjid.prayerTimes.juma,
+                    masjid.prayerTimes.jumaJamat,
+                  ),
                 ],
               ),
             ),
@@ -181,7 +247,9 @@ class MasjidDetailsScreen extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.emerald,
+                ),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text(
                   'Follow This Masjid',
@@ -196,43 +264,50 @@ class MasjidDetailsScreen extends StatelessWidget {
   }
 
   Widget _row(String label, String azan, String jamat) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: Row(
-          children: [
-            Expanded(flex: 4, child: Text(label)),
-            Expanded(
-              flex: 3,
-              child: Text(azan,
-                  textAlign: TextAlign.center,
-                  // Deep emerald, same weight as jamat below - see the note
-                  // on home_screen.dart's list rows for why weight no longer
-                  // carries the distinction between the two columns.
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: AppColors.emerald)),
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      children: [
+        Expanded(flex: 4, child: Text(label)),
+        Expanded(
+          flex: 3,
+          child: Text(
+            azan,
+            textAlign: TextAlign.center,
+            // Deep emerald, same weight as jamat below - see the note
+            // on home_screen.dart's list rows for why weight no longer
+            // carries the distinction between the two columns.
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.emerald,
             ),
-            if (jamat.trim().isNotEmpty || true)
-              Expanded(
-                flex: 3,
-                child: Text(
-                  jamat.trim().isEmpty ? '\u2014' : jamat,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: jamat.trim().isEmpty
-                        ? AppColors.textFaint
-                        : AppColors.champagneGold,
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
-      );
+        if (jamat.trim().isNotEmpty || true)
+          Expanded(
+            flex: 3,
+            child: Text(
+              jamat.trim().isEmpty ? '\u2014' : jamat,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: jamat.trim().isEmpty
+                    ? AppColors.textFaint
+                    : AppColors.champagneGold,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 /// Full-screen, swipeable viewer for a masjid's photos - opened by tapping
 /// any thumbnail in the gallery row above.
 class _MasjidPhotoViewer extends StatefulWidget {
-  const _MasjidPhotoViewer({required this.photoUrls, required this.initialIndex});
+  const _MasjidPhotoViewer({
+    required this.photoUrls,
+    required this.initialIndex,
+  });
 
   final List<String> photoUrls;
   final int initialIndex;
@@ -242,8 +317,9 @@ class _MasjidPhotoViewer extends StatefulWidget {
 }
 
 class _MasjidPhotoViewerState extends State<_MasjidPhotoViewer> {
-  late final PageController _controller =
-      PageController(initialPage: widget.initialIndex);
+  late final PageController _controller = PageController(
+    initialPage: widget.initialIndex,
+  );
   late int _currentIndex = widget.initialIndex;
 
   @override

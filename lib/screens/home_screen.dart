@@ -1,14 +1,20 @@
+import '../services/masjid_clock.dart';
+
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hijri/hijri_calendar.dart';
+
 import '../models/masjid.dart';
 import '../services/masjid_repository.dart';
 import '../services/user_repository.dart';
 import '../services/notification_service.dart';
 import '../services/prayer_notification_preferences.dart';
 import '../services/announcement_repository.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/foreground_alarm_manager.dart';
 import '../services/app_strings.dart';
 import '../theme/app_theme.dart';
@@ -73,14 +79,18 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() => _savingNotification = true);
     try {
       await PrayerNotificationPreferences.setEnabled(
-          key, !(_prayerNotifications[key] ?? true));
+        key,
+        !(_prayerNotifications[key] ?? true),
+      );
       await _loadPrayerNotifications();
       await NotificationService.scheduleFromCache();
     } catch (_) {
       if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content:
-                Text('Could not update notifications. Please try again.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not update notifications. Please try again.'),
+          ),
+        );
     } finally {
       if (mounted) setState(() => _savingNotification = false);
     }
@@ -140,13 +150,28 @@ class _HomeScreenState extends State<HomeScreen>
   /// The jamat time for a prayer, or empty if this masjid has not set one.
   static String _jamatFor(Masjid m, String label) {
     final t = m.prayerTimes;
-    if (label == S.fajr) return t.fajrJamat.trim();
-    if (label == S.dhuhr) return t.dhuhrJamat.trim();
-    if (label == S.asr) return t.asrJamat.trim();
-    if (label == S.maghrib) return t.maghribJamat.trim();
-    if (label == S.isha) return t.ishaJamat.trim();
-    if (label == S.juma) return t.jumaJamat.trim();
-    return '';
+    final value = label == S.fajr
+        ? t.fajrJamat
+        : label == S.dhuhr
+        ? t.dhuhrJamat
+        : label == S.asr
+        ? t.asrJamat
+        : label == S.maghrib
+        ? t.maghribJamat
+        : label == S.isha
+        ? t.ishaJamat
+        : label == S.juma
+        ? t.jumaJamat
+        : '';
+    try {
+      return MasjidClock.localDisplay(
+        value,
+        MasjidClock.zoneFor(m.latitude, m.longitude),
+        DateTime.now(),
+      );
+    } catch (_) {
+      return value;
+    }
   }
 
   /// The icon for a prayer label, for the next-prayer card - matches
@@ -262,10 +287,10 @@ class _HomeScreenState extends State<HomeScreen>
     _announcementSub?.cancel();
     _announcementSub = AnnouncementRepository.streamActive(masjidId, masjidName)
         .listen((list) {
-      if (!mounted) return;
-      setState(() => _announcementList = list);
-      _notifyNewAnnouncements(list, masjidName);
-    });
+          if (!mounted) return;
+          setState(() => _announcementList = list);
+          _notifyNewAnnouncements(list, masjidName);
+        });
   }
 
   String? _watchedMasjidId;
@@ -295,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen>
   void _maybeScheduleNotifications(Masjid masjid) {
     final t = masjid.prayerTimes;
     final signature =
-        '${masjid.id}|${t.fajr}|${t.dhuhr}|${t.asr}|${t.maghrib}|${t.isha}|${t.juma}';
+        '${masjid.id}|${masjid.latitude}|${masjid.longitude}|${_now.timeZoneOffset}|${t.fajr}|${t.dhuhr}|${t.asr}|${t.maghrib}|${t.isha}|${t.juma}';
     if (signature == _lastScheduledSignature) return;
     _lastScheduledSignature = signature;
     _scheduleAndCheckPermission(masjid);
@@ -357,28 +382,34 @@ class _HomeScreenState extends State<HomeScreen>
   /// prayer knows its own next occurrence, after Isha it is simply Fajr's turn
   /// that is nearest.
   (String, DateTime)? _nextPrayer(Masjid masjid) {
-    final entries = <(String, String)>[
-      (S.fajr, masjid.prayerTimes.fajr),
-      (S.dhuhr, masjid.prayerTimes.dhuhr),
-      (S.asr, masjid.prayerTimes.asr),
-      (S.maghrib, masjid.prayerTimes.maghrib),
-      (S.isha, masjid.prayerTimes.isha),
-    ];
-
-    (String, DateTime)? best;
-    for (final (String label, String timeStr) in entries) {
-      final DateTime? today = _parseTimeToday(timeStr);
-      if (today == null) continue;
-
-      // Today if it is still to come, otherwise the same time tomorrow.
-      final DateTime when =
-          today.isAfter(_now) ? today : today.add(const Duration(days: 1));
-
-      if (best == null || when.isBefore(best.$2)) {
-        best = (label, when);
+    try {
+      final zone = MasjidClock.zoneFor(masjid.latitude, masjid.longitude);
+      final t = masjid.prayerTimes;
+      final entries = <(String, String)>[
+        (S.fajr, t.fajr),
+        (S.dhuhr, t.dhuhr),
+        (S.asr, t.asr),
+        (S.maghrib, t.maghrib),
+        (S.isha, t.isha),
+        (S.juma, t.juma),
+      ];
+      (String, DateTime)? best;
+      for (final entry in entries) {
+        final at = MasjidClock.next(
+          entry.$2,
+          zone,
+          _now,
+          fridayOnly: entry.$1 == S.juma,
+          skipFriday: entry.$1 == S.dhuhr && MasjidClock.parse(t.juma) != null,
+        );
+        if (at != null && (best == null || at.isBefore(best.$2))) {
+          best = (entry.$1, at.toLocal());
+        }
       }
+      return best;
+    } catch (_) {
+      return null;
     }
-    return best;
   }
 
   /// Tapping the date opens the calendar.
@@ -417,8 +448,11 @@ class _HomeScreenState extends State<HomeScreen>
                     children: [
                       Padding(
                         padding: EdgeInsets.only(top: 2),
-                        child: Icon(Icons.warning_amber,
-                            color: AppColors.warningFg, size: 20),
+                        child: Icon(
+                          Icons.warning_amber,
+                          color: AppColors.warningFg,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -428,7 +462,9 @@ class _HomeScreenState extends State<HomeScreen>
                             Text(
                               'Prayer alarms may not fire',
                               style: AppText.rowTitle.copyWith(
-                                  fontSize: 15, color: AppColors.warningFg),
+                                fontSize: 15,
+                                color: AppColors.warningFg,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -436,10 +472,12 @@ class _HomeScreenState extends State<HomeScreen>
                                       _hasBatteryExemption == false
                                   ? 'Two settings still need your permission.'
                                   : _hasBatteryExemption == false
-                                      ? 'Battery saver can freeze the app and stop alarms.'
-                                      : '"Alarms & reminders" is off for this app.',
+                                  ? 'Battery saver can freeze the app and stop alarms.'
+                                  : '"Alarms & reminders" is off for this app.',
                               style: AppText.caption.copyWith(
-                                  fontSize: 12.5, color: AppColors.warningFg),
+                                fontSize: 12.5,
+                                color: AppColors.warningFg,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             // One button to the full wizard, rather than a
@@ -458,10 +496,10 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 );
-                                final g = await NotificationService
-                                    .hasExactAlarmPermission();
-                                final e = await NotificationService
-                                    .hasBatteryExemption();
+                                final g =
+                                    await NotificationService.hasExactAlarmPermission();
+                                final e =
+                                    await NotificationService.hasBatteryExemption();
                                 if (mounted) {
                                   setState(() {
                                     _hasExactAlarmPermission = g;
@@ -475,10 +513,13 @@ class _HomeScreenState extends State<HomeScreen>
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Text('Fix This Now',
-                                  style: AppText.body.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.warningFg)),
+                              child: Text(
+                                'Fix This Now',
+                                style: AppText.body.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.warningFg,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -498,20 +539,19 @@ class _HomeScreenState extends State<HomeScreen>
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _selectedMasjidId == null
-                    ? _buildNoMasjidSelected()
-                    : StreamBuilder<Masjid?>(
-                        stream: MasjidRepository.streamById(_selectedMasjidId!),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          final masjid = snapshot.data;
-                          if (masjid == null) return _buildNoMasjidSelected();
-                          _maybeScheduleNotifications(masjid);
-                          return _buildIlluminatedHome(masjid, hijri);
-                        },
-                      ),
+                ? _buildNoMasjidSelected()
+                : StreamBuilder<Masjid?>(
+                    stream: MasjidRepository.streamById(_selectedMasjidId!),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final masjid = snapshot.data;
+                      if (masjid == null) return _buildNoMasjidSelected();
+                      _maybeScheduleNotifications(masjid);
+                      return _buildIlluminatedHome(masjid, hijri);
+                    },
+                  ),
           ),
         ],
       ),
@@ -535,37 +575,46 @@ class _HomeScreenState extends State<HomeScreen>
           onTap: (index) {
             if (index == 1) {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const QuranHomeScreen()));
+                MaterialPageRoute(builder: (_) => const QuranHomeScreen()),
+              );
             } else if (index == 2) {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const HadithHomeScreen()));
+                MaterialPageRoute(builder: (_) => const HadithHomeScreen()),
+              );
             } else if (index == 3) {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PrayersHomeScreen()));
+                MaterialPageRoute(builder: (_) => const PrayersHomeScreen()),
+              );
             } else if (index == 4 && _isAdmin) {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AdminLoginScreen()));
+                MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
+              );
             } else if (index == (_isAdmin ? 5 : 4)) {
               // Settings - used to be a gear icon floating on the header
               // photo; moved here so it sits with every other section
               // instead of being the one thing reached a different way.
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
             }
           },
           items: [
             BottomNavigationBarItem(
-                icon: const Icon(Icons.home_outlined, size: 20),
-                label: S.prayerTime),
+              icon: const Icon(Icons.home_outlined, size: 20),
+              label: S.prayerTime,
+            ),
             BottomNavigationBarItem(
-                icon: const Icon(Icons.menu_book_outlined, size: 20),
-                label: S.quran),
+              icon: const Icon(Icons.menu_book_outlined, size: 20),
+              label: S.quran,
+            ),
             BottomNavigationBarItem(
-                icon: const Icon(Icons.auto_stories_outlined, size: 20),
-                label: S.hadith),
+              icon: const Icon(Icons.auto_stories_outlined, size: 20),
+              label: S.hadith,
+            ),
             BottomNavigationBarItem(
-                icon: const Icon(Icons.school_outlined, size: 20),
-                label: S.prayers),
+              icon: const Icon(Icons.school_outlined, size: 20),
+              label: S.prayers,
+            ),
             // Admins only. Four tabs for everyone else.
             //
             // The role question is asked at first launch; showing an admin
@@ -573,12 +622,13 @@ class _HomeScreenState extends State<HomeScreen>
             // pointless. Changeable any time from Settings.
             if (_isAdmin)
               BottomNavigationBarItem(
-                  icon:
-                      const Icon(Icons.admin_panel_settings_outlined, size: 20),
-                  label: S.masjidAdmin),
+                icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
+                label: S.masjidAdmin,
+              ),
             BottomNavigationBarItem(
-                icon: const Icon(Icons.settings_outlined, size: 20),
-                label: 'Settings'),
+              icon: const Icon(Icons.settings_outlined, size: 20),
+              label: 'Settings',
+            ),
           ],
         ),
       ),
@@ -586,116 +636,145 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _askIslamConnectButton() => Material(
-        color: AppColors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(color: AppColors.goldRule)),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (_) => const AskIslamConnectScreen())),
-          child: Ink(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                AppColors.goldRule.withOpacity(.28),
-                AppColors.white
-              ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-              padding: const EdgeInsets.all(16),
-              child: Row(children: [
-                Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: AppColors.goldRule.withOpacity(.5),
-                        borderRadius: BorderRadius.circular(18)),
-                    child: Icon(Icons.mic_none_rounded,
-                        size: 24, color: AppColors.text)),
-                const SizedBox(width: 14),
-                Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      Text('Ask Islam Connect',
-                          style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text,
-                              fontSize: 17)),
-                      const SizedBox(height: 5),
-                      Text(
-                          S.tr('Ask a question, in your own words',
-                              'اپنے الفاظ میں سوال کریں'),
-                          style: AppText.body.copyWith(
-                              color: AppColors.textMuted, fontSize: 13)),
-                      const SizedBox(height: 4),
-                      Text(
-                          S.tr('Quran, Hadith and trusted references',
-                              'قرآن، حدیث اور معتبر حوالے'),
-                          style: AppText.caption
-                              .copyWith(color: AppColors.textMuted)),
-                    ])),
-                const SizedBox(width: 6),
-                Icon(Icons.arrow_forward_rounded,
-                    color: AppColors.gold, size: 22),
-              ])),
+    color: AppColors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18),
+      side: BorderSide(color: AppColors.goldRule),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const AskIslamConnectScreen()),
+      ),
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      );
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.goldRule.withOpacity(.5),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(
+                Icons.mic_none_rounded,
+                size: 24,
+                color: AppColors.text,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ask Islam Connect',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
+                      fontSize: 17,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    S.tr(
+                      'Ask a question, in your own words',
+                      'اپنے الفاظ میں سوال کریں',
+                    ),
+                    style: AppText.body.copyWith(
+                      color: AppColors.textMuted,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    S.tr(
+                      'Quran, Hadith and trusted references',
+                      'قرآن، حدیث اور معتبر حوالے',
+                    ),
+                    style: AppText.caption.copyWith(color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 22),
+          ],
+        ),
+      ),
+    ),
+  );
 
   Widget _buildNoMasjidSelected() {
     return Center(
       child: SingleChildScrollView(
-          child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _askIslamConnectButton(),
-            const SizedBox(height: 24),
-            const Medallion(icon: Icons.mosque_outlined, size: 52),
-            const SizedBox(height: 16),
-            Text(
-              S.noMasjidSelected,
-              textAlign: TextAlign.center,
-              style: AppText.body
-                  .copyWith(fontSize: 14, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 24),
-            // THE ONLY WAY OUT OF THIS SCREEN.
-            //
-            // This state had no button at all. The floating "Change Masjid"
-            // button used to be the only route to the search, and removing it
-            // left a brand-new user staring at an icon and a sentence with
-            // nothing to tap — the app was unusable from a fresh install.
-            //
-            // The button belongs here, not floating over a list that does not
-            // exist yet.
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                icon: const Icon(Icons.place_outlined, size: 18),
-                label: Text(S.nearbyMasjid),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.emerald,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                  textStyle: AppText.body,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _askIslamConnectButton(),
+              const SizedBox(height: 24),
+              const Medallion(icon: Icons.mosque_outlined, size: 52),
+              const SizedBox(height: 16),
+              Text(
+                S.noMasjidSelected,
+                textAlign: TextAlign.center,
+                style: AppText.body.copyWith(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
                 ),
-                onPressed: () async {
-                  final result = await Navigator.of(context).push<Masjid>(
-                    MaterialPageRoute(
-                        builder: (_) => const MasjidSearchScreen()),
-                  );
-                  if (result != null) {
-                    await UserRepository.setSelectedMasjid(result.id);
-                    if (mounted) setState(() => _selectedMasjidId = result.id);
-                  }
-                },
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              // THE ONLY WAY OUT OF THIS SCREEN.
+              //
+              // This state had no button at all. The floating "Change Masjid"
+              // button used to be the only route to the search, and removing it
+              // left a brand-new user staring at an icon and a sentence with
+              // nothing to tap — the app was unusable from a fresh install.
+              //
+              // The button belongs here, not floating over a list that does not
+              // exist yet.
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.place_outlined, size: 18),
+                  label: Text(S.nearbyMasjid),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.emerald,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    textStyle: AppText.body,
+                  ),
+                  onPressed: () async {
+                    final result = await Navigator.of(context).push<Masjid>(
+                      MaterialPageRoute(
+                        builder: (_) => const MasjidSearchScreen(),
+                      ),
+                    );
+                    if (result != null) {
+                      await UserRepository.setSelectedMasjid(result.id);
+                      if (mounted)
+                        setState(() => _selectedMasjidId = result.id);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
 
@@ -716,8 +795,9 @@ class _HomeScreenState extends State<HomeScreen>
             child: AnimatedBuilder(
               animation: Listenable.merge(<Listenable>[_intro, _scroll]),
               builder: (context, child) {
-                final double o =
-                    _scroll.hasClients ? _scroll.offset.clamp(0.0, 400.0) : 0.0;
+                final double o = _scroll.hasClients
+                    ? _scroll.offset.clamp(0.0, 400.0)
+                    : 0.0;
                 return Transform.translate(
                   offset: Offset(0, o * 0.4),
                   child: Transform.scale(scale: 1 + o / 3000, child: child),
@@ -737,13 +817,13 @@ class _HomeScreenState extends State<HomeScreen>
                   settle: _fade.value,
                   onDirectionsTap:
                       (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                          ? () => _openDirections(masjid)
-                          : null,
+                      ? () => _openDirections(masjid)
+                      : null,
                   announcementCount: _announcementList.length,
                   onAnnouncementsTap: _announcementList.isEmpty
                       ? null
                       : () =>
-                          _showAnnouncements(_announcementList, masjid.name),
+                            _showAnnouncements(_announcementList, masjid.name),
                   onMetaTap: _showHijriInfo,
                 ),
               ),
@@ -780,8 +860,9 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Container(
                       decoration: BoxDecoration(
                         color: AppColors.ivory,
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(18)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(18),
+                        ),
                         boxShadow: <BoxShadow>[
                           // Two shadows, not one: a tight dark one for the contact edge
                           // and a wide soft one for the ambient lift. A single shadow
@@ -807,13 +888,15 @@ class _HomeScreenState extends State<HomeScreen>
                               children: [
                                 if (next == null)
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                    ),
                                     child: Text(
                                       'Prayer times for this masjid haven\u2019t been set yet.',
                                       textAlign: TextAlign.center,
-                                      style: AppText.body
-                                          .copyWith(color: AppColors.textMuted),
+                                      style: AppText.body.copyWith(
+                                        color: AppColors.textMuted,
+                                      ),
                                     ),
                                   )
                                 else
@@ -845,7 +928,8 @@ class _HomeScreenState extends State<HomeScreen>
                                         Text(
                                           S.nextPrayer.toUpperCase(),
                                           style: AppText.eyebrow.copyWith(
-                                              color: AppColors.textMuted),
+                                            color: AppColors.textMuted,
+                                          ),
                                         ),
                                         const SizedBox(height: 12),
                                         // Icon on the left in a subtle circular outline, name
@@ -908,10 +992,10 @@ class _HomeScreenState extends State<HomeScreen>
                                                         _arabicFor(next.$1),
                                                         style: AppText.arabic
                                                             .copyWith(
-                                                          fontSize: 16,
-                                                          color:
-                                                              AppColors.emerald,
-                                                        ),
+                                                              fontSize: 16,
+                                                              color: AppColors
+                                                                  .emerald,
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -925,13 +1009,14 @@ class _HomeScreenState extends State<HomeScreen>
                                                   // it the way the original 44sp hero size did.
                                                   Text(
                                                     _clockLabel(next.$2),
-                                                    style:
-                                                        AppText.hero.copyWith(
-                                                      fontSize: 24,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: AppColors.emerald,
-                                                    ),
+                                                    style: AppText.hero
+                                                        .copyWith(
+                                                          fontSize: 24,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color:
+                                                              AppColors.emerald,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -959,9 +1044,11 @@ class _HomeScreenState extends State<HomeScreen>
                                             Expanded(
                                               child: _NextPrayerStat(
                                                 icon: Icons.groups_outlined,
-                                                label: _jamatFor(
-                                                            masjid, next.$1)
-                                                        .isEmpty
+                                                label:
+                                                    _jamatFor(
+                                                      masjid,
+                                                      next.$1,
+                                                    ).isEmpty
                                                     ? '${S.jamatLabel} \u2014'
                                                     : '${S.jamatLabel} ${_jamatFor(masjid, next.$1)}',
                                                 color: AppColors.champagneGold,
@@ -999,28 +1086,34 @@ class _HomeScreenState extends State<HomeScreen>
                                     S.findQiblaDirection,
                                     () => Navigator.of(context).push(
                                       MaterialPageRoute(
-                                          builder: (_) => const QiblaScreen()),
+                                        builder: (_) => const QiblaScreen(),
+                                      ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _quickAction(
-                                      Icons.place_outlined, S.nearbyMasjid,
-                                      () async {
-                                    final result = await Navigator.of(context)
-                                        .push<Masjid>(
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const MasjidSearchScreen()),
-                                    );
-                                    if (result != null) {
-                                      await UserRepository.setSelectedMasjid(
-                                          result.id);
-                                      setState(
-                                          () => _selectedMasjidId = result.id);
-                                    }
-                                  }),
+                                    Icons.place_outlined,
+                                    S.nearbyMasjid,
+                                    () async {
+                                      final result = await Navigator.of(context)
+                                          .push<Masjid>(
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const MasjidSearchScreen(),
+                                            ),
+                                          );
+                                      if (result != null) {
+                                        await UserRepository.setSelectedMasjid(
+                                          result.id,
+                                        );
+                                        setState(
+                                          () => _selectedMasjidId = result.id,
+                                        );
+                                      }
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
@@ -1034,8 +1127,9 @@ class _HomeScreenState extends State<HomeScreen>
                               children: [
                                 OutlinedButton.icon(
                                   icon: const Icon(
-                                      Icons.calendar_month_outlined,
-                                      size: 16),
+                                    Icons.calendar_month_outlined,
+                                    size: 16,
+                                  ),
                                   label: Text(S.viewFullPrayerSchedule),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: AppColors.emerald,
@@ -1044,13 +1138,15 @@ class _HomeScreenState extends State<HomeScreen>
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 13),
+                                      vertical: 13,
+                                    ),
                                     textStyle: AppText.body,
                                   ),
                                   onPressed: () => Navigator.of(context).push(
                                     MaterialPageRoute(
-                                        builder: (_) =>
-                                            PrayerTimesScreen(masjid: masjid)),
+                                      builder: (_) =>
+                                          PrayerTimesScreen(masjid: masjid),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 90),
@@ -1081,11 +1177,23 @@ class _HomeScreenState extends State<HomeScreen>
   ///   after Isha ........... night     (stars, crescent)
   ///
   /// Falls back to clock hours if the masjid hasn't set its times yet.
+  DateTime? _masjidTimeToday(Masjid masjid, String text) {
+    try {
+      return MasjidClock.onDate(
+        text,
+        MasjidClock.zoneFor(masjid.latitude, masjid.longitude),
+        _now,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   SkyPhase _skyPhase(Masjid masjid) {
-    final DateTime? fajr = _parseTimeToday(masjid.prayerTimes.fajr);
-    final DateTime? dhuhr = _parseTimeToday(masjid.prayerTimes.dhuhr);
-    final DateTime? asr = _parseTimeToday(masjid.prayerTimes.asr);
-    final DateTime? isha = _parseTimeToday(masjid.prayerTimes.isha);
+    final DateTime? fajr = _masjidTimeToday(masjid, masjid.prayerTimes.fajr);
+    final DateTime? dhuhr = _masjidTimeToday(masjid, masjid.prayerTimes.dhuhr);
+    final DateTime? asr = _masjidTimeToday(masjid, masjid.prayerTimes.asr);
+    final DateTime? isha = _masjidTimeToday(masjid, masjid.prayerTimes.isha);
 
     if (fajr == null || dhuhr == null || asr == null || isha == null) {
       final int h = _now.hour;
@@ -1140,6 +1248,22 @@ class _HomeScreenState extends State<HomeScreen>
       (S.juma, t.juma, _arabicPrayerNames['juma']!, t.jumaJamat),
     ];
 
+    String? zone;
+    try {
+      zone = MasjidClock.zoneFor(masjid.latitude, masjid.longitude);
+    } catch (_) {}
+    if (zone != null) {
+      for (var i = 0; i < rows.length; i++) {
+        final row = rows[i];
+        rows[i] = (
+          row.$1,
+          MasjidClock.localDisplay(row.$2, zone, _now),
+          row.$3,
+          MasjidClock.localDisplay(row.$4, zone, _now),
+        );
+      }
+    }
+
     // Column headings only when this masjid actually publishes jamat times.
     // Without them the right-hand column is unlabelled; with them on a masjid
     // that has none, they would head an empty column.
@@ -1147,6 +1271,15 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            zone == null
+                ? 'Masjid location unavailable — times shown as entered'
+                : 'Your local time • Masjid timezone: $zone',
+            style: AppText.eyebrow.copyWith(fontSize: 10),
+          ),
+        ),
         if (showJamat)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
@@ -1166,22 +1299,28 @@ class _HomeScreenState extends State<HomeScreen>
                 const Expanded(flex: 3, child: SizedBox.shrink()),
                 Expanded(
                   flex: 4,
-                  child: Text(S.azanLabel.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: AppText.eyebrow.copyWith(
-                          fontSize: 9,
-                          letterSpacing: 1,
-                          color: AppColors.textFaint)),
+                  child: Text(
+                    S.azanLabel.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: AppText.eyebrow.copyWith(
+                      fontSize: 9,
+                      letterSpacing: 1,
+                      color: AppColors.textFaint,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
                   flex: 4,
-                  child: Text(S.jamatLabel.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: AppText.eyebrow.copyWith(
-                          fontSize: 9,
-                          letterSpacing: 1,
-                          color: AppColors.champagneGold)),
+                  child: Text(
+                    S.jamatLabel.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: AppText.eyebrow.copyWith(
+                      fontSize: 9,
+                      letterSpacing: 1,
+                      color: AppColors.champagneGold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1199,9 +1338,10 @@ class _HomeScreenState extends State<HomeScreen>
               border: rows[i].$1 == nextLabel
                   ? Border(left: BorderSide(color: AppColors.emerald, width: 3))
                   : (i == 0
-                      ? null
-                      : Border(
-                          top: BorderSide(color: AppColors.goldRuleFaint))),
+                        ? null
+                        : Border(
+                            top: BorderSide(color: AppColors.goldRuleFaint),
+                          )),
             ),
             // EVERYTHING IS FLEX NOW, no fixed pixel widths.
             //
@@ -1222,33 +1362,36 @@ class _HomeScreenState extends State<HomeScreen>
                       Semantics(
                         label: '${rows[i].$1} prayer notifications',
                         child: Switch(
-                          value: _prayerNotifications[
-                                  PrayerNotificationPreferences.keys[i]] ??
+                          value:
+                              _prayerNotifications[PrayerNotificationPreferences
+                                  .keys[i]] ??
                               true,
                           activeColor: AppColors.emerald,
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
-                          onChanged: _savingNotification ||
+                          onChanged:
+                              _savingNotification ||
                                   _prayerNotifications.isEmpty
                               ? null
                               : (_) => _togglePrayerNotification(
-                                  PrayerNotificationPreferences.keys[i]),
+                                  PrayerNotificationPreferences.keys[i],
+                                ),
                         ),
                       ),
                       Text(
                         _prayerNotifications.isEmpty
                             ? '…'
-                            : (_prayerNotifications[
-                                        PrayerNotificationPreferences
-                                            .keys[i]] ??
-                                    true)
-                                ? 'ON'
-                                : 'OFF',
+                            : (_prayerNotifications[PrayerNotificationPreferences
+                                      .keys[i]] ??
+                                  true)
+                            ? 'ON'
+                            : 'OFF',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: (_prayerNotifications[
-                                      PrayerNotificationPreferences.keys[i]] ??
+                          color:
+                              (_prayerNotifications[PrayerNotificationPreferences
+                                      .keys[i]] ??
                                   true)
                               ? AppColors.emerald
                               : AppColors.textMuted,
@@ -1293,7 +1436,10 @@ class _HomeScreenState extends State<HomeScreen>
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       style: AppText.arabic.copyWith(
-                          fontSize: 16, height: 1.2, color: AppColors.gold),
+                        fontSize: 16,
+                        height: 1.2,
+                        color: AppColors.gold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -1394,14 +1540,19 @@ class _HomeScreenState extends State<HomeScreen>
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Icon(Icons.campaign_outlined,
-                      size: 19, color: AppColors.gold),
+                  Icon(
+                    Icons.campaign_outlined,
+                    size: 19,
+                    color: AppColors.gold,
+                  ),
                   const SizedBox(width: 9),
                   Expanded(
                     child: Text(
                       S.isUrdu ? 'اہم اعلان' : 'Important Announcement',
-                      style: AppText.rowTitle
-                          .copyWith(fontSize: 17, color: AppColors.text),
+                      style: AppText.rowTitle.copyWith(
+                        fontSize: 17,
+                        color: AppColors.text,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -1411,8 +1562,10 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ],
               ),
-              Text(masjidName,
-                  style: AppText.caption.copyWith(color: AppColors.textMuted)),
+              Text(
+                masjidName,
+                style: AppText.caption.copyWith(color: AppColors.textMuted),
+              ),
               const SizedBox(height: 14),
               for (final Announcement a in list)
                 Padding(
@@ -1420,12 +1573,19 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(a.message,
-                          style: AppText.body
-                              .copyWith(color: AppColors.text, height: 1.5)),
+                      Text(
+                        a.message,
+                        style: AppText.body.copyWith(
+                          color: AppColors.text,
+                          height: 1.5,
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Container(
-                          width: 34, height: 1, color: AppColors.goldRule),
+                        width: 34,
+                        height: 1,
+                        color: AppColors.goldRule,
+                      ),
                     ],
                   ),
                 ),
@@ -1441,7 +1601,9 @@ class _HomeScreenState extends State<HomeScreen>
   /// Seen ids live on the device. Storing them server-side would mean a
   /// per-user read record, which is what this app has avoided everywhere else.
   Future<void> _notifyNewAnnouncements(
-      List<Announcement> list, String masjidName) async {
+    List<Announcement> list,
+    String masjidName,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final seen = prefs.getStringList('seen_announcements') ?? <String>[];
@@ -1525,8 +1687,10 @@ class _PressCardState extends State<_PressCard> {
                   textAlign: TextAlign.left,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppText.rowTitle
-                      .copyWith(fontSize: 14, color: AppColors.text),
+                  style: AppText.rowTitle.copyWith(
+                    fontSize: 14,
+                    color: AppColors.text,
+                  ),
                 ),
               ),
             ],
