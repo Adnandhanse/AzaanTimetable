@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/admin_contact.dart';
+import '../services/registration_operation_error.dart';
 import '../theme/app_theme.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -104,17 +105,20 @@ class _OtpScreenState extends State<OtpScreen> {
     super.dispose();
   }
 
+  bool _operationPending = false;
+
   Future<void> _completeVerification() async {
+    if (_operationPending || !mounted) return;
+    _operationPending = true;
     setState(() => _isVerifying = true);
     try {
       await widget.onVerified();
     } catch (e) {
+      _operationPending = false;
       if (!mounted) return;
       setState(() => _isVerifying = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'Phone verified, but the operation could not be completed: $e')),
+        SnackBar(content: Text(registrationOperationError(e))),
       );
     }
   }

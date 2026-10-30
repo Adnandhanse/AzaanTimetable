@@ -31,7 +31,9 @@ async function geminiJson({key,model=DEFAULT_MODEL,schema,instructions,input,max
    return result;
   }catch(e){
    e.failureKind=e.failureKind||(['TimeoutError','AbortError'].includes(e.name)?'timeout':e instanceof SyntaxError||bodyPhase?'parse':'network');
-   const retry=attempt<attempts&&transient(e)&&deadline-now()>1000;
+   // A timed-out generation already spent its latency budget. Retry only
+   // fast transient HTTP failures, never quota/auth/parse failures or timeouts.
+   const retry=attempt<attempts&&transient(e)&&!['TimeoutError','AbortError'].includes(e.name)&&deadline-now()>1000;
    log('gemini-request-failed',{phase,attempt,durationMs:now()-started,type:e.name,status:e.status||null,kind:e.failureKind,retry});
    if(!retry)throw e;
    await sleep(Math.min(500,Math.max(0,deadline-now()-1)));

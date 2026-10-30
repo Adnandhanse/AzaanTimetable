@@ -68,7 +68,18 @@ function queryGroups(question,history=[]){
 function corpusIndex(docs){
  if(indexes.has(docs))return indexes.get(docs);
  const all=[...docs,...notes.map(n=>({...n,ur:'',ar:'',grades:[],normalized:` ${normalize(n.en+' '+n.tags.join(' '))} `}))];
- const byId=new Map(all.map(d=>[d.id,d]));const index={all,byId};indexes.set(docs,index);return index;
+ const byId=new Map(all.map(d=>[d.id,d]));
+ // Construct once per warm instance, not once per question. Postings preserve
+ // the old whole-word matching and frequency scoring without scanning every
+ // multilingual document for each query term.
+ const postings=new Map(),byKind=new Map();
+ for(const doc of all){
+  if(!byKind.has(doc.kind))byKind.set(doc.kind,[]);byKind.get(doc.kind).push(doc);
+  for(const token of new Set(doc.normalized.trim().split(/\s+/u))){
+   if(!postings.has(token))postings.set(token,[]);postings.get(token).push(doc);
+  }
+ }
+ const index={all,byId,postings,byKind,bodies:new WeakMap(),stages:new WeakMap()};indexes.set(docs,index);return index;
 }
 function exactLookup(question,index){
  const q=romanQuestion(question).toLowerCase().replace(/[٠-٩۰-۹०-९]/g,c=>{const n=c.charCodeAt(0);return String(n-(n>=2406?2406:n>=1776?1776:1632));});
@@ -89,15 +100,16 @@ function retrieveEvidence(question,history,docs){
  if(!exact.requested){
   const frequencies=new Array(terms.length).fill(0),rows=[];
   const domain=g=>g.includes('quran')||g.includes('hadith')||g.includes('dua');
-  for(const doc of index.all){
-   const matched=[];
-   for(let i=0;i<terms.length;i++) {
-    const g=terms[i];
-    const hit=(g.includes('quran')&&doc.kind==='quran')||(g.includes('hadith')&&doc.kind==='hadith')||(g.includes('dua')&&doc.kind==='dua')||g.some(t=>doc.normalized.includes(` ${t} `));
-    if(hit){matched.push(i);frequencies[i]++;}
-   }
-   if(matched.length)rows.push({doc,matched});
+  const candidatesByDoc=new Map();
+  for(let i=0;i<terms.length;i++){
+   const g=terms[i],hits=new Set();
+   for(const term of g)for(const doc of index.postings.get(term)||[])hits.add(doc);
+   const kind=g.includes('quran')?'quran':g.includes('hadith')?'hadith':g.includes('dua')?'dua':null;
+   if(kind)for(const doc of index.byKind.get(kind)||[])hits.add(doc);
+   frequencies[i]=hits.size;
+   for(const doc of hits){if(!candidatesByDoc.has(doc))candidatesByDoc.set(doc,[]);candidatesByDoc.get(doc).push(i);}
   }
+  for(const [doc,matched] of candidatesByDoc)rows.push({doc,matched});
   const useful=terms.map((g,i)=>frequencies[i]&&!domain(g)?i:-1).filter(i=>i>=0);
   const strong=new Set(['adam','idris','hud','salih','lut','ismail','ishaq','yaqub','ayyub','shuayb','harun','dhulkifl','dawud','sulayman','ilyas','alyasa','zakariya','yahya','fajr','ibrahim','musa','isa','nuh','yunus','yusuf','nabuwwat','parents','biwi','haath','ungli','wuzu','roza','sleep','prison','zakat']);
   const required=useful.filter(i=>strong.has(terms[i][0]));
@@ -114,7 +126,8 @@ function retrieveEvidence(question,history,docs){
   }
   if(threshold)for(const {doc,matched} of rows){
    if(matched.filter(i=>useful.includes(i)).length<threshold||required.some(i=>!matched.includes(i)))continue;
-   const body=` ${normalize(doc.en||doc.ur||doc.roman||'')} `;
+   let body=index.bodies.get(doc);
+   if(!body){body=` ${normalize(doc.en||doc.ur||doc.roman||'')} `;index.bodies.set(doc,body);}
    // Bibliographic cross-references are not a standalone Hadith answer.
    if(doc.kind==='hadith'&&(doc.en||'').length<450&&/same (?:chain|hadith|meaning|words)|chain of transmitters|as (?:mentioned|narrated|reported) (?:above|before)/i.test(doc.en||''))continue;
    if(doc.kind==='hadith'&&(body.length<60||required.some(i=>!terms[i].some(t=>body.includes(` ${t} `)))))continue;
@@ -128,7 +141,8 @@ function retrieveEvidence(question,history,docs){
    if(broadSubject&&doc.kind==='hadith'&&/prayer|salat/i.test(doc.context||''))score+=3;
    if(procedural&&doc.kind==='hadith') {
     const stages=[/qibla/i,/takbir|allahu akbar/i,/recit/i,/bow|ruku/i,/prostrat|sujud/i,/sit|sitting/i];
-    const covered=stages.filter(re=>re.test(doc.en||'')).length;
+    let covered=index.stages.get(doc);
+    if(covered===undefined){covered=stages.filter(re=>re.test(doc.en||'')).length;index.stages.set(doc,covered);}
     if(covered>=3)score+=covered*6;
    }
    if(terms.some(g=>g.includes('dua'))&&doc.kind==='dua')score+=5;
@@ -160,15 +174,15 @@ function retrieveEvidence(question,history,docs){
  // type out of the evidence window. Generation still decides what to cite.
  const hadithOnly=terms.some(g=>g.includes('hadith'))&&!terms.some(g=>g.includes('quran'))&&!/compare|comparison|muqabla/i.test(question);
  const candidates=hadithOnly?unique.filter(x=>x.doc.kind==='hadith'):procedural?unique.filter(x=>['hadith','dua'].includes(x.doc.kind)):unique;
- const selected=candidates.slice(0,4);
+ const selected=candidates.slice(0,3);
  for(const kind of (hadithOnly?[]:procedural?['hadith','dua']:['hadith','quran','story','scholarly','dua'])){
   if(selected.some(x=>x.doc.kind===kind))continue;
-  const next=candidates.find(x=>x.doc.kind===kind);if(next&&selected.length<8)selected.push(next);
+  const next=candidates.find(x=>x.doc.kind===kind);if(next&&selected.length<6)selected.push(next);
  }
- for(const next of candidates){if(selected.length===8)break;if(!selected.includes(next))selected.push(next);}
+ for(const next of candidates){if(selected.length===6)break;if(!selected.includes(next))selected.push(next);}
  const evidence=selected.map(({doc,terms})=>({id:doc.id,kind:doc.kind,title:doc.title,
   publisher:doc.publisher||'',contentType:doc.contentType||(doc.kind==='story'?'editorial-retelling':'source-text'),
-  text:excerpt(doc.en||doc.ur||doc.roman,terms,procedural?3000:1800),grades:doc.grades||[],sources:doc.sources||[]}));
+  text:excerpt(doc.en||doc.ur||doc.roman,terms,procedural?2200:1200),grades:doc.grades||[],sources:doc.sources||[]}));
  return {index,evidence,exact};
 }
 module.exports={retrieveEvidence,corpusIndex,exactLookup,queryGroups};

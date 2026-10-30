@@ -18,10 +18,10 @@ test('quota, provider-auth, output parsing and timeout remain distinct',async()=
  let calls=0;
  await assert.rejects(geminiJson({...base,log:()=>{},fetcher:async()=>{calls++;return {ok:true,json:async()=>{throw new SyntaxError('private response body');}};}}),e=>e.failureKind==='parse'&&classifyFailure(e,'provider').supportCode==='AI-OUTPUT');assert.equal(calls,1);
 });
-test('total deadline bounds retries even when a request exhausts the first budget',async()=>{
+test('a timed-out first generation fails promptly instead of using a second budget',async()=>{
  let clock=0,calls=0;
  await assert.rejects(geminiJson({...base,now:()=>clock,sleep:async ms=>{clock+=ms;},timeoutMs:20000,totalTimeoutMs:35000,log:()=>{},fetcher:async()=>{
   calls++;clock+=calls===1?20000:14500;throw new DOMException('timed out','TimeoutError');
  }}),e=>classifyFailure(e,'provider').supportCode==='AI-TIMEOUT');
- assert.equal(calls,2);assert.equal(clock,35000);
+ assert.equal(calls,1);assert.equal(clock,20000);
 });

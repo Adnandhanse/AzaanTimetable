@@ -22,15 +22,13 @@ jobs:
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.FIREBASE_DEPLOY_CREDENTIALS }}
-      - name: Install dependencies
+      - name: Install registration backend dependencies
+        run: npm --prefix functions-international ci --ignore-scripts
+      - name: Test SMS identity and country validation
+        run: npm --prefix functions-international test
+      - name: Deploy registration and verified admin endpoints
+        run: npx --yes firebase-tools@14 --config firebase.registration.json deploy --only functions:international-admins --project actual-masjid-prayer-time --non-interactive
+      - name: Verify registration endpoint is deployed in the app region
         run: |
-          npm --prefix functions-international ci --ignore-scripts
-          npm --prefix functions ci --ignore-scripts
-          npm --prefix functions-reminders ci --ignore-scripts
-      - name: Test approval, country validation, transfer and reminders
-        run: |
-          npm --prefix functions-international test
-          npm --prefix functions test
-          npm --prefix functions-reminders test
-      - name: Deploy international verification and compatible transfer/reminder services
-        run: npx --yes firebase-tools@14 --config firebase.international.json deploy --only functions:international-admins,functions:ownership-transfer,functions:timing-reminders --project actual-masjid-prayer-time --non-interactive --force
+          npx --yes firebase-tools@14 functions:list --json --project actual-masjid-prayer-time > "$RUNNER_TEMP/registration-functions.json"
+          node scripts/check-registration-deployment.js "$RUNNER_TEMP/registration-functions.json"

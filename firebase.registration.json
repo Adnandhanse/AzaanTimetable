@@ -1,0 +1,14 @@
+{
+  "functions": [
+    {
+      "source": "functions-international",
+      "codebase": "international-admins",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "*.log",
+        ".env*"
+      ]
+    }
+  ]
+}

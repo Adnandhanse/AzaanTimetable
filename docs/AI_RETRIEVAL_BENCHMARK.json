@@ -1,0 +1,179 @@
+{
+  "localOnly": true,
+  "liveGeminiTested": false,
+  "warmSearchReductionPercent": 75.7,
+  "before": {
+    "checks": [
+      {
+        "question": "namaz ka tariqa kya hai",
+        "retrievalMs": 1228,
+        "ids": [
+          "hadith:muslim:904",
+          "hadith:nasai:1136",
+          "hadith:abudawud:744"
+        ]
+      },
+      {
+        "question": "zakat kya hai",
+        "retrievalMs": 334,
+        "ids": [
+          "hadith:bukhari:1395",
+          "hadith:bukhari:1458",
+          "hadith:bukhari:7372"
+        ]
+      },
+      {
+        "question": "zakat ke bare me hadees batao",
+        "retrievalMs": 334,
+        "ids": [
+          "hadith:muslim:2494",
+          "hadith:bukhari:1456",
+          "hadith:muslim:2286"
+        ]
+      },
+      {
+        "question": "namaz ka tarika batao",
+        "retrievalMs": 999,
+        "ids": [
+          "hadith:bukhari:6667",
+          "hadith:bukhari:6251",
+          "hadith:nasai:1313"
+        ]
+      },
+      {
+        "question": "How do I perform salah step by step?",
+        "retrievalMs": 1060,
+        "ids": [
+          "hadith:bukhari:6667",
+          "hadith:bukhari:6251",
+          "hadith:nasai:1313"
+        ]
+      },
+      {
+        "question": "sone se pehle ki dua",
+        "retrievalMs": 916,
+        "ids": [
+          "dua:28:105",
+          "dua:28:104",
+          "dua:28:110"
+        ]
+      },
+      {
+        "question": "maa baap ke huqooq",
+        "retrievalMs": 686,
+        "ids": [
+          "quran:17:23",
+          "hadith:muslim:256",
+          "hadith:muslim:253"
+        ]
+      },
+      {
+        "question": "gussa kaise control karu",
+        "retrievalMs": 663,
+        "ids": [
+          "hadith:muslim:6643",
+          "hadith:bukhari:6114",
+          "hadith:muslim:6644"
+        ]
+      },
+      {
+        "question": "aakhri nabi ka naam kya hai",
+        "retrievalMs": 775,
+        "ids": [
+          "quran:33:40",
+          "hadith:muslim:1269",
+          "hadith:bukhari:190"
+        ]
+      }
+    ],
+    "peakRssMiB": 551,
+    "liveGemini": false
+  },
+  "after": {
+    "checks": [
+      {
+        "question": "namaz ka tariqa kya hai",
+        "retrievalMs": 2710,
+        "ids": [
+          "hadith:muslim:904",
+          "hadith:nasai:1136",
+          "hadith:abudawud:744"
+        ]
+      },
+      {
+        "question": "zakat kya hai",
+        "retrievalMs": 108,
+        "ids": [
+          "hadith:bukhari:1395",
+          "hadith:bukhari:1458",
+          "hadith:bukhari:7372"
+        ]
+      },
+      {
+        "question": "zakat ke bare me hadees batao",
+        "retrievalMs": 99,
+        "ids": [
+          "hadith:muslim:2494",
+          "hadith:bukhari:1456",
+          "hadith:muslim:2286"
+        ]
+      },
+      {
+        "question": "namaz ka tarika batao",
+        "retrievalMs": 439,
+        "ids": [
+          "hadith:bukhari:6667",
+          "hadith:bukhari:6251",
+          "hadith:nasai:1313"
+        ]
+      },
+      {
+        "question": "How do I perform salah step by step?",
+        "retrievalMs": 386,
+        "ids": [
+          "hadith:bukhari:6667",
+          "hadith:bukhari:6251",
+          "hadith:nasai:1313"
+        ]
+      },
+      {
+        "question": "sone se pehle ki dua",
+        "retrievalMs": 137,
+        "ids": [
+          "dua:28:105",
+          "dua:28:104",
+          "dua:28:110"
+        ]
+      },
+      {
+        "question": "maa baap ke huqooq",
+        "retrievalMs": 21,
+        "ids": [
+          "quran:17:23",
+          "hadith:muslim:256",
+          "hadith:muslim:253"
+        ]
+      },
+      {
+        "question": "gussa kaise control karu",
+        "retrievalMs": 5,
+        "ids": [
+          "hadith:muslim:6643",
+          "hadith:bukhari:6114",
+          "hadith:muslim:6644"
+        ]
+      },
+      {
+        "question": "aakhri nabi ka naam kya hai",
+        "retrievalMs": 204,
+        "ids": [
+          "quran:33:40",
+          "hadith:muslim:1269",
+          "hadith:bukhari:190"
+        ]
+      }
+    ],
+    "peakRssMiB": 679,
+    "liveGemini": false
+  }
+}
