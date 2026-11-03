@@ -1,0 +1,13 @@
+Colour Tajweed reader — source and limitations
+Arabic text: Tanzil Quran Text, pinned source downloaded circa April 6, 2017, unmodified.
+https://github.com/cpfair/quran-tajweed/files/7281388/quran-uthmani.txt
+Tanzil copyright / CC BY 3.0 and verbatim-reproduction conditions: https://tanzil.net/docs/Text_License
+Copyright (C) 2007-2021 Tanzil Project. Source: https://tanzil.net. Text must not be changed. Retain this notice and track source corrections.
+Tajweed annotations: Collin Fair, cpfair/quran-tajweed, CC BY 4.0.
+Pinned revision: 496f71cd191da00fa2a37ded79dbbddb033bb0ad.
+https://github.com/cpfair/quran-tajweed
+https://creativecommons.org/licenses/by/4.0/
+Adaptation: original source codepoint offsets retained in generated Dart data; app assigns presentation colours. No new tajweed rules were inferred. Later overlapping annotations take precedence in the display.
+The upstream explicitly says it is not actively maintained. These are automatically generated rule annotations; this integration is NOT a scholarly accuracy certification. Reader review against an authorised Mushaf and Qari review remain necessary.
+The dedicated reader uses the precise source text matching the annotations; the main Quran text is not replaced. The source includes basmalah at the opening of most surahs. No additional basmalah is inserted in this reader.
+No new font bundled: uses existing Amiri font and its existing licence. No scanned pages, QCF fonts, or Dar al-Maarifah page artwork copied.

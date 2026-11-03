@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../widgets/speed_selector.dart';
 import '../services/app_strings.dart';
 import '../data/sajdah_verses.dart';
+import '../data/ruku_boundaries.dart';
 import '../data/juz_boundaries.dart';
 import '../widgets/mushaf_view.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -520,6 +521,14 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                           '${surah.number}.${verse.number}',
                           style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald),
                         ),
+                        if (isRukuEnd(surah.number, verse.number))
+                          const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Tooltip(
+                              message: 'Ruku end',
+                              child: Text('ع', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
                         // Sajdah marker. Red dot and label, beside the verse
                         // number, so it is visible while scrolling rather than
                         // only once you have read to the end of the ayah.

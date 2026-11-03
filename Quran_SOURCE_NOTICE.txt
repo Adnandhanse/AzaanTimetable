@@ -1,1 +1,15 @@
-Arabic and English/Urdu translations are reproduced unchanged from the project’s existing assets/quran/quran_en.json and quran_ur.json. Source: https://github.com/risan/quran-json . CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/ . New file selects 30 complete verses and adds references and concise Roman Urdu meanings. It does not replace the Quran source assets or assert new scholarly translation/tafsir. Existing Quran repository and source/license notices should be retained.
+URDU QURAN TRANSLATION UPDATE — 2026-11-03
+Translator: Muhammad Ibrahim Junagarhi.
+Digital edition: QuranEnc.com, developed under supervision of Rowwad Translation Center.
+Key: urdu_junagarhi; version: 1.1.3.
+Source: https://quranenc.com/en/browse/urdu_junagarhi
+Download: https://quranenc.com/downloads/sqlite/urdu_junagarhi.sqlite
+Metadata: https://quranenc.com/api/v1/translations/list/ur
+Arabic text and surah/ayah IDs preserved from existing app. Hindi unchanged. English replaced by QuranEnc Hilali & Muhsin Khan v1.1.2.
+Translation and footnotes copied verbatim from source SQLite; footnotes follow translation separated by two newlines. Notes are source commentary, not additional Quran text or a newly authored Junagarhi tafsir.
+Republication conditions (QuranEnc): no modification/addition/deletion of source content; clearly attribute source/publisher; mention version; retain transcript information; report source corrections to QuranEnc; keep updated with source; no inappropriate advertisements alongside translations.
+Original Arabic/English/Hindi source licences remain applicable. This patch does not license them anew.
+
+English: https://quranenc.com/en/browse/english_hilali_khan; translator Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan; v1.1.2. Source translation/notes preserved verbatim. Same QuranEnc reuse conditions apply.
+Ruku metadata: Tanzil Quran Metadata v1.0, https://tanzil.net/docs/Quran_Metadata (556 sections). Counts/divisions can differ between printed editions. Ruku symbols are UI metadata; Quran Arabic text unchanged.
+Tanzil Quran Text Copyright (C) 2007-2021 Tanzil Project. License CC BY 3.0. Verbatim copying/distribution permitted, changing Quran text not allowed. Source must be clearly indicated with a link to https://tanzil.net; retain this notice and check https://tanzil.net/updates/.

@@ -27,11 +27,12 @@ enum QuranLanguage {
 /// API needed at any point after install.
 ///
 /// Sources:
-/// - Arabic text & English/Urdu translations: "quran-json" project
-///   (CC BY-SA 4.0) - https://github.com/risan/quran-json
-/// - Hindi translation: "quran-api" project (Unlicense/Public Domain) -
-///   https://github.com/fawazahmed0/quran-api - translation by Suhel
-///   Farooq Khan & Saifur Rahman Nadwi, sourced from tanzil.net.
+/// - Arabic: existing quran-json assets (unchanged).
+/// - English: Hilali & Muhsin Khan, QuranEnc.com v1.1.2.
+/// - Urdu: Muhammad Junagarhi, QuranEnc.com v1.1.3.
+///   Source notes are preserved after the corresponding translation.
+/// - Hindi: existing Suhel Farooq Khan & Saifur Rahman Nadwi dataset.
+/// See Quran_SOURCE_NOTICE.txt for edition and reuse conditions.
 class QuranRepository {
   static List<Surah>? _cachedEnglish;
   static List<Surah>? _cachedUrdu;

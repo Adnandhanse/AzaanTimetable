@@ -1,3 +1,4 @@
+import 'tajweed_reader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
@@ -230,6 +231,13 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(S.quran),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => const TajweedReaderScreen())),
+            child: const Text('Colour Tajweed'),
+          ),
+        ],
         // Directly visible, not tucked behind an icon - this used to be a
         // translate-icon popup menu that gave no hint it was even a language
         // switcher. Arabic-only is the reading-mode default too, so it gets
@@ -273,6 +281,21 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                if (!_arabicOnly && _language == QuranLanguage.urdu)
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(12, 6, 12, 6),
+                    child: Text(
+                      'اردو ترجمہ: محمد جوناگڑھی • QuranEnc.com • v1.1.3',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                if (!_arabicOnly && _language == QuranLanguage.english)
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(12, 6, 12, 6),
+                    child: Text('Hilali & Muhsin Khan • QuranEnc.com • v1.1.2',
+                      textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
+                  ),
                 // ASPECT RATIO, NOT A FIXED HEIGHT.
                 //
                 // This was a 196px-tall box with BoxFit.cover. The artwork is

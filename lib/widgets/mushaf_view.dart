@@ -168,12 +168,18 @@ class _MushafViewState extends State<MushafView> {
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
 
-    for (final QuranVerse verse in widget.verses) {
+    for (int index = 0; index < widget.verses.length; index++) {
+      final QuranVerse verse = widget.verses[index];
       starts.add(buffer.length);
 
       buffer.write(verse.arabicText.trim());
       buffer.write(' \u06DD');
       buffer.write(_arabicDigits(verse.number));
+      if (widget.sajdahIndices.contains(index)) buffer.write('  ۩  ');
+      final surah = widget.surahForIndex?.call(index);
+      if (surah != null && isRukuEnd(surah, verse.number)) {
+        buffer.write('  ع  ');
+      }
       // Three spaces, not two - the ayah-end ornament and the next ayah's
       // opening word need a visible gap between them so a line-wrap landing
       // right on a verse boundary does not read as one run-together word.

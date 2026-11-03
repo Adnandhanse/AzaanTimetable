@@ -1,0 +1,5 @@
+Replace files at the same repo-relative paths, then build an app update. No pubspec/dependency changes or Firebase deployment. Urdu Junagarhi v1.1.3, English Hilali-Khan v1.1.2, source notes retained. Hindi unchanged: requested Junagarhi Hindi edition needs verified digital source and reuse permission. Complete Tanzil ruku metadata (556 sections) added; ع marks end in Arabic-only and verse views. Colour Tajweed reader included; see TAJWEED_SOURCE_NOTICE.txt. AI removal not included. No Flutter build/device test available.
+
+Colour Tajweed included: open Quran > Colour Tajweed (top right). Select a surah. Dedicated source edition and annotations bundled as Dart data, no internet/dependency/pubspec change. Main translations/ruku patch included. Colour reader is verse-by-verse, not a 15-line scanned Mushaf. Qari review and Flutter build/device tests pending.
+
+Sajdah markers: ۩ in Arabic-only flow and a visible ۩ Sajdah label in the colour reader. Existing 15-location table retained, including differences-of-opinion notes.
