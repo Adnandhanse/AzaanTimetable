@@ -4,6 +4,7 @@ import 'dart:ui' show LineMetrics;
 import 'package:flutter/material.dart';
 
 import '../data/ruku_boundaries.dart';
+import '../services/quran_tajweed_style.dart';
 import '../models/quran.dart';
 import '../theme/app_theme.dart';
 
@@ -15,6 +16,7 @@ class _MushafPage {
     required this.lastVerse,
     required this.firstIndex,
     required this.lastIndex,
+    required this.charStart,
   });
 
   final String text;
@@ -22,6 +24,7 @@ class _MushafPage {
   final int lastVerse;
   final int firstIndex;
   final int lastIndex;
+  final int charStart;
 }
 
 /// Arabic-only continuous reading, paginated so a whole number of lines fits
@@ -78,6 +81,7 @@ class _MushafViewState extends State<MushafView> {
   final PageController _controller = PageController();
 
   int _page = 0;
+  final Map<int, String> _colourMarks = {};
 
   List<_MushafPage>? _pages;
 
@@ -117,25 +121,25 @@ class _MushafViewState extends State<MushafView> {
     String pageText, {
     required TextStyle bodyStyle,
     required TextStyle markerStyle,
+    int charStart = 0,
   }) {
     final List<TextSpan> spans = <TextSpan>[];
     int last = 0;
 
     for (final RegExpMatch match in _ayahMarker.allMatches(pageText)) {
       if (match.start > last) {
-        spans.add(
-          TextSpan(
-            text: pageText.substring(last, match.start),
-            style: bodyStyle,
-          ),
-        );
+        spans.addAll(QuranTajweedStyle.spans(
+          pageText.substring(last, match.start), bodyStyle, _colourMarks,
+          Theme.of(context).brightness == Brightness.dark, offset: charStart + last));
       }
       spans.add(TextSpan(text: match.group(0), style: markerStyle));
       last = match.end;
     }
 
     if (last < pageText.length) {
-      spans.add(TextSpan(text: pageText.substring(last), style: bodyStyle));
+      spans.addAll(QuranTajweedStyle.spans(
+        pageText.substring(last), bodyStyle, _colourMarks,
+        Theme.of(context).brightness == Brightness.dark, offset: charStart + last));
     }
 
     return spans;
@@ -165,6 +169,7 @@ class _MushafViewState extends State<MushafView> {
   /// The whole run as one flowing string, plus the character offset each verse
   /// starts at.
   (String, List<int>) _flow() {
+    _colourMarks.clear();
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
 
@@ -172,7 +177,15 @@ class _MushafViewState extends State<MushafView> {
       final QuranVerse verse = widget.verses[index];
       starts.add(buffer.length);
 
-      buffer.write(verse.arabicText.trim());
+      final verseText = verse.arabicText.trim();
+      final verseSurah = widget.surahForIndex?.call(index);
+      if (verseSurah != null) {
+        final marks = QuranTajweedStyle.marks(verseSurah, verse.number, verseText);
+        for (final entry in marks.entries) {
+          _colourMarks[buffer.length + entry.key] = entry.value;
+        }
+      }
+      buffer.write(verseText);
       buffer.write(' \u06DD');
       buffer.write(_arabicDigits(verse.number));
       if (widget.sajdahIndices.contains(index)) buffer.write('  ۩  ');
@@ -282,6 +295,7 @@ class _MushafViewState extends State<MushafView> {
       pages.add(
         _MushafPage(
           text: text.substring(from, to).trim(),
+          charStart: from + text.substring(from, to).length - text.substring(from, to).trimLeft().length,
           firstVerse: widget.verses[firstIndex].number,
           lastVerse: widget.verses[lastIndex].number,
           firstIndex: firstIndex,
@@ -302,10 +316,11 @@ class _MushafViewState extends State<MushafView> {
     required TextStyle style,
     required TextStyle markerStyle,
     required double maxWidth,
+    int charStart = 0,
   }) {
     final TextPainter painter = TextPainter(
       text: TextSpan(
-        children: _spans(pageText, bodyStyle: style, markerStyle: markerStyle),
+        children: _spans(pageText, bodyStyle: style, markerStyle: markerStyle, charStart: charStart),
       ),
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.justify,
@@ -568,6 +583,7 @@ class _MushafViewState extends State<MushafView> {
                         children: <Widget>[
                           for (final double y in _lineBottoms(
                             pages[index].text,
+                            charStart: pages[index].charStart,
                             style: style,
                             markerStyle: markerStyle,
                             maxWidth: maxWidth,
@@ -587,6 +603,7 @@ class _MushafViewState extends State<MushafView> {
                               TextSpan(
                                 children: _spans(
                                   pages[index].text,
+                                  charStart: pages[index].charStart,
                                   bodyStyle: style,
                                   markerStyle: markerStyle,
                                 ),

@@ -2,13 +2,15 @@ class QuranVerse {
   final int number;
   final String arabicText;
   final String translation;
+  final String footnotes;
 
-  QuranVerse({required this.number, required this.arabicText, required this.translation});
+  QuranVerse({required this.number, required this.arabicText, required this.translation, this.footnotes = ''});
 
   factory QuranVerse.fromJson(Map<String, dynamic> json) => QuranVerse(
         number: json['id'],
         arabicText: json['text'],
         translation: json['translation'] ?? '',
+        footnotes: json['footnotes'] ?? '',
       );
 }
 

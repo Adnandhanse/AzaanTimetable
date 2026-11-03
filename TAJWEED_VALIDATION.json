@@ -30,5 +30,11 @@
   "device_visual_check": "not run",
   "qari_review": "pending",
   "sajdah_marker_locations": 15,
-  "sajdah_source": "Existing app table retained; not a new independent fiqh certification"
+  "sajdah_source": "Existing app table retained; not a new independent fiqh certification",
+  "arabic_edition": "Tanzil pinned 2017, used in BOTH normal and colour modes",
+  "both_language_assets_exact_source_match": true,
+  "shared_mushaf_layout": true,
+  "separate_reader_route": false,
+  "dart_syntax_parser": "pass; not a Flutter type/build check",
+  "flutter_device_test": "not run"
 }

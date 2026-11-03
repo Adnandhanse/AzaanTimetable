@@ -1,3 +1,5 @@
+import '../services/quran_tajweed_style.dart';
+import '../widgets/quran_explanation_link.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../data/sajdah_verses.dart';
@@ -303,13 +305,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              verse.arabicText,
-                              textAlign: TextAlign.right,
-                              textDirection: TextDirection.rtl,
-                              style: AppText.arabicVerse
-                                  .copyWith(color: AppColors.text),
-                            ),
+                            Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.arabicVerse.copyWith(color: AppColors.text), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
                             const SizedBox(height: 8),
                             Container(height: 1, color: AppColors.goldRuleFaint),
                             const SizedBox(height: 8),
@@ -327,6 +323,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                                 style: st.copyWith(color: AppColors.text),
                               );
                             }),
+                            QuranExplanationLink(verse: verse, surah: surah.number),
                           ],
                         ),
                       ),

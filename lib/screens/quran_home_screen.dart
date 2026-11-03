@@ -1,4 +1,4 @@
-import 'tajweed_reader_screen.dart';
+import '../services/quran_tajweed_style.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/quran.dart';
@@ -180,6 +180,7 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
   }
 
   Future<void> _loadPreferences() async {
+    await QuranTajweedStyle.load();
     final String code = await QuranLocalDataService.getQuranLanguageCode();
     final bool arabicOnly = await QuranLocalDataService.getArabicOnly();
     if (!mounted) return;
@@ -232,11 +233,19 @@ class _QuranHomeScreenState extends State<QuranHomeScreen>
       appBar: AppBar(
         title: Text(S.quran),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (_) => const TajweedReaderScreen())),
-            child: const Text('Colour Tajweed'),
-          ),
+          DropdownButtonHideUnderline(child: DropdownButton<bool>(
+            value: QuranTajweedStyle.enabled,
+            items: const [
+              DropdownMenuItem(value: false, child: Text('Normal')),
+              DropdownMenuItem(value: true, child: Text('Colour Tajweed')),
+            ],
+            onChanged: (value) async {
+              if (value == null) return;
+              await QuranTajweedStyle.setEnabled(value);
+              if (mounted) setState(() {});
+            },
+          )),
+          const SizedBox(width: 12),
         ],
         // Directly visible, not tucked behind an icon - this used to be a
         // translate-icon popup menu that gave no hint it was even a language

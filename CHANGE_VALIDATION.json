@@ -1,0 +1,19 @@
+{
+  "english_verses": 6236,
+  "urdu_verses": 6236,
+  "daily_entries_each": 30,
+  "source_translation_exact_match": true,
+  "notes_separate": true,
+  "ai_home_entries_commented": true,
+  "ai_backend_disabled": false,
+  "flutter_build": "not run",
+  "explanation_link_surah_and_juz": true,
+  "verses_with_source_notes": {
+    "en": 719,
+    "ur": 4813
+  },
+  "dialog_interaction_test": "not run (Flutter unavailable)",
+  "arabic_source_edition_changed": true,
+  "tajweed_modes_share_font_and_layout": true,
+  "colour_toggle_persisted": true
+}

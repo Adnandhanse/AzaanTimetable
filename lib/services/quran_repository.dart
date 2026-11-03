@@ -27,7 +27,7 @@ enum QuranLanguage {
 /// API needed at any point after install.
 ///
 /// Sources:
-/// - Arabic: existing quran-json assets (unchanged).
+/// - Arabic: exact Tanzil 2017 text matching the licensed tajweed offsets.
 /// - English: Hilali & Muhsin Khan, QuranEnc.com v1.1.2.
 /// - Urdu: Muhammad Junagarhi, QuranEnc.com v1.1.3.
 ///   Source notes are preserved after the corresponding translation.

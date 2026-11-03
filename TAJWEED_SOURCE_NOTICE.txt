@@ -9,5 +9,5 @@ https://github.com/cpfair/quran-tajweed
 https://creativecommons.org/licenses/by/4.0/
 Adaptation: original source codepoint offsets retained in generated Dart data; app assigns presentation colours. No new tajweed rules were inferred. Later overlapping annotations take precedence in the display.
 The upstream explicitly says it is not actively maintained. These are automatically generated rule annotations; this integration is NOT a scholarly accuracy certification. Reader review against an authorised Mushaf and Qari review remain necessary.
-The dedicated reader uses the precise source text matching the annotations; the main Quran text is not replaced. The source includes basmalah at the opening of most surahs. No additional basmalah is inserted in this reader.
+Normal and Colour Tajweed now share the exact pinned Tanzil Arabic edition matching the annotations. Main Arabic assets are replaced with that edition; Urdu/English translations remain unchanged. Only colour styles differ between the two modes. The source includes basmalah at the opening of most surahs. No additional basmalah is inserted in this reader.
 No new font bundled: uses existing Amiri font and its existing licence. No scanned pages, QCF fonts, or Dar al-Maarifah page artwork copied.

@@ -33,7 +33,8 @@ import 'hadith_home_screen.dart';
 import 'prayers_home_screen.dart';
 import 'qibla_screen.dart';
 import 'admin_login_screen.dart';
-import 'ask_islam_connect_screen.dart';
+// AI temporarily disabled: retain implementation for later restoration.
+// import 'ask_islam_connect_screen.dart';
 
 /// Arabic prayer names for the gold middle column. Deliberately separate from
 /// S.*: those return English or Urdu depending on the language toggle, and this
@@ -635,84 +636,84 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _askIslamConnectButton() => Material(
-    color: AppColors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18),
-      side: BorderSide(color: AppColors.goldRule),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const AskIslamConnectScreen()),
-      ),
-      child: Ink(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.goldRule.withOpacity(.5),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(
-                Icons.mic_none_rounded,
-                size: 24,
-                color: AppColors.text,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Ask Islam Connect',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.text,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    S.tr(
-                      'Ask a question, in your own words',
-                      'اپنے الفاظ میں سوال کریں',
-                    ),
-                    style: AppText.body.copyWith(
-                      color: AppColors.textMuted,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    S.tr(
-                      'Quran, Hadith and trusted references',
-                      'قرآن، حدیث اور معتبر حوالے',
-                    ),
-                    style: AppText.caption.copyWith(color: AppColors.textMuted),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 22),
-          ],
-        ),
-      ),
-    ),
-  );
-
+//   Widget _askIslamConnectButton() => Material(
+//     color: AppColors.white,
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.circular(18),
+//       side: BorderSide(color: AppColors.goldRule),
+//     ),
+//     clipBehavior: Clip.antiAlias,
+//     child: InkWell(
+//       onTap: () => Navigator.of(context).push(
+//         MaterialPageRoute<void>(builder: (_) => const AskIslamConnectScreen()),
+//       ),
+//       child: Ink(
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             colors: [AppColors.goldRule.withOpacity(.28), AppColors.white],
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//           ),
+//         ),
+//         padding: const EdgeInsets.all(16),
+//         child: Row(
+//           children: [
+//             Container(
+//               padding: const EdgeInsets.all(10),
+//               decoration: BoxDecoration(
+//                 color: AppColors.goldRule.withOpacity(.5),
+//                 borderRadius: BorderRadius.circular(18),
+//               ),
+//               child: Icon(
+//                 Icons.mic_none_rounded,
+//                 size: 24,
+//                 color: AppColors.text,
+//               ),
+//             ),
+//             const SizedBox(width: 14),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     'Ask Islam Connect',
+//                     style: TextStyle(
+//                       fontFamily: 'Inter',
+//                       fontWeight: FontWeight.w600,
+//                       color: AppColors.text,
+//                       fontSize: 17,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 5),
+//                   Text(
+//                     S.tr(
+//                       'Ask a question, in your own words',
+//                       'اپنے الفاظ میں سوال کریں',
+//                     ),
+//                     style: AppText.body.copyWith(
+//                       color: AppColors.textMuted,
+//                       fontSize: 13,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 4),
+//                   Text(
+//                     S.tr(
+//                       'Quran, Hadith and trusted references',
+//                       'قرآن، حدیث اور معتبر حوالے',
+//                     ),
+//                     style: AppText.caption.copyWith(color: AppColors.textMuted),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             const SizedBox(width: 6),
+//             Icon(Icons.arrow_forward_rounded, color: AppColors.gold, size: 22),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// 
   Widget _buildNoMasjidSelected() {
     return Center(
       child: SingleChildScrollView(
@@ -721,8 +722,7 @@ class _HomeScreenState extends State<HomeScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _askIslamConnectButton(),
-              const SizedBox(height: 24),
+              // _askIslamConnectButton(), // AI temporarily disabled
               const Medallion(icon: Icons.mosque_outlined, size: 52),
               const SizedBox(height: 16),
               Text(
@@ -1067,11 +1067,7 @@ class _HomeScreenState extends State<HomeScreen>
                           // below - the "cramped, overlapping" look, even though the header
                           // row itself was correctly aligned to its columns underneath it.
                           const SizedBox(height: 14),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: _askIslamConnectButton(),
-                          ),
-                          const SizedBox(height: 18),
+                          // AI card temporarily disabled.
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: _prayerTimesList(masjid, next?.$1),

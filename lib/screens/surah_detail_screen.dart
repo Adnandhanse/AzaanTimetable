@@ -1,3 +1,5 @@
+import '../services/quran_tajweed_style.dart';
+import '../widgets/quran_explanation_link.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/speed_selector.dart';
@@ -604,12 +606,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                         ),
                       ],
                     ),
-                    Text(
-                      verse.arabicText,
-                      textAlign: TextAlign.right,
-                      textDirection: TextDirection.rtl,
-                      style: AppText.quranAyah.copyWith(color: AppColors.text),
-                    ),
+                    Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.quranAyah.copyWith(color: AppColors.text), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
                     const SizedBox(height: 8),
                     const Divider(),
                     const SizedBox(height: 4),
@@ -629,6 +626,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                       style: AppText.translationFor(verse.translation)
                           .copyWith(color: AppColors.text),
                     ),
+                    QuranExplanationLink(verse: verse, surah: surah.number),
                     if (hasNote) ...[
                       const SizedBox(height: 8),
                       Container(
