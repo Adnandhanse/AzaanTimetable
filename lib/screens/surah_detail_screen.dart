@@ -63,9 +63,9 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   /// Arabic text size in Mushaf mode. Shared with the Juz screen via
   /// QuranLocalDataService, so zooming in one place carries over to the
   /// other. Clamped in [_changeFontSize].
-  double _fontSize = 26;
-  static const double _minFontSize = 18;
-  static const double _maxFontSize = 40;
+  double _fontSize = QuranLocalDataService.defaultQuranFontSize;
+  static const double _minFontSize = QuranLocalDataService.minQuranFontSize;
+  static const double _maxFontSize = QuranLocalDataService.maxQuranFontSize;
 
   /// True while playing a run of verses started from Mushaf mode's "Play
   /// Surah" button - advances to the next verse on its own rather than
@@ -381,8 +381,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         // A slim zoom bar under the title, Mushaf mode only. Sits here
         // instead of squeezed into actions - a Slider needs room to drag,
         // and the actions row already carries the mode toggle.
-        bottom: _mushafMode
-            ? PreferredSize(
+        bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(30),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
@@ -418,8 +417,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                     ],
                   ),
                 ),
-              )
-            : null,
+              ),
       ),
       // A speed bar, shown only while something is playing.
       //
@@ -606,7 +604,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                         ),
                       ],
                     ),
-                    Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.quranAyah.copyWith(color: AppColors.text), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
+                    Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.quranAyah.copyWith(color: AppColors.text, fontSize: _fontSize), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
                     const SizedBox(height: 8),
                     const Divider(),
                     const SizedBox(height: 4),
@@ -623,8 +621,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                               AppText.urduText
                           ? TextAlign.right
                           : TextAlign.left,
-                      style: AppText.translationFor(verse.translation)
-                          .copyWith(color: AppColors.text),
+                      style: AppText.translationFor(verse.translation).copyWith(
+                        color: AppColors.text,
+                        fontSize: (AppText.translationFor(verse.translation).fontSize ?? 18) *
+                          _fontSize / QuranLocalDataService.defaultQuranFontSize,
+                      ),
                     ),
                     QuranExplanationLink(verse: verse, surah: surah.number),
                     if (hasNote) ...[

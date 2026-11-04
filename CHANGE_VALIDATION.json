@@ -15,5 +15,11 @@
   "dialog_interaction_test": "not run (Flutter unavailable)",
   "arabic_source_edition_changed": true,
   "tajweed_modes_share_font_and_layout": true,
-  "colour_toggle_persisted": true
+  "colour_toggle_persisted": true,
+  "default_quran_font_size": 36,
+  "previous_saved_zoom_preserved": true,
+  "surah_and_juz_slider_in_both_modes": true,
+  "arabic_and_translation_zoom": true,
+  "dart_syntax_parser": "passed",
+  "device_visual_test": "not run"
 }

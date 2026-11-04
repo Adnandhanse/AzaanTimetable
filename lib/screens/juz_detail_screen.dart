@@ -39,9 +39,9 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
 
   /// Shares the stored font size with the Surah screen - zoom once, and it
   /// sticks whichever way the reader is browsing.
-  double _fontSize = 26;
-  static const double _minFontSize = 18;
-  static const double _maxFontSize = 40;
+  double _fontSize = QuranLocalDataService.defaultQuranFontSize;
+  static const double _minFontSize = QuranLocalDataService.minQuranFontSize;
+  static const double _maxFontSize = QuranLocalDataService.maxQuranFontSize;
 
   @override
   void initState() {
@@ -165,8 +165,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
             ),
           ),
         ],
-        bottom: _mushafMode
-            ? PreferredSize(
+        bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(30),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
@@ -202,8 +201,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                     ],
                   ),
                 ),
-              )
-            : null,
+              ),
       ),
       body: _mushafMode
           ? MushafView(
@@ -305,7 +303,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.arabicVerse.copyWith(color: AppColors.text), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
+                            Text.rich(TextSpan(children: QuranTajweedStyle.spans(verse.arabicText, AppText.arabicVerse.copyWith(color: AppColors.text, fontSize: _fontSize), QuranTajweedStyle.marks(surah.number, verse.number, verse.arabicText), Theme.of(context).brightness == Brightness.dark)), textAlign: TextAlign.right, textDirection: TextDirection.rtl),
                             const SizedBox(height: 8),
                             Container(height: 1, color: AppColors.goldRuleFaint),
                             const SizedBox(height: 8),
@@ -320,7 +318,9 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
                                     : TextDirection.ltr,
                                 textAlign:
                                     urdu ? TextAlign.right : TextAlign.left,
-                                style: st.copyWith(color: AppColors.text),
+                                style: st.copyWith(color: AppColors.text,
+                                  fontSize: (st.fontSize ?? 18) *
+                                    _fontSize / QuranLocalDataService.defaultQuranFontSize),
                               );
                             }),
                             QuranExplanationLink(verse: verse, surah: surah.number),

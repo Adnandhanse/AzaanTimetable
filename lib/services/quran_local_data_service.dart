@@ -85,18 +85,25 @@ class QuranLocalDataService {
   // --- Qur'an text size -----------------------------------------------------
 
   static const _quranFontSizeKey = 'quran_font_size';
+  static const double defaultQuranFontSize = 36.0;
+  static const double minQuranFontSize = 18.0;
+  static const double maxQuranFontSize = 40.0;
 
   /// Shared between the Surah screen and the Juz screen, so zooming in one
   /// place carries over to the other rather than resetting every time the
   /// reader switches how they are browsing.
   static Future<double> getQuranFontSize() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getDouble(_quranFontSizeKey) ?? 26.0;
+    final size = prefs.getDouble(_quranFontSizeKey);
+    if (size == null || !size.isFinite) return defaultQuranFontSize;
+    return size.clamp(minQuranFontSize, maxQuranFontSize).toDouble();
   }
 
   static Future<void> setQuranFontSize(double size) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_quranFontSizeKey, size);
+    if (!size.isFinite) return;
+    await prefs.setDouble(_quranFontSizeKey,
+      size.clamp(minQuranFontSize, maxQuranFontSize).toDouble());
   }
 
   // --- Qur'an translation language -----------------------------------------
