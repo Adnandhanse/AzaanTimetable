@@ -401,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen>
           zone,
           _now,
           fridayOnly: entry.$1 == S.juma,
-          skipFriday: entry.$1 == S.dhuhr && MasjidClock.parse(t.juma) != null,
+          skipFriday: entry.$1 == S.dhuhr,
         );
         if (at != null && (best == null || at.isBefore(best.$2))) {
           best = (entry.$1, at.toLocal());

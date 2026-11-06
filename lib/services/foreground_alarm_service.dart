@@ -187,26 +187,10 @@ class PrayerAlarmTaskHandler extends TaskHandler {
         continue;
       }
 
-      // AND THE REVERSE: no Dhuhr alarm on a Friday.
-      //
-      // Juma REPLACES Dhuhr, it does not accompany it. Both were firing every
-      // Friday — two azans within minutes of each other, and the Dhuhr one for
-      // a prayer nobody is praying.
-      //
-      // Only suppressed when the masjid has actually set a Juma time. If Juma
-      // is blank, Dhuhr must still fire or Friday would have no midday alarm at
-      // all.
+      // Product policy: Friday never has a Dhuhr alarm, even when Juma
+      // is blank or invalid. `now` is already in the masjid timezone.
       if (label.toLowerCase() == 'dhuhr' && now.weekday == DateTime.friday) {
-        final String juma =
-            (times.entries
-                    .firstWhere(
-                      (e) => e.key.toLowerCase().contains('juma'),
-                      orElse: () => const MapEntry<String, dynamic>('', ''),
-                    )
-                    .value
-                as String?) ??
-            '';
-        if (juma.trim().isNotEmpty && _parseTime(juma) != null) continue;
+        continue;
       }
 
       final scheduledMinutes = parsed.$1 * 60 + parsed.$2;
@@ -424,13 +408,7 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           zone,
           now,
           fridayOnly: label.toLowerCase().contains('juma'),
-          skipFriday:
-              label.toLowerCase() == 'dhuhr' &&
-              times.entries.any(
-                (e) =>
-                    e.key.toLowerCase().contains('juma') &&
-                    MasjidClock.parse(e.value as String? ?? '') != null,
-              ),
+          skipFriday: label.toLowerCase() == 'dhuhr',
         );
         if (at == null) continue;
         if (bestAt == null || at.isBefore(bestAt)) {

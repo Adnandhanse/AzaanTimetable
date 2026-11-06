@@ -695,7 +695,6 @@ class NotificationService {
     }
     MasjidClock.location(zone); // Validate before arming anything.
     final now = DateTime.now();
-    final hasJuma = MasjidClock.parse(schedule.times['juma'] ?? '') != null;
     for (final entry in _labels.entries) {
       final key = entry.key;
       final label = entry.value;
@@ -706,7 +705,7 @@ class NotificationService {
         zone,
         now,
         fridayOnly: key == 'juma',
-        skipFriday: key == 'dhuhr' && hasJuma,
+        skipFriday: key == 'dhuhr',
       );
       if (next == null) continue;
       // Repeating notification uses the MOSQUE timezone. Extra one-shots are
@@ -717,7 +716,7 @@ class NotificationService {
         body: "${schedule.masjidName} • It's time for $label.",
         when: next,
         payload: _buildPayload(label, schedule.masjidName, schedule.audioUrl),
-        match: key == 'juma' || (key == 'dhuhr' && hasJuma)
+        match: key == 'juma' || (key == 'dhuhr')
             ? DateTimeComponents.dayOfWeekAndTime
             : DateTimeComponents.time,
       );
@@ -730,7 +729,7 @@ class NotificationService {
         );
         nextFires.add('$label -> ${next.toLocal()} ($zone)');
       }
-      if (key == 'dhuhr' && hasJuma) {
+      if (key == 'dhuhr') {
         for (var weekday = 1; weekday <= 7; weekday++) {
           if (weekday == DateTime.friday || weekday == next.weekday) continue;
           var at = MasjidClock.onDate(time, zone, now)!;
@@ -757,7 +756,7 @@ class NotificationService {
         if (when == null ||
             !when.isAfter(now) ||
             (key == 'juma' && when.weekday != DateTime.friday) ||
-            (key == 'dhuhr' && hasJuma && when.weekday == DateTime.friday) ||
+            (key == 'dhuhr' && when.weekday == DateTime.friday) ||
             when.isAtSameMomentAs(next))
           continue;
         await _scheduleWithFallback(
@@ -980,7 +979,7 @@ class NotificationService {
         zone,
         DateTime.now(),
         fridayOnly: e.key == 'Juma',
-        skipFriday: e.key == 'Dhuhr' && MasjidClock.parse(times.juma) != null,
+        skipFriday: e.key == 'Dhuhr',
       );
       if (scheduled == null) {
         results.add('${e.key}: not set');
