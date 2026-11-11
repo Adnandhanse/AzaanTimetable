@@ -4,6 +4,7 @@ import 'dart:ui' show LineMetrics;
 import 'package:flutter/material.dart';
 
 import '../data/ruku_boundaries.dart';
+import '../data/tajweed_data.dart';
 import '../services/quran_tajweed_style.dart';
 import '../models/quran.dart';
 import '../theme/app_theme.dart';
@@ -82,13 +83,29 @@ class _MushafViewState extends State<MushafView> {
 
   int _page = 0;
   final Map<int, String> _colourMarks = {};
+  final Map<int, int> _bismillahEnds = {};
 
   List<_MushafPage>? _pages;
 
   bool _jumpedToInitial = false;
   double? _cachedWidth;
   int? _cachedLines;
-  int? _cachedVerseCount;
+  List<QuranVerse>? _cachedVerses;
+  double? _cachedFontSize;
+  TextScaler? _cachedTextScaler;
+  bool? _cachedTajweed;
+
+  static const _pageMargin = EdgeInsets.fromLTRB(10, 8, 10, 4);
+  static const double _lineSpacing = 1.75;
+  static final String _bismillah = tajweedData['1:1']![0] as String;
+  // The bundled edition retains an extra shadda in the openings of 95 and 97.
+  static final String _bismillahWithShadda = 'بّ${_bismillah.substring(1)}';
+
+  static String? _openingPrefix(String text) {
+    if (text.startsWith('$_bismillah ')) return _bismillah;
+    if (text.startsWith('$_bismillahWithShadda ')) return _bismillahWithShadda;
+    return null;
+  }
 
   @override
   void dispose() {
@@ -170,33 +187,47 @@ class _MushafViewState extends State<MushafView> {
   /// starts at.
   (String, List<int>) _flow() {
     _colourMarks.clear();
+    _bismillahEnds.clear();
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
 
+    bool afterFatihaBismillah = false;
     for (int index = 0; index < widget.verses.length; index++) {
       final QuranVerse verse = widget.verses[index];
-      starts.add(buffer.length);
-
       final verseText = verse.arabicText.trim();
       final verseSurah = widget.surahForIndex?.call(index);
+      final opensSurah = verse.number == 1;
+      final prefix = opensSurah && verseSurah != 9
+          ? _openingPrefix(verseText)
+          : null;
+      if (index > 0) {
+        buffer.write(opensSurah || afterFatihaBismillah ? '\n' : '   ');
+      }
+      afterFatihaBismillah = opensSurah && verseSurah == 1 &&
+          verseText == _bismillah;
+      starts.add(buffer.length);
       if (verseSurah != null) {
         final marks = QuranTajweedStyle.marks(verseSurah, verse.number, verseText);
         for (final entry in marks.entries) {
           _colourMarks[buffer.length + entry.key] = entry.value;
         }
       }
-      buffer.write(verseText);
+      // Replace only the separator space: all Tajweed offsets stay valid.
+      if (prefix != null) {
+        _bismillahEnds[buffer.length] = buffer.length + prefix.length + 1;
+        buffer
+          ..write(prefix)
+          ..write('\n')
+          ..write(verseText.substring(prefix.length + 1));
+      } else {
+        buffer.write(verseText);
+      }
       buffer.write(' \u06DD');
       buffer.write(_arabicDigits(verse.number));
       if (widget.sajdahIndices.contains(index)) buffer.write('  ۩  ');
-      final surah = widget.surahForIndex?.call(index);
-      if (surah != null && isRukuEnd(surah, verse.number)) {
+      if (verseSurah != null && isRukuEnd(verseSurah, verse.number)) {
         buffer.write('  ع  ');
       }
-      // Three spaces, not two - the ayah-end ornament and the next ayah's
-      // opening word need a visible gap between them so a line-wrap landing
-      // right on a verse boundary does not read as one run-together word.
-      buffer.write('   ');
     }
 
     return (buffer.toString(), starts);
@@ -228,6 +259,7 @@ class _MushafViewState extends State<MushafView> {
     required TextStyle markerStyle,
     required double maxWidth,
     required int linesPerPage,
+    required TextScaler textScaler,
   }) {
     final (String text, List<int> starts) = _flow();
 
@@ -246,11 +278,13 @@ class _MushafViewState extends State<MushafView> {
       ),
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.justify,
+      textScaler: textScaler,
     )..layout(maxWidth: maxWidth);
 
     final List<LineMetrics> lines = textPainter.computeLineMetrics();
 
     if (lines.isEmpty) {
+      textPainter.dispose();
       return const <_MushafPage>[];
     }
 
@@ -261,22 +295,25 @@ class _MushafViewState extends State<MushafView> {
       first < lines.length;
       first += linesPerPage
     ) {
-      // Small safety offset for Arabic tashkeel, ascenders, descenders and
-      // Quranic marks.
-      final double y =
-          lines[first].baseline - lines[first].ascent + 6;
-
-      final int offset = textPainter
-          .getPositionForOffset(
-            Offset(maxWidth - 1, y),
-          )
-          .offset;
+      final line = lines[first];
+      final position = textPainter.getPositionForOffset(
+        Offset(line.left + line.width / 2,
+            line.baseline + (line.descent - line.ascent) / 2),
+      );
+      int offset = textPainter.getLineBoundary(position).start;
+      final verseStart = starts[_verseIndexAt(starts, offset)];
+      final bismillahEnd = _bismillahEnds[verseStart];
+      if (bismillahEnd != null && offset <= bismillahEnd &&
+          verseStart > breaks.last) {
+        offset = verseStart;
+      }
 
       if (offset > breaks.last) {
         breaks.add(offset);
       }
     }
 
+    textPainter.dispose();
     breaks.add(text.length);
 
     final List<_MushafPage> pages = <_MushafPage>[];
@@ -289,13 +326,17 @@ class _MushafViewState extends State<MushafView> {
         continue;
       }
 
-      final int firstIndex = _verseIndexAt(starts, from);
-      final int lastIndex = _verseIndexAt(starts, to - 1);
+      final raw = text.substring(from, to);
+      final trimmed = raw.trim();
+      if (trimmed.isEmpty) continue;
+      final start = from + raw.length - raw.trimLeft().length;
+      final int firstIndex = _verseIndexAt(starts, start);
+      final int lastIndex = _verseIndexAt(starts, start + trimmed.length - 1);
 
       pages.add(
         _MushafPage(
-          text: text.substring(from, to).trim(),
-          charStart: from + text.substring(from, to).length - text.substring(from, to).trimLeft().length,
+          text: trimmed,
+          charStart: start,
           firstVerse: widget.verses[firstIndex].number,
           lastVerse: widget.verses[lastIndex].number,
           firstIndex: firstIndex,
@@ -307,36 +348,15 @@ class _MushafViewState extends State<MushafView> {
     return pages;
   }
 
-  /// The y-position (relative to the top of the text block) of the bottom of
-  /// every line in [pageText], laid out exactly as the real Text widget will
-  /// lay it out - same style, same width. Used to draw a ruled line under
-  /// each line of text, matching a printed Mushaf page.
-  List<double> _lineBottoms(
-    String pageText, {
-    required TextStyle style,
-    required TextStyle markerStyle,
-    required double maxWidth,
-    int charStart = 0,
-  }) {
-    final TextPainter painter = TextPainter(
-      text: TextSpan(
-        children: _spans(pageText, bodyStyle: style, markerStyle: markerStyle, charStart: charStart),
-      ),
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.justify,
-    )..layout(maxWidth: maxWidth);
-
-    return <double>[
-      for (final LineMetrics line in painter.computeLineMetrics())
-        line.baseline + line.descent,
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final frameColor = Color.lerp(AppColors.white, AppColors.text, dark ? 0.45 : 0.7)!;
+    final ruleColor = Color.lerp(AppColors.white, AppColors.text, dark ? 0.24 : 0.2)!;
     final TextStyle style = AppText.quranAyah.copyWith(
       fontSize: widget.fontSize,
-      height: 2.05,
+      height: _lineSpacing,
       color: AppColors.text,
     );
 
@@ -352,45 +372,38 @@ class _MushafViewState extends State<MushafView> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        const double horizontalPagePadding = 22;
-        const double verticalPagePadding = 18;
-        const double pageCardMargins = 14;
-
-        final double maxWidth =
-            constraints.maxWidth -
-            horizontalPagePadding * 2 -
-            28;
-
-        // Top information bar + card margins + extra vertical safety.
-        const double chrome = 40 + pageCardMargins + 18;
-
+        const double gutter = 13;
+        final double pageWidth =
+            math.max(1.0, constraints.maxWidth - _pageMargin.horizontal);
+        final double maxWidth = math.max(1.0, pageWidth - gutter * 2);
         final double maxHeight =
-            constraints.maxHeight -
-            verticalPagePadding * 2 -
-            chrome;
-
-        // Extra safety allowance for Arabic marks and verse-end symbols.
+            constraints.maxHeight - _pageMargin.vertical - 72;
         final double lineHeight =
-            widget.fontSize * 2.05 + 3;
-
-        final int linesPerPage = (maxHeight / lineHeight)
-            .floor()
-            .clamp(6, widget.targetLines);
+            textScaler.scale(widget.fontSize) * _lineSpacing + 3;
+        final int linesPerPage =
+            (maxHeight / lineHeight).floor().clamp(2, widget.targetLines);
 
         if (_pages == null ||
             _cachedWidth != maxWidth ||
             _cachedLines != linesPerPage ||
-            _cachedVerseCount != widget.verses.length) {
+            _cachedVerses != widget.verses ||
+            _cachedFontSize != widget.fontSize ||
+            _cachedTextScaler != textScaler ||
+            _cachedTajweed != QuranTajweedStyle.enabled) {
           _pages = _paginate(
             style: style,
             markerStyle: markerStyle,
             maxWidth: maxWidth,
             linesPerPage: linesPerPage,
+            textScaler: textScaler,
           );
 
           _cachedWidth = maxWidth;
           _cachedLines = linesPerPage;
-          _cachedVerseCount = widget.verses.length;
+          _cachedVerses = widget.verses;
+          _cachedFontSize = widget.fontSize;
+          _cachedTextScaler = textScaler;
+          _cachedTajweed = QuranTajweedStyle.enabled;
         }
 
         final List<_MushafPage> pages = _pages!;
@@ -466,8 +479,7 @@ class _MushafViewState extends State<MushafView> {
                       children: <Widget>[
                         Text(
                           'Page ${safePage + 1} of ${pages.length}'
-                          '   \u00B7   Ayah ${current.firstVerse}\u2013${current.lastVerse}'
-                          '   \u00B7   $linesPerPage lines',
+                          '   \u00B7   Ayah ${current.firstVerse}\u2013${current.lastVerse}',
                           style: AppText.caption.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -542,77 +554,71 @@ class _MushafViewState extends State<MushafView> {
                   BuildContext context,
                   int index,
                 ) {
-                  final Widget page = Container(
-                    margin: const EdgeInsets.fromLTRB(
-                      14,
-                      10,
-                      14,
-                      4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.goldRule,
-                      ),
-                    ),
+                  final data = pages[index];
+                  final rows = data.text.split('\n');
+                  int offset = data.charStart;
+                  final blocks = <Widget>[];
+                  for (final row in rows) {
+                    final content = row.trimRight();
+                    final span = TextSpan(
+                      children: _spans(content, charStart: offset,
+                          bodyStyle: style, markerStyle: markerStyle),
+                    );
+                    offset += row.length + 1;
+                    final alignment = content == _bismillah ||
+                            content == _bismillahWithShadda ||
+                            content.startsWith('$_bismillah \u06DD')
+                        ? TextAlign.center
+                        : TextAlign.justify;
+                    final painter = TextPainter(
+                      text: span,
+                      textDirection: TextDirection.rtl,
+                      textAlign: alignment,
+                      textScaler: textScaler,
+                    )..layout(minWidth: maxWidth, maxWidth: maxWidth);
+                    final bottoms = [
+                      for (final line in painter.computeLineMetrics())
+                        line.baseline + line.descent,
+                    ];
+                    painter.dispose();
 
-                    // Extra bottom padding prevents Arabic marks and
-                    // descenders from touching the card's bottom edge.
-                    padding: const EdgeInsets.fromLTRB(
-                      horizontalPagePadding,
-                      verticalPagePadding,
-                      horizontalPagePadding,
-                      verticalPagePadding + 8,
-                    ),
-
-                    // Ruled lines under each line of text, printed-Mushaf
-                    // style, drawn from the SAME layout the Text widget below
-                    // will produce (same style, same width) so each rule
-                    // lands under its own line rather than an estimate that
-                    // drifts over a tall page.
-                    //
-                    // Wrapped in a scroll view: linesPerPage is clamped to a
-                    // floor of 6 so a page never shrinks to nothing, but at
-                    // large zoom that floor can still be taller than the
-                    // card. Rather than clip text at high zoom, this makes
-                    // that case scrollable instead of hidden.
-                    child: SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(),
-                      child: Stack(
-                        children: <Widget>[
-                          for (final double y in _lineBottoms(
-                            pages[index].text,
-                            charStart: pages[index].charStart,
-                            style: style,
-                            markerStyle: markerStyle,
-                            maxWidth: maxWidth,
-                          ))
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              top: y + 3,
-                              child: Container(
-                                height: 1,
-                                color: AppColors.goldRuleFaint,
-                              ),
-                            ),
-                          Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: Text.rich(
-                              TextSpan(
-                                children: _spans(
-                                  pages[index].text,
-                                  charStart: pages[index].charStart,
-                                  bodyStyle: style,
-                                  markerStyle: markerStyle,
-                                ),
-                              ),
-                              textAlign: TextAlign.justify,
-                              softWrap: true,
+                    blocks.add(Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(gutter, 0, gutter, 3),
+                          child: SizedBox(
+                            width: maxWidth,
+                            child: RichText(
+                              text: span,
+                              textDirection: TextDirection.rtl,
+                              textAlign: alignment,
+                              textScaler: textScaler,
                             ),
                           ),
-                        ],
+                        ),
+                        for (final y in bottoms)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            top: y + 1,
+                            height: 1,
+                            child: ColoredBox(color: ruleColor),
+                          ),
+                      ],
+                    ));
+                  }
+                  final Widget page = Container(
+                    margin: _pageMargin,
+                    color: AppColors.white,
+                    foregroundDecoration: BoxDecoration(
+                      border: Border.all(color: frameColor, width: 2),
+                    ),
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: blocks,
                       ),
                     ),
                   );
@@ -684,14 +690,8 @@ class _PageTurn extends StatelessWidget {
                 Positioned.fill(
                   child: IgnorePointer(
                     child: Container(
-                      margin: const EdgeInsets.fromLTRB(
-                        14,
-                        10,
-                        14,
-                        4,
-                      ),
+                      margin: _MushafViewState._pageMargin,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
                         gradient: LinearGradient(
                           begin: t >= 0
                               ? Alignment.centerLeft
