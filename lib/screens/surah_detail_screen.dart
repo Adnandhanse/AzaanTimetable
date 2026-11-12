@@ -473,6 +473,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
               // A single surah screen only ever shows one surah, so every
               // index maps to it.
               surahForIndex: (_) => surah.number,
+              surahNameForIndex: (_) => surah.arabicName,
               markedIndex: _markedVerse == null
                   ? null
                   : surah.verses

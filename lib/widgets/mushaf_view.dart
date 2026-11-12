@@ -45,6 +45,7 @@ class MushafView extends StatefulWidget {
     this.initialVerseIndex,
     this.sajdahIndices = const <int>{},
     this.surahForIndex,
+    this.surahNameForIndex,
   });
 
   /// Any run of verses - a whole surah, or the span a juz covers.
@@ -73,6 +74,7 @@ class MushafView extends StatefulWidget {
   /// context, not something MushafView can work out on its own from a flat
   /// verse list.
   final int Function(int index)? surahForIndex;
+  final String Function(int index)? surahNameForIndex;
 
   @override
   State<MushafView> createState() => _MushafViewState();
@@ -84,6 +86,7 @@ class _MushafViewState extends State<MushafView> {
   int _page = 0;
   final Map<int, String> _colourMarks = {};
   final Map<int, int> _bismillahEnds = {};
+  final Map<int, String> _surahOpenings = {};
 
   List<_MushafPage>? _pages;
 
@@ -113,27 +116,12 @@ class _MushafViewState extends State<MushafView> {
     super.dispose();
   }
 
-  /// Matches an ayah-end ornament plus the Arabic-Indic digits after it, so
-  /// it can be rendered in a font other than [AppFonts.quran].
-  ///
-  /// The bundled Quran font's own digit glyphs for 1-9 have a zero advance
-  /// width in the font file itself (checked directly against its metrics) -
-  /// they are built to be positioned via OpenType mark-attachment onto the
-  /// ornament glyph, and whatever is failing to apply that positioning here
-  /// draws them stacked at zero offset instead, on top of whatever comes
-  /// before them. That is the overlap in the screenshots. No amount of extra
-  /// spacing in the surrounding text can fix a zero-width glyph - the space
-  /// characters move, the digit does not. Routing just this marker through
-  /// Amiri (bundled, and confirmed to have normal, non-zero advances for
-  /// these exact codepoints) sidesteps the broken glyphs entirely while
-  /// leaving the Quran font in place for the verse text itself.
-  static final RegExp _ayahMarker = RegExp('\u06DD[\u0660-\u0669]+');
+  // Isolate the complete number label so multiple digits keep their order
+  // inside RTL text. The preceding no-break space keeps it with the ayah.
+  static final RegExp _ayahMarker = RegExp(
+    '\u2066\\([\u0660-\u0669]+\\)\u2069',
+  );
 
-  /// Splits [pageText] into spans, styling ayah-end markers in [markerStyle]
-  /// and everything else in [bodyStyle]. The concatenation of every span's
-  /// text is exactly [pageText] - only the styling differs, so this changes
-  /// nothing about line-breaking versus the plain-string layout already used
-  /// for pagination.
   List<TextSpan> _spans(
     String pageText, {
     required TextStyle bodyStyle,
@@ -188,6 +176,7 @@ class _MushafViewState extends State<MushafView> {
   (String, List<int>) _flow() {
     _colourMarks.clear();
     _bismillahEnds.clear();
+    _surahOpenings.clear();
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
 
@@ -206,6 +195,10 @@ class _MushafViewState extends State<MushafView> {
       afterFatihaBismillah = opensSurah && verseSurah == 1 &&
           verseText == _bismillah;
       starts.add(buffer.length);
+      final surahName = opensSurah ? widget.surahNameForIndex?.call(index) : null;
+      if (surahName != null && surahName.isNotEmpty) {
+        _surahOpenings[buffer.length] = surahName;
+      }
       if (verseSurah != null) {
         final marks = QuranTajweedStyle.marks(verseSurah, verse.number, verseText);
         for (final entry in marks.entries) {
@@ -222,8 +215,9 @@ class _MushafViewState extends State<MushafView> {
       } else {
         buffer.write(verseText);
       }
-      buffer.write(' \u06DD');
+      buffer.write('\u00A0\u2066(');
       buffer.write(_arabicDigits(verse.number));
+      buffer.write(')\u2069');
       if (widget.sajdahIndices.contains(index)) buffer.write('  ۩  ');
       if (verseSurah != null && isRukuEnd(verseSurah, verse.number)) {
         buffer.write('  ع  ');
@@ -352,7 +346,8 @@ class _MushafViewState extends State<MushafView> {
   Widget build(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final frameColor = Color.lerp(AppColors.white, AppColors.text, dark ? 0.45 : 0.7)!;
+    final frameColor = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.68 : 0.82)!;
+    final openingFill = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.18 : 0.08)!;
     final ruleColor = Color.lerp(AppColors.white, AppColors.text, dark ? 0.24 : 0.2)!;
     final TextStyle style = AppText.quranAyah.copyWith(
       fontSize: widget.fontSize,
@@ -362,12 +357,11 @@ class _MushafViewState extends State<MushafView> {
 
     // Ayah-end marker style, shared by pagination, the ruled-line layout,
     // and the actual rendered text so all three agree on where lines break.
-    // See _ayahMarker for why this needs a different font from the Quran
-    // text around it.
+    // Amiri provides normal-width Arabic-Indic digits for these labels.
     final TextStyle markerStyle = style.copyWith(
       fontFamily: AppFonts.arabic,
       fontSize: widget.fontSize * 0.62,
-      color: AppColors.gold,
+      color: Color.lerp(AppColors.emerald, AppColors.text, 0.26)!,
     );
 
     return LayoutBuilder(
@@ -457,6 +451,14 @@ class _MushafViewState extends State<MushafView> {
         // render rather than showing a guess.
         final int? currentSurah =
             widget.surahForIndex?.call(current.firstIndex);
+        final lastSurah = widget.surahForIndex?.call(current.lastIndex);
+        final firstRef = currentSurah != lastSurah
+            ? '$currentSurah:${current.firstVerse}'
+            : '${current.firstVerse}';
+        final lastRef = currentSurah != lastSurah
+            ? '$lastSurah:${current.lastVerse}'
+            : '${current.lastVerse}';
+        final ayahRange = firstRef == lastRef ? firstRef : '$firstRef–$lastRef';
         final (int, int, int?)? ruku = currentSurah == null
             ? null
             : rukuAt(currentSurah, current.firstVerse);
@@ -479,7 +481,7 @@ class _MushafViewState extends State<MushafView> {
                       children: <Widget>[
                         Text(
                           'Page ${safePage + 1} of ${pages.length}'
-                          '   \u00B7   Ayah ${current.firstVerse}\u2013${current.lastVerse}',
+                          '   \u00B7   Ayah $ayahRange',
                           style: AppText.caption.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -559,17 +561,18 @@ class _MushafViewState extends State<MushafView> {
                   int offset = data.charStart;
                   final blocks = <Widget>[];
                   for (final row in rows) {
+                    final openingName = _surahOpenings[offset];
                     final content = row.trimRight();
                     final span = TextSpan(
                       children: _spans(content, charStart: offset,
                           bodyStyle: style, markerStyle: markerStyle),
                     );
                     offset += row.length + 1;
-                    final alignment = content == _bismillah ||
-                            content == _bismillahWithShadda ||
-                            content.startsWith('$_bismillah \u06DD')
-                        ? TextAlign.center
-                        : TextAlign.justify;
+                    final isBismillah = content == _bismillah ||
+                        content == _bismillahWithShadda ||
+                        content.startsWith('$_bismillah\u00A0\u2066(');
+                    final alignment =
+                        isBismillah ? TextAlign.center : TextAlign.justify;
                     final painter = TextPainter(
                       text: span,
                       textDirection: TextDirection.rtl,
@@ -582,7 +585,7 @@ class _MushafViewState extends State<MushafView> {
                     ];
                     painter.dispose();
 
-                    blocks.add(Stack(
+                    final ruledText = Stack(
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(gutter, 0, gutter, 3),
@@ -596,16 +599,48 @@ class _MushafViewState extends State<MushafView> {
                             ),
                           ),
                         ),
-                        for (final y in bottoms)
+                        for (final y in isBismillah ? const <double>[] : bottoms)
                           Positioned(
-                            left: 0,
-                            right: 0,
+                            left: 2,
+                            right: 2,
                             top: y + 1,
                             height: 1,
                             child: ColoredBox(color: ruleColor),
                           ),
                       ],
-                    ));
+                    );
+                    if (openingName != null || isBismillah) {
+                      blocks.add(Container(
+                        decoration: BoxDecoration(
+                          color: openingFill,
+                          border: Border(
+                            top: BorderSide(color: ruleColor),
+                            bottom: BorderSide(color: ruleColor),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (openingName != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: gutter, vertical: 6,
+                                ),
+                                child: Text(
+                                  openingName,
+                                  textAlign: TextAlign.center,
+                                  textDirection: TextDirection.rtl,
+                                  style: AppText.arabicTitle.copyWith(
+                                    color: AppColors.text, fontSize: 21,
+                                  ),
+                                ),
+                              ),
+                            if (isBismillah) ruledText,
+                          ],
+                        ),
+                      ));
+                    }
+                    if (!isBismillah) blocks.add(ruledText);
                   }
                   final Widget page = Container(
                     margin: _pageMargin,

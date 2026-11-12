@@ -211,6 +211,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
               // this has to look each index up rather than answer with one
               // fixed number.
               surahForIndex: (int index) => items[index].$1.number,
+              surahNameForIndex: (int index) => items[index].$1.arabicName,
               // A juz spans surahs, so each item carries its own surah and the
               // index is the only unambiguous handle — same reason the bookmark
               // works on indices.
