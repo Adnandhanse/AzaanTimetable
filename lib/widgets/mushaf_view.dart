@@ -98,7 +98,9 @@ class _MushafViewState extends State<MushafView> {
   TextScaler? _cachedTextScaler;
   bool? _cachedTajweed;
 
-  static const _pageMargin = EdgeInsets.fromLTRB(10, 8, 10, 4);
+  static const double _rukuGutter = 42;
+  static const _pageMargin = EdgeInsets.fromLTRB(10, 8, _rukuGutter + 6, 4);
+  final Map<int, int> _rukuEndDigits = {};
   static const double _lineSpacing = 1.75;
   static final String _bismillah = tajweedData['1:1']![0] as String;
   // The bundled edition retains an extra shadda in the openings of 95 and 97.
@@ -177,6 +179,7 @@ class _MushafViewState extends State<MushafView> {
     _colourMarks.clear();
     _bismillahEnds.clear();
     _surahOpenings.clear();
+    _rukuEndDigits.clear();
     final StringBuffer buffer = StringBuffer();
     final List<int> starts = <int>[];
 
@@ -217,11 +220,12 @@ class _MushafViewState extends State<MushafView> {
       }
       buffer.write('\u00A0\u2066(');
       buffer.write(_arabicDigits(verse.number));
+      final ruku = verseSurah == null ? null : rukuAt(verseSurah, verse.number);
+      if (ruku != null && ruku.$3 == verse.number) {
+        _rukuEndDigits[buffer.length - 1] = ruku.$1;
+      }
       buffer.write(')\u2069');
       if (widget.sajdahIndices.contains(index)) buffer.write('  ۩  ');
-      if (verseSurah != null && isRukuEnd(verseSurah, verse.number)) {
-        buffer.write('  ع  ');
-      }
     }
 
     return (buffer.toString(), starts);
@@ -444,25 +448,6 @@ class _MushafViewState extends State<MushafView> {
             widget.markedIndex! >= current.firstIndex &&
             widget.markedIndex! <= current.lastIndex;
 
-        // Which Ruku' the top of this page falls in, if the boundary table
-        // covers it. surahForIndex is optional, and the table itself is
-        // partial (see ruku_boundaries.dart) - both are reasons this can
-        // legitimately come back null, in which case the chip just does not
-        // render rather than showing a guess.
-        final int? currentSurah =
-            widget.surahForIndex?.call(current.firstIndex);
-        final lastSurah = widget.surahForIndex?.call(current.lastIndex);
-        final firstRef = currentSurah != lastSurah
-            ? '$currentSurah:${current.firstVerse}'
-            : '${current.firstVerse}';
-        final lastRef = currentSurah != lastSurah
-            ? '$lastSurah:${current.lastVerse}'
-            : '${current.lastVerse}';
-        final ayahRange = firstRef == lastRef ? firstRef : '$firstRef–$lastRef';
-        final (int, int, int?)? ruku = currentSurah == null
-            ? null
-            : rukuAt(currentSurah, current.firstVerse);
-
         return Column(
           children: <Widget>[
             // Page information and bookmark control at the top.
@@ -476,33 +461,9 @@ class _MushafViewState extends State<MushafView> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Page ${safePage + 1} of ${pages.length}'
-                          '   \u00B7   Ayah $ayahRange',
-                          style: AppText.caption.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        // Current Ruku', and where it ends if that is known.
-                        // The ع mark is the same symbol Indo-Pak Mushafs use
-                        // in the margin for this.
-                        if (ruku != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              ruku.$3 == null
-                                  ? '\u0639  Ruku\u2019 ${ruku.$1} \u00B7 starts at ayah ${ruku.$2}'
-                                  : '\u0639  Ruku\u2019 ${ruku.$1} \u00B7 ayah ${ruku.$2}\u2013${ruku.$3}',
-                              style: AppText.caption.copyWith(
-                                color: AppColors.emerald,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                      ],
+                    child: Text(
+                      'Page ${safePage + 1} of ${pages.length}',
+                      style: AppText.caption.copyWith(color: AppColors.textMuted),
                     ),
                   ),
                   if (widget.onMarkIndex != null)
@@ -563,6 +524,7 @@ class _MushafViewState extends State<MushafView> {
                   for (final row in rows) {
                     final openingName = _surahOpenings[offset];
                     final content = row.trimRight();
+                    final rowStart = offset;
                     final span = TextSpan(
                       children: _spans(content, charStart: offset,
                           bodyStyle: style, markerStyle: markerStyle),
@@ -583,9 +545,25 @@ class _MushafViewState extends State<MushafView> {
                       for (final line in painter.computeLineMetrics())
                         line.baseline + line.descent,
                     ];
+                    final rukuRows = <int, List<int>>{};
+                    for (final marker in _ayahMarker.allMatches(content)) {
+                      final digit = marker.end - 3;
+                      final number = _rukuEndDigits[rowStart + digit];
+                      if (number == null) continue;
+                      final boxes = painter.getBoxesForSelection(
+                        TextSelection(baseOffset: digit, extentOffset: digit + 1),
+                      );
+                      if (boxes.isEmpty) continue;
+                      final center = (boxes.first.top + boxes.first.bottom) / 2;
+                      final line = bottoms.indexWhere((bottom) => center < bottom);
+                      if (line >= 0) {
+                        (rukuRows[line] ??= <int>[]).add(number);
+                      }
+                    }
                     painter.dispose();
 
                     final ruledText = Stack(
+                      clipBehavior: Clip.none,
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(gutter, 0, gutter, 3),
@@ -606,6 +584,29 @@ class _MushafViewState extends State<MushafView> {
                             top: y + 1,
                             height: 1,
                             child: ColoredBox(color: ruleColor),
+                          ),
+                        for (final entry in rukuRows.entries)
+                          Positioned(
+                            right: -_rukuGutter,
+                            width: _rukuGutter - 3,
+                            top: entry.key == 0 ? 0 : bottoms[entry.key - 1],
+                            height: bottoms[entry.key] -
+                                (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
+                            child: Semantics(
+                              label: entry.value.map((n) => 'End of Ruku $n').join(', '),
+                              child: ExcludeSemantics(
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      'ع ${entry.value.map(_arabicDigits).join('، ')}',
+                                      textDirection: TextDirection.rtl,
+                                      style: markerStyle.copyWith(fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                       ],
                     );
@@ -643,18 +644,33 @@ class _MushafViewState extends State<MushafView> {
                     if (!isBismillah) blocks.add(ruledText);
                   }
                   final Widget page = Container(
-                    margin: _pageMargin,
-                    color: AppColors.white,
-                    foregroundDecoration: BoxDecoration(
-                      border: Border.all(color: frameColor, width: 2),
-                    ),
-                    child: SingleChildScrollView(
-                      physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: blocks,
-                      ),
+                    margin: const EdgeInsets.fromLTRB(10, 8, 6, 4),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned.fill(
+                          right: _rukuGutter,
+                          child: ColoredBox(color: AppColors.white),
+                        ),
+                        SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(0, 8, _rukuGutter, 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: blocks,
+                          ),
+                        ),
+                        Positioned.fill(
+                          right: _rukuGutter,
+                          child: IgnorePointer(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: frameColor, width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
 
