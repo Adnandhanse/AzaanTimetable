@@ -205,6 +205,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
       ),
       body: _mushafMode
           ? MushafView(
+              numberRukuByJuz: true,
               verses: items.map((e) => e.$2).toList(),
               fontSize: _fontSize,
               // A juz runs across several surahs, so unlike the surah screen
