@@ -98,8 +98,11 @@ class _MushafViewState extends State<MushafView> {
   TextScaler? _cachedTextScaler;
   bool? _cachedTajweed;
 
-  static const double _rukuGutter = 32;
-  static const _pageMargin = EdgeInsets.fromLTRB(_rukuGutter + 5, 8, _rukuGutter + 5, 8);
+  static const double _rukuGutter = 25;
+  static const _viewportPadding = EdgeInsets.fromLTRB(3, 2, 3, 4);
+  static const _pageMargin = EdgeInsets.fromLTRB(
+    _rukuGutter + 3, 2, _rukuGutter + 3, 4,
+  );
   final Map<int, int> _rukuEndDigits = {};
   static const double _lineSpacing = 1.75;
   static final String _bismillah = tajweedData['1:1']![0] as String;
@@ -370,12 +373,12 @@ class _MushafViewState extends State<MushafView> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        const double gutter = 9;
+        const double gutter = 7;
         final double pageWidth =
             math.max(1.0, constraints.maxWidth - _pageMargin.horizontal);
         final double maxWidth = math.max(1.0, pageWidth - gutter * 2);
         final double maxHeight =
-            constraints.maxHeight - _pageMargin.vertical - 72;
+            constraints.maxHeight - _pageMargin.vertical - 52;
         final double lineHeight =
             textScaler.scale(widget.fontSize) * _lineSpacing + 3;
         final int linesPerPage =
@@ -643,9 +646,9 @@ class _MushafViewState extends State<MushafView> {
                     if (!isBismillah) blocks.add(ruledText);
                   }
                   final Widget page = Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 8, 5, 8),
+                    padding: _viewportPadding,
                     child: Align(
-                      alignment: Alignment.center,
+                      alignment: Alignment.topCenter,
                       child: SingleChildScrollView(
                         physics: const ClampingScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: _rukuGutter),
@@ -655,7 +658,7 @@ class _MushafViewState extends State<MushafView> {
                           foregroundDecoration: BoxDecoration(
                             border: Border.all(color: frameColor, width: 3),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: blocks,
