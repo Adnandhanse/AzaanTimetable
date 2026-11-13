@@ -126,11 +126,6 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
             Text('Set Up Prayer Alarms',
                 style: AppText.displayName
                     .copyWith(fontSize: 26, color: AppColors.emerald)),
-            const SizedBox(height: 6),
-            Text(
-              'Four steps, about a minute. Android will not let an app switch these on by itself, so each one needs your tap.',
-              style: AppText.body.copyWith(color: AppColors.textMuted),
-            ),
             const SizedBox(height: 20),
             const DiamondRule(),
             const SizedBox(height: 18),
@@ -139,7 +134,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               number: 1,
               title: 'Allow Notifications',
               detail:
-                  'One tap. Without this the alarm has no way to reach you.',
+                  'Show prayer alerts on your phone.',
               done: notif,
               busy: _busy,
               onTap: _grantNotifications,
@@ -148,7 +143,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               number: 2,
               title: 'Allow Alarms & Reminders',
               detail:
-                  'Lets the alarm fire at an exact minute rather than whenever Android feels like it. Android gives no dialog for this one, so it opens a settings screen — and on newer phones it is often already on.',
+                  'Allow alerts at the scheduled prayer time.',
               done: exact,
               busy: _busy,
               onTap: _grantExactAlarm,
@@ -157,16 +152,16 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
               number: 3,
               title: 'Let the app run in the background',
               detail:
-                  'One tap. A battery-restricted app gets frozen, and a frozen app cannot ring.',
+                  'Keep prayer alerts working in the background.',
               done: batt,
               busy: _busy,
               onTap: _grantBattery,
             ),
             _Step(
               number: 4,
-              title: 'Turn off "Put unused apps to sleep"',
+              title: 'Samsung sleep settings',
               detail:
-                  'Samsung has a second battery system that step 3 does not cover, and no app can read or change it. On the screen that opens: Background usage limits → turn OFF "Put unused apps to sleep", then remove this app from "Sleeping apps" and "Deep sleeping apps".',
+                  'On Samsung, remove Islam Connect from Sleeping and Deep sleeping apps.',
               done: _samsungDone,
               busy: _busy,
               actionLabel: 'Open',
@@ -186,7 +181,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
                 ),
                 padding: const EdgeInsets.all(13),
                 child: Text(
-                  'Steps 1 to 3 are still incomplete. Prayer alarms will be unreliable until they are done.',
+                  'Prayer alerts may be missed until setup is complete.',
                   style:
                       AppText.caption.copyWith(color: AppColors.warningFg),
                 ),
@@ -206,13 +201,7 @@ class _SetupWizardScreenState extends State<SetupWizardScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Steps 1 and 3 are one-tap system prompts. Steps 2 and 4 have no prompt Android will show on an app\u2019s behalf, so they open the right screen instead.',
-              textAlign: TextAlign.center,
-              style: AppText.caption.copyWith(color: AppColors.textFaint),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'You can reopen this any time from Settings \u2192 Alarm health.',
+              'Set up later in Settings \u2192 Alarm health.',
               textAlign: TextAlign.center,
               style: AppText.caption.copyWith(color: AppColors.textFaint),
             ),
