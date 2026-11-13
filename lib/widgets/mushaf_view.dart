@@ -98,8 +98,8 @@ class _MushafViewState extends State<MushafView> {
   TextScaler? _cachedTextScaler;
   bool? _cachedTajweed;
 
-  static const double _rukuGutter = 42;
-  static const _pageMargin = EdgeInsets.fromLTRB(10, 8, _rukuGutter + 6, 4);
+  static const double _rukuGutter = 32;
+  static const _pageMargin = EdgeInsets.fromLTRB(_rukuGutter + 5, 8, _rukuGutter + 5, 8);
   final Map<int, int> _rukuEndDigits = {};
   static const double _lineSpacing = 1.75;
   static final String _bismillah = tajweedData['1:1']![0] as String;
@@ -275,7 +275,7 @@ class _MushafViewState extends State<MushafView> {
         children: _spans(text, bodyStyle: style, markerStyle: markerStyle),
       ),
       textDirection: TextDirection.rtl,
-      textAlign: TextAlign.justify,
+      textAlign: TextAlign.center,
       textScaler: textScaler,
     )..layout(maxWidth: maxWidth);
 
@@ -350,9 +350,9 @@ class _MushafViewState extends State<MushafView> {
   Widget build(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final frameColor = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.68 : 0.82)!;
+    final frameColor = dark ? const Color(0xFFD5DFD5) : const Color(0xFF26302C);
     final openingFill = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.18 : 0.08)!;
-    final ruleColor = Color.lerp(AppColors.white, AppColors.text, dark ? 0.24 : 0.2)!;
+    final ruleColor = dark ? const Color(0xFF839187) : const Color(0xFF535E57);
     final TextStyle style = AppText.quranAyah.copyWith(
       fontSize: widget.fontSize,
       height: _lineSpacing,
@@ -370,7 +370,7 @@ class _MushafViewState extends State<MushafView> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        const double gutter = 13;
+        const double gutter = 9;
         final double pageWidth =
             math.max(1.0, constraints.maxWidth - _pageMargin.horizontal);
         final double maxWidth = math.max(1.0, pageWidth - gutter * 2);
@@ -533,8 +533,7 @@ class _MushafViewState extends State<MushafView> {
                     final isBismillah = content == _bismillah ||
                         content == _bismillahWithShadda ||
                         content.startsWith('$_bismillah\u00A0\u2066(');
-                    final alignment =
-                        isBismillah ? TextAlign.center : TextAlign.justify;
+                    const alignment = TextAlign.center;
                     final painter = TextPainter(
                       text: span,
                       textDirection: TextDirection.rtl,
@@ -582,12 +581,12 @@ class _MushafViewState extends State<MushafView> {
                             left: 2,
                             right: 2,
                             top: y + 1,
-                            height: 1,
+                            height: 1.25,
                             child: ColoredBox(color: ruleColor),
                           ),
                         for (final entry in rukuRows.entries)
                           Positioned(
-                            right: -_rukuGutter,
+                            left: -_rukuGutter,
                             width: _rukuGutter - 3,
                             top: entry.key == 0 ? 0 : bottoms[entry.key - 1],
                             height: bottoms[entry.key] -
@@ -600,8 +599,8 @@ class _MushafViewState extends State<MushafView> {
                                     fit: BoxFit.scaleDown,
                                     child: Text(
                                       'ع ${entry.value.map(_arabicDigits).join('، ')}',
-                                      textDirection: TextDirection.rtl,
-                                      style: markerStyle.copyWith(fontSize: 18),
+                                      textDirection: TextDirection.ltr,
+                                      style: markerStyle.copyWith(fontSize: 17),
                                     ),
                                   ),
                                 ),
@@ -643,34 +642,26 @@ class _MushafViewState extends State<MushafView> {
                     }
                     if (!isBismillah) blocks.add(ruledText);
                   }
-                  final Widget page = Container(
-                    margin: const EdgeInsets.fromLTRB(10, 8, 6, 4),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Positioned.fill(
-                          right: _rukuGutter,
-                          child: ColoredBox(color: AppColors.white),
-                        ),
-                        SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(0, 8, _rukuGutter, 8),
+                  final Widget page = Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 8, 5, 8),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: _rukuGutter),
+                        child: Container(
+                          width: pageWidth,
+                          color: AppColors.white,
+                          foregroundDecoration: BoxDecoration(
+                            border: Border.all(color: frameColor, width: 3),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: blocks,
                           ),
                         ),
-                        Positioned.fill(
-                          right: _rukuGutter,
-                          child: IgnorePointer(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: frameColor, width: 2),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   );
 
