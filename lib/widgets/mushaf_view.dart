@@ -97,7 +97,7 @@ class _MushafViewState extends State<MushafView> {
     _rukuGutter + 3, 2, _rukuGutter + 3, 4,
   );
   final Map<int, int> _rukuEndDigits = {};
-  static const double _lineSpacing = 1.75;
+  static const double _lineSpacing = 1.68;
   static final String _bismillah = tajweedData['1:1']![0] as String;
   // The bundled edition retains an extra shadda in the openings of 95 and 97.
   static final String _bismillahWithShadda = 'بّ${_bismillah.substring(1)}';
@@ -339,6 +339,7 @@ class _MushafViewState extends State<MushafView> {
     final openingFill = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.18 : 0.08)!;
     final ruleColor = dark ? const Color(0xFF839187) : const Color(0xFF535E57);
     final TextStyle style = AppText.quranAyah.copyWith(
+      fontWeight: FontWeight.w400,
       fontSize: widget.fontSize,
       height: _lineSpacing,
       color: AppColors.text,
@@ -537,7 +538,7 @@ class _MushafViewState extends State<MushafView> {
                         digits.width + 3,
                       );
                       rings.add(Rect.fromCircle(
-                        center: Offset(center.dx + gutter, center.dy),
+                        center: Offset(center.dx + gutter, center.dy + 2),
                         radius: diameter / 2,
                       ));
                       final number = _rukuEndDigits[rowStart + marker.end - 3];
@@ -553,7 +554,7 @@ class _MushafViewState extends State<MushafView> {
                       clipBehavior: Clip.none,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(gutter, 0, gutter, 3),
+                          padding: const EdgeInsets.fromLTRB(gutter, 2, gutter, 4),
                           child: SizedBox(
                             width: maxWidth,
                             child: RichText(
@@ -583,7 +584,7 @@ class _MushafViewState extends State<MushafView> {
                           Positioned(
                             left: 2,
                             right: 2,
-                            top: y + 1,
+                            top: y + 4,
                             height: 1.25,
                             child: ColoredBox(color: ruleColor),
                           ),
@@ -591,7 +592,7 @@ class _MushafViewState extends State<MushafView> {
                           Positioned(
                             left: -_rukuGutter,
                             width: _rukuGutter - 3,
-                            top: entry.key == 0 ? 0 : bottoms[entry.key - 1],
+                            top: 2 + (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
                             height: bottoms[entry.key] -
                                 (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
                             child: Semantics(
@@ -627,14 +628,14 @@ class _MushafViewState extends State<MushafView> {
                             if (openingName != null)
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: gutter, vertical: 6,
+                                  horizontal: gutter, vertical: 3,
                                 ),
                                 child: Text(
                                   openingName,
                                   textAlign: TextAlign.center,
                                   textDirection: TextDirection.rtl,
-                                  style: AppText.arabicTitle.copyWith(
-                                    color: AppColors.text, fontSize: 21,
+                                  style: style.copyWith(
+                                    color: AppColors.emerald,
                                   ),
                                 ),
                               ),
