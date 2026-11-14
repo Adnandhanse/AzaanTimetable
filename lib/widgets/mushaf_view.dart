@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show LineMetrics;
 
 import 'package:flutter/material.dart';
 
@@ -12,28 +11,21 @@ import '../theme/app_theme.dart';
 /// One paginated page: its text, and which verses fall on it.
 class _MushafPage {
   const _MushafPage({
-    required this.text,
+    required this.lineRanges,
     required this.firstVerse,
     required this.lastVerse,
     required this.firstIndex,
     required this.lastIndex,
-    required this.charStart,
   });
 
-  final String text;
+  final List<(int, int)> lineRanges;
   final int firstVerse;
   final int lastVerse;
   final int firstIndex;
   final int lastIndex;
-  final int charStart;
 }
 
-/// Arabic-only continuous reading, paginated so a whole number of lines fits
-/// each screen and nothing is ever cut in half.
-///
-/// This is a screen-sized reading layout, not a fixed Madani Mushaf layout.
-/// A fixed Mushaf requires a page/line layout table measured against the exact
-/// Quran font being used.
+/// Arabic-only reader with 15 measured Arabic rows on every full page.
 class MushafView extends StatefulWidget {
   const MushafView({
     super.key,
@@ -85,14 +77,14 @@ class _MushafViewState extends State<MushafView> {
 
   int _page = 0;
   final Map<int, String> _colourMarks = {};
-  final Map<int, int> _bismillahEnds = {};
+  static const int _linesPerPage = 15;
+  String _readingText = '';
   final Map<int, String> _surahOpenings = {};
 
   List<_MushafPage>? _pages;
 
   bool _jumpedToInitial = false;
   double? _cachedWidth;
-  double? _cachedPageHeight;
   bool? _cachedJuzNumbering;
   List<QuranVerse>? _cachedVerses;
   double? _cachedFontSize;
@@ -189,7 +181,6 @@ class _MushafViewState extends State<MushafView> {
   /// starts at.
   (String, List<int>) _flow() {
     _colourMarks.clear();
-    _bismillahEnds.clear();
     _surahOpenings.clear();
     _rukuEndDigits.clear();
     final StringBuffer buffer = StringBuffer();
@@ -223,7 +214,6 @@ class _MushafViewState extends State<MushafView> {
       }
       // Replace only the separator space: all Tajweed offsets stay valid.
       if (prefix != null) {
-        _bismillahEnds[buffer.length] = buffer.length + prefix.length + 1;
         buffer
           ..write(prefix)
           ..write('\n')
@@ -271,10 +261,11 @@ class _MushafViewState extends State<MushafView> {
     required TextStyle style,
     required TextStyle markerStyle,
     required double maxWidth,
-    required double pageHeight,
     required TextScaler textScaler,
   }) {
     final (String text, List<int> starts) = _flow();
+
+    _readingText = text;
 
     if (text.isEmpty || starts.isEmpty) {
       return const <_MushafPage>[];
@@ -301,99 +292,40 @@ class _MushafViewState extends State<MushafView> {
       return const <_MushafPage>[];
     }
 
-    final List<int> breaks = <int>[0];
-
-    final offsets = <int>[0];
-    for (int i = 1; i < lines.length; i++) {
-      final line = lines[i];
+    // Record each shaped row once. Render those exact slices instead of
+    // letting each page wrap the text again and change the row count.
+    final ranges = <(int, int)>[];
+    for (final line in lines) {
       final position = textPainter.getPositionForOffset(
         Offset(line.left + line.width / 2,
             line.baseline + (line.descent - line.ascent) / 2),
       );
-      offsets.add(textPainter.getLineBoundary(position).start);
-    }
-
-    // Include the same Surah-name widget padding and type metrics used
-    // in the reader, since the heading is not part of the Arabic text flow.
-    final headerPainter = TextPainter(
-      textDirection: TextDirection.rtl,
-      textScaler: textScaler,
-    );
-    final openingHeights = <int, double>{};
-    for (final opening in _surahOpenings.entries) {
-      headerPainter.text = TextSpan(
-        text: opening.value,
-        style: AppText.arabicTitle.copyWith(fontSize: 21),
-      );
-      headerPainter.layout(maxWidth: maxWidth);
-      openingHeights[opening.key] = headerPainter.height + 14;
-    }
-    headerPainter.dispose();
-
-    int first = 0;
-    while (first < lines.length) {
-      double height = 0;
-      int end = first;
-      while (end < lines.length) {
-        final line = lines[end];
-        final start = offsets[end];
-        // A rendered paragraph adds 3 px below its final line.
-        final next = end + 1 < offsets.length ? offsets[end + 1] : text.length;
-        final endsParagraph = next == text.length ||
-            (next > 0 && text.codeUnitAt(next - 1) == 10) ||
-            (next < text.length && text.codeUnitAt(next) == 10);
-        final cost = line.ascent + line.descent +
-            (openingHeights[start] ?? 0) + (endsParagraph ? 3 : 0);
-        if (end > first && height + cost > pageHeight) break;
-        height += cost;
-        end++;
+      final boundary = textPainter.getLineBoundary(position);
+      if (boundary.start < 0 || boundary.end > text.length) continue;
+      final raw = text.substring(boundary.start, boundary.end);
+      final content = raw.trim();
+      if (content.isEmpty) continue;
+      final start = boundary.start + raw.length - raw.trimLeft().length;
+      final end = start + content.length;
+      if (ranges.isEmpty || start >= ranges.last.$2) {
+        ranges.add((start, end));
       }
-      if (end >= lines.length) break;
-
-      // Keep Bismillah with the opening line when both can move together.
-      final boundary = offsets[end];
-      final verseStart = starts[_verseIndexAt(starts, boundary)];
-      final bismillahEnd = _bismillahEnds[verseStart];
-      if (bismillahEnd != null && boundary <= bismillahEnd &&
-          verseStart > offsets[first]) {
-        while (end > first + 1 && offsets[end] > verseStart) {
-          end--;
-        }
-      }
-      if (offsets[end] > breaks.last) breaks.add(offsets[end]);
-      first = end;
     }
-
     textPainter.dispose();
-    breaks.add(text.length);
 
-    final List<_MushafPage> pages = <_MushafPage>[];
-
-    for (int i = 0; i < breaks.length - 1; i++) {
-      final int from = breaks[i];
-      final int to = breaks[i + 1];
-
-      if (to <= from) {
-        continue;
-      }
-
-      final raw = text.substring(from, to);
-      final trimmed = raw.trim();
-      if (trimmed.isEmpty) continue;
-      final start = from + raw.length - raw.trimLeft().length;
-      final int firstIndex = _verseIndexAt(starts, start);
-      final int lastIndex = _verseIndexAt(starts, start + trimmed.length - 1);
-
-      pages.add(
-        _MushafPage(
-          text: trimmed,
-          charStart: start,
-          firstVerse: widget.verses[firstIndex].number,
-          lastVerse: widget.verses[lastIndex].number,
-          firstIndex: firstIndex,
-          lastIndex: lastIndex,
-        ),
-      );
+    final pages = <_MushafPage>[];
+    for (int first = 0; first < ranges.length; first += _linesPerPage) {
+      final end = math.min(first + _linesPerPage, ranges.length);
+      final pageRows = ranges.sublist(first, end);
+      final firstIndex = _verseIndexAt(starts, pageRows.first.$1);
+      final lastIndex = _verseIndexAt(starts, pageRows.last.$2 - 1);
+      pages.add(_MushafPage(
+        lineRanges: pageRows,
+        firstVerse: widget.verses[firstIndex].number,
+        lastVerse: widget.verses[lastIndex].number,
+        firstIndex: firstIndex,
+        lastIndex: lastIndex,
+      ));
     }
 
     return pages;
@@ -427,16 +359,8 @@ class _MushafViewState extends State<MushafView> {
         final double pageWidth =
             math.max(1.0, constraints.maxWidth - _pageMargin.horizontal);
         final double maxWidth = math.max(1.0, pageWidth - gutter * 2);
-        // Header sits above the reading viewport. Leave space for it and
-        // the frame padding, then fill each page using measured line heights.
-        final pageHeight = math.max(
-          1.0, constraints.maxHeight - _pageMargin.vertical -
-              math.max(44.0, textScaler.scale(14) + 24) - 11,
-        );
-
         if (_pages == null ||
             _cachedWidth != maxWidth ||
-            _cachedPageHeight != pageHeight ||
             _cachedJuzNumbering != widget.numberRukuByJuz ||
             _cachedVerses != widget.verses ||
             _cachedFontSize != widget.fontSize ||
@@ -446,12 +370,10 @@ class _MushafViewState extends State<MushafView> {
             style: style,
             markerStyle: markerStyle,
             maxWidth: maxWidth,
-            pageHeight: pageHeight,
             textScaler: textScaler,
           );
 
           _cachedWidth = maxWidth;
-          _cachedPageHeight = pageHeight;
           _cachedJuzNumbering = widget.numberRukuByJuz;
           _cachedVerses = widget.verses;
           _cachedFontSize = widget.fontSize;
@@ -573,18 +495,14 @@ class _MushafViewState extends State<MushafView> {
                   int index,
                 ) {
                   final data = pages[index];
-                  final rows = data.text.split('\n');
-                  int offset = data.charStart;
                   final blocks = <Widget>[];
-                  for (final row in rows) {
-                    final openingName = _surahOpenings[offset];
-                    final content = row.trimRight();
-                    final rowStart = offset;
+                  for (final (rowStart, rowEnd) in data.lineRanges) {
+                    final openingName = _surahOpenings[rowStart];
+                    final content = _readingText.substring(rowStart, rowEnd);
                     final span = TextSpan(
-                      children: _spans(content, charStart: offset,
+                      children: _spans(content, charStart: rowStart,
                           bodyStyle: style, markerStyle: markerStyle),
                     );
-                    offset += row.length + 1;
                     final isBismillah = content == _bismillah ||
                         content == _bismillahWithShadda ||
                         content.startsWith('$_bismillah\u00A0\u2066(');
@@ -593,6 +511,7 @@ class _MushafViewState extends State<MushafView> {
                       text: span,
                       textDirection: TextDirection.rtl,
                       textAlign: alignment,
+                      maxLines: 1,
                       textScaler: textScaler,
                     )..layout(minWidth: maxWidth, maxWidth: maxWidth);
                     final bottoms = [
@@ -641,6 +560,9 @@ class _MushafViewState extends State<MushafView> {
                               text: span,
                               textDirection: TextDirection.rtl,
                               textAlign: alignment,
+                              softWrap: false,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
                               textScaler: textScaler,
                             ),
                           ),
