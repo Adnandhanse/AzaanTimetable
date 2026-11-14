@@ -143,7 +143,15 @@ class _MushafViewState extends State<MushafView> {
           pageText.substring(last, match.start), bodyStyle, _colourMarks,
           Theme.of(context).brightness == Brightness.dark, offset: charStart + last));
       }
-      spans.add(TextSpan(text: match.group(0), style: markerStyle));
+      final token = match.group(0)!;
+      // Reserve the original marker footprint while painting a thin ring
+      // around the digits separately from the Arabic glyphs.
+      final invisible = markerStyle.copyWith(color: Colors.transparent);
+      spans.add(TextSpan(text: token.substring(0, 2), style: invisible));
+      spans.add(TextSpan(
+        text: token.substring(2, token.length - 2), style: markerStyle,
+      ));
+      spans.add(TextSpan(text: token.substring(token.length - 2), style: invisible));
       last = match.end;
     }
 
@@ -198,7 +206,7 @@ class _MushafViewState extends State<MushafView> {
           ? _openingPrefix(verseText)
           : null;
       if (index > 0) {
-        buffer.write(opensSurah || afterFatihaBismillah ? '\n' : '   ');
+        buffer.write(opensSurah || afterFatihaBismillah ? '\n' : '  ');
       }
       afterFatihaBismillah = opensSurah && verseSurah == 1 &&
           verseText == _bismillah;
@@ -409,7 +417,7 @@ class _MushafViewState extends State<MushafView> {
     // Amiri provides normal-width Arabic-Indic digits for these labels.
     final TextStyle markerStyle = style.copyWith(
       fontFamily: AppFonts.arabic,
-      fontSize: widget.fontSize * 0.62,
+      fontSize: (widget.fontSize * 0.32).clamp(9.0, 14.0).toDouble(),
       color: Color.lerp(AppColors.emerald, AppColors.text, 0.26)!,
     );
 
@@ -592,16 +600,30 @@ class _MushafViewState extends State<MushafView> {
                         line.baseline + line.descent,
                     ];
                     final rukuRows = <int, List<int>>{};
+                    final rings = <Rect>[];
                     for (final marker in _ayahMarker.allMatches(content)) {
-                      final digit = marker.end - 3;
-                      final number = _rukuEndDigits[rowStart + digit];
-                      if (number == null) continue;
                       final boxes = painter.getBoxesForSelection(
-                        TextSelection(baseOffset: digit, extentOffset: digit + 1),
+                        TextSelection(
+                          baseOffset: marker.start + 2,
+                          extentOffset: marker.end - 2,
+                        ),
                       );
                       if (boxes.isEmpty) continue;
-                      final center = (boxes.first.top + boxes.first.bottom) / 2;
-                      final line = bottoms.indexWhere((bottom) => center < bottom);
+                      final digits = boxes
+                          .map((box) => box.toRect())
+                          .reduce((a, b) => a.expandToInclude(b));
+                      final center = digits.center;
+                      final diameter = math.max(
+                        textScaler.scale(markerStyle.fontSize!) * 1.42,
+                        digits.width + 3,
+                      );
+                      rings.add(Rect.fromCircle(
+                        center: Offset(center.dx + gutter, center.dy),
+                        radius: diameter / 2,
+                      ));
+                      final number = _rukuEndDigits[rowStart + marker.end - 3];
+                      if (number == null) continue;
+                      final line = bottoms.indexWhere((bottom) => center.dy < bottom);
                       if (line >= 0) {
                         (rukuRows[line] ??= <int>[]).add(number);
                       }
@@ -623,6 +645,18 @@ class _MushafViewState extends State<MushafView> {
                             ),
                           ),
                         ),
+                        for (final ring in rings)
+                          Positioned.fromRect(
+                            rect: ring,
+                            child: IgnorePointer(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: markerStyle.color!),
+                                ),
+                              ),
+                            ),
+                          ),
                         for (final y in isBismillah ? const <double>[] : bottoms)
                           Positioned(
                             left: 2,

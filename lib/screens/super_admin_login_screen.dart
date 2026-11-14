@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'super_admin_dashboard_screen.dart';
@@ -44,11 +45,32 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const SuperAdminDashboardScreen()),
       );
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final message = switch (e.code) {
+        'wrong-password' || 'user-not-found' || 'invalid-credential' ||
+        'invalid-email' || 'invalid-login-credentials' =>
+          'Check your admin email and password.',
+        'user-disabled' => 'This account is disabled.',
+        'network-request-failed' => 'Check your connection and try again.',
+        'too-many-requests' => 'Too many attempts. Try again later.',
+        _ => 'Sign-in failed (${e.code}).',
+      };
+      setState(() {
+        _isLoading = false;
+        _error = message;
+      });
+    } on StateError {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _error = 'Invalid email or password';
+        _error = 'Signed in, but Platform Admin access could not be verified.';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _error = 'Could not sign in. Please try again.';
       });
     }
   }
