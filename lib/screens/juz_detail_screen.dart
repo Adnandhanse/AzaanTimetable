@@ -142,6 +142,7 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: _mushafMode ? 44 : kToolbarHeight,
         title: Text('Juz ${widget.juzNumber}'),
         actions: [
           Padding(
@@ -166,42 +167,45 @@ class _JuzDetailScreenState extends State<JuzDetailScreen> {
           ),
         ],
         bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(30),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                  child: Row(
-                    children: <Widget>[
-                      Text('A',
-                          style: TextStyle(
-                              fontSize: 12, color: AppColors.textMuted)),
-                      Expanded(
-                        child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 2.5,
-                            activeTrackColor: AppColors.emerald,
-                            inactiveTrackColor: AppColors.goldRuleFaint,
-                            thumbColor: AppColors.emerald,
-                            thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 6),
-                            overlayShape: const RoundSliderOverlayShape(
-                                overlayRadius: 13),
-                          ),
-                          child: Slider(
-                            value: _fontSize,
-                            min: _minFontSize,
-                            max: _maxFontSize,
-                            onChanged: _previewFontSize,
-                            onChangeEnd: _commitFontSize,
-                          ),
-                        ),
+          preferredSize: Size.fromHeight(_mushafMode ? 21 : 30),
+          child: SizedBox(
+            height: _mushafMode ? 21 : 30,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: <Widget>[
+                  Text('A',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.textMuted)),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 2.5,
+                        activeTrackColor: AppColors.emerald,
+                        inactiveTrackColor: AppColors.goldRuleFaint,
+                        thumbColor: AppColors.emerald,
+                        thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6),
+                        overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 13),
                       ),
-                      Text('A',
-                          style: TextStyle(
-                              fontSize: 20, color: AppColors.textMuted)),
-                    ],
+                      child: Slider(
+                        value: _fontSize,
+                        min: _minFontSize,
+                        max: _maxFontSize,
+                        onChanged: _previewFontSize,
+                        onChangeEnd: _commitFontSize,
+                      ),
+                    ),
                   ),
-                ),
+                  Text('A',
+                      style: TextStyle(
+                          fontSize: 20, color: AppColors.textMuted)),
+                ],
               ),
+            ),
+          ),
+        ),
       ),
       body: _mushafMode
           ? MushafView(

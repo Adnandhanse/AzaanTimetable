@@ -91,13 +91,13 @@ class _MushafViewState extends State<MushafView> {
   TextScaler? _cachedTextScaler;
   bool? _cachedTajweed;
 
-  static const double _rukuGutter = 25;
-  static const _viewportPadding = EdgeInsets.fromLTRB(3, 2, 3, 4);
+  static const double _rukuGutter = 17;
+  static const _viewportPadding = EdgeInsets.fromLTRB(2, 1, 2, 2);
   static const _pageMargin = EdgeInsets.fromLTRB(
-    _rukuGutter + 3, 2, _rukuGutter + 3, 4,
+    _rukuGutter + 2, 1, 2, 2,
   );
   final Map<int, int> _rukuEndDigits = {};
-  static const double _lineSpacing = 1.68;
+  static const double _lineSpacing = 1.42;
   static final String _bismillah = tajweedData['1:1']![0] as String;
   // The bundled edition retains an extra shadda in the openings of 95 and 97.
   static final String _bismillahWithShadda = 'بّ${_bismillah.substring(1)}';
@@ -197,7 +197,7 @@ class _MushafViewState extends State<MushafView> {
           ? _openingPrefix(verseText)
           : null;
       if (index > 0) {
-        buffer.write(opensSurah || afterFatihaBismillah ? '\n' : '  ');
+        buffer.write(opensSurah || afterFatihaBismillah ? '\n' : ' ');
       }
       afterFatihaBismillah = opensSurah && verseSurah == 1 &&
           verseText == _bismillah;
@@ -221,7 +221,7 @@ class _MushafViewState extends State<MushafView> {
       } else {
         buffer.write(verseText);
       }
-      buffer.write('\u00A0\u2066(');
+      buffer.write('\u00A0\u2009\u2066(');
       buffer.write(_arabicDigits(verse.number));
       final ruku = verseSurah == null ? null : rukuAt(verseSurah, verse.number);
       if (ruku != null && ruku.$3 == verse.number) {
@@ -338,25 +338,33 @@ class _MushafViewState extends State<MushafView> {
     final frameColor = dark ? const Color(0xFFD5DFD5) : const Color(0xFF26302C);
     final openingFill = Color.lerp(AppColors.white, AppColors.emerald, dark ? 0.18 : 0.08)!;
     final ruleColor = dark ? const Color(0xFF839187) : const Color(0xFF535E57);
-    final TextStyle style = AppText.quranAyah.copyWith(
-      fontWeight: FontWeight.w400,
-      fontSize: widget.fontSize,
-      height: _lineSpacing,
-      color: AppColors.text,
-    );
-
-    // Ayah-end marker style, shared by pagination, the ruled-line layout,
-    // and the actual rendered text so all three agree on where lines break.
-    // Amiri provides normal-width Arabic-Indic digits for these labels.
-    final TextStyle markerStyle = style.copyWith(
-      fontFamily: AppFonts.arabic,
-      fontSize: (widget.fontSize * 0.32).clamp(9.0, 14.0).toDouble(),
-      color: Color.lerp(AppColors.emerald, AppColors.text, 0.26)!,
-    );
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        const double gutter = 7;
+        // Leave room for the compact page controls and a Surah heading.
+        // Use one point size for all Arabic rows at a given viewport.
+        final fitSize = math.max(1.0,
+          (constraints.maxHeight - 88) / (_linesPerPage * _lineSpacing));
+        final readingSize = math.min(
+          textScaler.scale(widget.fontSize), fitSize,
+        );
+        const pageScaler = TextScaler.noScaling;
+        final TextStyle style = AppText.quranAyah.copyWith(
+          fontWeight: FontWeight.w400,
+          fontSize: readingSize,
+          height: _lineSpacing,
+          color: AppColors.text,
+        );
+
+        // Ayah-end marker style, shared by pagination, the ruled-line layout,
+        // and the actual rendered text so all three agree on where lines break.
+        // Amiri provides normal-width Arabic-Indic digits for these labels.
+        final TextStyle markerStyle = style.copyWith(
+          fontFamily: AppFonts.arabic,
+          fontSize: (readingSize * 0.32).clamp(9.0, 14.0).toDouble(),
+          color: Color.lerp(AppColors.emerald, AppColors.text, 0.26)!,
+        );
+
+        const double gutter = 5;
         final double pageWidth =
             math.max(1.0, constraints.maxWidth - _pageMargin.horizontal);
         final double maxWidth = math.max(1.0, pageWidth - gutter * 2);
@@ -364,20 +372,20 @@ class _MushafViewState extends State<MushafView> {
             _cachedWidth != maxWidth ||
             _cachedJuzNumbering != widget.numberRukuByJuz ||
             _cachedVerses != widget.verses ||
-            _cachedFontSize != widget.fontSize ||
+            _cachedFontSize != readingSize ||
             _cachedTextScaler != textScaler ||
             _cachedTajweed != QuranTajweedStyle.enabled) {
           _pages = _paginate(
             style: style,
             markerStyle: markerStyle,
             maxWidth: maxWidth,
-            textScaler: textScaler,
+            textScaler: pageScaler,
           );
 
           _cachedWidth = maxWidth;
           _cachedJuzNumbering = widget.numberRukuByJuz;
           _cachedVerses = widget.verses;
-          _cachedFontSize = widget.fontSize;
+          _cachedFontSize = readingSize;
           _cachedTextScaler = textScaler;
           _cachedTajweed = QuranTajweedStyle.enabled;
         }
@@ -431,10 +439,10 @@ class _MushafViewState extends State<MushafView> {
             // Page information and bookmark control at the top.
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                18,
-                6,
-                8,
-                2,
+                9,
+                0,
+                4,
+                0,
               ),
               child: Row(
                 children: <Widget>[
@@ -470,7 +478,8 @@ class _MushafViewState extends State<MushafView> {
                       ),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
+                          horizontal: 6,
+                          vertical: 3,
                         ),
                         minimumSize: Size.zero,
                         tapTargetSize:
@@ -513,7 +522,7 @@ class _MushafViewState extends State<MushafView> {
                       textDirection: TextDirection.rtl,
                       textAlign: alignment,
                       maxLines: 1,
-                      textScaler: textScaler,
+                      textScaler: pageScaler,
                     )..layout(minWidth: maxWidth, maxWidth: maxWidth);
                     final bottoms = [
                       for (final line in painter.computeLineMetrics())
@@ -534,11 +543,11 @@ class _MushafViewState extends State<MushafView> {
                           .reduce((a, b) => a.expandToInclude(b));
                       final center = digits.center;
                       final diameter = math.max(
-                        textScaler.scale(markerStyle.fontSize!) * 1.42,
+                        pageScaler.scale(markerStyle.fontSize!) * 1.42,
                         digits.width + 3,
                       );
                       rings.add(Rect.fromCircle(
-                        center: Offset(center.dx + gutter, center.dy + 2),
+                        center: Offset(center.dx + gutter, center.dy + 1),
                         radius: diameter / 2,
                       ));
                       final number = _rukuEndDigits[rowStart + marker.end - 3];
@@ -554,7 +563,7 @@ class _MushafViewState extends State<MushafView> {
                       clipBehavior: Clip.none,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(gutter, 2, gutter, 4),
+                          padding: const EdgeInsets.fromLTRB(gutter, 1, gutter, 2),
                           child: SizedBox(
                             width: maxWidth,
                             child: RichText(
@@ -564,7 +573,7 @@ class _MushafViewState extends State<MushafView> {
                               softWrap: false,
                               maxLines: 1,
                               overflow: TextOverflow.visible,
-                              textScaler: textScaler,
+                              textScaler: pageScaler,
                             ),
                           ),
                         ),
@@ -584,15 +593,15 @@ class _MushafViewState extends State<MushafView> {
                           Positioned(
                             left: 2,
                             right: 2,
-                            top: y + 4,
-                            height: 1.25,
+                            top: y + 1.75,
+                            height: 0.8,
                             child: ColoredBox(color: ruleColor),
                           ),
                         for (final entry in rukuRows.entries)
                           Positioned(
                             left: -_rukuGutter,
                             width: _rukuGutter - 3,
-                            top: 2 + (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
+                            top: 1 + (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
                             height: bottoms[entry.key] -
                                 (entry.key == 0 ? 0 : bottoms[entry.key - 1]),
                             child: Semantics(
@@ -604,7 +613,7 @@ class _MushafViewState extends State<MushafView> {
                                     child: Text(
                                       'ع ${entry.value.map(_arabicDigits).join('، ')}',
                                       textDirection: TextDirection.ltr,
-                                      style: markerStyle.copyWith(fontSize: 17),
+                                      style: markerStyle.copyWith(fontSize: 13),
                                     ),
                                   ),
                                 ),
@@ -628,7 +637,7 @@ class _MushafViewState extends State<MushafView> {
                             if (openingName != null)
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: gutter, vertical: 3,
+                                  horizontal: gutter, vertical: 1,
                                 ),
                                 child: Text(
                                   openingName,
@@ -636,6 +645,7 @@ class _MushafViewState extends State<MushafView> {
                                   textDirection: TextDirection.rtl,
                                   style: style.copyWith(
                                     color: AppColors.emerald,
+                                    height: 1.25,
                                   ),
                                 ),
                               ),
@@ -650,19 +660,23 @@ class _MushafViewState extends State<MushafView> {
                     padding: _viewportPadding,
                     child: Align(
                       alignment: Alignment.topCenter,
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: _rukuGutter),
-                        child: Container(
-                          width: pageWidth,
-                          color: AppColors.white,
-                          foregroundDecoration: BoxDecoration(
-                            border: Border.all(color: frameColor, width: 3),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: blocks,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.topCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: _rukuGutter),
+                          child: Container(
+                            width: pageWidth,
+                            color: AppColors.white,
+                            foregroundDecoration: BoxDecoration(
+                              border: Border.all(color: frameColor, width: 2),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: blocks,
+                            ),
                           ),
                         ),
                       ),

@@ -424,10 +424,19 @@ class PrayerAlarmTaskHandler extends TaskHandler {
           ? '${d.inHours}h ${d.inMinutes % 60}m'
           : '${d.inMinutes}m';
 
+      // TZDateTime.toLocal() uses the timezone package's isolate-local
+      // location. Use a native DateTime to display the phone's timezone.
+      // Format the same occurrence used by the countdown.
+      final deviceTime = DateTime.fromMillisecondsSinceEpoch(
+        bestAt.millisecondsSinceEpoch,
+      );
+      final hour = deviceTime.hour % 12;
+      final minute = deviceTime.minute.toString().padLeft(2, '0');
+      final period = deviceTime.hour < 12 ? 'AM' : 'PM';
+
       await FlutterForegroundTask.updateService(
         notificationTitle: '$bestLabel — in $left',
-        notificationText:
-            '${MasjidClock.localDisplay(times[bestLabel] as String? ?? '', zone, now)} (device time)',
+        notificationText: '${hour == 0 ? 12 : hour}:$minute $period (device time)',
       );
     } catch (_) {
       // Never let a notification update interfere with the alarm loop.

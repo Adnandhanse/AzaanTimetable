@@ -316,6 +316,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     final surah = widget.surah;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: _mushafMode ? 44 : kToolbarHeight,
         // Surah on top, juz beneath.
         //
         // A surah can span several juz — Al-Baqarah covers three — so a single
@@ -325,7 +326,12 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('${surah.number}. ${surah.transliteration}'),
+            Text(
+              '${surah.number}. ${surah.transliteration}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _mushafMode ? const TextStyle(fontSize: 18) : null,
+            ),
             Text(
               '${S.isUrdu ? 'پارہ' : 'Juz'} ${juzForVerse(surah.number, _visibleVerse)}',
               style: AppText.caption.copyWith(
@@ -382,42 +388,45 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         // instead of squeezed into actions - a Slider needs room to drag,
         // and the actions row already carries the mode toggle.
         bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(30),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                  child: Row(
-                    children: <Widget>[
-                      Text('A',
-                          style: TextStyle(
-                              fontSize: 12, color: AppColors.textMuted)),
-                      Expanded(
-                        child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 2.5,
-                            activeTrackColor: AppColors.emerald,
-                            inactiveTrackColor: AppColors.goldRuleFaint,
-                            thumbColor: AppColors.emerald,
-                            thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 6),
-                            overlayShape: const RoundSliderOverlayShape(
-                                overlayRadius: 13),
-                          ),
-                          child: Slider(
-                            value: _fontSize,
-                            min: _minFontSize,
-                            max: _maxFontSize,
-                            onChanged: _previewFontSize,
-                            onChangeEnd: _commitFontSize,
-                          ),
-                        ),
+          preferredSize: Size.fromHeight(_mushafMode ? 21 : 30),
+          child: SizedBox(
+            height: _mushafMode ? 21 : 30,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: <Widget>[
+                  Text('A',
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.textMuted)),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 2.5,
+                        activeTrackColor: AppColors.emerald,
+                        inactiveTrackColor: AppColors.goldRuleFaint,
+                        thumbColor: AppColors.emerald,
+                        thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6),
+                        overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 13),
                       ),
-                      Text('A',
-                          style: TextStyle(
-                              fontSize: 20, color: AppColors.textMuted)),
-                    ],
+                      child: Slider(
+                        value: _fontSize,
+                        min: _minFontSize,
+                        max: _maxFontSize,
+                        onChanged: _previewFontSize,
+                        onChangeEnd: _commitFontSize,
+                      ),
+                    ),
                   ),
-                ),
+                  Text('A',
+                      style: TextStyle(
+                          fontSize: 20, color: AppColors.textMuted)),
+                ],
               ),
+            ),
+          ),
+        ),
       ),
       // A speed bar, shown only while something is playing.
       //

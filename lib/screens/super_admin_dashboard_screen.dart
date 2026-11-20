@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../models/masjid.dart';
 import '../widgets/timing_review_status.dart';
 import '../services/masjid_repository.dart';
@@ -18,6 +19,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
+  final Set<String> _sendingReminderFor = {};
 
   @override
   void initState() {
@@ -142,6 +144,60 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
     );
   }
 
+  Future<void> _sendTimingReminder(Masjid masjid) async {
+    if (masjid.verificationStatus != 'Verified' ||
+        _sendingReminderFor.contains(masjid.id)) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Send timing reminder?'),
+        content: Text(
+          'Send a prayer timing update reminder to the registered admin devices of ${masjid.name}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Send reminder'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _sendingReminderFor.add(masjid.id));
+    try {
+      final result = await FirebaseFunctions.instanceFor(region: 'us-central1')
+          .httpsCallable('sendManualPrayerTimingReminder')
+          .call({'masjidId': masjid.id});
+      if (!mounted) return;
+      final sent = (result.data is Map) ? result.data['sent'] as int? ?? 0 : 0;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(sent > 0
+              ? 'Reminder sent to $sent device(s) for ${masjid.name}.'
+              : 'No active registered admin devices found for ${masjid.name}.'),
+        ),
+      );
+    } on FirebaseFunctionsException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message ?? 'Could not send reminder.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not send reminder. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _sendingReminderFor.remove(masjid.id));
+    }
+  }
+
   Widget _buildList(List<Masjid> masjids) {
     if (masjids.isEmpty) {
       return Center(
@@ -196,6 +252,25 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> w
                   Text('${m.address}, ${m.city}', style: const TextStyle(color: Colors.grey)),
                   const SizedBox(height: 4),
                   TimingReviewStatus(masjid: m),
+                  if (m.verificationStatus == 'Verified')
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: _sendingReminderFor.contains(m.id)
+                            ? null
+                            : () => _sendTimingReminder(m),
+                        icon: _sendingReminderFor.contains(m.id)
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.notifications_active_outlined),
+                        label: Text(_sendingReminderFor.contains(m.id)
+                            ? 'Sending...'
+                            : 'Send Reminder'),
+                      ),
+                    ),
                   Text('Admin: ${m.adminName} • ${m.adminMobile}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   if (m.registrationNo.isNotEmpty)
                     Text('Reg. No: ${m.registrationNo}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
